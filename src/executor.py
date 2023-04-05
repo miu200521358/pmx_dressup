@@ -4,7 +4,7 @@ import wx
 from mlib.utils.file_utils import get_path
 from form.main_frame import MainFrame
 
-VERSION_NAME = "ver5.01.09_β01"
+VERSION_NAME = "ver1.00.00_β01"
 
 # 指数表記なし、有効小数点桁数6、30を超えると省略あり、一行の文字数200
 np.set_printoptions(suppress=True, precision=6, threshold=30, linewidth=200)
@@ -15,7 +15,7 @@ freeze_support()
 if __name__ == "__main__":
     app = wx.App(False)
     icon = wx.Icon(get_path("resources/pmx_dressup.ico"), wx.BITMAP_TYPE_ICO)
-    frame = MainFrame(app, f"{VERSION_NAME}", wx.Size(600, 700))
+    frame = MainFrame(app, f"PmxDressup {VERSION_NAME}", wx.Size(600, 700))
     frame.SetIcon(icon)
     frame.Show(True)
     app.MainLoop()
