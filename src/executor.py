@@ -1,5 +1,8 @@
 from multiprocessing import freeze_support
 import numpy as np
+import wx
+from mlib.utils.file_utils import get_path
+from form.main_frame import MainFrame
 
 VERSION_NAME = "ver5.01.09_β01"
 
@@ -10,4 +13,9 @@ np.set_printoptions(suppress=True, precision=6, threshold=30, linewidth=200)
 freeze_support()
 
 if __name__ == "__main__":
-    pass
+    app = wx.App(False)
+    icon = wx.Icon(get_path("resources/pmx_dressup.ico"), wx.BITMAP_TYPE_ICO)
+    frame = MainFrame(app, f"{VERSION_NAME}", wx.Size(600, 700))
+    frame.SetIcon(icon)
+    frame.Show(True)
+    app.MainLoop()
