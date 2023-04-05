@@ -12,4 +12,6 @@
 
 ### 更新方法
 
+ 1. `git pull`
  1. `git submodule update --remote`
+
