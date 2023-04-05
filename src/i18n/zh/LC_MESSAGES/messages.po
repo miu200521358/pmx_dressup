@@ -19,3 +19,6 @@ msgstr ""
 
 msgid "ファイル"
 msgstr "文件"
+
+msgid "設定"
+msgstr "设置"

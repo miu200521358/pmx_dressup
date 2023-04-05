@@ -20,3 +20,7 @@ msgstr ""
 msgid "ファイル"
 msgstr ""
 
+
+msgid "設定"
+msgstr ""
+
