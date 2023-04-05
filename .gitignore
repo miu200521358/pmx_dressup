@@ -51,9 +51,9 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 
-# Translations
-*.mo
-*.pot
+# # Translations
+# *.mo
+# *.pot
 
 # Django stuff:
 *.log
@@ -127,3 +127,4 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+translate.bat
