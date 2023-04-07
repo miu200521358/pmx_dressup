@@ -1,13 +1,15 @@
 import os
 from typing import Any, Optional
+
 import wx
-from mlib.form.base_frame import BaseFrame
-from form.panel.file_panel import FilePanel
-from mlib.base.logger import MLogger
+
 from form.load_worker import LoadWorker
 from form.panel.config_panel import ConfigPanel
-from mlib.utils.file_utils import save_histories
+from form.panel.file_panel import FilePanel
+from mlib.base.logger import MLogger
+from mlib.form.base_frame import BaseFrame
 from mlib.pmx.pmx_collection import PmxModel
+from mlib.utils.file_utils import save_histories
 from mlib.vmd.vmd_collection import VmdMotion
 
 logger = MLogger(os.path.basename(__file__))
@@ -16,11 +18,6 @@ __ = logger.get_text
 
 class MainFrame(BaseFrame):
     def __init__(self, app: wx.App, title: str, size: wx.Size, *args, **kw):
-        global logger
-        logger = MLogger(os.path.basename(__file__))
-        global __
-        __ = logger.get_text
-
         super().__init__(
             app,
             history_keys=["model_pmx", "motion_vmd"],

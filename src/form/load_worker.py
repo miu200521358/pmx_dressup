@@ -1,8 +1,8 @@
 import wx
 
+from form.panel.file_panel import FilePanel
 from mlib.form.base_panel import BasePanel
 from mlib.form.base_worker import BaseWorker
-from form.panel.file_panel import FilePanel
 
 
 class LoadWorker(BaseWorker):

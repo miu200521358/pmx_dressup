@@ -1,13 +1,12 @@
 import argparse
+import os
 from multiprocessing import freeze_support
+
 import numpy as np
 import wx
-import os
-from mlib.utils.file_utils import get_path
-from form.main_frame import MainFrame
-from mlib.base.logger import MLogger
-from mlib.base.logger import LoggingMode
 
+from mlib.base.logger import LoggingMode, MLogger
+from mlib.utils.file_utils import get_path
 
 APP_NAME = "PmxDressup"
 VERSION_NAME = "1.00.00_β03"
@@ -30,6 +29,8 @@ if __name__ == "__main__":
 
     # ロガーの初期化
     MLogger.initialize(args.lang, os.path.dirname(os.path.abspath(__file__)), LoggingMode(args.log_mode), level=args.verbose)
+
+    from form.main_frame import MainFrame
 
     # アプリの起動
     app = wx.App(False)
