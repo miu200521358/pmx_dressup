@@ -24,3 +24,159 @@ msgstr ""
 msgid "設定"
 msgstr ""
 
+
+msgid "PMXモデル"
+msgstr ""
+
+
+msgid "(未設定)"
+msgstr ""
+
+
+msgid "{title}に記録されているモデル名です。\n文字列は選択およびコピー可能です。"
+msgstr ""
+
+
+msgid "開く"
+msgstr ""
+
+
+msgid "履歴"
+msgstr ""
+
+
+msgid "これまでに指定された事のある{title}を再指定することができます。"
+msgstr ""
+
+
+msgid "VMDモーションデータ"
+msgstr ""
+
+
+msgid "実際は動いてないよ"
+msgstr ""
+
+
+msgid "----------------------"
+msgstr ""
+
+
+msgid "PMXモデルデータ読み取り開始"
+msgstr ""
+
+
+msgid "頂点データ読み取り完了: {count}"
+msgstr ""
+
+
+msgid "頂点データ読み取り完了: 62129"
+msgstr ""
+
+
+msgid "面データ読み取り完了: {count}"
+msgstr ""
+
+
+msgid "面データ読み取り完了: 59363"
+msgstr ""
+
+
+msgid "テクスチャデータ読み取り完了: {count}"
+msgstr ""
+
+
+msgid "テクスチャデータ読み取り完了: 52"
+msgstr ""
+
+
+msgid "材質データ読み取り完了: {count}"
+msgstr ""
+
+
+msgid "材質データ読み取り完了: 32"
+msgstr ""
+
+
+msgid "ボーンデータ読み取り完了: {count}"
+msgstr ""
+
+
+msgid "ボーンデータ読み取り完了: 218"
+msgstr ""
+
+
+msgid "モーフデータ読み取り完了: {count}"
+msgstr ""
+
+
+msgid "モーフデータ読み取り完了: 171"
+msgstr ""
+
+
+msgid "表示枠データ読み取り完了: {count}"
+msgstr ""
+
+
+msgid "表示枠データ読み取り完了: 14"
+msgstr ""
+
+
+msgid "剛体データ読み取り完了: {count}"
+msgstr ""
+
+
+msgid "剛体データ読み取り完了: 29"
+msgstr ""
+
+
+msgid "ジョイントデータ読み取り完了: {count}"
+msgstr ""
+
+
+msgid "ジョイントデータ読み取り完了: 0"
+msgstr ""
+
+
+msgid "VMDモーションデータ読み取り開始"
+msgstr ""
+
+
+msgid "ボーンデータ読み取り完了: 117"
+msgstr ""
+
+
+msgid "モーフデータ読み取り完了: 33"
+msgstr ""
+
+
+msgid "カメラデータ読み取り完了: {count}"
+msgstr ""
+
+
+msgid "カメラデータ読み取り完了: 0"
+msgstr ""
+
+
+msgid "照明データ読み取り完了: {count}"
+msgstr ""
+
+
+msgid "照明データ読み取り完了: 0"
+msgstr ""
+
+
+msgid "セルフ影データ読み取り完了: {count}"
+msgstr ""
+
+
+msgid "セルフ影データ読み取り完了: 0"
+msgstr ""
+
+
+msgid "IKデータ読み取り完了: {count}"
+msgstr ""
+
+
+msgid "IKデータ読み取り完了: 1"
+msgstr ""
+
