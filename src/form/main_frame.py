@@ -16,6 +16,11 @@ __ = logger.get_text
 
 class MainFrame(BaseFrame):
     def __init__(self, app: wx.App, title: str, size: wx.Size, *args, **kw):
+        global logger
+        logger = MLogger(os.path.basename(__file__))
+        global __
+        __ = logger.get_text
+
         super().__init__(
             app,
             history_keys=["model_pmx", "motion_vmd"],

@@ -17,14 +17,6 @@ msgstr ""
 "Generated-By: Babel 2.12.1\n"
 
 
-msgid "ファイル"
-msgstr ""
-
-
-msgid "設定"
-msgstr ""
-
-
 msgid "PMXモデル"
 msgstr ""
 
@@ -57,6 +49,18 @@ msgid "実際は動いてないよ"
 msgstr ""
 
 
+msgid "ファイル"
+msgstr ""
+
+
+msgid "ファイルを選んでダブルクリック、またはOKボタンをクリックしてください。"
+msgstr ""
+
+
+msgid "ファイル履歴選択"
+msgstr ""
+
+
 msgid "----------------------"
 msgstr ""
 
@@ -69,15 +73,7 @@ msgid "頂点データ読み取り完了: {count}"
 msgstr ""
 
 
-msgid "頂点データ読み取り完了: 62129"
-msgstr ""
-
-
 msgid "面データ読み取り完了: {count}"
-msgstr ""
-
-
-msgid "面データ読み取り完了: 59363"
 msgstr ""
 
 
@@ -85,15 +81,7 @@ msgid "テクスチャデータ読み取り完了: {count}"
 msgstr ""
 
 
-msgid "テクスチャデータ読み取り完了: 52"
-msgstr ""
-
-
 msgid "材質データ読み取り完了: {count}"
-msgstr ""
-
-
-msgid "材質データ読み取り完了: 32"
 msgstr ""
 
 
@@ -101,15 +89,7 @@ msgid "ボーンデータ読み取り完了: {count}"
 msgstr ""
 
 
-msgid "ボーンデータ読み取り完了: 218"
-msgstr ""
-
-
 msgid "モーフデータ読み取り完了: {count}"
-msgstr ""
-
-
-msgid "モーフデータ読み取り完了: 171"
 msgstr ""
 
 
@@ -117,15 +97,7 @@ msgid "表示枠データ読み取り完了: {count}"
 msgstr ""
 
 
-msgid "表示枠データ読み取り完了: 14"
-msgstr ""
-
-
 msgid "剛体データ読み取り完了: {count}"
-msgstr ""
-
-
-msgid "剛体データ読み取り完了: 29"
 msgstr ""
 
 
@@ -133,19 +105,7 @@ msgid "ジョイントデータ読み取り完了: {count}"
 msgstr ""
 
 
-msgid "ジョイントデータ読み取り完了: 0"
-msgstr ""
-
-
 msgid "VMDモーションデータ読み取り開始"
-msgstr ""
-
-
-msgid "ボーンデータ読み取り完了: 117"
-msgstr ""
-
-
-msgid "モーフデータ読み取り完了: 33"
 msgstr ""
 
 
@@ -153,15 +113,7 @@ msgid "カメラデータ読み取り完了: {count}"
 msgstr ""
 
 
-msgid "カメラデータ読み取り完了: 0"
-msgstr ""
-
-
 msgid "照明データ読み取り完了: {count}"
-msgstr ""
-
-
-msgid "照明データ読み取り完了: 0"
 msgstr ""
 
 
@@ -169,14 +121,18 @@ msgid "セルフ影データ読み取り完了: {count}"
 msgstr ""
 
 
-msgid "セルフ影データ読み取り完了: 0"
-msgstr ""
-
-
 msgid "IKデータ読み取り完了: {count}"
 msgstr ""
 
 
-msgid "IKデータ読み取り完了: 1"
+msgid "表示モデル"
+msgstr ""
+
+
+msgid "表示モーション"
+msgstr ""
+
+
+msgid "出力先"
 msgstr ""
 

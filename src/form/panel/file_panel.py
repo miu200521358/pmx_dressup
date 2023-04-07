@@ -17,6 +17,11 @@ __ = logger.get_text
 
 class FilePanel(BasePanel):
     def __init__(self, frame: BaseFrame, tab_idx: int, *args, **kw):
+        global logger
+        logger = MLogger(os.path.basename(__file__))
+        global __
+        __ = logger.get_text
+
         super().__init__(frame, tab_idx, *args, **kw)
 
         self.pmx_reader = PmxReader()

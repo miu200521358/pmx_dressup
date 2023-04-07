@@ -17,8 +17,92 @@ msgstr ""
 "Generated-By: Babel 2.12.1\n"
 
 
+msgid "PMXモデル"
+msgstr "PMX模型"
+
+msgid "(未設定)"
+msgstr "（未设定）"
+
+msgid "{title}に記録されているモデル名です。\n文字列は選択およびコピー可能です。"
+msgstr "记录在{title}中的模型名称。\Јn字符串可以被选择和复制"
+
+msgid "開く"
+msgstr "开放"
+
+msgid "履歴"
+msgstr "历史"
+
+msgid "これまでに指定された事のある{title}を再指定することができます。"
+msgstr "你可以重新指定一个之前已经指定的{标题}"
+
+msgid "VMDモーションデータ"
+msgstr "VMD运动数据"
+
+msgid "実際は動いてないよ"
+msgstr "这实际上是没有用的"
+
 msgid "ファイル"
 msgstr "文件"
 
-msgid "設定"
-msgstr "设置"
+msgid "ファイルを選んでダブルクリック、またはOKボタンをクリックしてください。"
+msgstr "选择该文件并双击或点击确定按钮"
+
+msgid "ファイル履歴選択"
+msgstr "文件历史选择"
+
+msgid "----------------------"
+msgstr "----------------------"
+
+msgid "PMXモデルデータ読み取り開始"
+msgstr "开始读取PMX模型数据"
+
+msgid "頂点データ読み取り完了: {count}"
+msgstr "顶点数据读取完成：{count}"
+
+msgid "面データ読み取り完了: {count}"
+msgstr "表面数据读取完成：{count}"
+
+msgid "テクスチャデータ読み取り完了: {count}"
+msgstr "纹理数据读取完成：{count}"
+
+msgid "材質データ読み取り完了: {count}"
+msgstr "材料数据读取完成：{count}"
+
+msgid "ボーンデータ読み取り完了: {count}"
+msgstr "Bourne数据读取完成：{count}"
+
+msgid "モーフデータ読み取り完了: {count}"
+msgstr "形态数据读取完成：{count}"
+
+msgid "表示枠データ読み取り完了: {count}"
+msgstr "显示框架数据读取完成：{count}"
+
+msgid "剛体データ読み取り完了: {count}"
+msgstr "刚性数据读取完成：{count}"
+
+msgid "ジョイントデータ読み取り完了: {count}"
+msgstr "联合数据读取完成：{count}"
+
+msgid "VMDモーションデータ読み取り開始"
+msgstr "开始读取VMD运动数据"
+
+msgid "カメラデータ読み取り完了: {count}"
+msgstr "相机数据读取完成：{count}"
+
+msgid "照明データ読み取り完了: {count}"
+msgstr "照明数据读取完成：{count}"
+
+msgid "セルフ影データ読み取り完了: {count}"
+msgstr "自我阴影数据读取完成：{count}"
+
+msgid "IKデータ読み取り完了: {count}"
+msgstr "IK数据读取完成：{count}"
+
+msgid "表示モデル"
+msgstr "显示模式"
+
+msgid "表示モーション"
+msgstr "显示运动"
+
+msgid "出力先"
+msgstr "输出目的地"

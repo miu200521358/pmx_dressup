@@ -17,8 +17,92 @@ msgstr ""
 "Generated-By: Babel 2.12.1\n"
 
 
-msgid "ファイル"
-msgstr "파일
+msgid "PMXモデル"
+msgstr "PMX 모델"
 
-msgid "設定"
-msgstr "설정
+msgid "(未設定)"
+msgstr "(미설정)"
+
+msgid "{title}に記録されているモデル名です。\n文字列は選択およびコピー可能です。"
+msgstr "{title}에 기록된 모델명입니다. \n 문자열은 선택 및 복사할 수 있습니다"
+
+msgid "開く"
+msgstr "열기"
+
+msgid "履歴"
+msgstr "역사"
+
+msgid "これまでに指定された事のある{title}を再指定することができます。"
+msgstr "이전에 지정한 적이 있는 {title}을 다시 지정할 수 있습니다"
+
+msgid "VMDモーションデータ"
+msgstr "VMD 모션 데이터"
+
+msgid "実際は動いてないよ"
+msgstr "실제로는 움직이지 않아요"
+
+msgid "ファイル"
+msgstr "파일"
+
+msgid "ファイルを選んでダブルクリック、またはOKボタンをクリックしてください。"
+msgstr "파일을 선택하고 두 번 클릭하거나 확인 버튼을 클릭하세요"
+
+msgid "ファイル履歴選択"
+msgstr "파일 기록 선택"
+
+msgid "----------------------"
+msgstr "----------------------"
+
+msgid "PMXモデルデータ読み取り開始"
+msgstr "PMX 모델 데이터 읽기 시작"
+
+msgid "頂点データ読み取り完了: {count}"
+msgstr "버텍스 데이터 읽기 완료: {count}"
+
+msgid "面データ読み取り完了: {count}"
+msgstr "면 데이터 판독 완료: {count}"
+
+msgid "テクスチャデータ読み取り完了: {count}"
+msgstr "텍스처 데이터 읽기 완료: {count}"
+
+msgid "材質データ読み取り完了: {count}"
+msgstr "재료 데이터 읽기 완료: {count}"
+
+msgid "ボーンデータ読み取り完了: {count}"
+msgstr "본 데이터 읽기 완료: {count}"
+
+msgid "モーフデータ読み取り完了: {count}"
+msgstr "모프 데이터 읽기 완료: {count}"
+
+msgid "表示枠データ読み取り完了: {count}"
+msgstr "표시창 데이터 읽기 완료: {count}"
+
+msgid "剛体データ読み取り完了: {count}"
+msgstr "강체 데이터 읽기 완료: {count}"
+
+msgid "ジョイントデータ読み取り完了: {count}"
+msgstr "공동 데이터 읽기 완료: {count}"
+
+msgid "VMDモーションデータ読み取り開始"
+msgstr "VMD 모션 데이터 읽기 시작"
+
+msgid "カメラデータ読み取り完了: {count}"
+msgstr "카메라 데이터 읽기 완료: {count}"
+
+msgid "照明データ読み取り完了: {count}"
+msgstr "조명 데이터 읽기 완료: {count}"
+
+msgid "セルフ影データ読み取り完了: {count}"
+msgstr "자기 그림자 데이터 읽기 완료: {count}"
+
+msgid "IKデータ読み取り完了: {count}"
+msgstr "IK 데이터 읽기 완료: {count}"
+
+msgid "表示モデル"
+msgstr "디스플레이 모델"
+
+msgid "表示モーション"
+msgstr "디스플레이 모션"
+
+msgid "出力先"
+msgstr "출력처"

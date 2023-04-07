@@ -17,8 +17,92 @@ msgstr ""
 "Generated-By: Babel 2.12.1\n"
 
 
+msgid "PMXモデル"
+msgstr "PMXモデル"
+
+msgid "(未設定)"
+msgstr "(未設定)"
+
+msgid "{title}に記録されているモデル名です。\n文字列は選択およびコピー可能です。"
+msgstr "{title}に記録されているモデル名です。\n文字列は選択およびコピー可能です。"
+
+msgid "開く"
+msgstr "開く"
+
+msgid "履歴"
+msgstr "履歴"
+
+msgid "これまでに指定された事のある{title}を再指定することができます。"
+msgstr "これまでに指定された事のある{title}を再指定することができます。"
+
+msgid "VMDモーションデータ"
+msgstr "VMDモーションデータ"
+
+msgid "実際は動いてないよ"
+msgstr "実際は動いてないよ"
+
 msgid "ファイル"
 msgstr "ファイル"
 
-msgid "設定"
-msgstr "設定"
+msgid "ファイルを選んでダブルクリック、またはOKボタンをクリックしてください。"
+msgstr "ファイルを選んでダブルクリック、またはOKボタンをクリックしてください。"
+
+msgid "ファイル履歴選択"
+msgstr "ファイル履歴選択"
+
+msgid "----------------------"
+msgstr "----------------------"
+
+msgid "PMXモデルデータ読み取り開始"
+msgstr "PMXモデルデータ読み取り開始"
+
+msgid "頂点データ読み取り完了: {count}"
+msgstr "頂点データ読み取り完了: {count}"
+
+msgid "面データ読み取り完了: {count}"
+msgstr "面データ読み取り完了: {count}"
+
+msgid "テクスチャデータ読み取り完了: {count}"
+msgstr "テクスチャデータ読み取り完了: {count}"
+
+msgid "材質データ読み取り完了: {count}"
+msgstr "材質データ読み取り完了: {count}"
+
+msgid "ボーンデータ読み取り完了: {count}"
+msgstr "ボーンデータ読み取り完了: {count}"
+
+msgid "モーフデータ読み取り完了: {count}"
+msgstr "モーフデータ読み取り完了: {count}"
+
+msgid "表示枠データ読み取り完了: {count}"
+msgstr "表示枠データ読み取り完了: {count}"
+
+msgid "剛体データ読み取り完了: {count}"
+msgstr "剛体データ読み取り完了: {count}"
+
+msgid "ジョイントデータ読み取り完了: {count}"
+msgstr "ジョイントデータ読み取り完了: {count}"
+
+msgid "VMDモーションデータ読み取り開始"
+msgstr "VMDモーションデータ読み取り開始"
+
+msgid "カメラデータ読み取り完了: {count}"
+msgstr "カメラデータ読み取り完了: {count}"
+
+msgid "照明データ読み取り完了: {count}"
+msgstr "照明データ読み取り完了: {count}"
+
+msgid "セルフ影データ読み取り完了: {count}"
+msgstr "セルフ影データ読み取り完了: {count}"
+
+msgid "IKデータ読み取り完了: {count}"
+msgstr "IKデータ読み取り完了: {count}"
+
+msgid "表示モデル"
+msgstr "表示モデル"
+
+msgid "表示モーション"
+msgstr "表示モーション"
+
+msgid "出力先"
+msgstr "出力先"

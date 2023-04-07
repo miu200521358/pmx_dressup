@@ -17,8 +17,92 @@ msgstr ""
 "Generated-By: Babel 2.12.1\n"
 
 
+msgid "PMXモデル"
+msgstr "PMX Model"
+
+msgid "(未設定)"
+msgstr "(Not set)"
+
+msgid "{title}に記録されているモデル名です。\n文字列は選択およびコピー可能です。"
+msgstr "The model name as recorded in {title}. \The ɑn string can be selected and copied"
+
+msgid "開く"
+msgstr "Open"
+
+msgid "履歴"
+msgstr "History"
+
+msgid "これまでに指定された事のある{title}を再指定することができます。"
+msgstr "You can reassign a {title} that has been previously specified"
+
+msgid "VMDモーションデータ"
+msgstr "VMD motion data"
+
+msgid "実際は動いてないよ"
+msgstr "It's not really working"
+
 msgid "ファイル"
 msgstr "File"
 
-msgid "設定"
-msgstr "Settings.
+msgid "ファイルを選んでダブルクリック、またはOKボタンをクリックしてください。"
+msgstr "Please select the file and double click or click the OK button"
+
+msgid "ファイル履歴選択"
+msgstr "File History Selection"
+
+msgid "----------------------"
+msgstr "----------------------"
+
+msgid "PMXモデルデータ読み取り開始"
+msgstr "PMX model data read started"
+
+msgid "頂点データ読み取り完了: {count}"
+msgstr "Vertex data read complete: {count}"
+
+msgid "面データ読み取り完了: {count}"
+msgstr "Surface data read complete: {count}"
+
+msgid "テクスチャデータ読み取り完了: {count}"
+msgstr "Texture data read complete: {count}"
+
+msgid "材質データ読み取り完了: {count}"
+msgstr "Material data read complete: {count}"
+
+msgid "ボーンデータ読み取り完了: {count}"
+msgstr "Bone data read complete: {count}"
+
+msgid "モーフデータ読み取り完了: {count}"
+msgstr "Morph data read complete: {count}"
+
+msgid "表示枠データ読み取り完了: {count}"
+msgstr "Display frame data read complete: {count}"
+
+msgid "剛体データ読み取り完了: {count}"
+msgstr "Rigid data read complete: {count}"
+
+msgid "ジョイントデータ読み取り完了: {count}"
+msgstr "Joint data read complete: {count}"
+
+msgid "VMDモーションデータ読み取り開始"
+msgstr "Start reading VMD motion data"
+
+msgid "カメラデータ読み取り完了: {count}"
+msgstr "Camera data read complete: {count}"
+
+msgid "照明データ読み取り完了: {count}"
+msgstr "Lighting data read complete: {count}"
+
+msgid "セルフ影データ読み取り完了: {count}"
+msgstr "Self shadow data read complete: {count}"
+
+msgid "IKデータ読み取り完了: {count}"
+msgstr "IK data read complete: {count}"
+
+msgid "表示モデル"
+msgstr "Display Model"
+
+msgid "表示モーション"
+msgstr "Display Motion"
+
+msgid "出力先"
+msgstr "Output to"
