@@ -36,7 +36,7 @@ class FilePanel(BasePanel):
             name_spacer=20,
             is_save=False,
             tooltip="PMXモデル",
-            event=self.on_change_model_pmx,
+            file_change_event=self.on_change_model_pmx,
         )
         self.model_ctrl.set_parent_sizer(self.root_sizer)
 
@@ -50,7 +50,7 @@ class FilePanel(BasePanel):
             name_spacer=20,
             is_save=False,
             tooltip="PMX衣装モデル",
-            event=self.on_change_dress_pmx,
+            file_change_event=self.on_change_dress_pmx,
         )
         self.dress_ctrl.set_parent_sizer(self.root_sizer)
 
@@ -64,7 +64,7 @@ class FilePanel(BasePanel):
             name_spacer=20,
             is_save=False,
             tooltip="VMDモーションデータ",
-            event=self.on_change_motion,
+            file_change_event=self.on_change_motion,
         )
         self.motion_ctrl.set_parent_sizer(self.root_sizer)
 
