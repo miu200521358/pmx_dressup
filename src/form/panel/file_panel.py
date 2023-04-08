@@ -40,6 +40,20 @@ class FilePanel(BasePanel):
         )
         self.model_ctrl.set_parent_sizer(self.root_sizer)
 
+        self.dress_ctrl = MFilePickerCtrl(
+            self.frame,
+            self,
+            self.pmx_reader,
+            key="dress_pmx",
+            title="衣装モデル",
+            is_show_name=True,
+            name_spacer=20,
+            is_save=False,
+            tooltip="PMX衣装モデル",
+            event=self.on_change_dress_pmx,
+        )
+        self.dress_ctrl.set_parent_sizer(self.root_sizer)
+
         self.motion_ctrl = MFilePickerCtrl(
             self.frame,
             self,
@@ -77,6 +91,10 @@ class FilePanel(BasePanel):
             dir_path, file_name, file_ext = separate_path(self.model_ctrl.path)
             model_path = os.path.join(dir_path, f"{file_name}_{datetime.now():%Y%m%d_%H%M%S}{file_ext}")
             self.output_pmx_ctrl.path = model_path
+
+    def on_change_dress_pmx(self, event: wx.Event):
+        if self.dress_ctrl.read_name():
+            self.dress_ctrl.read_digest()
 
     def on_change_motion(self, event: wx.Event):
         if self.motion_ctrl.read_name():

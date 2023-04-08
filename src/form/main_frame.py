@@ -20,7 +20,7 @@ class MainFrame(BaseFrame):
     def __init__(self, app: wx.App, title: str, size: wx.Size, *args, **kw):
         super().__init__(
             app,
-            history_keys=["model_pmx", "motion_vmd"],
+            history_keys=["model_pmx", "dress_pmx", "motion_vmd"],
             title=title,
             size=size,
         )
@@ -50,6 +50,7 @@ class MainFrame(BaseFrame):
 
     def save_histories(self):
         self.file_panel.model_ctrl.save_path()
+        self.file_panel.dress_ctrl.save_path()
         self.file_panel.motion_ctrl.save_path()
 
         save_histories(self.histories)
@@ -60,15 +61,18 @@ class MainFrame(BaseFrame):
         if not (result and data):
             return
 
-        data1, data2 = data
+        data1, data2, data3 = data
         model: PmxModel = data1
-        motion: VmdMotion = data2
+        dress: PmxModel = data2
+        motion: VmdMotion = data3
         self.file_panel.model_ctrl.data = model
+        self.file_panel.dress_ctrl.data = dress
         self.file_panel.motion_ctrl.data = motion
 
         try:
             self.config_panel.canvas.set_context()
             self.config_panel.canvas.append_model_set(self.file_panel.model_ctrl.data, self.file_panel.motion_ctrl.data)
+            self.config_panel.canvas.append_model_set(self.file_panel.dress_ctrl.data, VmdMotion())
             self.config_panel.canvas.Refresh()
             self.notebook.ChangeSelection(self.config_panel.tab_idx)
         except:

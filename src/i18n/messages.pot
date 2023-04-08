@@ -136,3 +136,34 @@ msgstr ""
 msgid "出力先"
 msgstr ""
 
+
+msgid "衣装モデル"
+msgstr ""
+
+
+msgid "PMX衣装モデル"
+msgstr ""
+
+
+msgid "モデルセットアップ開始"
+msgstr ""
+
+
+msgid "モデルセットアップ：ボーン"
+msgstr ""
+
+
+msgid "読取失敗"
+msgstr ""
+
+msgid "-- モデルセットアップ：ボーン [{index} ({percentage:.2f}%)]"
+msgstr ""
+
+
+msgid "-- モデルセットアップ：ボーンツリー"
+msgstr ""
+
+
+msgid "モデルセットアップ完了"
+msgstr ""
+
