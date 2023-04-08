@@ -86,16 +86,24 @@ class FilePanel(BasePanel):
         self.fit()
 
     def on_change_model_pmx(self, event: wx.Event):
+        self.model_ctrl.unwrap()
         if self.model_ctrl.read_name():
             self.model_ctrl.read_digest()
-            dir_path, file_name, file_ext = separate_path(self.model_ctrl.path)
-            model_path = os.path.join(dir_path, f"{file_name}_{datetime.now():%Y%m%d_%H%M%S}{file_ext}")
-            self.output_pmx_ctrl.path = model_path
+            self.create_output_path()
 
     def on_change_dress_pmx(self, event: wx.Event):
+        self.dress_ctrl.unwrap()
         if self.dress_ctrl.read_name():
             self.dress_ctrl.read_digest()
+            self.create_output_path()
 
     def on_change_motion(self, event: wx.Event):
+        self.motion_ctrl.unwrap()
         if self.motion_ctrl.read_name():
             self.motion_ctrl.read_digest()
+
+    def create_output_path(self):
+        if self.model_ctrl.valid() and self.dress_ctrl.valid():
+            model_dir_path, model_file_name, model_file_ext = separate_path(self.model_ctrl.path)
+            dress_dir_path, dress_file_name, dress_file_ext = separate_path(self.dress_ctrl.path)
+            self.output_pmx_ctrl.path = os.path.join(model_dir_path, dress_file_name, f"{model_file_name}_{datetime.now():%Y%m%d_%H%M%S}{model_file_ext}")
