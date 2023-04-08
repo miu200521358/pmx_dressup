@@ -175,3 +175,87 @@ msgstr ""
 msgid "-- ボーンデータ読み取り [{index} ({percentage:.2f}%)]"
 msgstr ""
 
+
+msgid "縮尺を"
+msgstr ""
+
+
+msgid "縮尺をXYZ別に設定することができます"
+msgstr ""
+
+
+msgid "X軸方向の縮尺です"
+msgstr ""
+
+
+msgid "Y軸方向の縮尺です"
+msgstr ""
+
+
+msgid "Z軸方向の縮尺です"
+msgstr ""
+
+
+msgid "全体の縮尺"
+msgstr ""
+
+
+msgid "全体の縮尺をXYZ別に設定することができます"
+msgstr ""
+
+
+msgid "全体の縮尺X軸方向の縮尺です"
+msgstr ""
+
+
+msgid "全体の縮尺Y軸方向の縮尺です"
+msgstr ""
+
+
+msgid "全体の縮尺Z軸方向の縮尺です"
+msgstr ""
+
+
+msgid "全体や各ボーンにおける縮尺をXYZ別に設定することができます"
+msgstr ""
+
+
+msgid "全体をXYZ別に設定することができます"
+msgstr ""
+
+
+msgid "全体X軸方向の縮尺です"
+msgstr ""
+
+
+msgid "全体Y軸方向の縮尺です"
+msgstr ""
+
+
+msgid "全体Z軸方向の縮尺です"
+msgstr ""
+
+
+msgid "予期せぬエラーが発生しました"
+msgstr ""
+
+
+msgid "追加縮尺"
+msgstr ""
+
+
+msgid "全体の追加縮尺をXYZ別に設定することができます"
+msgstr ""
+
+
+msgid "全体X軸方向に追加でどの程度伸縮させるかを設定できます"
+msgstr ""
+
+
+msgid "全体Y軸方向に追加でどの程度伸縮させるかを設定できます"
+msgstr ""
+
+
+msgid "全体Z軸方向に追加でどの程度伸縮させるかを設定できます"
+msgstr ""
+

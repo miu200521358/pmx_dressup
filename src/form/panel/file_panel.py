@@ -54,20 +54,6 @@ class FilePanel(BasePanel):
         )
         self.dress_ctrl.set_parent_sizer(self.root_sizer)
 
-        self.motion_ctrl = MFilePickerCtrl(
-            self.frame,
-            self,
-            self.vmd_reader,
-            key="motion_vmd",
-            title="表示モーション",
-            is_show_name=True,
-            name_spacer=20,
-            is_save=False,
-            tooltip="VMDモーションデータ",
-            file_change_event=self.on_change_motion,
-        )
-        self.motion_ctrl.set_parent_sizer(self.root_sizer)
-
         self.output_pmx_ctrl = MFilePickerCtrl(
             self.frame,
             self,
@@ -96,11 +82,6 @@ class FilePanel(BasePanel):
         if self.dress_ctrl.read_name():
             self.dress_ctrl.read_digest()
             self.create_output_path()
-
-    def on_change_motion(self, event: wx.Event):
-        self.motion_ctrl.unwrap()
-        if self.motion_ctrl.read_name():
-            self.motion_ctrl.read_digest()
 
     def create_output_path(self):
         if self.model_ctrl.valid() and self.dress_ctrl.valid():

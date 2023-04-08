@@ -15,5 +15,4 @@ class LoadWorker(BaseWorker):
         self.result_data = (
             file_panel.pmx_reader.read_by_filepath(file_panel.model_ctrl.path),
             file_panel.pmx_reader.read_by_filepath(file_panel.dress_ctrl.path),
-            file_panel.vmd_reader.read_by_filepath(file_panel.motion_ctrl.path),
         )
