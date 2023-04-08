@@ -25,7 +25,7 @@ msgid "(未設定)"
 msgstr ""
 
 
-msgid "{title}に記録されているモデル名です。\n文字列は選択およびコピー可能です。"
+msgid "{t}に記録されているモデル名です。\n文字列は選択およびコピー可能です。"
 msgstr ""
 
 
@@ -37,15 +37,11 @@ msgid "履歴"
 msgstr ""
 
 
-msgid "これまでに指定された事のある{title}を再指定することができます。"
+msgid "これまでに指定された事のある{t}を再指定することができます。"
 msgstr ""
 
 
 msgid "VMDモーションデータ"
-msgstr ""
-
-
-msgid "実際は動いてないよ"
 msgstr ""
 
 
@@ -69,39 +65,39 @@ msgid "PMXモデルデータ読み取り開始"
 msgstr ""
 
 
-msgid "頂点データ読み取り完了: {count}"
+msgid "頂点データ読み取り完了: {c}"
 msgstr ""
 
 
-msgid "面データ読み取り完了: {count}"
+msgid "面データ読み取り完了: {c}"
 msgstr ""
 
 
-msgid "テクスチャデータ読み取り完了: {count}"
+msgid "テクスチャデータ読み取り完了: {c}"
 msgstr ""
 
 
-msgid "材質データ読み取り完了: {count}"
+msgid "材質データ読み取り完了: {c}"
 msgstr ""
 
 
-msgid "ボーンデータ読み取り完了: {count}"
+msgid "ボーンデータ読み取り完了: {c}"
 msgstr ""
 
 
-msgid "モーフデータ読み取り完了: {count}"
+msgid "モーフデータ読み取り完了: {c}"
 msgstr ""
 
 
-msgid "表示枠データ読み取り完了: {count}"
+msgid "表示枠データ読み取り完了: {c}"
 msgstr ""
 
 
-msgid "剛体データ読み取り完了: {count}"
+msgid "剛体データ読み取り完了: {c}"
 msgstr ""
 
 
-msgid "ジョイントデータ読み取り完了: {count}"
+msgid "ジョイントデータ読み取り完了: {c}"
 msgstr ""
 
 
@@ -109,19 +105,19 @@ msgid "VMDモーションデータ読み取り開始"
 msgstr ""
 
 
-msgid "カメラデータ読み取り完了: {count}"
+msgid "カメラデータ読み取り完了: {c}"
 msgstr ""
 
 
-msgid "照明データ読み取り完了: {count}"
+msgid "照明データ読み取り完了: {c}"
 msgstr ""
 
 
-msgid "セルフ影データ読み取り完了: {count}"
+msgid "セルフ影データ読み取り完了: {c}"
 msgstr ""
 
 
-msgid "IKデータ読み取り完了: {count}"
+msgid "IKデータ読み取り完了: {c}"
 msgstr ""
 
 
@@ -156,7 +152,7 @@ msgstr ""
 msgid "読取失敗"
 msgstr ""
 
-msgid "-- モデルセットアップ：ボーン [{index} ({percentage:.2f}%)]"
+msgid "-- モデルセットアップ：ボーン [{i} ({p:.2f}%)]"
 msgstr ""
 
 
@@ -172,11 +168,7 @@ msgid "出力先のチェックに失敗しました。以下の原因が考え�
 msgstr ""
 
 
-msgid "-- ボーンデータ読み取り [{index} ({percentage:.2f}%)]"
-msgstr ""
-
-
-msgid "縮尺を"
+msgid "-- ボーンデータ読み取り [{i} ({p:.2f}%)]"
 msgstr ""
 
 
@@ -292,7 +284,7 @@ msgid "モデル追加セットアップ：ウェイトボーン分布"
 msgstr ""
 
 
-msgid "-- モデル追加セットアップ：ウェイトボーン分布 [{index} ({percentage:.2f}%)]"
+msgid "-- モデル追加セットアップ：ウェイトボーン分布 [{i} ({p:.2f}%)]"
 msgstr ""
 
 
@@ -300,10 +292,22 @@ msgid "衣装モデル追加セットアップ：スケールモーフ追加"
 msgstr ""
 
 
-msgid "-- 衣装モデル追加セットアップ：スケールモーフ追加 [{index} ({percentage:.2f}%)]"
+msgid "-- 衣装モデル追加セットアップ：スケールモーフ追加 [{i} ({p:.2f}%)]"
 msgstr ""
 
 
-msgid "-- ウェイトボーン分布 [{index} ({percentage:.2f}%)]"
+msgid "-- ウェイトボーン分布 [{i} ({p:.2f}%)]"
+msgstr ""
+
+
+msgid "モーションを指定している場合、任意のキーフレの結果の表示や再生ができます"
+msgstr ""
+
+
+msgid "モーションを指定している場合、任意のキーフレの結果を表示することができます"
+msgstr ""
+
+
+msgid "モーションを指定している場合、再生することができます"
 msgstr ""
 

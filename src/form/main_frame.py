@@ -9,7 +9,6 @@ from form.panel.file_panel import FilePanel
 from mlib.base.logger import MLogger
 from mlib.base.math import MVector3D
 from mlib.form.base_frame import BaseFrame
-from mlib.pmx.canvas import MotionSet
 from mlib.pmx.pmx_collection import PmxModel
 from mlib.utils.file_utils import save_histories
 from mlib.vmd.vmd_collection import VmdMotion
@@ -30,6 +29,7 @@ class MainFrame(BaseFrame):
         # ファイルタブ
         self.file_panel = FilePanel(self, 0)
         self.notebook.AddPage(self.file_panel, __("ファイル"), False)
+        self.dress_motion: Optional[VmdMotion] = None
 
         # 設定タブ
         self.config_panel = ConfigPanel(self, 1)
@@ -79,12 +79,12 @@ class MainFrame(BaseFrame):
         self.file_panel.motion_ctrl.data = motion
 
         # モデルとドレスのボーンの縮尺を合わせる
-        dress_motion = self.create_dress_motion()
+        self.dress_motion = self.create_dress_motion()
 
         try:
             self.config_panel.canvas.set_context()
             self.config_panel.canvas.append_model_set(self.file_panel.model_ctrl.data, motion)
-            self.config_panel.canvas.append_model_set(self.file_panel.dress_ctrl.data, dress_motion)
+            self.config_panel.canvas.append_model_set(self.file_panel.dress_ctrl.data, self.dress_motion)
             self.config_panel.canvas.Refresh()
             self.notebook.ChangeSelection(self.config_panel.tab_idx)
         except:
@@ -120,10 +120,9 @@ class MainFrame(BaseFrame):
 
         return motion
 
-    def fit_dress_motion(self, dress_motion: VmdMotion):
-        animations: list[MotionSet] = [
-            MotionSet(self.config_panel.canvas.model_sets[0].model, VmdMotion(), 0),
-            MotionSet(self.config_panel.canvas.model_sets[1].model, dress_motion, 0),
-        ]
-        self.config_panel.canvas.animations = animations
-        self.config_panel.canvas.Refresh()
+    def fit_dress_motion(self, dress_motion: Optional[VmdMotion] = None, fno: int = 0):
+        if not dress_motion:
+            dress_motion = self.dress_motion
+
+        self.config_panel.canvas.model_sets[1].motion = dress_motion
+        self.config_panel.canvas.change_motion(wx.SpinEvent())

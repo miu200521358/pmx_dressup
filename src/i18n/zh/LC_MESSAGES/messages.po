@@ -23,8 +23,8 @@ msgstr "PMX模型"
 msgid "(未設定)"
 msgstr "（未设定）"
 
-msgid "{title}に記録されているモデル名です。\n文字列は選択およびコピー可能です。"
-msgstr "记录在{title}中的模型名称。\Јn字符串可以被选择和复制"
+msgid "{t}に記録されているモデル名です。\n文字列は選択およびコピー可能です。"
+msgstr "记录在{t}的模型名称。\ɑn字符串可以被选择和复制"
 
 msgid "開く"
 msgstr "开放"
@@ -32,14 +32,11 @@ msgstr "开放"
 msgid "履歴"
 msgstr "历史"
 
-msgid "これまでに指定された事のある{title}を再指定することができます。"
-msgstr "你可以重新指定一个之前已经指定的{标题}"
+msgid "これまでに指定された事のある{t}を再指定することができます。"
+msgstr "如果以前曾经指定过{t}，你可以重新指定它"
 
 msgid "VMDモーションデータ"
 msgstr "VMD运动数据"
-
-msgid "実際は動いてないよ"
-msgstr "这实际上是没有用的"
 
 msgid "ファイル"
 msgstr "文件"
@@ -56,47 +53,47 @@ msgstr "----------------------"
 msgid "PMXモデルデータ読み取り開始"
 msgstr "开始读取PMX模型数据"
 
-msgid "頂点データ読み取り完了: {count}"
-msgstr "顶点数据读取完成：{count}"
+msgid "頂点データ読み取り完了: {c}"
+msgstr "顶点数据读取完成：{c}"
 
-msgid "面データ読み取り完了: {count}"
-msgstr "表面数据读取完成：{count}"
+msgid "面データ読み取り完了: {c}"
+msgstr "表面数据读取完成：{c}"
 
-msgid "テクスチャデータ読み取り完了: {count}"
-msgstr "纹理数据读取完成：{count}"
+msgid "テクスチャデータ読み取り完了: {c}"
+msgstr "纹理数据读取完成：{c}"
 
-msgid "材質データ読み取り完了: {count}"
-msgstr "材料数据读取完毕：{count}"
+msgid "材質データ読み取り完了: {c}"
+msgstr "材料数据读取完毕：{c}"
 
-msgid "ボーンデータ読み取り完了: {count}"
-msgstr "Bourne数据读取完成：{count}"
+msgid "ボーンデータ読み取り完了: {c}"
+msgstr "Bourne数据读取完成：{c}"
 
-msgid "モーフデータ読み取り完了: {count}"
-msgstr "形态数据读取完成：{count}"
+msgid "モーフデータ読み取り完了: {c}"
+msgstr "形态数据读取完成：{c}"
 
-msgid "表示枠データ読み取り完了: {count}"
-msgstr "显示框架数据读取完成：{count}"
+msgid "表示枠データ読み取り完了: {c}"
+msgstr "显示框架数据读取完成：{c}"
 
-msgid "剛体データ読み取り完了: {count}"
-msgstr "刚性数据读取完成：{count}"
+msgid "剛体データ読み取り完了: {c}"
+msgstr "刚性数据读取完成：{c}"
 
-msgid "ジョイントデータ読み取り完了: {count}"
-msgstr "联合数据读取完成：{count}"
+msgid "ジョイントデータ読み取り完了: {c}"
+msgstr "联合数据读取完成：{c}"
 
 msgid "VMDモーションデータ読み取り開始"
 msgstr "开始读取VMD运动数据"
 
-msgid "カメラデータ読み取り完了: {count}"
-msgstr "相机数据读取完成：{count}"
+msgid "カメラデータ読み取り完了: {c}"
+msgstr "相机数据读取完成：{c}"
 
-msgid "照明データ読み取り完了: {count}"
-msgstr "照明数据读取完成：{count}"
+msgid "照明データ読み取り完了: {c}"
+msgstr "照明数据读取完成：{c}"
 
-msgid "セルフ影データ読み取り完了: {count}"
-msgstr "自我阴影数据读取完成：{count}"
+msgid "セルフ影データ読み取り完了: {c}"
+msgstr "自我阴影数据读取完成：{c}"
 
-msgid "IKデータ読み取り完了: {count}"
-msgstr "IK数据读取完成：{count}"
+msgid "IKデータ読み取り完了: {c}"
+msgstr "IK数据读取完成：{c}"
 
 msgid "表示モデル"
 msgstr "显示模式"
@@ -106,3 +103,137 @@ msgstr "显示运动"
 
 msgid "出力先"
 msgstr "输出目的地"
+
+msgid "衣装モデル"
+msgstr "服装模型"
+
+msgid "PMX衣装モデル"
+msgstr "PMX服装模型"
+
+msgid "モデルセットアップ開始"
+msgstr "模型设置开始"
+
+msgid "モデルセットアップ：ボーン"
+msgstr "模型设置：骨骼"
+
+msgid "読取失敗"
+msgstr "阅读失败"
+msgid "-- モデルセットアップ：ボーン [{i} ({p:.2f}%)]"
+msgstr "--模型设置：骨骼[{i}（{p:.2f}%）]"
+
+msgid "-- モデルセットアップ：ボーンツリー"
+msgstr "--模型设置：骨树"
+
+msgid "モデルセットアップ完了"
+msgstr "模型设置完成"
+
+msgid "出力先のチェックに失敗しました。以下の原因が考えられます。\n出力先が255文字を超えている\n出力先に使えない文字列が含まれている（例) \ / : * ? " < > |）\n出力先の親フォルダに書き込み権限がない\n出力先に書き込み権限がない"
+msgstr "输出目的地检查失败。以下原因是可能的。\Јn输出目的地包含超过255个字符 Јn输出目的地包含不可用的字符串（例如） \ / : * ? " < > |) Јn输出目的地的父文件夹没有写入权限 Јn输出目的地没有写入权限"
+
+msgid "-- ボーンデータ読み取り [{i} ({p:.2f}%)]"
+msgstr "--Bourne数据读取[{i}（{p:.2f}%）]"
+
+msgid "縮尺をXYZ別に設定することができます"
+msgstr "规模可由XYZ设定"
+
+msgid "X軸方向の縮尺です"
+msgstr "在X轴方向的比例"
+
+msgid "Y軸方向の縮尺です"
+msgstr "在Y轴方向上的比例"
+
+msgid "Z軸方向の縮尺です"
+msgstr "Z轴刻度"
+
+msgid "全体の縮尺"
+msgstr "总体规模"
+
+msgid "全体の縮尺をXYZ別に設定することができます"
+msgstr "总体规模可由XYZ设定"
+
+msgid "全体の縮尺X軸方向の縮尺です"
+msgstr "总体比例X轴比例"
+
+msgid "全体の縮尺Y軸方向の縮尺です"
+msgstr "总体比例Y轴比例"
+
+msgid "全体の縮尺Z軸方向の縮尺です"
+msgstr "总体比例Z轴比例"
+
+msgid "全体や各ボーンにおける縮尺をXYZ別に設定することができます"
+msgstr "你可以通过XYZ在整体或每块骨头上设置刻度"
+
+msgid "全体をXYZ別に設定することができます"
+msgstr "整体可以由XYZ配置"
+
+msgid "全体X軸方向の縮尺です"
+msgstr "在整个X轴方向的比例"
+
+msgid "全体Y軸方向の縮尺です"
+msgstr "整体Y轴比例"
+
+msgid "全体Z軸方向の縮尺です"
+msgstr "整体Z轴比例"
+
+msgid "予期せぬエラーが発生しました"
+msgstr "发生了一个意外的错误"
+
+msgid "追加縮尺"
+msgstr "额外规模"
+
+msgid "全体の追加縮尺をXYZ別に設定することができます"
+msgstr "额外的总体规模可由XYZ设定"
+
+msgid "全体X軸方向に追加でどの程度伸縮させるかを設定できます"
+msgstr "你可以设置在整个X轴的方向上额外拉伸或收缩多少"
+
+msgid "全体Y軸方向に追加でどの程度伸縮させるかを設定できます"
+msgstr "你可以设置在整个Y轴方向上额外拉伸或收缩多少"
+
+msgid "全体Z軸方向に追加でどの程度伸縮させるかを設定できます"
+msgstr "你可以设置你在整个Z轴方向上想要多少额外的拉伸或收缩"
+
+msgid "全体やボーンごとに追加でどの程度伸縮させるかを、XYZ別に設定することができます"
+msgstr "你可以通过XYZ设置整个事物或每块骨头另外拉伸或收缩多少"
+
+msgid "人物モデル"
+msgstr "人物模型"
+
+msgid "お着替えさせたい対象の人物モデルを指定してください。\nお着替え後に不要になる頂点は事前に削除しておいてください。"
+msgstr "指定你要改变的目标人物模型。\请提前删除转换后不再需要的顶点"
+
+msgid "お着替えしたい衣装モデルを指定してください。\nお着替え後に不要になる頂点は事前に削除しておいてください。"
+msgstr "请指定你想换成的服装模型。\Please delete any vertices that will no longer be needed after the changeover." 请提前删除任何在转换后不再需要的顶点。
+
+msgid "任意でVMDモーションデータを指定する事ができます。\n空欄の場合、人物と衣装は初期状態で表示します。"
+msgstr "你可以选择性地指定VMD运动数据。\If the Јn is left blank, the person and costume will be displayed in their default state"
+
+msgid "お着替え後モデル出力先"
+msgstr "换完衣服后的模型输出目的地"
+
+msgid "お着替え後のモデルの出力ファイルパスです。\n任意の値に変更可能です。"
+msgstr "换衣后模型的输出文件路径。\Јn它可以改成任何值"
+
+msgid "モデル追加セットアップ：ウェイトボーン分布"
+msgstr "额外的模型设置：重量骨架分布"
+
+msgid "-- モデル追加セットアップ：ウェイトボーン分布 [{i} ({p:.2f}%)]"
+msgstr "--额外的模型设置：重量骨骼分布[{i}（{p:.2f}%）]"
+
+msgid "衣装モデル追加セットアップ：スケールモーフ追加"
+msgstr "额外的服装模型设置：额外的比例变形"
+
+msgid "-- 衣装モデル追加セットアップ：スケールモーフ追加 [{i} ({p:.2f}%)]"
+msgstr "--额外的服装模型设置：增加了比例变形[{i}（{p:.2f}%）]"
+
+msgid "-- ウェイトボーン分布 [{i} ({p:.2f}%)]"
+msgstr "--重生分布[{i}（{p:.2f}%）]"
+
+msgid "モーションを指定している場合、任意のキーフレの結果の表示や再生ができます"
+msgstr "如果指定了运动，可以显示和回放任何按键的结果"
+
+msgid "モーションを指定している場合、任意のキーフレの結果を表示することができます"
+msgstr "如果你已经指定了一个动议，你可以显示任何关键性的结果"
+
+msgid "モーションを指定している場合、再生することができます"
+msgstr "如果指定了运动，就可以回放"

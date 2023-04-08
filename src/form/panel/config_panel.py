@@ -5,7 +5,7 @@ import wx
 from mlib.base.logger import MLogger
 from mlib.base.math import MVector3D
 from mlib.form.base_frame import BaseFrame
-from mlib.form.parts.spin_ctrl import WheelSpinCtrlDouble
+from mlib.form.parts.spin_ctrl import WheelSpinCtrl, WheelSpinCtrlDouble
 from mlib.pmx.canvas import CanvasPanel
 
 logger = MLogger(os.path.basename(__file__))
@@ -34,9 +34,25 @@ class ConfigPanel(CanvasPanel):
 
         self.config_sizer = wx.BoxSizer(wx.VERTICAL)
 
-        self.title_ctrl = wx.StaticText(self.scrolled_window, wx.ID_ANY, __("追加縮尺"), wx.DefaultPosition, wx.DefaultSize, 0)
-        self.title_ctrl.SetToolTip(__("全体やボーンごとに追加でどの程度伸縮させるかを、XYZ別に設定することができます"))
-        self.config_sizer.Add(self.title_ctrl, 0, wx.ALL, 3)
+        self.play_sizer = wx.BoxSizer(wx.HORIZONTAL)
+
+        self.frame_title_ctrl = wx.StaticText(self.scrolled_window, wx.ID_ANY, __("モーション"), wx.DefaultPosition, wx.DefaultSize, 0)
+        self.frame_title_ctrl.SetToolTip(__("モーションを指定している場合、任意のキーフレの結果の表示や再生ができます"))
+        self.play_sizer.Add(self.frame_title_ctrl, 0, wx.ALL, 3)
+
+        self.frame_ctrl = WheelSpinCtrl(self.scrolled_window, initial=0, min=0, max=10000, size=wx.Size(70, -1), change_event=self.on_frame_change)
+        self.frame_title_ctrl.SetToolTip(__("モーションを指定している場合、任意のキーフレの結果を表示することができます"))
+        self.play_sizer.Add(self.frame_ctrl, 0, wx.ALL, 3)
+
+        self.play_ctrl = wx.Button(self.scrolled_window, wx.ID_ANY, "Play", wx.DefaultPosition, wx.Size(80, -1))
+        self.play_ctrl.SetToolTip(__("モーションを指定している場合、再生することができます"))
+        self.play_sizer.Add(self.play_ctrl, 0, wx.ALL, 3)
+
+        self.config_sizer.Add(self.play_sizer, 0, wx.ALL, 3)
+
+        self.scale_title_ctrl = wx.StaticText(self.scrolled_window, wx.ID_ANY, __("追加縮尺"), wx.DefaultPosition, wx.DefaultSize, 0)
+        self.scale_title_ctrl.SetToolTip(__("全体やボーンごとに追加でどの程度伸縮させるかを、XYZ別に設定することができます"))
+        self.config_sizer.Add(self.scale_title_ctrl, 0, wx.ALL, 3)
 
         self.grid_sizer = wx.FlexGridSizer(rows=1, cols=7, vgap=0, hgap=0)
 
@@ -59,14 +75,32 @@ class ConfigPanel(CanvasPanel):
         self.Layout()
 
     def _initialize_event(self):
-        pass
+        self.play_ctrl.Bind(wx.EVT_BUTTON, self.on_play)
+
+    def on_play(self, event: wx.Event):
+        self.canvas.on_play(event)
+        self.play_ctrl.SetLabelText("Stop" if self.canvas.playing else "Play")
+
+    @property
+    def fno(self):
+        return self.frame_ctrl.GetValue()
+
+    @fno.setter
+    def fno(self, v: int):
+        self.frame_ctrl.SetValue(v)
+
+    def play_stop(self):
+        self.play_ctrl.SetLabelText("Play")
+
+    def on_frame_change(self, event: wx.Event):
+        self.frame.fit_dress_motion(fno=self.fno)
 
     def on_change(self, event: wx.Event):
         axis_scale_sets: dict[str, MVector3D] = {}
         axis_scale_sets["ALL"] = self.all_axis_set.get_scale()
 
-        dress_motion = self.frame.create_dress_motion(axis_scale_sets)
-        self.frame.fit_dress_motion(dress_motion)
+        self.frame.dress_motion = self.frame.create_dress_motion(axis_scale_sets)
+        self.frame.fit_dress_motion(fno=self.fno)
 
 
 class AxisCtrlSet:

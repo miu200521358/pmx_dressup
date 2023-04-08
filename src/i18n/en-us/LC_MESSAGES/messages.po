@@ -23,8 +23,8 @@ msgstr "PMX Model"
 msgid "(未設定)"
 msgstr "(Not set)"
 
-msgid "{title}に記録されているモデル名です。\n文字列は選択およびコピー可能です。"
-msgstr "The model name as recorded in {title}. \The ɑn string can be selected and copied"
+msgid "{t}に記録されているモデル名です。\n文字列は選択およびコピー可能です。"
+msgstr "The model name as recorded in {t}. \The ɛn string can be selected and copied"
 
 msgid "開く"
 msgstr "Open"
@@ -32,14 +32,11 @@ msgstr "Open"
 msgid "履歴"
 msgstr "History"
 
-msgid "これまでに指定された事のある{title}を再指定することができます。"
-msgstr "You can reassign a {title} that has been previously specified"
+msgid "これまでに指定された事のある{t}を再指定することができます。"
+msgstr "You can re-specify {t} that has been previously specified"
 
 msgid "VMDモーションデータ"
 msgstr "VMD motion data"
-
-msgid "実際は動いてないよ"
-msgstr "It's not really working"
 
 msgid "ファイル"
 msgstr "File"
@@ -56,47 +53,47 @@ msgstr "----------------------"
 msgid "PMXモデルデータ読み取り開始"
 msgstr "PMX model data read started"
 
-msgid "頂点データ読み取り完了: {count}"
-msgstr "Vertex data read complete: {count}"
+msgid "頂点データ読み取り完了: {c}"
+msgstr "Vertex data read complete: {c}"
 
-msgid "面データ読み取り完了: {count}"
-msgstr "Surface data read complete: {count}"
+msgid "面データ読み取り完了: {c}"
+msgstr "Surface data read complete: {c}"
 
-msgid "テクスチャデータ読み取り完了: {count}"
-msgstr "Texture data read complete: {count}"
+msgid "テクスチャデータ読み取り完了: {c}"
+msgstr "Texture data read complete: {c}"
 
-msgid "材質データ読み取り完了: {count}"
-msgstr "Material data read complete: {count}"
+msgid "材質データ読み取り完了: {c}"
+msgstr "Material data read complete: {c}"
 
-msgid "ボーンデータ読み取り完了: {count}"
-msgstr "Bone data read complete: {count}"
+msgid "ボーンデータ読み取り完了: {c}"
+msgstr "Bone data read complete: {c}"
 
-msgid "モーフデータ読み取り完了: {count}"
-msgstr "Morph data read complete: {count}"
+msgid "モーフデータ読み取り完了: {c}"
+msgstr "Morph data read complete: {c}"
 
-msgid "表示枠データ読み取り完了: {count}"
-msgstr "Display frame data read complete: {count}"
+msgid "表示枠データ読み取り完了: {c}"
+msgstr "Display frame data read complete: {c}"
 
-msgid "剛体データ読み取り完了: {count}"
-msgstr "Rigid data read complete: {count}"
+msgid "剛体データ読み取り完了: {c}"
+msgstr "Rigid data read complete: {c}"
 
-msgid "ジョイントデータ読み取り完了: {count}"
-msgstr "Joint data read complete: {count}"
+msgid "ジョイントデータ読み取り完了: {c}"
+msgstr "Joint data read complete: {c}"
 
 msgid "VMDモーションデータ読み取り開始"
 msgstr "Start reading VMD motion data"
 
-msgid "カメラデータ読み取り完了: {count}"
-msgstr "Camera data read complete: {count}"
+msgid "カメラデータ読み取り完了: {c}"
+msgstr "Camera data read complete: {c}"
 
-msgid "照明データ読み取り完了: {count}"
-msgstr "Lighting data read complete: {count}"
+msgid "照明データ読み取り完了: {c}"
+msgstr "Lighting data read complete: {c}"
 
-msgid "セルフ影データ読み取り完了: {count}"
-msgstr "Self shadow data read complete: {count}"
+msgid "セルフ影データ読み取り完了: {c}"
+msgstr "Self shadow data read complete: {c}"
 
-msgid "IKデータ読み取り完了: {count}"
-msgstr "IK data read complete: {count}"
+msgid "IKデータ読み取り完了: {c}"
+msgstr "IK data read complete: {c}"
 
 msgid "表示モデル"
 msgstr "Display Model"
@@ -106,3 +103,137 @@ msgstr "Display Motion"
 
 msgid "出力先"
 msgstr "Output to"
+
+msgid "衣装モデル"
+msgstr "Costume model"
+
+msgid "PMX衣装モデル"
+msgstr "PMX Costume Model"
+
+msgid "モデルセットアップ開始"
+msgstr "Model setup started"
+
+msgid "モデルセットアップ：ボーン"
+msgstr "Model setup: bone"
+
+msgid "読取失敗"
+msgstr "Reading failed"
+msgid "-- モデルセットアップ：ボーン [{i} ({p:.2f}%)]"
+msgstr "-- Model setup: bone [{i} ({p:.2f}%)]"
+
+msgid "-- モデルセットアップ：ボーンツリー"
+msgstr "-- Model setup: bone tree"
+
+msgid "モデルセットアップ完了"
+msgstr "Model setup complete"
+
+msgid "出力先のチェックに失敗しました。以下の原因が考えられます。\n出力先が255文字を超えている\n出力先に使えない文字列が含まれている（例) \ / : * ? " < > |）\n出力先の親フォルダに書き込み権限がない\n出力先に書き込み権限がない"
+msgstr "Failed to check output destination. The following are possible causes. \ЈnThe output destination exceeds 255 charactersЈnThe output destination contains unusable character strings (e.g.) \ / : * ? " < > |) The parent folder of the ዄn output destination does not have write permissions.
+
+msgid "-- ボーンデータ読み取り [{i} ({p:.2f}%)]"
+msgstr "-- Bone data read [{i} ({p:.2f}%)]"
+
+msgid "縮尺をXYZ別に設定することができます"
+msgstr "The scale can be set by XYZ"
+
+msgid "X軸方向の縮尺です"
+msgstr "Scale in the x-axis direction"
+
+msgid "Y軸方向の縮尺です"
+msgstr "Y-axis scale"
+
+msgid "Z軸方向の縮尺です"
+msgstr "Scale in Z-axis direction"
+
+msgid "全体の縮尺"
+msgstr "Overall scale"
+
+msgid "全体の縮尺をXYZ別に設定することができます"
+msgstr "The overall scale can be set by XYZ"
+
+msgid "全体の縮尺X軸方向の縮尺です"
+msgstr "The overall scale, in the x-axis direction"
+
+msgid "全体の縮尺Y軸方向の縮尺です"
+msgstr "Overall scale Y-axis scale"
+
+msgid "全体の縮尺Z軸方向の縮尺です"
+msgstr "The overall scale in the Z-axis direction"
+
+msgid "全体や各ボーンにおける縮尺をXYZ別に設定することができます"
+msgstr "Scale can be set by XYZ for the whole or for each bone"
+
+msgid "全体をXYZ別に設定することができます"
+msgstr "The whole can be set up by XYZ"
+
+msgid "全体X軸方向の縮尺です"
+msgstr "Scale in overall x-axis direction"
+
+msgid "全体Y軸方向の縮尺です"
+msgstr "Overall Y-axis scale"
+
+msgid "全体Z軸方向の縮尺です"
+msgstr "Overall Z-axis scale"
+
+msgid "予期せぬエラーが発生しました"
+msgstr "An unexpected error has occurred"
+
+msgid "追加縮尺"
+msgstr "Additional Scale"
+
+msgid "全体の追加縮尺をXYZ別に設定することができます"
+msgstr "Additional overall scale can be set by XYZ"
+
+msgid "全体X軸方向に追加でどの程度伸縮させるかを設定できます"
+msgstr "You can set how much to additionally stretch or shrink in the overall X-axis direction"
+
+msgid "全体Y軸方向に追加でどの程度伸縮させるかを設定できます"
+msgstr "You can set how much to additionally stretch or shrink in the overall Y-axis direction"
+
+msgid "全体Z軸方向に追加でどの程度伸縮させるかを設定できます"
+msgstr "You can set how much to additionally stretch or shrink in the overall Z-axis direction"
+
+msgid "全体やボーンごとに追加でどの程度伸縮させるかを、XYZ別に設定することができます"
+msgstr "You can set how much to stretch or shrink the whole thing or each bone additionally, by XYZ"
+
+msgid "人物モデル"
+msgstr "People Models"
+
+msgid "お着替えさせたい対象の人物モデルを指定してください。\nお着替え後に不要になる頂点は事前に削除しておいてください。"
+msgstr "Specify the person model you want to change. \Please delete in advance the vertices that will no longer be needed after the changeover"
+
+msgid "お着替えしたい衣装モデルを指定してください。\nお着替え後に不要になる頂点は事前に削除しておいてください。"
+msgstr "Specify the costume model you want to change. \Please delete in advance any vertices that will no longer be needed after the changeover"
+
+msgid "任意でVMDモーションデータを指定する事ができます。\n空欄の場合、人物と衣装は初期状態で表示します。"
+msgstr "You can optionally specify VMD motion data. \If ɑn is left blank, the person and costume will be displayed in their initial state"
+
+msgid "お着替え後モデル出力先"
+msgstr "Model output destination after change of clothes"
+
+msgid "お着替え後のモデルの出力ファイルパスです。\n任意の値に変更可能です。"
+msgstr "The output file path of the model after the change of clothes. \You can change it to any value"
+
+msgid "モデル追加セットアップ：ウェイトボーン分布"
+msgstr "Additional model setup: weight bone distribution"
+
+msgid "-- モデル追加セットアップ：ウェイトボーン分布 [{i} ({p:.2f}%)]"
+msgstr "-- Model add setup: weight bone distribution [{i} ({p:.2f}%)]"
+
+msgid "衣装モデル追加セットアップ：スケールモーフ追加"
+msgstr "Additional costume model setup: scale morphs added"
+
+msgid "-- 衣装モデル追加セットアップ：スケールモーフ追加 [{i} ({p:.2f}%)]"
+msgstr "-- Additional costume model setup: scale morph added [{i} ({p:.2f}%)]"
+
+msgid "-- ウェイトボーン分布 [{i} ({p:.2f}%)]"
+msgstr "-- Weightborn distribution [{i} ({p:.2f}%)]"
+
+msgid "モーションを指定している場合、任意のキーフレの結果の表示や再生ができます"
+msgstr "If motion is specified, the results of any keyfre can be displayed or played back"
+
+msgid "モーションを指定している場合、任意のキーフレの結果を表示することができます"
+msgstr "If you have specified a motion, you can display the results of any keyfre"
+
+msgid "モーションを指定している場合、再生することができます"
+msgstr "If motion is specified, it can be played"
