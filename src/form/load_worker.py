@@ -1,16 +1,16 @@
 import os
 from typing import Optional
+
 import wx
 
 from form.panel.file_panel import FilePanel
+from mlib.base.logger import MLogger
+from mlib.base.math import MQuaternion, MVector3D
 from mlib.form.base_panel import BasePanel
 from mlib.form.base_worker import BaseWorker
-from mlib.base.logger import MLogger
 from mlib.pmx.pmx_collection import PmxModel
+from mlib.pmx.pmx_part import BoneMorphOffset, Morph, MorphType, VertexMorphOffset
 from mlib.vmd.vmd_collection import VmdMotion
-from mlib.base.math import MVector3D
-from mlib.pmx.pmx_part import Morph, MorphType, VertexMorphOffset
-
 
 logger = MLogger(os.path.basename(__file__))
 __ = logger.get_text
@@ -38,7 +38,7 @@ class LoadWorker(BaseWorker):
 
             # ドレスに拡大縮小モーフを入れる
             logger.info("衣装モデル追加セットアップ：スケールモーフ追加")
-            dress = self.create_dress_scale_morphs(dress)
+            dress = self.create_dress_scale_morphs(model, dress)
 
         elif file_panel.dress_ctrl.data:
             dress = file_panel.dress_ctrl.data
@@ -54,12 +54,22 @@ class LoadWorker(BaseWorker):
 
         self.result_data = (model, dress, motion)
 
-    def create_dress_scale_morphs(self, dress: PmxModel) -> PmxModel:
+    def create_dress_scale_morphs(self, model: PmxModel, dress: PmxModel) -> PmxModel:
         # ウェイト頂点の法線に基づいたスケールを取得
         weighted_vertex_scale = dress.get_weighted_vertex_scale()
 
         # 変形用スケールモーフを追加
+        bone_scale_morph = Morph(name="BoneScale")
+        bone_scale_morph.morph_type = MorphType.BONE
+        bone_scale_offsets: list[BoneMorphOffset] = []
+
         for bone in dress.bones:
+            if 0 <= bone.parent_index and bone.name in model.bones and dress.bones[bone.parent_index].name in model.bones:
+                # 親ボーンがある場合、親ボーンとのスケールモーフを追加
+                parent_name = dress.bones[bone.parent_index].name
+                bone_scale = (model.bones[bone.name].position - model.bones[parent_name].position) - (bone.position - dress.bones[parent_name].position)
+                bone_scale_offsets.append(BoneMorphOffset(bone.index, bone_scale, MQuaternion()))
+
             for axis in ["X", "Y", "Z"]:
                 morph = Morph(name=f"{bone.name}{axis}")
                 morph.morph_type = MorphType.VERTEX
@@ -85,5 +95,8 @@ class LoadWorker(BaseWorker):
                 total_index_count=len(dress.bones),
                 display_block=100,
             )
+
+        bone_scale_morph.offsets = bone_scale_offsets
+        dress.morphs.append(bone_scale_morph)
 
         return dress

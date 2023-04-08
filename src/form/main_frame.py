@@ -79,7 +79,7 @@ class MainFrame(BaseFrame):
         self.file_panel.motion_ctrl.data = motion
 
         # モデルとドレスのボーンの縮尺を合わせる
-        dress_motion = self.create_dress_motion(motion.copy())
+        dress_motion = self.create_dress_motion()
 
         try:
             self.config_panel.canvas.set_context()
@@ -90,15 +90,20 @@ class MainFrame(BaseFrame):
         except:
             logger.critical(__("モデル描画初期化処理失敗"))
 
-    def create_dress_motion(self, motion: VmdMotion, axis_scale_sets: dict[str, MVector3D] = {}) -> VmdMotion:
+    def create_dress_motion(self, axis_scale_sets: dict[str, MVector3D] = {}) -> VmdMotion:
         model: PmxModel = self.file_panel.model_ctrl.data
         dress: PmxModel = self.file_panel.dress_ctrl.data
+        motion: VmdMotion = self.file_panel.motion_ctrl.data.copy()
 
         motion.path = "fit motion"
+
+        # ボーンスケールモーフは常に適用
+        bmf = VmdMorphFrame(0, "BoneScale")
+        bmf.ratio = 1
+        motion.morphs[bmf.name].append(bmf)
+
         for dress_bone in dress.bones:
             if dress_bone.name in model.bones and dress.bones[dress_bone.parent_index].name in model.bones:
-                # ドレスボーンをモデルボーンの位置に合わせて変形させる
-
                 # スケールをモーフで加味する
                 axis_scale: MVector3D = axis_scale_sets.get(dress_bone.name, MVector3D()) + axis_scale_sets.get("ALL", MVector3D())
                 xmf = VmdMorphFrame(0, f"{dress_bone.name}X")

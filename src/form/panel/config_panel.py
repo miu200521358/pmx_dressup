@@ -62,10 +62,10 @@ class ConfigPanel(CanvasPanel):
         pass
 
     def on_change(self, event: wx.Event):
-        scale_sets: dict[str, MVector3D] = {}
-        scale_sets["ALL"] = self.all_axis_set.get_scale()
+        axis_scale_sets: dict[str, MVector3D] = {}
+        axis_scale_sets["ALL"] = self.all_axis_set.get_scale()
 
-        dress_motion = self.frame.create_dress_motion(scale_sets)
+        dress_motion = self.frame.create_dress_motion(axis_scale_sets)
         self.frame.fit_dress_motion(dress_motion)
 
 
