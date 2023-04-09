@@ -1,3 +1,4 @@
+import logging
 import os
 from typing import Any, Optional
 
@@ -10,6 +11,7 @@ from mlib.pmx.pmx_collection import PmxModel
 from mlib.utils.file_utils import save_histories
 from mlib.vmd.vmd_collection import VmdMotion
 from mlib.vmd.vmd_part import VmdMorphFrame
+from mlib.pmx.pmx_writer import PmxWriter
 from service.form.panel.config_panel import ConfigPanel
 from service.form.panel.file_panel import FilePanel
 from service.worker.load_worker import LoadWorker
@@ -79,6 +81,15 @@ class MainFrame(BaseFrame):
         self.file_panel.dress_ctrl.data = dress
         self.file_panel.motion_ctrl.data = motion
 
+        if logger.total_level <= logging.DEBUG:
+            # デバッグモードの時だけ変形モーフ付き衣装モデルデータ保存
+            from datetime import datetime
+
+            out_path = os.path.join(os.path.dirname(self.file_panel.output_pmx_ctrl.path), f"{dress.name}_{datetime.now():%Y%m%d_%H%M%S}.pmx")
+            os.makedirs(os.path.dirname(out_path), exist_ok=True)
+            PmxWriter(dress, out_path).save()
+            logger.info(f"変形モーフ付き衣装モデル出力: {out_path}")
+
         # モデルとドレスのボーンの縮尺を合わせる
         self.model_motion = motion
         self.dress_motion = motion.copy()
@@ -97,7 +108,7 @@ class MainFrame(BaseFrame):
             self.config_panel.canvas.Refresh()
             self.notebook.ChangeSelection(self.config_panel.tab_idx)
         except:
-            logger.critical(__("モデル描画初期化処理失敗"))
+            logger.critical("モデル描画初期化処理失敗")
 
     def replace_choice(self, listbox_ctrl: wx.ListBox, model: PmxModel):
         listbox_ctrl.Clear()

@@ -1,6 +1,7 @@
 import os
 from typing import Optional
 
+import numpy as np
 import wx
 
 from mlib.base.logger import MLogger
@@ -90,13 +91,41 @@ class LoadWorker(BaseWorker):
         bone_scale_morph.is_system = True
         bone_scale_morph.morph_type = MorphType.BONE
         bone_scale_offsets: list[BoneMorphOffset] = []
+        model_fake_bone_positions: dict[int, MVector3D] = {}
 
         for bone in dress.bones:
-            if 0 <= bone.parent_index and bone.name in model.bones:
-                # 親ボーンがある場合、親ボーンとのスケールモーフを追加
-                parent_name = self.get_parent_name(model, dress, bone)
-                bone_scale = (model.bones[bone.name].position - model.bones[parent_name].position) - (bone.position - dress.bones[parent_name].position)
+            if 0 == bone.index and 0 > bone.parent_index:
+                # ルートで親がない場合、グローバル座標の差分を取る
+                bone_scale = model.bones[0].position - bone.position
                 bone_scale_offsets.append(BoneMorphOffset(bone.index, bone_scale, MQuaternion()))
+            else:
+                if bone.name in model.bones and dress.bones[bone.parent_index].name == model.bones[model.bones[bone.name].parent_index].name:
+                    # 自身と同じボーンで同じ親子関係の場合、親ボーンとのスケールモーフを追加
+                    bone_scale = model.bones[bone.name].parent_relative_position - bone.parent_relative_position
+                    bone_scale_offsets.append(BoneMorphOffset(bone.index, bone_scale, MQuaternion()))
+                elif bone.name in model.bones and bone.parent_index in model_fake_bone_positions:
+                    # 同じボーンがモデル側にある場合（親ボーンがない場合）、モデル側の仮ボーン位置で計算する
+                    model_parent_fake_bone_position = model_fake_bone_positions[bone.parent_index]
+                    bone_scale = (model.bones[bone.name].position - model_parent_fake_bone_position) - bone.parent_relative_position
+                    bone_scale_offsets.append(BoneMorphOffset(bone.index, bone_scale, MQuaternion()))
+                else:
+                    # 同じボーンがモデル側に無い場合、相対位置で求める
+                    parent_name = self.get_parent_name(model, dress, bone)
+                    child_names = self.get_child_names(model, dress, bone)
+                    if parent_name and child_names:
+                        dress_child_mean_pos = MVector3D(*np.mean([dress.bones[cname].position.vector for cname in child_names], axis=0))
+                        model_child_mean_pos = MVector3D(*np.mean([model.bones[cname].position.vector for cname in child_names], axis=0))
+                        # 人物にない衣装ボーンの縮尺
+                        dress_wrap_scale = (bone.position - dress.bones[parent_name].position) / (dress_child_mean_pos - dress.bones[parent_name].position)
+                        # 人物モデルに縮尺を当てはめる
+                        model_fake_bone_position = (
+                            model.bones[parent_name].position + (model_child_mean_pos - model.bones[parent_name].position) * dress_wrap_scale
+                        )
+                        bone_scale = (model_fake_bone_position - model.bones[parent_name].position) - bone.parent_relative_position
+                        bone_scale_offsets.append(BoneMorphOffset(bone.index, bone_scale, MQuaternion()))
+                        model_fake_bone_positions[bone.index] = model_fake_bone_position
+                    else:
+                        pass
 
             for axis in ["X", "Y", "Z"]:
                 scale_morph = Morph(name=f"{bone.name}S{axis}")
@@ -114,9 +143,9 @@ class LoadWorker(BaseWorker):
                         case "Z":
                             axis_scale.z = scale.z
                     offsets.append(VertexMorphOffset(vertex_index=vertex_index, position_offset=axis_scale))
-                scale_morph.offsets = offsets
-
-                dress.morphs.append(scale_morph)
+                if offsets:
+                    scale_morph.offsets = offsets
+                    dress.morphs.append(scale_morph)
 
             logger.count(
                 "衣装モデル追加セットアップ：スケールモーフ追加",
@@ -130,9 +159,18 @@ class LoadWorker(BaseWorker):
 
         return dress
 
-    def get_parent_name(self, model: PmxModel, dress: PmxModel, bone: Bone):
+    def get_parent_name(self, model: PmxModel, dress: PmxModel, bone: Bone) -> str:
         # 親ボーンがモデル側にもあればそのまま返す
         if dress.bones[bone.parent_index].name in model.bones:
             return dress.bones[bone.parent_index].name
         # なければ遡る
         return self.get_parent_name(model, dress, dress.bones[bone.parent_index])
+
+    def get_child_names(self, model: PmxModel, dress: PmxModel, bone: Bone) -> list[str]:
+        child_names: list[str] = []
+        # 子ボーンリストを取得する
+        for bname in dress.bones.names:
+            if dress.bones[bname].parent_index == bone.index and bname in model.bones:
+                child_names.append(bname)
+        # なければ終了
+        return child_names
