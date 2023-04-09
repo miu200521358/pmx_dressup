@@ -3,9 +3,6 @@ from typing import Any, Optional
 
 import wx
 
-from form.load_worker import LoadWorker
-from form.panel.config_panel import ConfigPanel
-from form.panel.file_panel import FilePanel
 from mlib.base.logger import MLogger
 from mlib.base.math import MVector3D
 from mlib.form.base_frame import BaseFrame
@@ -13,6 +10,9 @@ from mlib.pmx.pmx_collection import PmxModel
 from mlib.utils.file_utils import save_histories
 from mlib.vmd.vmd_collection import VmdMotion
 from mlib.vmd.vmd_part import VmdMorphFrame
+from service.form.panel.config_panel import ConfigPanel
+from service.form.panel.file_panel import FilePanel
+from service.worker.load_worker import LoadWorker
 
 logger = MLogger(os.path.basename(__file__))
 __ = logger.get_text

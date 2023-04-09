@@ -3,7 +3,6 @@ from typing import Optional
 
 import wx
 
-from form.panel.file_panel import FilePanel
 from mlib.base.logger import MLogger
 from mlib.base.math import MQuaternion, MVector3D
 from mlib.form.base_panel import BasePanel
@@ -11,6 +10,7 @@ from mlib.form.base_worker import BaseWorker
 from mlib.pmx.pmx_collection import PmxModel
 from mlib.pmx.pmx_part import BoneMorphOffset, Morph, MorphType, VertexMorphOffset
 from mlib.vmd.vmd_collection import VmdMotion
+from service.form.panel.file_panel import FilePanel
 
 logger = MLogger(os.path.basename(__file__))
 __ = logger.get_text

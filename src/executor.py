@@ -30,7 +30,7 @@ if __name__ == "__main__":
     # ロガーの初期化
     MLogger.initialize(args.lang, os.path.dirname(os.path.abspath(__file__)), LoggingMode(args.log_mode), level=args.verbose)
 
-    from form.main_frame import MainFrame
+    from service.form.main_frame import MainFrame
 
     # アプリの起動
     app = wx.App(False)
