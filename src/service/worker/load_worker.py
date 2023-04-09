@@ -1,3 +1,4 @@
+import logging
 import os
 from typing import Optional
 
@@ -11,6 +12,7 @@ from mlib.form.base_worker import BaseWorker
 from mlib.pmx.pmx_collection import PmxModel
 from mlib.pmx.pmx_part import BoneMorphOffset, Morph, MorphType, VertexMorphOffset
 from mlib.vmd.vmd_collection import VmdMotion
+from mlib.pmx.pmx_writer import PmxWriter
 from service.form.panel.file_panel import FilePanel
 from mlib.pmx.pmx_part import Bone
 
@@ -66,6 +68,15 @@ class LoadWorker(BaseWorker):
             motion = file_panel.motion_ctrl.data
         else:
             motion = VmdMotion()
+
+        if logger.total_level <= logging.DEBUG:
+            # デバッグモードの時だけ変形モーフ付き衣装モデルデータ保存
+            from datetime import datetime
+
+            out_path = os.path.join(os.path.dirname(file_panel.output_pmx_ctrl.path), f"{dress.name}_{datetime.now():%Y%m%d_%H%M%S}.pmx")
+            os.makedirs(os.path.dirname(out_path), exist_ok=True)
+            PmxWriter(dress, out_path).save()
+            logger.info(f"変形モーフ付き衣装モデル出力: {out_path}")
 
         self.result_data = (model, dress, motion)
 
