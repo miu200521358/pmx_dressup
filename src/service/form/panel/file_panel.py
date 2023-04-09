@@ -29,7 +29,7 @@ class FilePanel(BasePanel):
             is_show_name=True,
             name_spacer=20,
             is_save=False,
-            tooltip="お着替えさせたい対象の人物モデルを指定してください。\nお着替え後に不要になる頂点は事前に削除しておいてください。",
+            tooltip="お着替えさせたい対象の人物モデルを指定してください。",
             file_change_event=self.on_change_model_pmx,
         )
         self.model_ctrl.set_parent_sizer(self.root_sizer)
@@ -42,7 +42,7 @@ class FilePanel(BasePanel):
             is_show_name=True,
             name_spacer=20,
             is_save=False,
-            tooltip="お着替えしたい衣装モデルを指定してください。\nお着替え後に不要になる頂点は事前に削除しておいてください。",
+            tooltip="お着替えしたい衣装モデルを指定してください。",
             file_change_event=self.on_change_dress_pmx,
         )
         self.dress_ctrl.set_parent_sizer(self.root_sizer)

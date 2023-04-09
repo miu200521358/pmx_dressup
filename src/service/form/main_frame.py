@@ -29,6 +29,7 @@ class MainFrame(BaseFrame):
         # ファイルタブ
         self.file_panel = FilePanel(self, 0)
         self.notebook.AddPage(self.file_panel, __("ファイル"), False)
+        self.model_motion: Optional[VmdMotion] = None
         self.dress_motion: Optional[VmdMotion] = None
 
         # 設定タブ
@@ -79,50 +80,79 @@ class MainFrame(BaseFrame):
         self.file_panel.motion_ctrl.data = motion
 
         # モデルとドレスのボーンの縮尺を合わせる
-        self.dress_motion = self.create_dress_motion()
+        self.model_motion = motion
+        self.dress_motion = motion.copy()
+
+        # 衣装モーションにモーフを適用
+        self.set_dress_motion_morphs()
+
+        # 材質の選択肢を入れ替える
+        self.replace_choice(self.config_panel.model_material_choice_ctrl, model)
+        self.replace_choice(self.config_panel.dress_material_choice_ctrl, dress)
 
         try:
             self.config_panel.canvas.set_context()
-            self.config_panel.canvas.append_model_set(self.file_panel.model_ctrl.data, motion)
+            self.config_panel.canvas.append_model_set(self.file_panel.model_ctrl.data, self.model_motion)
             self.config_panel.canvas.append_model_set(self.file_panel.dress_ctrl.data, self.dress_motion)
             self.config_panel.canvas.Refresh()
             self.notebook.ChangeSelection(self.config_panel.tab_idx)
         except:
             logger.critical(__("モデル描画初期化処理失敗"))
 
-    def create_dress_motion(self, axis_scale_sets: dict[str, MVector3D] = {}) -> VmdMotion:
+    def replace_choice(self, listbox_ctrl: wx.ListBox, model: PmxModel):
+        listbox_ctrl.Clear()
+        for material_name in model.materials.names:
+            listbox_ctrl.Append(material_name)
+
+    def set_model_motion_morphs(self, model_material_off_names: list[str] = []):
+        if self.model_motion is None:
+            return
+
+        model: PmxModel = self.file_panel.model_ctrl.data
+
+        for material in model.materials:
+            mf = VmdMorphFrame(0, f"{material.name}TR")
+            mf.ratio = 1 if material.name in model_material_off_names else 0
+            self.model_motion.morphs[mf.name].append(mf)
+
+    def set_dress_motion_morphs(self, axis_scale_sets: dict[str, MVector3D] = {}, dress_material_off_names: list[str] = []):
+        if self.dress_motion is None:
+            return
+
         model: PmxModel = self.file_panel.model_ctrl.data
         dress: PmxModel = self.file_panel.dress_ctrl.data
-        motion: VmdMotion = self.file_panel.motion_ctrl.data.copy()
 
-        motion.path = "fit motion"
+        self.dress_motion.path = "fit motion"
 
         # ボーンスケールモーフは常に適用
         bmf = VmdMorphFrame(0, "BoneScale")
         bmf.ratio = 1
-        motion.morphs[bmf.name].append(bmf)
+        self.dress_motion.morphs[bmf.name].append(bmf)
+
+        for material in dress.materials:
+            mf = VmdMorphFrame(0, f"{material.name}TR")
+            mf.ratio = 1 if material.name in dress_material_off_names else 0
+            self.dress_motion.morphs[mf.name].append(mf)
 
         for dress_bone in dress.bones:
             if dress_bone.name in model.bones and dress.bones[dress_bone.parent_index].name in model.bones:
                 # スケールをモーフで加味する
                 axis_scale: MVector3D = axis_scale_sets.get(dress_bone.name, MVector3D()) + axis_scale_sets.get("ALL", MVector3D())
-                xmf = VmdMorphFrame(0, f"{dress_bone.name}X")
+                xmf = VmdMorphFrame(0, f"{dress_bone.name}SX")
                 xmf.ratio = axis_scale.x
-                motion.morphs[xmf.name].append(xmf)
+                self.dress_motion.morphs[xmf.name].append(xmf)
 
-                ymf = VmdMorphFrame(0, f"{dress_bone.name}Y")
+                ymf = VmdMorphFrame(0, f"{dress_bone.name}SY")
                 ymf.ratio = axis_scale.y
-                motion.morphs[ymf.name].append(ymf)
+                self.dress_motion.morphs[ymf.name].append(ymf)
 
-                zmf = VmdMorphFrame(0, f"{dress_bone.name}Z")
+                zmf = VmdMorphFrame(0, f"{dress_bone.name}SZ")
                 zmf.ratio = axis_scale.z
-                motion.morphs[zmf.name].append(zmf)
+                self.dress_motion.morphs[zmf.name].append(zmf)
 
-        return motion
-
-    def fit_dress_motion(self, dress_motion: Optional[VmdMotion] = None, fno: int = 0):
-        if not dress_motion:
-            dress_motion = self.dress_motion
-
-        self.config_panel.canvas.model_sets[1].motion = dress_motion
+    def fit_dress_motion(
+        self,
+    ):
+        self.config_panel.canvas.model_sets[0].motion = self.model_motion
+        self.config_panel.canvas.model_sets[1].motion = self.dress_motion
         self.config_panel.canvas.change_motion(wx.SpinEvent())
