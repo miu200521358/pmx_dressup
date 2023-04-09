@@ -91,7 +91,6 @@ class MainFrame(BaseFrame):
         self.replace_choice(self.config_panel.dress_material_choice_ctrl, dress)
 
         try:
-            self.config_panel.canvas.set_context()
             self.config_panel.canvas.append_model_set(self.file_panel.model_ctrl.data, self.model_motion)
             self.config_panel.canvas.append_model_set(self.file_panel.dress_ctrl.data, self.dress_motion)
             self.config_panel.canvas.Refresh()
