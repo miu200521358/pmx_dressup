@@ -5,7 +5,7 @@ import wx
 
 from mlib.base.logger import MLogger
 from mlib.base.math import MVector3D
-from mlib.form.base_frame import BaseFrame
+from mlib.service.form.base_frame import BaseFrame
 from mlib.pmx.pmx_collection import PmxModel
 from mlib.utils.file_utils import save_histories
 from mlib.vmd.vmd_collection import VmdMotion

@@ -4,8 +4,8 @@ import wx
 
 from mlib.base.logger import MLogger
 from mlib.base.math import MVector3D
-from mlib.form.base_frame import BaseFrame
-from mlib.form.parts.spin_ctrl import WheelSpinCtrl, WheelSpinCtrlDouble
+from mlib.service.form.base_frame import BaseFrame
+from mlib.service.form.parts.spin_ctrl import WheelSpinCtrl, WheelSpinCtrlDouble
 from mlib.pmx.canvas import CanvasPanel
 
 logger = MLogger(os.path.basename(__file__))

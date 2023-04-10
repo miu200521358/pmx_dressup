@@ -7,14 +7,15 @@ import wx
 
 from mlib.base.logger import MLogger
 from mlib.base.math import MQuaternion, MVector3D
-from mlib.form.base_panel import BasePanel
-from mlib.form.base_worker import BaseWorker
+from mlib.service.form.base_panel import BasePanel
+from mlib.service.base_worker import BaseWorker
 from mlib.pmx.pmx_collection import PmxModel
 from mlib.pmx.pmx_part import BoneMorphOffset, Morph, MorphType, VertexMorphOffset
 from mlib.vmd.vmd_collection import VmdMotion
 from mlib.pmx.pmx_writer import PmxWriter
 from service.form.panel.file_panel import FilePanel
 from mlib.pmx.pmx_part import Bone
+from mlib.base.exception import MApplicationException
 
 logger = MLogger(os.path.basename(__file__))
 __ = logger.get_text
@@ -35,6 +36,8 @@ class LoadWorker(BaseWorker):
         if file_panel.model_ctrl.valid() and not file_panel.model_ctrl.data:
             model = file_panel.model_ctrl.reader.read_by_filepath(file_panel.model_ctrl.path)
 
+            self.valid_model(model, "人物")
+
             # 人物に材質透明モーフを入れる
             logger.info("人物モデル追加セットアップ：材質OFFモーフ追加")
             model = self.create_material_off_morphs(model)
@@ -47,6 +50,8 @@ class LoadWorker(BaseWorker):
 
         if file_panel.dress_ctrl.valid() and (is_model_change or not file_panel.dress_ctrl.data):
             dress = file_panel.dress_ctrl.reader.read_by_filepath(file_panel.dress_ctrl.path)
+
+            self.valid_model(dress, "衣装")
 
             # ドレスに材質透明モーフを入れる
             logger.info("衣装モデル追加セットアップ：材質OFFモーフ追加")
@@ -79,6 +84,13 @@ class LoadWorker(BaseWorker):
             logger.info(f"変形モーフ付き衣装モデル出力: {out_path}")
 
         self.result_data = (model, dress, motion)
+
+    def valid_model(self, model: PmxModel, type_name: str) -> None:
+        """フィッティングに最低限必要なボーンで不足しているボーンリストを取得する"""
+        required_bone_names = {"センター", "上半身", "下半身", "首", "頭", "右肩", "左肩", "右手首", "左手首", "右足", "左足", "右足首", "左足首"}
+        missing_bone_names = sorted(list(required_bone_names - set(model.bones.names)))
+        if missing_bone_names:
+            raise MApplicationException(type_name + "モデルにフィッティングに必要なボーンが不足しています。\n不足ボーン: {b}", b=",".join(missing_bone_names))
 
     def create_material_off_morphs(self, model: PmxModel) -> PmxModel:
         vertices_by_material = model.get_vertices_by_material()
@@ -135,8 +147,6 @@ class LoadWorker(BaseWorker):
                         bone_scale = (model_fake_bone_position - model.bones[parent_name].position) - bone.parent_relative_position
                         bone_scale_offsets.append(BoneMorphOffset(bone.index, bone_scale, MQuaternion()))
                         model_fake_bone_positions[bone.index] = model_fake_bone_position
-                    else:
-                        pass
 
             for axis in ["X", "Y", "Z"]:
                 scale_morph = Morph(name=f"{bone.name}S{axis}")
