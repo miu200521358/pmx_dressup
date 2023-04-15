@@ -7,6 +7,7 @@ from mlib.base.math import MVector3D
 from mlib.service.form.base_frame import BaseFrame
 from mlib.service.form.parts.spin_ctrl import WheelSpinCtrl, WheelSpinCtrlDouble
 from mlib.pmx.canvas import CanvasPanel
+from mlib.service.form.parts.float_slider_ctrl import FloatSliderCtrl
 
 logger = MLogger(os.path.basename(__file__))
 __ = logger.get_text
@@ -62,39 +63,10 @@ class ConfigPanel(CanvasPanel):
         # --------------
         # 材質表示
 
-        self.material_sizer = wx.BoxSizer(wx.VERTICAL)
+        self.material_sizer = wx.StaticBoxSizer(wx.StaticBox(self.scrolled_window, wx.ID_ANY, __("材質透過度")), orient=wx.VERTICAL)
 
-        self.material_title_ctrl = wx.StaticText(self.scrolled_window, wx.ID_ANY, __("非表示材質選択"), wx.DefaultPosition, wx.DefaultSize, 0)
-        self.material_title_ctrl.SetToolTip(__("人物や衣装の材質の表示を切り替えられます。表示OFFの状態で保存すると、お着替え結果には出力されません"))
-        self.material_sizer.Add(self.material_title_ctrl, 0, wx.ALL, 3)
-
-        self.model_material_title_ctrl = wx.StaticText(self.scrolled_window, wx.ID_ANY, __("人物モデル"), wx.DefaultPosition, wx.DefaultSize, 0)
-        self.model_material_title_ctrl.SetToolTip(__("選択した材質を非表示に出来ます。"))
-        self.material_sizer.Add(self.model_material_title_ctrl, 0, wx.ALL, 3)
-
-        self.model_material_choice_ctrl = wx.ListBox(
-            self.scrolled_window,
-            wx.ID_ANY,
-            wx.DefaultPosition,
-            wx.Size(300, 100),
-            choices=[],
-            style=wx.LB_MULTIPLE | wx.LB_NEEDED_SB,
-        )
-        self.material_sizer.Add(self.model_material_choice_ctrl, 1, wx.EXPAND | wx.ALL, 3)
-
-        self.dress_material_title_ctrl = wx.StaticText(self.scrolled_window, wx.ID_ANY, __("衣装モデル"), wx.DefaultPosition, wx.DefaultSize, 0)
-        self.dress_material_title_ctrl.SetToolTip(__("選択した材質を非表示に出来ます。"))
-        self.material_sizer.Add(self.dress_material_title_ctrl, 0, wx.ALL, 3)
-
-        self.dress_material_choice_ctrl = wx.ListBox(
-            self.scrolled_window,
-            wx.ID_ANY,
-            wx.DefaultPosition,
-            wx.Size(300, 100),
-            choices=[],
-            style=wx.LB_MULTIPLE | wx.LB_NEEDED_SB,
-        )
-        self.material_sizer.Add(self.dress_material_choice_ctrl, 1, wx.EXPAND | wx.ALL, 3)
+        self.model_material_ctrl = MaterialCtrlSet(self, self.scrolled_window, self.material_sizer, "人物")
+        self.dress_material_ctrl = MaterialCtrlSet(self, self.scrolled_window, self.material_sizer, "衣装")
 
         self.window_sizer.Add(self.material_sizer, 0, wx.ALL, 3)
 
@@ -133,8 +105,8 @@ class ConfigPanel(CanvasPanel):
 
     def _initialize_event(self):
         self.play_ctrl.Bind(wx.EVT_BUTTON, self.on_play)
-        self.model_material_choice_ctrl.Bind(wx.EVT_LISTBOX, self.on_change)
-        self.dress_material_choice_ctrl.Bind(wx.EVT_LISTBOX, self.on_change)
+        # self.model_material_choice_ctrl.Bind(wx.EVT_LISTBOX, self.on_change)
+        # self.dress_material_choice_ctrl.Bind(wx.EVT_LISTBOX, self.on_change)
 
     def on_play(self, event: wx.Event):
         self.canvas.on_play(event)
@@ -152,23 +124,117 @@ class ConfigPanel(CanvasPanel):
         self.play_ctrl.SetLabelText("Play")
 
     def on_frame_change(self, event: wx.Event):
-        self.frame.fit_dress_motion(fno=self.fno)
+        self.frame.fit_model_motion(self.model_material_ctrl.alphas.get(__("ボーンライン"), 1.0))
+        self.frame.fit_dress_motion(self.dress_material_ctrl.alphas.get(__("ボーンライン"), 1.0))
 
     def on_change(self, event: wx.Event):
-        model_material_off_names: list[str] = [
-            self.model_material_choice_ctrl.GetString(material_index) for material_index in self.model_material_choice_ctrl.GetSelections()
-        ]
-
-        dress_material_off_names: list[str] = [
-            self.dress_material_choice_ctrl.GetString(material_index) for material_index in self.dress_material_choice_ctrl.GetSelections()
-        ]
-
         axis_scale_sets: dict[str, MVector3D] = {}
         axis_scale_sets["ALL"] = self.all_axis_set.get_scale()
 
-        self.frame.set_model_motion_morphs(model_material_off_names)
-        self.frame.set_dress_motion_morphs(axis_scale_sets, dress_material_off_names)
-        self.frame.fit_dress_motion()
+        self.frame.set_model_motion_morphs(self.model_material_ctrl.alphas)
+        self.frame.fit_model_motion(self.model_material_ctrl.alphas.get(__("ボーンライン"), 1.0))
+
+        self.frame.set_dress_motion_morphs(axis_scale_sets, self.dress_material_ctrl.alphas)
+        self.frame.fit_dress_motion(self.dress_material_ctrl.alphas.get(__("ボーンライン"), 1.0))
+
+
+class MaterialCtrlSet:
+    def __init__(self, parent: ConfigPanel, window: wx.ScrolledWindow, sizer: wx.Sizer, type_name: str) -> None:
+        self.sizer = sizer
+        self.parent = parent
+        self.window = window
+        self.alphas: dict[str, float] = {}
+
+        self.title_ctrl = wx.StaticText(self.window, wx.ID_ANY, __(type_name), wx.DefaultPosition, wx.DefaultSize, 0)
+        self.title_ctrl.SetToolTip(__(f"{type_name}の材質プルダウンから選択した材質の透過度を下のスライダーで調整できます。"))
+        self.sizer.Add(self.title_ctrl, 0, wx.ALL, 3)
+
+        self.material_sizer = wx.BoxSizer(wx.HORIZONTAL)
+
+        self.left_btn_ctrl = wx.Button(
+            self.window,
+            wx.ID_ANY,
+            "<",
+            wx.DefaultPosition,
+            wx.Size(20, -1),
+        )
+        self.left_btn_ctrl.SetToolTip(__(f"{type_name}の材質プルダウンの選択肢を上方向に移動できます。"))
+        self.left_btn_ctrl.Bind(wx.EVT_BUTTON, self.on_change_material_left)
+        self.material_sizer.Add(self.left_btn_ctrl, 0, wx.ALL, 3)
+
+        self.material_choice_ctrl = wx.Choice(
+            self.window,
+            wx.ID_ANY,
+            wx.DefaultPosition,
+            wx.Size(210, -1),
+            choices=[],
+        )
+        self.material_choice_ctrl.SetToolTip(
+            __(f"スライダーで調整対象となる{type_name}の材質です。\n「ボーンライン」はボーンを表す線を示します。\n透過度0の状態でエクスポートすると、お着替え結果には出力されません\n(ボーンラインは常に出力されません)")
+        )
+        self.material_choice_ctrl.Bind(wx.EVT_CHOICE, self.on_change_material)
+        self.material_sizer.Add(self.material_choice_ctrl, 1, wx.EXPAND | wx.ALL, 3)
+
+        self.right_btn_ctrl = wx.Button(
+            self.window,
+            wx.ID_ANY,
+            ">",
+            wx.DefaultPosition,
+            wx.Size(20, -1),
+        )
+        self.right_btn_ctrl.SetToolTip(__(f"{type_name}の材質プルダウンの選択肢を下方向に移動できます。"))
+        self.right_btn_ctrl.Bind(wx.EVT_BUTTON, self.on_change_material_right)
+        self.material_sizer.Add(self.right_btn_ctrl, 0, wx.ALL, 3)
+
+        self.sizer.Add(self.material_sizer, 0, wx.ALL, 3)
+
+        self.slider = FloatSliderCtrl(
+            parent=self.window,
+            value=1,
+            min_value=0,
+            max_value=1,
+            increment=0.01,
+            spin_increment=0.1,
+            border=3,
+            size=wx.Size(240, -1),
+            change_event=self.on_change_alpha,
+        )
+        self.sizer.Add(self.slider.sizer, 0, wx.ALL, 3)
+
+    def initialize(self, material_names: list[str]):
+        self.material_choice_ctrl.Clear()
+        for material_name in material_names:
+            self.material_choice_ctrl.Append(material_name)
+            self.alphas[material_name] = 1.0
+        # 最後にボーンの透過度も調整出来るようにしておく
+        self.material_choice_ctrl.Append(__("ボーンライン"))
+        self.alphas[__("ボーンライン")] = 1.0
+        self.material_choice_ctrl.SetSelection(0)
+        self.slider.SetValue(1.0)
+
+    def on_change_material(self, event: wx.Event):
+        material_name = self.material_choice_ctrl.GetStringSelection()
+        self.slider.SetValue(self.alphas[material_name])
+
+    def on_change_alpha(self, event: wx.Event):
+        alpha = self.slider.GetValue()
+        material_name = self.material_choice_ctrl.GetStringSelection()
+        self.alphas[material_name] = float(alpha)
+        self.parent.on_change(event)
+
+    def on_change_material_right(self, event: wx.Event):
+        selection = self.material_choice_ctrl.GetSelection()
+        if selection == len(self.alphas) - 1:
+            selection = -1
+        self.material_choice_ctrl.SetSelection(selection + 1)
+        self.on_change_material(event)
+
+    def on_change_material_left(self, event: wx.Event):
+        selection = self.material_choice_ctrl.GetSelection()
+        if selection == 0:
+            selection = len(self.alphas)
+        self.material_choice_ctrl.SetSelection(selection - 1)
+        self.on_change_material(event)
 
 
 class AxisCtrlSet:

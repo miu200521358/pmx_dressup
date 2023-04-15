@@ -16,6 +16,8 @@ from mlib.pmx.pmx_writer import PmxWriter
 from service.form.panel.file_panel import FilePanel
 from mlib.pmx.pmx_part import Bone
 from mlib.base.exception import MApplicationException
+from mlib.base.math import MVector4D
+from mlib.pmx.pmx_part import MaterialMorphCalcMode, MaterialMorphOffset
 
 logger = MLogger(os.path.basename(__file__))
 __ = logger.get_text
@@ -90,17 +92,37 @@ class LoadWorker(BaseWorker):
         required_bone_names = {"センター", "上半身", "下半身", "首", "頭", "右肩", "左肩", "右手首", "左手首", "右足", "左足", "右足首", "左足首"}
         missing_bone_names = sorted(list(required_bone_names - set(model.bones.names)))
         if missing_bone_names:
-            raise MApplicationException(type_name + "モデルにフィッティングに必要なボーンが不足しています。\n不足ボーン: {b}", b=",".join(missing_bone_names))
+            raise MApplicationException(
+                type_name + "モデルのフィッティングに必要なボーンが不足しています。\n不足ボーン: {b}",
+                b=", ".join(missing_bone_names),
+            )
 
     def create_material_off_morphs(self, model: PmxModel) -> PmxModel:
-        vertices_by_material = model.get_vertices_by_material()
+        """材質OFFモーフ追加"""
+        # vertices_by_material = model.get_vertices_by_material()
         for material in model.materials:
             morph = Morph(name=f"{material.name}TR")
             morph.is_system = True
-            morph.morph_type = MorphType.VERTEX
-            offsets: list[VertexMorphOffset] = []
-            for vertex_index in vertices_by_material.get(material.index, []):
-                offsets.append(VertexMorphOffset(vertex_index, -model.vertices[vertex_index].position))
+            # morph.morph_type = MorphType.VERTEX
+            # offsets: list[VertexMorphOffset] = []
+            # for vertex_index in vertices_by_material.get(material.index, []):
+            #     offsets.append(VertexMorphOffset(vertex_index, -model.vertices[vertex_index].position))
+            morph.morph_type = MorphType.MATERIAL
+            offsets: list[MaterialMorphOffset] = [
+                MaterialMorphOffset(
+                    material.index,
+                    MaterialMorphCalcMode.ADDITION,
+                    MVector4D(-1.0, -1.0, -1.0, -1.0),
+                    MVector3D(-1.0, -1.0, -1.0),
+                    -1.0,
+                    MVector3D(-1.0, -1.0, -1.0),
+                    MVector4D(-1.0, -1.0, -1.0, -1.0),
+                    -1.0,
+                    MVector4D(-1.0, -1.0, -1.0, -1.0),
+                    MVector4D(-1.0, -1.0, -1.0, -1.0),
+                    MVector4D(-1.0, -1.0, -1.0, -1.0),
+                )
+            ]
             morph.offsets = offsets
             model.morphs.append(morph)
         return model
