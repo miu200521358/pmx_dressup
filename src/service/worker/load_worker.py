@@ -214,12 +214,48 @@ class LoadWorker(BaseWorker):
             dress_parent_relative_pos = dress_pos - dress_parent_pos
 
             # モデルのボーンに合わせて移動させる
-            local_offset_pos = local_model_pos - dress_parent_relative_pos
+            knee_local_offset_pos = local_model_pos - dress_parent_relative_pos
 
             if dress_bone.index not in bone_scale_offsets:
-                bone_scale_offsets[dress_bone.index] = BoneMorphOffset(dress_bone.index, local_offset_pos, MQuaternion())
+                bone_scale_offsets[dress_bone.index] = BoneMorphOffset(dress_bone.index, knee_local_offset_pos, MQuaternion())
             else:
-                bone_scale_offsets[dress_bone.index].position = local_offset_pos
+                bone_scale_offsets[dress_bone.index].position = knee_local_offset_pos
+
+        # ひざの調整
+        for leg_bone_name, knee_bone_name, ankle_bone_name in [("右足", "右ひざ", "右足首"), ("左足", "左ひざ", "左足首")]:
+            if leg_bone_name in dress.bones and knee_bone_name in dress.bones and ankle_bone_name in dress.bones:
+                # 足位置は揃ってるはず
+                leg_pos = model_bone_positions[dress.bones[leg_bone_name].index]
+
+                # ひざ位置
+                dress_knee_pos = dress.bones[knee_bone_name].position
+                model_knee_pos = model_bone_positions[dress.bones[knee_bone_name].index]
+
+                # 足首位置は衣装側でYZは固定（Xだけ動かす）
+                dress_ankle_pos = dress.bones[ankle_bone_name].position
+                model_ankle_pos = model_bone_positions[dress.bones[ankle_bone_name].index]
+
+                model_knee_scale = (leg_pos - model_knee_pos) / (leg_pos - model_ankle_pos)
+                dress_knee_fit_pos = (leg_pos - dress_ankle_pos) * model_knee_scale + dress_ankle_pos
+
+                knee_local_offset_pos = dress_knee_pos - dress_knee_fit_pos
+                bone_scale_offsets[dress.bones[knee_bone_name].index] = BoneMorphOffset(dress.bones[knee_bone_name].index, knee_local_offset_pos, MQuaternion())
+
+                # D系はそのままコピーする
+                if f"{knee_bone_name}D" in dress.bones:
+                    bone_scale_offsets[dress.bones[f"{knee_bone_name}D"].index] = BoneMorphOffset(
+                        dress.bones[f"{knee_bone_name}D"].index, knee_local_offset_pos, MQuaternion()
+                    )
+
+                ankle_local_offset_pos = MVector3D(0, -knee_local_offset_pos.y, 0)
+                bone_scale_offsets[dress.bones[ankle_bone_name].index] = BoneMorphOffset(
+                    dress.bones[ankle_bone_name].index, ankle_local_offset_pos, MQuaternion()
+                )
+
+                if f"{ankle_bone_name}D" in dress.bones:
+                    bone_scale_offsets[dress.bones[f"{ankle_bone_name}D"].index] = BoneMorphOffset(
+                        dress.bones[f"{ankle_bone_name}D"].index, ankle_local_offset_pos, MQuaternion()
+                    )
 
         bone_scale_morph.offsets = list(bone_scale_offsets.values())
         dress.morphs.append(bone_scale_morph)
