@@ -155,7 +155,21 @@ class LoadWorker(BaseWorker):
             # 衣装のボーン角度をモデルのボーン角度に合わせる
             dress_fit_qqs[dress_bone.index] = model_slope_qq * dress_slope_qq.inverse()
 
+        leg_bone_names: list[str] = []
         for dress_bone in dress.bones:
+            bone_tree = dress.bone_trees[dress_bone.name]
+            # 足系ボーンが含まれている場合
+            tree_leg_bone_names = [bname for bname in bone_tree.names if bname in ["右足IK親", "右足ＩＫ", "右ひざ", "右足先EX", "左足IK親", "左足ＩＫ", "左ひざ", "左足先EX"]]
+            for lname in tree_leg_bone_names:
+                for filtered_lname in dress.bone_trees[dress_bone.name].filter(lname, dress_bone.name).names:
+                    # 足系ボーンを追加する
+                    if filtered_lname not in leg_bone_names:
+                        leg_bone_names.append(filtered_lname)
+
+        for dress_bone in dress.bones:
+            if dress_bone.name in leg_bone_names:
+                # 足の末端系のボーンがある場合、相対位置の計算からは除外
+                continue
             dress_bone_tree = dress.bone_trees[dress_bone.name]
             dress_fit_qq = MQuaternion()
             for tree_bone_name in reversed(dress_bone_tree.names):
