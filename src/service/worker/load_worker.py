@@ -241,16 +241,16 @@ class LoadWorker(BaseWorker):
                 knee_local_offset_pos = dress_knee_pos - dress_knee_fit_pos
                 bone_scale_offsets[dress.bones[knee_bone_name].index] = BoneMorphOffset(dress.bones[knee_bone_name].index, knee_local_offset_pos, MQuaternion())
 
+                ankle_local_offset_pos = MVector3D(0, -knee_local_offset_pos.y, 0)
+                bone_scale_offsets[dress.bones[ankle_bone_name].index] = BoneMorphOffset(
+                    dress.bones[ankle_bone_name].index, ankle_local_offset_pos, MQuaternion()
+                )
+
                 # D系はそのままコピーする
                 if f"{knee_bone_name}D" in dress.bones:
                     bone_scale_offsets[dress.bones[f"{knee_bone_name}D"].index] = BoneMorphOffset(
                         dress.bones[f"{knee_bone_name}D"].index, knee_local_offset_pos, MQuaternion()
                     )
-
-                ankle_local_offset_pos = MVector3D(0, -knee_local_offset_pos.y, 0)
-                bone_scale_offsets[dress.bones[ankle_bone_name].index] = BoneMorphOffset(
-                    dress.bones[ankle_bone_name].index, ankle_local_offset_pos, MQuaternion()
-                )
 
                 if f"{ankle_bone_name}D" in dress.bones:
                     bone_scale_offsets[dress.bones[f"{ankle_bone_name}D"].index] = BoneMorphOffset(
