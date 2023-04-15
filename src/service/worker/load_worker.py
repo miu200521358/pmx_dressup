@@ -188,48 +188,30 @@ class LoadWorker(BaseWorker):
             for tree_bone_name in dress_bone_tree.names[:-1]:
                 tree_bone = dress.bones[tree_bone_name]
 
-                tree_model_parent_pos = model_bone_positions[tree_bone.parent_index]
                 tree_model_pos = model_bone_positions[tree_bone.index]
 
                 # 角度をモデルのボーンに合わせる
                 dress_fit_qq = dress_fit_qqs.get(tree_bone.index, MQuaternion())
                 dress_mat.rotate(dress_fit_qq)
 
-                local_tree_model_parent_pos = dress_mat.inverse() * tree_model_parent_pos
                 local_tree_model_pos = dress_mat.inverse() * tree_model_pos
-                local_tree_model_offset = local_tree_model_pos - local_tree_model_parent_pos
-
-                tree_dress_parent_pos = dress.bones[tree_bone.parent_index].position
-                tree_dress_pos = tree_bone.position
-
-                local_tree_dress_parent_pos = dress_mat.inverse() * tree_dress_parent_pos
-                local_tree_dress_pos = dress_mat.inverse() * tree_dress_pos
-                local_tree_dress_offset = local_tree_dress_pos - local_tree_dress_parent_pos
 
                 # モデルのボーンに合わせて移動させる
                 dress_mat.translate(local_tree_model_pos)
 
             # 末端（計算対象）ボーンの位置
-            model_parent_pos = model_bone_positions[dress_bone.parent_index]
             model_pos = model_bone_positions[dress_bone.index]
 
             # 角度をモデルのボーンに合わせる
             dress_fit_qq = dress_fit_qqs.get(dress_bone.index, MQuaternion())
             dress_mat.rotate(dress_fit_qq)
 
-            model_parent_relative_pos = model_pos - model_parent_pos
-            local_model_parent_pos = dress_mat.inverse() * model_parent_pos
             local_model_pos = dress_mat.inverse() * model_pos
-            local_model_offset = local_model_pos - local_model_parent_pos
 
             dress_parent_pos = dress.bones[dress_bone.parent_index].position
             dress_pos = dress_bone.position
 
             dress_parent_relative_pos = dress_pos - dress_parent_pos
-            dress_mat_pos = dress_mat * dress_parent_relative_pos
-            local_dress_parent_pos = dress_mat.inverse() * dress_parent_pos
-            local_dress_pos = dress_mat.inverse() * dress_pos
-            local_dress_offset = local_dress_pos - local_dress_parent_pos
 
             # モデルのボーンに合わせて移動させる
             local_offset_pos = local_model_pos - dress_parent_relative_pos
