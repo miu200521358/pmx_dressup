@@ -77,6 +77,7 @@ class MainFrame(BaseFrame):
         self.file_panel.console_ctrl.write(f"\n----------------\n{elapsed_time}")
 
         if not (result and data):
+            self.on_sound()
             return
 
         data1, data2, data3 = data
@@ -109,10 +110,13 @@ class MainFrame(BaseFrame):
         except:
             logger.critical("モデル描画初期化処理失敗")
 
+        self.on_sound()
+
     def on_motion_result(self, result: bool, data: Optional[Any], elapsed_time: str):
         self.file_panel.console_ctrl.write(f"\n----------------\n{elapsed_time}")
 
         if not (result and data):
+            self.on_sound()
             return
 
         motion: VmdMotion = data
@@ -135,6 +139,8 @@ class MainFrame(BaseFrame):
             self.notebook.ChangeSelection(self.config_panel.tab_idx)
         except:
             logger.critical("モデル描画初期化処理失敗")
+
+        self.on_sound()
 
     def set_model_motion_morphs(self, material_alphas: dict[str, float] = {}):
         if self.model_motion is None:

@@ -18,6 +18,7 @@ from mlib.pmx.pmx_part import Bone
 from mlib.base.exception import MApplicationException
 from mlib.base.math import MVector4D
 from mlib.pmx.pmx_part import MaterialMorphCalcMode, MaterialMorphOffset
+from mlib.base.math import MMatrix4x4
 
 logger = MLogger(os.path.basename(__file__))
 __ = logger.get_text
@@ -103,10 +104,6 @@ class LoadWorker(BaseWorker):
         for material in model.materials:
             morph = Morph(name=f"{material.name}TR")
             morph.is_system = True
-            # morph.morph_type = MorphType.VERTEX
-            # offsets: list[VertexMorphOffset] = []
-            # for vertex_index in vertices_by_material.get(material.index, []):
-            #     offsets.append(VertexMorphOffset(vertex_index, -model.vertices[vertex_index].position))
             morph.morph_type = MorphType.MATERIAL
             offsets: list[MaterialMorphOffset] = [
                 MaterialMorphOffset(
@@ -128,6 +125,176 @@ class LoadWorker(BaseWorker):
         return model
 
     def create_dress_scale_morphs(self, model: PmxModel, dress: PmxModel) -> PmxModel:
+        """衣装フィッティング用ボーンモーフを作成"""
+        bone_scale_morph = Morph(name="BoneScale")
+        bone_scale_morph.is_system = True
+        bone_scale_morph.morph_type = MorphType.BONE
+        bone_scale_offsets: dict[int, BoneMorphOffset] = {}
+        model_bone_positions: dict[int, MVector3D] = {-1: MVector3D()}
+        dress_fit_qqs: dict[int, MQuaternion] = {}
+
+        for dress_bone in dress.bones:
+            _, model_bone_positions = self.get_model_position(model, dress, dress_bone, model_bone_positions)
+
+        for start_bone_name, end_bone_name in [
+            ("上半身", "首"),
+            ("首", "頭"),
+            ("右肩", "右腕"),
+            ("右腕", "右手首"),
+            ("右手首", "右親指２"),
+            ("右手首", "右人指３"),
+            ("右手首", "右中指３"),
+            ("右手首", "右薬指３"),
+            ("右手首", "右小指３"),
+            ("右足", "右足首"),
+            ("左肩", "左腕"),
+            ("左腕", "左手首"),
+            ("左手首", "左親指２"),
+            ("左手首", "左人指３"),
+            ("左手首", "左中指３"),
+            ("左手首", "左薬指３"),
+            ("左手首", "左小指３"),
+            ("左足", "左足首"),
+        ]:
+            dress_bone_tree = dress.bone_trees[end_bone_name]
+            if start_bone_name not in model.bones or end_bone_name not in model.bones or start_bone_name not in dress.bones or end_bone_name not in dress.bones:
+                continue
+
+            # 開始ボーンがボーンツリーに含まれている場合、親子関係で縮尺を取っていく
+            range_dress_bone_tree = dress_bone_tree.filter(start_bone_name, end_bone_name)
+            for dress_start_bone, dress_end_bone in zip(range_dress_bone_tree, range_dress_bone_tree.range(1)):
+                model_start_bone_position = model_bone_positions[dress_start_bone.index]
+                model_end_bone_position = model_bone_positions[dress_end_bone.index]
+
+                model_x_direction = (model_end_bone_position - model_start_bone_position).normalized()
+                model_y_direction = MVector3D(0, 0, -1) if np.isclose(abs(model_x_direction.x), 1) else MVector3D(1, 0, 0)
+                model_z_direction = model_x_direction.cross(model_y_direction)
+                model_slope_qq = MQuaternion.from_direction(model_z_direction, model_x_direction)
+
+                dress_x_direction = (dress_end_bone.position - dress_start_bone.position).normalized()
+                dress_y_direction = MVector3D(0, 0, -1) if np.isclose(abs(dress_x_direction.x), 1) else MVector3D(1, 0, 0)
+                dress_z_direction = dress_x_direction.cross(dress_y_direction)
+                dress_slope_qq = MQuaternion.from_direction(dress_z_direction, dress_x_direction)
+
+                # 衣装のボーン角度をモデルのボーン角度に合わせる
+                dress_fit_qqs[dress_start_bone.index] = model_slope_qq * dress_slope_qq.inverse()
+
+        for dress_bone in dress.bones:
+            if dress_bone.index == 0:
+                # ルートは無視
+                continue
+            dress_bone_tree = dress.bone_trees[dress_bone.name]
+            dress_fit_qq = MQuaternion()
+
+            for tree_bone_name in reversed(dress_bone_tree.names):
+                tree_bone = dress.bones[tree_bone_name]
+                if tree_bone.name == dress_bone.name:
+                    # 初回はそのまま設定
+                    dress_fit_qq = dress_fit_qqs.get(tree_bone.index, MQuaternion())
+                else:
+                    # 自分より親は逆回転させる
+                    dress_fit_qq *= dress_fit_qqs.get(tree_bone.index, MQuaternion()).inverse()
+
+                if tree_bone.index not in bone_scale_offsets and 0 < tree_bone.index:
+                    bone_scale_offsets[tree_bone.index] = BoneMorphOffset(tree_bone.index, MVector3D(), dress_fit_qq)
+
+            dress_mat = MMatrix4x4()
+            for tree_bone_name in dress_bone_tree.names:
+                tree_bone = dress.bones[tree_bone_name]
+
+                tree_model_parent_pos = model_bone_positions[tree_bone.parent_index]
+                tree_model_pos = model_bone_positions[tree_bone.index]
+
+                # 角度をモデルのボーンに合わせる
+                dress_fit_qq = dress_fit_qqs.get(tree_bone.index, MQuaternion())
+                dress_mat.rotate(dress_fit_qq)
+
+                local_tree_model_parent_pos = dress_mat.inverse() * tree_model_parent_pos
+                local_tree_model_pos = dress_mat.inverse() * tree_model_pos
+                local_tree_model_offset = local_tree_model_pos - local_tree_model_parent_pos
+
+                tree_dress_parent_pos = dress.bones[tree_bone.parent_index].position
+                tree_dress_pos = tree_bone.position
+
+                local_tree_dress_parent_pos = dress_mat.inverse() * tree_dress_parent_pos
+                local_tree_dress_pos = dress_mat.inverse() * tree_dress_pos
+                local_tree_dress_offset = local_tree_dress_pos - local_tree_dress_parent_pos
+
+                # モデルのボーンに合わせて移動させる
+                dress_mat.translate(local_tree_model_offset - local_tree_dress_offset)
+
+            # 末端（計算対象）ボーンの位置
+            model_parent_pos = model_bone_positions[dress_bone.parent_index]
+            model_pos = model_bone_positions[dress_bone.index]
+
+            # 角度をモデルのボーンに合わせる
+            dress_fit_qq = dress_fit_qqs.get(dress_bone.index, MQuaternion())
+            dress_mat.rotate(dress_fit_qq)
+
+            local_model_parent_pos = dress_mat.inverse() * model_parent_pos
+            local_model_pos = dress_mat.inverse() * model_pos
+            local_model_offset = local_model_pos - local_model_parent_pos
+
+            dress_parent_pos = dress.bones[dress_bone.parent_index].position
+            dress_pos = dress_bone.position
+
+            local_dress_parent_pos = dress_mat.inverse() * dress_parent_pos
+            local_dress_pos = dress_mat.inverse() * dress_pos
+            local_dress_offset = local_dress_pos - local_dress_parent_pos
+
+            # モデルのボーンに合わせて移動させる
+            local_offset_pos = local_model_offset - local_dress_offset
+
+            if dress_bone.index not in bone_scale_offsets:
+                bone_scale_offsets[dress_bone.index] = BoneMorphOffset(dress_bone.index, local_offset_pos, MQuaternion())
+            else:
+                bone_scale_offsets[dress_bone.index].position = local_offset_pos
+
+        bone_scale_morph.offsets = list(bone_scale_offsets.values())
+        dress.morphs.append(bone_scale_morph)
+
+        return dress
+
+    def get_model_position(self, model: PmxModel, dress: PmxModel, bone: Bone, model_bone_positions: dict[int, MVector3D]):
+        """衣装モデルのボーン名に相当する人物モデルのボーン位置を取得する"""
+        if bone.name in model.bones:
+            model_bone_positions[bone.index] = model.bones[bone.name].position
+            return model.bones[bone.name].position, model_bone_positions
+        if bone.name in model_bone_positions:
+            return model_bone_positions[bone.index], model_bone_positions
+        # まだ仮登録されていない場合、計算する
+        parent_name = self.get_parent_name(model, dress, bone)
+        child_names = self.get_child_names(model, dress, bone)
+        if not child_names:
+            # 子どもが居ない場合、親ボーンの子どもから求め直す
+            child_names = [b.name for b in model.bones if model.bones[parent_name].index == b.parent_index and b.name in dress.bones]
+        if parent_name and child_names:
+            dress_child_mean_pos = MVector3D(*np.mean([dress.bones[cname].position.vector for cname in child_names], axis=0))
+            model_child_mean_pos = MVector3D(*np.mean([model.bones[cname].position.vector for cname in child_names], axis=0))
+            # 人物にない衣装ボーンの縮尺
+            dress_wrap_scale = (bone.position - dress.bones[parent_name].position) / (dress_child_mean_pos - dress.bones[parent_name].position)
+            # 人物モデルに縮尺を当てはめる
+            model_fake_bone_position = model.bones[parent_name].position + (model_child_mean_pos - model.bones[parent_name].position) * dress_wrap_scale
+            model_bone_positions[bone.index] = model_fake_bone_position
+
+            return model_fake_bone_position, model_bone_positions
+        if parent_name and not child_names:
+            # 同じボーンがまったく人物モデルに無い場合、その親の縮尺を反映させる
+            parent_parent_name = self.get_parent_name(model, dress, dress.bones[parent_name])
+            model_parent_parent_pos = model_bone_positions.get(dress.bones[parent_parent_name].index, MVector3D())
+            model_parent_pos = model_bone_positions.get(dress.bones[parent_name].index, MVector3D())
+            dress_parent_parent_pos = dress.bones[parent_parent_name].position
+            dress_parent_pos = dress.bones[parent_name].position
+            model_fake_bone_position = model_parent_pos + ((bone.position - dress_parent_pos) / (dress_parent_pos - dress_parent_parent_pos)) * (
+                model_parent_pos - model_parent_parent_pos
+            )
+            model_bone_positions[bone.index] = model_fake_bone_position
+
+            return model_fake_bone_position, model_bone_positions
+
+        return MVector3D(), model_bone_positions
+
+    def create_dress_scale_morphs2(self, model: PmxModel, dress: PmxModel) -> PmxModel:
         # ウェイト頂点の法線に基づいたスケールを取得
         weighted_vertex_scale = dress.get_weighted_vertex_scale()
 
@@ -203,6 +370,9 @@ class LoadWorker(BaseWorker):
         return dress
 
     def get_parent_name(self, model: PmxModel, dress: PmxModel, bone: Bone) -> str:
+        if bone.parent_index < 0:
+            # ルートはスルー
+            return ""
         # 親ボーンがモデル側にもあればそのまま返す
         if dress.bones[bone.parent_index].name in model.bones:
             return dress.bones[bone.parent_index].name
