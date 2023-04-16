@@ -291,9 +291,7 @@ class LoadWorker(BaseWorker):
                 ).length()
 
                 # 足首
-                dress_ankle_fit_pos = MVector3D(model_ankle_pos.x, (dress_ankle_scale_pos * sole_scale).y, model_ankle_pos.z) - MVector3D(
-                    0, dress_sole_scale_pos.y, 0
-                )
+                dress_ankle_fit_pos = MVector3D(model_ankle_pos.x, (dress_ankle_scale_pos.y - dress_sole_scale_pos.y) * sole_scale, model_ankle_pos.z)
 
                 ankle_local_offset_pos = dress_ankle_fit_pos - dress_ankle_scale_pos
                 bone_scale_offsets[dress.bones[ankle_bone_name].index] = BoneMorphOffset(
@@ -338,21 +336,21 @@ class LoadWorker(BaseWorker):
                 leg_ik_parent_mat = MMatrix4x4()
 
                 if leg_ik_parent_bone_name in dress.bones:
+                    leg_ik_parent_bone_index = dress.bones[leg_ik_parent_bone_name].index
                     dress_leg_ik_parent_original_pos = dress.bones[leg_ik_parent_bone_name].position
                     local_dress_leg_ik_parent_scale_pos = MVector3D(dress_ankle_fit_pos.x, 0, dress_ankle_fit_pos.z)
 
                     leg_ik_parent_local_offset_pos = local_dress_leg_ik_parent_scale_pos - dress_leg_ik_parent_original_pos
-                    bone_scale_offsets[dress.bones[leg_ik_parent_bone_name].index] = BoneMorphOffset(
-                        dress.bones[leg_ik_parent_bone_name].index, leg_ik_parent_local_offset_pos, MQuaternion()
-                    )
+                    bone_scale_offsets[leg_ik_parent_bone_index] = BoneMorphOffset(leg_ik_parent_bone_index, leg_ik_parent_local_offset_pos, MQuaternion())
                 else:
                     # IK親が無い場合、親ボーンの位置を親とする
-                    dress_leg_ik_parent_original_pos = dress.bones[dress.bones[leg_ik_bone_name].parent_index].position
+                    leg_ik_parent_bone_index = dress.bones[leg_ik_bone_name].parent_index
+                    dress_leg_ik_parent_original_pos = dress.bones[leg_ik_parent_bone_index].position
                     local_dress_leg_ik_parent_scale_pos = MVector3D(dress_leg_ik_parent_original_pos.x, 0, dress_leg_ik_parent_original_pos.z)
 
                 local_leg_ik_parent_pos = leg_ik_parent_mat.inverse() * local_dress_leg_ik_parent_scale_pos
                 leg_ik_parent_mat.translate(local_leg_ik_parent_pos)
-                dress_fit_mats[dress.bones[leg_ik_parent_bone_name].index] = leg_ik_parent_mat
+                dress_fit_mats[leg_ik_parent_bone_index] = leg_ik_parent_mat
 
                 # 足ＩＫ
                 dress_leg_ik_original_pos = dress.bones[leg_ik_bone_name].position
