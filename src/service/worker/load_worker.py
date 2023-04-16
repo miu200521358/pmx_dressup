@@ -1,5 +1,4 @@
 import logging
-from math import isclose
 import os
 from typing import Optional
 
@@ -159,38 +158,27 @@ class LoadWorker(BaseWorker):
         for dress_bone in dress.bones:
             if dress_bone.name not in model.bones:
                 continue
+
             model_start_bone_position = model_bone_positions[dress_bone.far_parent_index]
             model_end_bone_position = model_bone_positions[dress_bone.index]
+
+            if (
+                np.isclose(np.abs(model_end_bone_position.vector), 0, atol=0.01, rtol=0.01).any()
+                or np.isclose(np.abs(dress_bone.position.vector), 0, atol=0.01, rtol=0.01).any()
+            ):
+                # ほぼ原点の場合、角度はなし
+                dress_fit_qqs[dress_bone.index] = MQuaternion()
+                continue
 
             model_x_direction = (model_end_bone_position - model_start_bone_position).normalized()
             model_y_direction = MVector3D(0, 0, -1) if np.isclose(abs(model_x_direction.x), 1) else MVector3D(1, 0, 0)
             model_z_direction = model_x_direction.cross(model_y_direction)
             model_slope_qq = MQuaternion.from_direction(model_z_direction, model_x_direction)
 
-            # if np.isclose(np.abs(model_x_direction.vector), 1).any():
-            #     # 垂直や水平の場合、角度はなし
-            #     model_slope_qq = MQuaternion.from_direction(MVector3D(0, 1, 0), MVector3D(1, 0, 0))
-            # else:
-            #     model_y_direction = MVector3D(1, 0, 0)
-            #     model_z_direction = model_x_direction.cross(model_y_direction)
-            #     model_slope_qq = MQuaternion.from_direction(model_z_direction, model_x_direction)
-
             dress_x_direction = (dress_bone.position - dress.bones[dress_bone.far_parent_index].position).normalized() or model_x_direction.copy()
             dress_y_direction = MVector3D(0, 0, -1) if np.isclose(abs(dress_x_direction.x), 1) else MVector3D(1, 0, 0)
             dress_z_direction = dress_x_direction.cross(dress_y_direction)
             dress_slope_qq = MQuaternion.from_direction(dress_z_direction, dress_x_direction)
-
-            # dress_start_bone_position = dress_bone_positions[dress_bone.far_parent_index]
-            # dress_end_bone_position = dress_bone_positions[dress_bone.index]
-
-            # dress_x_direction = (dress_end_bone_position - dress_start_bone_position).normalized()
-            # if np.isclose(np.abs(dress_x_direction.vector), 1).any():
-            #     # 垂直や水平の場合、角度はなし
-            #     dress_slope_qq = MQuaternion.from_direction(MVector3D(0, 1, 0), MVector3D(1, 0, 0))
-            # else:
-            #     dress_y_direction = MVector3D(1, 0, 0)
-            #     dress_z_direction = dress_x_direction.cross(dress_y_direction)
-            #     dress_slope_qq = MQuaternion.from_direction(dress_z_direction, dress_x_direction)
 
             # 衣装のボーン角度をモデルのボーン角度に合わせる
             dress_fit_qqs[dress_bone.index] = model_slope_qq * dress_slope_qq.inverse()
