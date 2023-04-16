@@ -218,22 +218,18 @@ class LoadWorker(BaseWorker):
             dress_fit_qq = dress_fit_qqs.get(dress_bone.index, MQuaternion())
             dress_mat.rotate(dress_fit_qq)
 
-            local_model_pos = dress_mat.inverse() * model_pos
-
-            dress_parent_pos = dress.bones[dress_bone.parent_index].position
-            dress_pos = dress_bone.position
-
-            dress_parent_relative_pos = dress_pos - dress_parent_pos
+            # 合わせたいボーンの位置
+            dress_fit_pos = dress_mat.inverse() * model_pos
 
             # モデルのボーンに合わせて移動させる
-            local_offset_pos = local_model_pos - dress_parent_relative_pos
+            dress_local_offset_pos = dress_fit_pos - dress_bone.parent_relative_position
 
             if dress_bone.index not in bone_scale_offsets:
-                bone_scale_offsets[dress_bone.index] = BoneMorphOffset(dress_bone.index, local_offset_pos, MQuaternion())
+                bone_scale_offsets[dress_bone.index] = BoneMorphOffset(dress_bone.index, dress_local_offset_pos, MQuaternion())
             else:
-                bone_scale_offsets[dress_bone.index].position = local_offset_pos
+                bone_scale_offsets[dress_bone.index].position = dress_local_offset_pos
 
-            dress_mat.translate(local_model_pos)
+            dress_mat.translate(dress_fit_pos)
 
             # 行列を保存
             dress_fit_mats[dress_bone.index] = dress_mat.copy()
@@ -443,8 +439,8 @@ class LoadWorker(BaseWorker):
             dress_child_mean_pos = MVector3D(*np.mean([dress.bones[cname].position.vector for cname in child_names], axis=0))
             model_child_mean_pos = MVector3D(*np.mean([model.bones[cname].position.vector for cname in child_names], axis=0))
             # 人物にない衣装ボーンの縮尺
-            dress_wrap_scale = (bone.position - dress.bones[parent_name].position).abs() / (
-                (dress_child_mean_pos - bone.position).abs() + (bone.position - dress.bones[parent_name].position).abs()
+            dress_wrap_scale = (bone.position - dress.bones[parent_name].position) / (
+                (dress_child_mean_pos - bone.position) + (bone.position - dress.bones[parent_name].position)
             )
             # 人物モデルに縮尺を当てはめる
             model_fake_bone_position = model.bones[parent_name].position + (model_child_mean_pos - model.bones[parent_name].position) * dress_wrap_scale
