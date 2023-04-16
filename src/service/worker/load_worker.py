@@ -135,6 +135,7 @@ class LoadWorker(BaseWorker):
         bone_scale_morph.morph_type = MorphType.BONE
         bone_scale_offsets: dict[int, BoneMorphOffset] = {}
         model_bone_positions: dict[int, MVector3D] = {-1: MVector3D()}
+        dress_bone_positions: dict[int, MVector3D] = {-1: MVector3D()}
         dress_fit_qqs: dict[int, MQuaternion] = {}
 
         leg_bone_names: list[str] = []
@@ -150,6 +151,9 @@ class LoadWorker(BaseWorker):
 
         for dress_bone in dress.bones:
             _, model_bone_positions = self.get_model_position(model, dress, dress_bone, model_bone_positions)
+
+        for model_bone in model.bones:
+            _, dress_bone_positions = self.get_model_position(dress, model, model_bone, dress_bone_positions)
 
         for dress_bone in dress.bones:
             if dress_bone.name not in model.bones:
