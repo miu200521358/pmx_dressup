@@ -410,52 +410,6 @@ class LoadWorker(BaseWorker):
                     )
                     dress_fit_mats[dress_ankle_d_bone_index] = dress_ankle_mat.copy()
 
-                # # 足D
-                # if f"{leg_bone_name}D" in dress.bones:
-                #     dress_leg_d_bone_index = dress.bones[f"{leg_bone_name}D"].index
-                #     dress_leg_d_bone_parent_index = dress.bones[dress_leg_d_bone_index].parent_index
-                #     dress_leg_d_parent_mat = dress_fit_mats[dress_leg_d_bone_parent_index]
-
-                #     local_dress_leg_d_fit_pos = dress_leg_d_parent_mat.inverse() * model_leg_pos
-                #     dress_leg_d_offset_pos = (
-                #         dress.bones[dress_leg_d_bone_index].position - dress.bones[dress_leg_d_bone_parent_index].position
-                #     ) - local_dress_leg_d_fit_pos
-
-                #     bone_scale_offsets[dress_leg_d_bone_index] = BoneMorphOffset(dress_leg_d_bone_index, dress_leg_d_offset_pos, MQuaternion())
-                #     dress_leg_d_mat = dress_leg_d_parent_mat.copy()
-                #     dress_leg_d_mat.translate(local_dress_leg_d_fit_pos + dress_leg_d_offset_pos)
-                #     dress_fit_mats[dress_leg_d_bone_index] = dress_leg_d_mat
-
-                # # ひざD
-                # if f"{knee_bone_name}D" in dress.bones:
-                #     dress_knee_d_bone_index = dress.bones[f"{knee_bone_name}D"].index
-                #     dress_knee_d_bone_parent_index = dress.bones[dress_knee_d_bone_index].parent_index
-                #     dress_knee_d_parent_mat = dress_fit_mats[dress_knee_d_bone_parent_index]
-
-                #     local_dress_knee_d_fit_pos = dress_knee_d_parent_mat.inverse() * dress_knee_fit_pos
-                #     dress_knee_d_offset_pos = (
-                #         dress.bones[dress_knee_d_bone_index].position - dress.bones[dress_knee_d_bone_parent_index].position
-                #     ) - local_dress_knee_d_fit_pos
-
-                #     bone_scale_offsets[dress_knee_d_bone_index] = BoneMorphOffset(dress_knee_d_bone_index, dress_knee_d_offset_pos, MQuaternion())
-                #     dress_knee_d_mat = dress_knee_d_parent_mat.copy()
-                #     dress_knee_d_mat.translate(local_dress_knee_d_fit_pos + dress_knee_d_offset_pos)
-                #     dress_fit_mats[dress_knee_d_bone_index] = dress_knee_d_mat
-
-                # # 足首D
-                # if f"{ankle_bone_name}D" in dress.bones:
-                #     dress_ankle_d_bone_index = dress.bones[f"{ankle_bone_name}D"].index
-                #     dress_ankle_d_bone_parent_index = dress.bones[dress_ankle_d_bone_index].parent_index
-                #     dress_ankle_d_parent_mat = dress_fit_mats[dress_ankle_d_bone_parent_index]
-
-                #     local_dress_ankle_d_fit_pos = dress_ankle_d_parent_mat.inverse() * dress_ankle_fit_pos
-                #     dress_ankle_d_offset_pos = local_dress_ankle_d_fit_pos - (dress_ankle_fit_pos - dress_knee_fit_pos)
-
-                #     bone_scale_offsets[dress_ankle_d_bone_index] = BoneMorphOffset(dress_ankle_d_bone_index, dress_ankle_d_offset_pos, MQuaternion())
-                #     dress_ankle_d_mat = dress_ankle_d_parent_mat.copy()
-                #     dress_ankle_d_mat.translate(local_dress_ankle_d_fit_pos + dress_ankle_d_offset_pos)
-                #     dress_fit_mats[dress_ankle_d_bone_index] = dress_ankle_d_mat
-
                 # 足先EX
                 if ex_bone_name in dress.bones:
                     dress_ex_original_pos = dress.bones[ex_bone_name].position
