@@ -189,6 +189,9 @@ class LoadWorker(BaseWorker):
             if dress_bone.name in leg_bone_names:
                 # 足の末端系のボーンがある場合、相対位置の計算からは除外
                 continue
+            if not dress.bone_trees.is_in_standard(dress_bone.name):
+                # 準標準ボーンに含まれない場合、相対位置計算除外
+                continue
             dress_bone_tree = dress.bone_trees[dress_bone.name]
             dress_fit_qq = MQuaternion()
             for tree_bone_name in reversed(dress_bone_tree.names):
