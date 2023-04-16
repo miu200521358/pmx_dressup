@@ -32,6 +32,14 @@ if __name__ == "__main__":
 
     from service.form.main_frame import MainFrame
 
+    try:
+        # Windowsマルチプロセス対策
+        from multiprocessing import freeze_support
+
+        freeze_support()
+    finally:
+        pass
+
     # アプリの起動
     app = wx.App(False)
     icon = wx.Icon(get_path("resources/pmx_dressup.ico"), wx.BITMAP_TYPE_ICO)
