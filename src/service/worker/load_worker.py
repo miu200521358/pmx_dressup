@@ -94,20 +94,6 @@ class LoadWorker(BaseWorker):
             "センター",
             "上半身",
             "下半身",
-            "首",
-            "頭",
-            "右肩",
-            "左肩",
-            "右手首",
-            "左手首",
-            "右足",
-            "右足ＩＫ",
-            "右つま先ＩＫ",
-            "左足",
-            "右足首",
-            "左足首",
-            "左足ＩＫ",
-            "左つま先ＩＫ",
         }
         missing_bone_names = sorted(list(required_bone_names - set(model.bones.names)))
         if missing_bone_names:
@@ -257,8 +243,10 @@ class LoadWorker(BaseWorker):
                 leg_bone_name in dress.bones
                 and knee_bone_name in dress.bones
                 and ankle_bone_name in dress.bones
+                and leg_ik_bone_name in dress.bones
+                and toe_ik_bone_name in dress.bones
+                and dress.bones[leg_ik_bone_name].ik
                 and dress.bones[toe_ik_bone_name].ik
-                and model.bones[toe_ik_bone_name].ik
             ):
                 # 足位置は揃ってるはず
                 model_leg_pos = model_bone_positions[dress.bones[leg_bone_name].index]
@@ -357,9 +345,10 @@ class LoadWorker(BaseWorker):
 
                 # 足ＩＫ
                 dress_leg_ik_original_pos = dress.bones[leg_ik_bone_name].position
-                local_dress_leg_ik_fit_pos = leg_ik_parent_mat.inverse() * (dress_ankle_mat * MVector3D())
+                local_dress_leg_ik_original_pos = leg_ik_parent_mat.inverse() * dress_leg_ik_original_pos
+                local_dress_leg_ik_fit_pos = leg_ik_parent_mat.inverse() * dress_ankle_fit_pos
 
-                leg_ik_local_offset_pos = (dress_leg_ik_original_pos - dress_leg_ik_parent_original_pos) - local_dress_leg_ik_fit_pos
+                leg_ik_local_offset_pos = local_dress_leg_ik_fit_pos - local_dress_leg_ik_original_pos
                 bone_scale_offsets[dress.bones[leg_ik_bone_name].index] = BoneMorphOffset(
                     dress.bones[leg_ik_bone_name].index, leg_ik_local_offset_pos, MQuaternion()
                 )
