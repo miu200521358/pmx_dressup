@@ -135,7 +135,6 @@ class LoadWorker(BaseWorker):
         bone_scale_morph.morph_type = MorphType.BONE
         bone_scale_offsets: dict[int, BoneMorphOffset] = {}
         model_bone_positions: dict[int, MVector3D] = {-1: MVector3D()}
-        dress_bone_positions: dict[int, MVector3D] = {-1: MVector3D()}
         dress_fit_qqs: dict[int, MQuaternion] = {}
 
         leg_bone_names: list[str] = []
@@ -151,9 +150,6 @@ class LoadWorker(BaseWorker):
 
         for dress_bone in dress.bones:
             _, model_bone_positions = self.get_model_position(model, dress, dress_bone, model_bone_positions)
-
-        for model_bone in model.bones:
-            _, dress_bone_positions = self.get_model_position(dress, model, model_bone, dress_bone_positions)
 
         for dress_bone in dress.bones:
             if dress_bone.name not in model.bones:
@@ -208,7 +204,7 @@ class LoadWorker(BaseWorker):
             if dress_bone.index not in bone_scale_offsets:
                 bone_scale_offsets[dress_bone.index] = BoneMorphOffset(dress_bone.index, MVector3D(), dress_fit_qq)
 
-        dress_fit_mats: dict[int, MMatrix4x4] = {}
+        dress_fit_mats: dict[int, MMatrix4x4] = {-1: MMatrix4x4()}
         for dress_bone_tree in dress.bone_trees:
             if not dress_bone_tree.last_name:
                 continue
@@ -286,7 +282,6 @@ class LoadWorker(BaseWorker):
 
                 # ひざ
                 model_knee_pos = model_bone_positions[dress.bones[knee_bone_name].index]
-                dress_knee_scale_pos: MVector3D = dress_leg_mat * (dress.bones[knee_bone_name].position - dress.bones[leg_bone_name].position)
 
                 # 足首
                 model_ankle_pos = model_bone_positions[dress.bones[ankle_bone_name].index]
@@ -313,76 +308,76 @@ class LoadWorker(BaseWorker):
                     MVector3D(dress_toe_scale_pos.x, 0, dress_toe_scale_pos.z) - dress_sole_fit_pos
                 ).length()
 
-                # 足首
-                dress_ankle_fit_pos = MVector3D(model_ankle_pos.x, (dress_ankle_scale_pos.y - dress_sole_scale_pos.y) * sole_scale, model_ankle_pos.z)
-
-                ankle_local_offset_pos = dress_ankle_fit_pos - dress_ankle_scale_pos
-                bone_scale_offsets[dress.bones[ankle_bone_name].index] = BoneMorphOffset(
-                    dress.bones[ankle_bone_name].index, ankle_local_offset_pos, MQuaternion()
-                )
-
                 # ひざ
-                model_knee_scale = (model_knee_pos - model_leg_pos).abs() / (
-                    (model_sole_fit_pos - model_knee_pos).abs() + (model_knee_pos - model_leg_pos).abs()
-                )
-                # 人物モデルに縮尺を当てはめる
-                dress_knee_fit_pos = model_leg_pos + (model_sole_fit_pos - model_leg_pos) * model_knee_scale
+                model_knee_scale = (model_sole_fit_pos - model_knee_pos) / ((model_sole_fit_pos - model_knee_pos) + (model_knee_pos - model_leg_pos))
+                dress_knee_fit_pos = model_sole_fit_pos - ((model_sole_fit_pos - model_knee_pos) + (model_knee_pos - model_leg_pos)) * model_knee_scale
+                local_dress_knee_pos = dress_leg_mat.inverse() * dress_knee_fit_pos
+                global_dress_knee_scale_pos = dress_leg_mat * (dress.bones[knee_bone_name].position - dress.bones[leg_bone_name].position)
 
-                local_knee_offset_pos = dress_knee_scale_pos - dress_knee_fit_pos
+                local_knee_offset_pos = dress_knee_fit_pos - global_dress_knee_scale_pos
                 bone_scale_offsets[dress.bones[knee_bone_name].index] = BoneMorphOffset(dress.bones[knee_bone_name].index, local_knee_offset_pos, MQuaternion())
 
                 dress_knee_mat = dress_leg_mat.copy()
-                local_dress_knee_pos = dress_knee_mat.inverse() * dress_knee_fit_pos
                 dress_knee_mat.translate(local_dress_knee_pos)
                 dress_fit_mats[dress.bones[knee_bone_name].index] = dress_knee_mat
 
+                # 足首
+                dress_ankle_scale_pos = dress_knee_mat * (dress.bones[ankle_bone_name].position - dress.bones[knee_bone_name].position)
+                dress_ankle_fit_pos = MVector3D(model_ankle_pos.x, dress.bones[ankle_bone_name].position.y * sole_scale, model_ankle_pos.z)
+                local_dress_ankle_pos = dress_knee_mat.inverse() * dress_ankle_fit_pos
+                global_dress_ankle_scale_pos = dress_knee_mat * (dress.bones[ankle_bone_name].position - dress.bones[knee_bone_name].position)
+
+                local_ankle_offset_pos = dress_ankle_fit_pos - global_dress_ankle_scale_pos
+                bone_scale_offsets[dress.bones[ankle_bone_name].index] = BoneMorphOffset(
+                    dress.bones[ankle_bone_name].index, local_ankle_offset_pos, MQuaternion()
+                )
+
                 dress_ankle_mat = dress_knee_mat.copy()
-                local_dress_ankle_pos = dress_ankle_mat.inverse() * dress_ankle_fit_pos
                 dress_ankle_mat.translate(local_dress_ankle_pos)
                 dress_fit_mats[dress.bones[ankle_bone_name].index] = dress_ankle_mat
 
                 # つま先
-                dress_toe_fit_pos = MVector3D(model_toe_pos.x, (dress_toe_scale_pos * sole_scale).y, dress_toe_scale_pos.z) - MVector3D(
-                    0, dress_toe_original_pos.y, 0
-                )
+                toe_bone_name = dress.bones[dress.bones[toe_ik_bone_name].ik.bone_index].name
+                dress_toe_scale_pos = dress_ankle_mat * (dress.bones[toe_bone_name].position - dress.bones[ankle_bone_name].position)
+                dress_toe_fit_pos = MVector3D(model_toe_pos.x, dress.bones[toe_bone_name].position.y * sole_scale, model_toe_pos.z)
+                local_dress_toe_pos = dress_ankle_mat.inverse() * dress_toe_fit_pos
+                global_dress_toe_scale_pos = dress_ankle_mat * (dress.bones[toe_bone_name].position - dress.bones[ankle_bone_name].position)
 
-                toe_local_offset_pos = dress_toe_scale_pos - dress_toe_fit_pos
-                bone_scale_offsets[dress.bones[toe_ik_bone_name].ik.bone_index] = BoneMorphOffset(
-                    dress.bones[toe_ik_bone_name].ik.bone_index, toe_local_offset_pos, MQuaternion()
-                )
+                local_toe_offset_pos = dress_toe_fit_pos - global_dress_toe_scale_pos
+                bone_scale_offsets[dress.bones[toe_bone_name].index] = BoneMorphOffset(dress.bones[toe_bone_name].index, local_toe_offset_pos, MQuaternion())
 
-                toe_mat = dress_ankle_mat.copy()
-                toe_mat.translate((dress_toe_original_pos - dress_ankle_original_pos) + toe_local_offset_pos)
-                dress_fit_mats[dress.bones[toe_ik_bone_name].ik.bone_index] = toe_mat
+                dress_toe_mat = dress_ankle_mat.copy()
+                dress_toe_mat.translate(local_dress_toe_pos)
+                dress_fit_mats[dress.bones[toe_bone_name].index] = dress_toe_mat
 
                 # IK親
-                leg_ik_parent_mat = MMatrix4x4()
-
                 if leg_ik_parent_bone_name in dress.bones:
+                    leg_ik_parent_mat = MMatrix4x4()
+                    leg_ik_parent_mat.rotate(dress_fit_qqs.get(dress.bones[leg_ik_parent_bone_name].parent_index, MQuaternion()))
+                    leg_ik_parent_mat.translate(dress.bones[dress.bones[leg_ik_parent_bone_name].parent_index].position)
+
                     leg_ik_parent_bone_index = dress.bones[leg_ik_parent_bone_name].index
                     dress_leg_ik_parent_original_pos = dress.bones[leg_ik_parent_bone_name].position
-                    local_dress_leg_ik_parent_scale_pos = MVector3D(dress_ankle_fit_pos.x, 0, dress_ankle_fit_pos.z)
 
-                    leg_ik_parent_local_offset_pos = local_dress_leg_ik_parent_scale_pos - dress_leg_ik_parent_original_pos
-                    bone_scale_offsets[leg_ik_parent_bone_index] = BoneMorphOffset(leg_ik_parent_bone_index, leg_ik_parent_local_offset_pos, MQuaternion())
+                    local_leg_ik_parent_pos = leg_ik_parent_mat.inverse() * dress_leg_ik_parent_original_pos
+                    bone_scale_offsets[leg_ik_parent_bone_index] = BoneMorphOffset(leg_ik_parent_bone_index, local_leg_ik_parent_pos, MQuaternion())
+
+                    leg_ik_parent_mat.translate(local_leg_ik_parent_pos)
+                    dress_fit_mats[leg_ik_parent_bone_index] = leg_ik_parent_mat
                 else:
                     # IK親が無い場合、親ボーンの位置を親とする
                     leg_ik_parent_bone_index = dress.bones[leg_ik_bone_name].parent_index
+                    leg_ik_parent_mat = dress_fit_mats[leg_ik_parent_bone_index]
                     dress_leg_ik_parent_original_pos = dress.bones[leg_ik_parent_bone_index].position
-                    local_dress_leg_ik_parent_scale_pos = MVector3D(dress_leg_ik_parent_original_pos.x, 0, dress_leg_ik_parent_original_pos.z)
-
-                local_leg_ik_parent_pos = leg_ik_parent_mat.inverse() * local_dress_leg_ik_parent_scale_pos
-                leg_ik_parent_mat.translate(local_leg_ik_parent_pos)
-                dress_fit_mats[leg_ik_parent_bone_index] = leg_ik_parent_mat
 
                 # 足ＩＫ
                 dress_leg_ik_original_pos = dress.bones[leg_ik_bone_name].position
-                local_dress_leg_ik_original_pos = leg_ik_parent_mat.inverse() * dress_leg_ik_original_pos
                 local_dress_leg_ik_fit_pos = leg_ik_parent_mat.inverse() * dress_ankle_fit_pos
+                global_dress_leg_ik_scale_pos = leg_ik_parent_mat * (dress_leg_ik_original_pos - dress_leg_ik_parent_original_pos)
 
-                leg_ik_local_offset_pos = local_dress_leg_ik_fit_pos - local_dress_leg_ik_original_pos
+                local_leg_ik_offset_pos = local_dress_leg_ik_fit_pos - global_dress_leg_ik_scale_pos
                 bone_scale_offsets[dress.bones[leg_ik_bone_name].index] = BoneMorphOffset(
-                    dress.bones[leg_ik_bone_name].index, leg_ik_local_offset_pos, MQuaternion()
+                    dress.bones[leg_ik_bone_name].index, local_leg_ik_offset_pos, MQuaternion()
                 )
 
                 leg_ik_mat = leg_ik_parent_mat.copy()
@@ -391,16 +386,29 @@ class LoadWorker(BaseWorker):
 
                 # つま先ＩＫ
                 dress_toe_ik_original_pos = dress.bones[toe_ik_bone_name].position
-                local_dress_toe_ik_fit_pos = leg_ik_mat.inverse() * (toe_mat * MVector3D())
+                local_dress_toe_ik_original_pos = leg_ik_mat.inverse() * dress_toe_ik_original_pos
+                local_dress_toe_ik_fit_pos = leg_ik_mat.inverse() * dress_toe_fit_pos
 
-                toe_ik_local_offset_pos = (dress_toe_ik_original_pos - dress_leg_ik_original_pos) - local_dress_toe_ik_fit_pos
+                toe_ik_local_offset_pos = local_dress_toe_ik_fit_pos - local_dress_toe_ik_original_pos
                 bone_scale_offsets[dress.bones[toe_ik_bone_name].index] = BoneMorphOffset(
                     dress.bones[toe_ik_bone_name].index, toe_ik_local_offset_pos, MQuaternion()
                 )
 
                 toe_ik_mat = leg_ik_mat.copy()
-                toe_ik_mat.translate((dress_toe_ik_original_pos - dress_ankle_original_pos) + toe_ik_local_offset_pos)
+                toe_ik_mat.translate(local_dress_toe_ik_fit_pos)
                 dress_fit_mats[dress.bones[toe_ik_bone_name].index] = toe_ik_mat
+
+                # dress_toe_ik_original_pos = dress.bones[toe_ik_bone_name].position
+                # local_dress_toe_ik_fit_pos = leg_ik_mat.inverse() * (dress_toe_mat * MVector3D())
+
+                # toe_ik_local_offset_pos = (dress_toe_ik_original_pos - dress_leg_ik_original_pos) - local_dress_toe_ik_fit_pos
+                # bone_scale_offsets[dress.bones[toe_ik_bone_name].index] = BoneMorphOffset(
+                #     dress.bones[toe_ik_bone_name].index, toe_ik_local_offset_pos, MQuaternion()
+                # )
+
+                # toe_ik_mat = leg_ik_mat.copy()
+                # toe_ik_mat.translate((dress_toe_ik_original_pos - dress_ankle_original_pos) + toe_ik_local_offset_pos)
+                # dress_fit_mats[dress.bones[toe_ik_bone_name].index] = toe_ik_mat
 
                 # 足D
                 if f"{leg_bone_name}D" in dress.bones:
