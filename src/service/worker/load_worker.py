@@ -113,15 +113,15 @@ class LoadWorker(BaseWorker):
                 MaterialMorphOffset(
                     material.index,
                     MaterialMorphCalcMode.ADDITION,
-                    MVector4D(-1.0, -1.0, -1.0, -1.0),
-                    MVector3D(-1.0, -1.0, -1.0),
-                    -1.0,
-                    MVector3D(-1.0, -1.0, -1.0),
-                    MVector4D(-1.0, -1.0, -1.0, -1.0),
-                    -1.0,
-                    MVector4D(-1.0, -1.0, -1.0, -1.0),
-                    MVector4D(-1.0, -1.0, -1.0, -1.0),
-                    MVector4D(-1.0, -1.0, -1.0, -1.0),
+                    MVector4D(0.0, 0.0, 0.0, -1.0),
+                    MVector3D(0.0, 0.0, 0.0),
+                    0.0,
+                    MVector3D(0.0, 0.0, 0.0),
+                    MVector4D(0.0, 0.0, 0.0, 0.0),
+                    0.0,
+                    MVector4D(0.0, 0.0, 0.0, 0.0),
+                    MVector4D(0.0, 0.0, 0.0, 0.0),
+                    MVector4D(0.0, 0.0, 0.0, 0.0),
                 )
             ]
             morph.offsets = offsets
