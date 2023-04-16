@@ -1,4 +1,5 @@
 import logging
+from math import isclose
 import os
 from typing import Optional
 
@@ -166,15 +167,34 @@ class LoadWorker(BaseWorker):
             model_z_direction = model_x_direction.cross(model_y_direction)
             model_slope_qq = MQuaternion.from_direction(model_z_direction, model_x_direction)
 
+            # if np.isclose(np.abs(model_x_direction.vector), 1).any():
+            #     # 垂直や水平の場合、角度はなし
+            #     model_slope_qq = MQuaternion.from_direction(MVector3D(0, 1, 0), MVector3D(1, 0, 0))
+            # else:
+            #     model_y_direction = MVector3D(1, 0, 0)
+            #     model_z_direction = model_x_direction.cross(model_y_direction)
+            #     model_slope_qq = MQuaternion.from_direction(model_z_direction, model_x_direction)
+
             dress_x_direction = (dress_bone.position - dress.bones[dress_bone.far_parent_index].position).normalized() or model_x_direction.copy()
             dress_y_direction = MVector3D(0, 0, -1) if np.isclose(abs(dress_x_direction.x), 1) else MVector3D(1, 0, 0)
             dress_z_direction = dress_x_direction.cross(dress_y_direction)
             dress_slope_qq = MQuaternion.from_direction(dress_z_direction, dress_x_direction)
 
+            # dress_start_bone_position = dress_bone_positions[dress_bone.far_parent_index]
+            # dress_end_bone_position = dress_bone_positions[dress_bone.index]
+
+            # dress_x_direction = (dress_end_bone_position - dress_start_bone_position).normalized()
+            # if np.isclose(np.abs(dress_x_direction.vector), 1).any():
+            #     # 垂直や水平の場合、角度はなし
+            #     dress_slope_qq = MQuaternion.from_direction(MVector3D(0, 1, 0), MVector3D(1, 0, 0))
+            # else:
+            #     dress_y_direction = MVector3D(1, 0, 0)
+            #     dress_z_direction = dress_x_direction.cross(dress_y_direction)
+            #     dress_slope_qq = MQuaternion.from_direction(dress_z_direction, dress_x_direction)
+
             # 衣装のボーン角度をモデルのボーン角度に合わせる
             dress_fit_qqs[dress_bone.index] = model_slope_qq * dress_slope_qq.inverse()
 
-        dress_fit_mats: dict[int, MMatrix4x4] = {}
         for dress_bone in dress.bones:
             if dress_bone.name in leg_bone_names:
                 # 足の末端系のボーンがある場合、相対位置の計算からは除外
@@ -182,6 +202,10 @@ class LoadWorker(BaseWorker):
             if not dress.bone_trees.is_in_standard(dress_bone.name):
                 # 準標準ボーンに含まれない場合、相対位置計算除外
                 continue
+            if dress_bone.index in bone_scale_offsets:
+                # 計算済みはスルー
+                continue
+
             dress_bone_tree = dress.bone_trees[dress_bone.name]
             dress_fit_qq = MQuaternion()
             for tree_bone_name in reversed(dress_bone_tree.names):
@@ -196,20 +220,40 @@ class LoadWorker(BaseWorker):
             if dress_bone.index not in bone_scale_offsets:
                 bone_scale_offsets[dress_bone.index] = BoneMorphOffset(dress_bone.index, MVector3D(), dress_fit_qq)
 
+        dress_fit_mats: dict[int, MMatrix4x4] = {}
+        for dress_bone_tree in dress.bone_trees:
+            if not dress_bone_tree.last_name:
+                continue
+
+            dress_bone = dress.bones[dress_bone_tree.last_name]
+
+            if dress_bone.name in leg_bone_names:
+                # 足の末端系のボーンがある場合、相対位置の計算からは除外
+                continue
+            if not dress.bone_trees.is_in_standard(dress_bone.name):
+                # 準標準ボーンに含まれない場合、相対位置計算除外
+                continue
+
             dress_mat = MMatrix4x4()
-            for tree_bone_name in dress_bone_tree.names[:-1]:
-                tree_bone = dress.bones[tree_bone_name]
 
-                tree_model_pos = model_bone_positions[tree_bone.index]
+            if dress_bone.parent_index in dress_fit_mats:
+                # 既に計算済みの場合、行列を保持して次へ
+                dress_mat = dress_fit_mats[dress_bone.parent_index].copy()
+            else:
+                # 未計算の場合、末端までのボーン変形を計算する
+                for tree_bone_name in dress_bone_tree.names[:-1]:
+                    tree_bone = dress.bones[tree_bone_name]
 
-                # 角度をモデルのボーンに合わせる
-                dress_fit_qq = dress_fit_qqs.get(tree_bone.index, MQuaternion())
-                dress_mat.rotate(dress_fit_qq)
+                    tree_model_pos = model_bone_positions[tree_bone.index]
 
-                local_tree_model_pos = dress_mat.inverse() * tree_model_pos
+                    # 角度をモデルのボーンに合わせる
+                    dress_fit_qq = dress_fit_qqs.get(tree_bone.index, MQuaternion())
+                    dress_mat.rotate(dress_fit_qq)
 
-                # モデルのボーンに合わせて移動させる
-                dress_mat.translate(local_tree_model_pos)
+                    local_tree_model_pos = dress_mat.inverse() * tree_model_pos
+
+                    # モデルのボーンに合わせて移動させる
+                    dress_mat.translate(local_tree_model_pos)
 
             # 末端（計算対象）ボーンの位置
             model_pos = model_bone_positions[dress_bone.index]
