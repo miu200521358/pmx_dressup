@@ -170,7 +170,7 @@ class MaterialCtrlSet:
             choices=[],
         )
         self.material_choice_ctrl.SetToolTip(
-            __(f"スライダーで調整対象となる{type_name}の材質です。\n「ボーンライン」はボーンを表す線を示します。\n透過度0の状態でエクスポートすると、お着替え結果には出力されません\n(ボーンラインは常に出力されません)")
+            __(f"スライダーで調整対象となる{type_name}の材質です。\n「ボーンライン」はボーンを表す線を示します。\n透過度が1でない状態でエクスポートすると、お着替え結果には出力されません\n(ボーンラインは常に出力されません)")
         )
         self.material_choice_ctrl.Bind(wx.EVT_CHOICE, self.on_change_material)
         self.material_sizer.Add(self.material_choice_ctrl, 1, wx.EXPAND | wx.ALL, 3)
