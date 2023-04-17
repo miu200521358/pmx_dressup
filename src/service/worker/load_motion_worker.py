@@ -4,8 +4,8 @@ from typing import Optional
 import wx
 
 from mlib.base.logger import MLogger
-from mlib.service.form.base_panel import BasePanel
 from mlib.service.base_worker import BaseWorker
+from mlib.service.form.base_panel import BasePanel
 from mlib.vmd.vmd_collection import VmdMotion
 from service.form.panel.file_panel import FilePanel
 
