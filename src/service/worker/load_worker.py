@@ -227,11 +227,6 @@ class LoadWorker(BaseWorker):
             model_start_bone_position = model_bone_positions[dress_bone.parent_index]
             model_end_bone_position = model_bone_positions[dress_bone.index]
 
-            # if np.isclose(model_start_bone_position.distance(model_end_bone_position), 0, atol=0.01, rtol=0.01).all():
-            #     # モデル側がほぼ同じ場合、角度はなし
-            #     dress_fit_qqs[dress_bone.index] = MQuaternion()
-            #     continue
-
             model_x_direction = (model_end_bone_position - model_start_bone_position).normalized()
             model_y_direction = MVector3D(0, 0, -1) if np.isclose(abs(model_x_direction.x), 1) else MVector3D(1, 0, 0)
             model_z_direction = model_x_direction.cross(model_y_direction)
@@ -515,31 +510,57 @@ class LoadWorker(BaseWorker):
                     ex_mat.translate((dress_ex_original_pos - dress_ankle_original_pos) + ex_local_offset_pos)
                     dress_fit_matrixes[dress.bones[ex_bone_name].index] = ex_mat
 
-        # for bone in dress.bones:
-        #     if bone.index not in dress_fit_matrixes:
-        #         # 行列がない場合、親の行列を取得を取得
-        #         parent_index = self.get_exist_parent_index(dress, bone, dress_fit_matrixes)
-        #         parent_parent_index = dress.bones[parent_index].far_parent_index
+        for dress_bone_tree in dress.bone_trees:
+            if dress_bone_tree.last_index in dress_fit_matrixes:
+                # ボーンツリーの末端まで登録されている場合、スルー
+                continue
+            distance_scales: list[float] = []
+            for n, dress_bone in enumerate(dress_bone_tree):
+                if 2 > n:
+                    # ルートからの孫以下ボーンではない場合、スルー
+                    continue
+                # 自分の親とその親の距離比から縮尺を求める
+                dress_parent_bone = dress_bone_tree[dress_bone_tree.names[n - 1]]
+                dress_parent_parent_bone = dress_bone_tree[dress_bone_tree.names[n - 2]]
+                # 本来の距離
+                parent_distance = dress_parent_bone.position.distance(dress_parent_parent_bone.position) or 1
+                # 縮尺後の距離
+                dress_parent_fit_pos = dress_fit_matrixes[dress_parent_bone.index] * MVector3D()
+                dress_parent_parent_fit_pos = dress_fit_matrixes[dress_parent_parent_bone.index] * MVector3D()
+                parent_fit_distance = dress_parent_fit_pos.distance(dress_parent_parent_fit_pos) or 1
+                # 距離比
+                distance_scale = parent_fit_distance / parent_distance
+                distance_scales.append(distance_scale)
 
-        #         parent_pos = dress.bones[parent_index].position
-        #         parent_parent_pos = dress.bones[parent_parent_index].position
+                if dress_bone.index in dress_fit_matrixes:
+                    # 登録済みのボーンは比率だけ求めてスルー
+                    continue
 
-        #         parent_fit_pos = dress_fit_matrixes[parent_index] * MVector3D()
-        #         parent_parent_fit_pos = dress_fit_matrixes[parent_parent_index] * MVector3D()
+                # 中央値と標準偏差を計算
+                np_distance_scales = np.array(distance_scales)
+                median_distance_scales = np.median(np_distance_scales)
+                std_distance_scales = np.std(np_distance_scales)
 
-        #         parent_scale = (parent_fit_pos - parent_pos).one() / (parent_parent_fit_pos - parent_parent_pos).one()
+                # 中央値から標準偏差の1.5倍までの値を取得
+                filtered_distance_scales = np_distance_scales[
+                    (np_distance_scales >= median_distance_scales - 1.5 * std_distance_scales)
+                    & (np_distance_scales <= median_distance_scales + 1.5 * std_distance_scales)
+                ]
 
-        #         matrix = dress_fit_matrixes[parent_index].copy()
-        #         bone_pos = matrix * (bone.position - parent_pos)
-        #         local_fit_pos = (bone.position - parent_pos) * parent_scale
-        #         bone_fit_pos = matrix * local_fit_pos
+                # 親ボーンからの差
+                dress_diff_pos = dress_bone.position - dress_parent_bone.position
+                # 中央距離比を加味したボーン位置
+                dress_fit_pos = dress_parent_fit_pos + dress_diff_pos * np.mean(filtered_distance_scales)
+                # 親ボーンから見たローカル位置
+                local_dress_fit_pos = dress_fit_matrixes[dress_parent_bone.index].inverse() * dress_fit_pos
+                dress_offset_pos = local_dress_fit_pos - dress_diff_pos
 
-        #         local_offset_pos = bone_fit_pos - bone_pos
-        #         if local_offset_pos:
-        #             bone_fitting_offsets[bone.index] = BoneMorphOffset(bone.index, local_offset_pos, MQuaternion())
+                if dress_offset_pos:
+                    bone_fitting_offsets[dress_bone.index] = BoneMorphOffset(dress_bone.index, dress_offset_pos, MQuaternion())
 
-        #         matrix.translate(local_fit_pos)
-        #         dress_fit_matrixes[bone.index] = matrix
+                matrix = dress_fit_matrixes[dress_parent_bone.index].copy()
+                matrix.translate(local_dress_fit_pos)
+                dress_fit_matrixes[dress_bone.index] = matrix
 
         bone_fitting_morph.offsets = list(bone_fitting_offsets.values())
         dress.morphs.append(bone_fitting_morph)
