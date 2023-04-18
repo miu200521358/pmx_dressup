@@ -56,7 +56,7 @@ class MainFrame(BaseFrame):
                     self.save_histories()
 
                     self.worker.start()
-                elif not self.file_panel.motion_ctrl.data:
+                elif self.file_panel.motion_ctrl.path and not self.file_panel.motion_ctrl.data:
                     # モーションだけ変わった場合、設定はそのままでモーションだけ変更する
                     self.config_panel.canvas.clear_model_set()
                     self.save_histories()
@@ -192,12 +192,12 @@ class MainFrame(BaseFrame):
                 zmf.ratio = axis_scale.z
                 self.dress_motion.morphs[zmf.name].append(zmf)
 
-    def fit_model_motion(self, bone_alpha: float = 1.0):
+    def fit_model_motion(self, bone_alpha: float = 1.0, is_bone_deform: bool = True):
         self.config_panel.canvas.model_sets[0].motion = self.model_motion
         self.config_panel.canvas.model_sets[0].bone_alpha = bone_alpha
-        self.config_panel.canvas.change_motion(wx.SpinEvent())
+        self.config_panel.canvas.change_motion(wx.SpinEvent(), is_bone_deform)
 
-    def fit_dress_motion(self, bone_alpha: float = 1.0):
+    def fit_dress_motion(self, bone_alpha: float = 1.0, is_bone_deform: bool = True):
         self.config_panel.canvas.model_sets[1].motion = self.dress_motion
         self.config_panel.canvas.model_sets[1].bone_alpha = bone_alpha
-        self.config_panel.canvas.change_motion(wx.SpinEvent())
+        self.config_panel.canvas.change_motion(wx.SpinEvent(), is_bone_deform)
