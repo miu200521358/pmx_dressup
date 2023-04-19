@@ -204,6 +204,7 @@ class LoadWorker(BaseWorker):
         bone_fitting_morph.morph_type = MorphType.BONE
         bone_fitting_offsets: dict[int, BoneMorphOffset] = {}
         model_bone_positions: dict[int, MVector3D] = {-1: MVector3D()}
+        model_bone_tail_relative_positions: dict[int, MVector3D] = {-1: MVector3D()}
         dress_fit_qqs: dict[int, MQuaternion] = {}
 
         leg_bone_names: list[str] = []
@@ -217,366 +218,459 @@ class LoadWorker(BaseWorker):
                     if filtered_lname not in leg_bone_names:
                         leg_bone_names.append(filtered_lname)
 
-        for dress_bone in dress.bones:
-            _, model_bone_positions = self.get_model_position(model, dress, dress_bone, model_bone_positions)
+        for dress_bone_tree in dress.bone_trees:
+            for dress_bone in dress_bone_tree:
+                model_bone_positions, model_bone_tail_relative_positions = self.get_model_position(
+                    model,
+                    dress,
+                    dress_bone.name,
+                    model_bone_positions,
+                    model_bone_tail_relative_positions,
+                )
 
-        for dress_bone in dress.bones:
-            if dress_bone.name not in model.bones:
-                continue
-
-            model_start_bone_position = model_bone_positions[dress_bone.parent_index]
-            model_end_bone_position = model_bone_positions[dress_bone.index]
-
-            model_x_direction = (model_end_bone_position - model_start_bone_position).normalized()
-            model_y_direction = MVector3D(0, 0, -1) if np.isclose(abs(model_x_direction.x), 1) else MVector3D(1, 0, 0)
-            model_z_direction = model_x_direction.cross(model_y_direction)
-            model_slope_qq = MQuaternion.from_direction(model_x_direction, model_z_direction)
-
-            dress_x_direction = (dress_bone.position - dress.bones[dress_bone.index].position).normalized() or model_x_direction.copy()
-            dress_y_direction = MVector3D(0, 0, -1) if np.isclose(abs(dress_x_direction.x), 1) else MVector3D(1, 0, 0)
-            dress_z_direction = dress_x_direction.cross(dress_y_direction)
-            dress_slope_qq = MQuaternion.from_direction(dress_x_direction, dress_z_direction)
-
-            # 衣装のボーン角度をモデルのボーン角度に合わせる
-            dress_fit_qqs[dress_bone.index] = model_slope_qq * dress_slope_qq.inverse()
-
-        for dress_bone in dress.bones:
-            if dress_bone.name in leg_bone_names:
-                # 足の末端系のボーンがある場合、相対位置の計算からは除外
-                continue
-            if not dress.bone_trees.is_in_standard(dress_bone.name):
-                # 準標準ボーンに含まれない場合、相対位置計算除外
-                continue
-            if dress_bone.index in bone_fitting_offsets:
-                # 計算済みはスルー
-                continue
-
-            dress_bone_tree = dress.bone_trees[dress_bone.name]
-            dress_fit_qq = MQuaternion()
-            for tree_bone_name in reversed(dress_bone_tree.names):
-                tree_bone = dress.bones[tree_bone_name]
-                if tree_bone.name == dress_bone.name:
-                    # 初回はそのまま設定
-                    dress_fit_qq = dress_fit_qqs.get(tree_bone.index, MQuaternion())
-                else:
-                    # 自分より親は逆回転させる
-                    dress_fit_qq *= dress_fit_qqs.get(tree_bone.index, MQuaternion()).inverse()
-
-            bone_fitting_offsets[dress_bone.index] = BoneMorphOffset(dress_bone.index, MVector3D(), dress_fit_qq)
+        z_direction = MVector3D(0, 0, -1)
+        vertices_by_bone: dict[int, list[int]] = dress.get_vertices_by_bone()
 
         dress_fit_matrixes: dict[int, MMatrix4x4] = {-1: MMatrix4x4()}
         for dress_bone_tree in dress.bone_trees:
-            if not dress_bone_tree.last_name:
-                continue
-
-            dress_bone = dress.bones[dress_bone_tree.last_name]
-
-            if dress_bone.name in leg_bone_names:
-                # 足の末端系のボーンがある場合、相対位置の計算からは除外
-                continue
-            if not dress.bone_trees.is_in_standard(dress_bone.name):
-                # 準標準ボーンに含まれない場合、相対位置計算除外
-                continue
-
-            dress_mat = MMatrix4x4()
-
-            if dress_bone.parent_index in dress_fit_matrixes:
-                # 既に計算済みの場合、行列を保持して次へ
-                dress_mat = dress_fit_matrixes[dress_bone.parent_index].copy()
-            else:
-                # 未計算の場合、末端までのボーン変形を計算する
-                for tree_bone_name in dress_bone_tree.names[:-1]:
-                    tree_bone = dress.bones[tree_bone_name]
-
-                    tree_model_pos = model_bone_positions[tree_bone.index]
-
-                    # 角度をモデルのボーンに合わせる
-                    dress_fit_qq = dress_fit_qqs.get(tree_bone.index, MQuaternion())
-                    dress_mat.rotate(dress_fit_qq)
-
-                    local_tree_model_pos = dress_mat.inverse() * tree_model_pos
-
-                    # モデルのボーンに合わせて移動させる
-                    dress_mat.translate(local_tree_model_pos)
-
-            # 末端（計算対象）ボーンの位置
-            model_pos = model_bone_positions[dress_bone.index]
-
-            # 角度をモデルのボーンに合わせる
-            dress_fit_qq = dress_fit_qqs.get(dress_bone.index, MQuaternion())
-            dress_mat.rotate(dress_fit_qq)
-
-            # 合わせたいボーンの位置
-            dress_fit_pos = dress_mat.inverse() * model_pos
-
-            # （距離のある）親ボーンの位置
-            parent_relative_position = dress_bone.position - dress.bones[dress_bone.parent_index].position
-
-            # モデルのボーンに合わせて移動させる
-            dress_local_offset_pos = dress_fit_pos - parent_relative_position
-
-            if dress_bone.index not in bone_fitting_offsets:
-                bone_fitting_offsets[dress_bone.index] = BoneMorphOffset(dress_bone.index, dress_local_offset_pos, MQuaternion())
-            else:
-                bone_fitting_offsets[dress_bone.index].position = dress_local_offset_pos
-
-            dress_mat.translate(dress_fit_pos)
-
-            # 行列を保存
-            dress_fit_matrixes[dress_bone.index] = dress_mat.copy()
-
-        # ひざと足首の調整
-        for leg_bone_name, knee_bone_name, ankle_bone_name, leg_ik_bone_name, toe_ik_bone_name, leg_ik_parent_bone_name, ex_bone_name in [
-            ("右足", "右ひざ", "右足首", "右足ＩＫ", "右つま先ＩＫ", "右足IK親", "右足先EX"),
-            ("左足", "左ひざ", "左足首", "左足ＩＫ", "左つま先ＩＫ", "左足IK親", "左足先EX"),
-        ]:
-            if (
-                leg_bone_name in dress.bones
-                and knee_bone_name in dress.bones
-                and ankle_bone_name in dress.bones
-                and leg_ik_bone_name in dress.bones
-                and toe_ik_bone_name in dress.bones
-                and dress.bones[leg_ik_bone_name].ik
-                and dress.bones[toe_ik_bone_name].ik
-            ):
-                # 足位置は揃ってるはず
-                model_leg_pos = model_bone_positions[dress.bones[leg_bone_name].index]
-                dress_leg_mat = dress_fit_matrixes[dress.bones[leg_bone_name].index]
-
-                # ひざ
-                model_knee_pos = model_bone_positions[dress.bones[knee_bone_name].index]
-
-                # 足首
-                model_ankle_pos = model_bone_positions[dress.bones[ankle_bone_name].index]
-                dress_ankle_original_pos = dress.bones[ankle_bone_name].position
-                dress_ankle_scale_pos: MVector3D = dress_leg_mat * (dress.bones[ankle_bone_name].position - dress.bones[leg_bone_name].position)
-
-                # 踵
-                model_sole_fit_pos = MVector3D(model_ankle_pos.x, 0, model_ankle_pos.z)
-                dress_sole_scale_pos: MVector3D = dress_leg_mat * (
-                    MVector3D(dress_ankle_scale_pos.x, 0, dress_ankle_scale_pos.z) - dress.bones[leg_bone_name].position
-                )
-                dress_sole_fit_pos = MVector3D(dress_sole_scale_pos.x, 0, dress_sole_scale_pos.z)
-
-                # つま先
-                model_toe_pos = model.bones[model.bones[toe_ik_bone_name].ik.bone_index].position
-                model_toe_fit_pos = MVector3D(model_toe_pos.x, 0, model_toe_pos.z)
-                dress_toe_original_pos: MVector3D = dress.bones[dress.bones[toe_ik_bone_name].ik.bone_index].position
-                dress_toe_scale_pos: MVector3D = dress_leg_mat * (
-                    dress.bones[dress.bones[toe_ik_bone_name].ik.bone_index].position - dress.bones[leg_bone_name].position
-                )
-
-                # 足底の長さの縮尺で靴のサイズを調整
-                sole_scale = (model_toe_fit_pos - model_sole_fit_pos).length() / (
-                    MVector3D(dress_toe_scale_pos.x, 0, dress_toe_scale_pos.z) - dress_sole_fit_pos
-                ).length()
-
-                # ひざ
-                model_knee_scale = (model_sole_fit_pos - model_knee_pos) / ((model_sole_fit_pos - model_knee_pos) + (model_knee_pos - model_leg_pos))
-                dress_knee_fit_pos = model_sole_fit_pos - ((model_sole_fit_pos - model_knee_pos) + (model_knee_pos - model_leg_pos)) * model_knee_scale
-                local_dress_knee_pos = dress_leg_mat.inverse() * dress_knee_fit_pos
-                global_dress_knee_scale_pos = dress_leg_mat * (dress.bones[knee_bone_name].position - dress.bones[leg_bone_name].position)
-
-                local_knee_offset_pos = dress_knee_fit_pos - global_dress_knee_scale_pos
-                bone_fitting_offsets[dress.bones[knee_bone_name].index] = BoneMorphOffset(
-                    dress.bones[knee_bone_name].index, local_knee_offset_pos, MQuaternion()
-                )
-
-                dress_knee_mat = dress_leg_mat.copy()
-                dress_knee_mat.translate(local_dress_knee_pos)
-                dress_fit_matrixes[dress.bones[knee_bone_name].index] = dress_knee_mat
-
-                # 足首
-                dress_ankle_scale_pos = dress_knee_mat * (dress.bones[ankle_bone_name].position - dress.bones[knee_bone_name].position)
-                dress_ankle_fit_pos = MVector3D(model_ankle_pos.x, dress.bones[ankle_bone_name].position.y * sole_scale, model_ankle_pos.z)
-                local_dress_ankle_pos = dress_knee_mat.inverse() * dress_ankle_fit_pos
-                global_dress_ankle_scale_pos = dress_knee_mat * (dress.bones[ankle_bone_name].position - dress.bones[knee_bone_name].position)
-
-                local_ankle_offset_pos = dress_ankle_fit_pos - global_dress_ankle_scale_pos
-                bone_fitting_offsets[dress.bones[ankle_bone_name].index] = BoneMorphOffset(
-                    dress.bones[ankle_bone_name].index, local_ankle_offset_pos, MQuaternion()
-                )
-
-                dress_ankle_mat = dress_knee_mat.copy()
-                dress_ankle_mat.translate(local_dress_ankle_pos)
-                dress_fit_matrixes[dress.bones[ankle_bone_name].index] = dress_ankle_mat
-
-                # つま先
-                toe_bone_name = dress.bones[dress.bones[toe_ik_bone_name].ik.bone_index].name
-                dress_toe_scale_pos = dress_ankle_mat * (dress.bones[toe_bone_name].position - dress.bones[ankle_bone_name].position)
-                dress_toe_fit_pos = MVector3D(model_toe_pos.x, dress.bones[toe_bone_name].position.y * sole_scale, model_toe_pos.z)
-                local_dress_toe_pos = dress_ankle_mat.inverse() * dress_toe_fit_pos
-                global_dress_toe_scale_pos = dress_ankle_mat * (dress.bones[toe_bone_name].position - dress.bones[ankle_bone_name].position)
-
-                local_toe_offset_pos = dress_toe_fit_pos - global_dress_toe_scale_pos
-                bone_fitting_offsets[dress.bones[toe_bone_name].index] = BoneMorphOffset(dress.bones[toe_bone_name].index, local_toe_offset_pos, MQuaternion())
-
-                dress_toe_mat = dress_ankle_mat.copy()
-                dress_toe_mat.translate(local_dress_toe_pos)
-                dress_fit_matrixes[dress.bones[toe_bone_name].index] = dress_toe_mat
-
-                # IK親
-                if leg_ik_parent_bone_name in dress.bones:
-                    leg_ik_parent_mat = dress_fit_matrixes[dress.bones[leg_ik_parent_bone_name].parent_index].copy()
-
-                    leg_ik_parent_bone_index = dress.bones[leg_ik_parent_bone_name].index
-                    leg_ik_parent_fit_pos = MVector3D(dress_ankle_fit_pos.x, 0, dress_ankle_fit_pos.z)
-                    global_dress_leg_ik_parent_scale_pos = leg_ik_parent_mat * (
-                        dress.bones[leg_ik_parent_bone_name].position - dress.bones[dress.bones[leg_ik_parent_bone_name].parent_index].position
-                    )
-
-                    local_leg_ik_parent_pos = leg_ik_parent_mat.inverse() * leg_ik_parent_fit_pos
-                    local_leg_ik_parent_offset_pos = leg_ik_parent_fit_pos - global_dress_leg_ik_parent_scale_pos
-                    bone_fitting_offsets[leg_ik_parent_bone_index] = BoneMorphOffset(leg_ik_parent_bone_index, local_leg_ik_parent_offset_pos, MQuaternion())
-
-                    leg_ik_parent_mat.translate(local_leg_ik_parent_pos)
-                    dress_fit_matrixes[leg_ik_parent_bone_index] = leg_ik_parent_mat
-                else:
-                    # IK親が無い場合、親ボーンの位置を親とする
-                    leg_ik_parent_bone_index = dress.bones[leg_ik_bone_name].parent_index
-                    leg_ik_parent_mat = dress_fit_matrixes[leg_ik_parent_bone_index]
-                    leg_ik_parent_fit_pos = dress.bones[leg_ik_parent_bone_index].position
-
-                # 足ＩＫ
-                local_dress_leg_ik_fit_pos = leg_ik_parent_mat.inverse() * dress_ankle_fit_pos
-                global_dress_leg_ik_scale_pos = leg_ik_parent_mat * (dress.bones[leg_ik_bone_name].position - dress.bones[leg_ik_parent_bone_index].position)
-                local_leg_ik_offset_pos = dress_ankle_fit_pos - global_dress_leg_ik_scale_pos
-
-                bone_fitting_offsets[dress.bones[leg_ik_bone_name].index] = BoneMorphOffset(
-                    dress.bones[leg_ik_bone_name].index, local_leg_ik_offset_pos, MQuaternion()
-                )
-
-                leg_ik_mat = leg_ik_parent_mat.copy()
-                leg_ik_mat.translate(local_dress_leg_ik_fit_pos)
-                dress_fit_matrixes[dress.bones[leg_ik_bone_name].index] = leg_ik_mat
-
-                # つま先ＩＫ
-                local_dress_toe_ik_fit_pos = leg_ik_mat.inverse() * dress_toe_fit_pos
-                global_dress_toe_ik_scale_pos = leg_ik_mat * (dress.bones[toe_ik_bone_name].position - dress.bones[leg_ik_bone_name].position)
-                local_toe_ik_offset_pos = dress_toe_fit_pos - global_dress_toe_ik_scale_pos
-
-                bone_fitting_offsets[dress.bones[toe_ik_bone_name].index] = BoneMorphOffset(
-                    dress.bones[toe_ik_bone_name].index, local_toe_ik_offset_pos, MQuaternion()
-                )
-
-                toe_ik_mat = leg_ik_mat.copy()
-                toe_ik_mat.translate(local_dress_toe_ik_fit_pos)
-                dress_fit_matrixes[dress.bones[toe_ik_bone_name].index] = toe_ik_mat
-
-                # 足D
-                if f"{leg_bone_name}D" in dress.bones:
-                    dress_leg_d_bone_index = dress.bones[f"{leg_bone_name}D"].index
-                    bone_fitting_offsets[dress_leg_d_bone_index] = BoneMorphOffset(
-                        dress_leg_d_bone_index,
-                        bone_fitting_offsets[dress.bones[leg_bone_name].index].position,
-                        bone_fitting_offsets[dress.bones[leg_bone_name].index].rotation.qq,
-                    )
-                    dress_fit_matrixes[dress_leg_d_bone_index] = dress_leg_mat.copy()
-
-                # ひざD
-                if f"{knee_bone_name}D" in dress.bones:
-                    dress_knee_d_bone_index = dress.bones[f"{knee_bone_name}D"].index
-                    bone_fitting_offsets[dress_knee_d_bone_index] = BoneMorphOffset(
-                        dress_knee_d_bone_index,
-                        bone_fitting_offsets[dress.bones[knee_bone_name].index].position,
-                        bone_fitting_offsets[dress.bones[knee_bone_name].index].rotation.qq,
-                    )
-                    dress_fit_matrixes[dress_knee_d_bone_index] = dress_knee_mat.copy()
-
-                # 足首D
-                if f"{ankle_bone_name}D" in dress.bones:
-                    dress_ankle_d_bone_index = dress.bones[f"{ankle_bone_name}D"].index
-                    bone_fitting_offsets[dress_ankle_d_bone_index] = BoneMorphOffset(
-                        dress_ankle_d_bone_index,
-                        bone_fitting_offsets[dress.bones[ankle_bone_name].index].position,
-                        bone_fitting_offsets[dress.bones[ankle_bone_name].index].rotation.qq,
-                    )
-                    dress_fit_matrixes[dress_ankle_d_bone_index] = dress_ankle_mat.copy()
-
-                # 足先EX
-                if ex_bone_name in dress.bones:
-                    dress_ex_original_pos = dress.bones[ex_bone_name].position
-
-                    # 足首とつま先の比率から求める
-                    dress_ex_scale = (dress_ex_original_pos - dress_ankle_original_pos) / (dress_toe_original_pos - dress_ankle_original_pos)
-                    dress_ex_fit_pos = dress_ankle_fit_pos + (dress_toe_original_pos - dress_ankle_original_pos) * dress_ex_scale
-
-                    dress_ex_scale_pos = dress_ankle_mat * (dress_ex_original_pos - dress_ankle_original_pos)
-
-                    ex_local_offset_pos = dress_ex_scale_pos - dress_ex_fit_pos
-                    bone_fitting_offsets[dress.bones[ex_bone_name].index] = BoneMorphOffset(dress.bones[ex_bone_name].index, ex_local_offset_pos, MQuaternion())
-
-                    ex_mat = dress_leg_mat.copy()
-                    ex_mat.translate((dress_ex_original_pos - dress_ankle_original_pos) + ex_local_offset_pos)
-                    dress_fit_matrixes[dress.bones[ex_bone_name].index] = ex_mat
-
-        for dress_bone_tree in dress.bone_trees:
-            if dress_bone_tree.last_index in dress_fit_matrixes:
-                # ボーンツリーの末端まで登録されている場合、スルー
-                continue
-            distance_scales: list[float] = []
             for n, dress_bone in enumerate(dress_bone_tree):
-                if 2 > n:
-                    # ルートからの孫以下ボーンではない場合、スルー
+                if dress_bone.index not in vertices_by_bone or "捩" in dress_bone.name or dress_bone.has_fixed_axis or dress_bone.name not in model.bones:
+                    # ウェイトを持ってない場合、捩りの場合、人物に同じボーンがない場合、角度は計算しない
                     continue
-                # 自分の親とその親の距離比から縮尺を求める
-                dress_parent_bone = dress_bone_tree[dress_bone_tree.names[n - 1]]
-                dress_parent_parent_bone = dress_bone_tree[dress_bone_tree.names[n - 2]]
-                # 本来の距離
-                parent_distance = dress_parent_bone.position.distance(dress_parent_parent_bone.position) or 1
-                # 縮尺後の距離
-                dress_parent_fit_pos = dress_fit_matrixes[dress_parent_bone.index] * MVector3D()
-                dress_parent_parent_fit_pos = dress_fit_matrixes[dress_parent_parent_bone.index] * MVector3D()
-                parent_fit_distance = dress_parent_fit_pos.distance(dress_parent_parent_fit_pos) or 1
-                # 距離比
-                distance_scale = parent_fit_distance / parent_distance
-                distance_scales.append(distance_scale)
+                # # 人物：親から見た自分の方向
+                # model_parent_x_direction = (model_bone_positions[dress_bone.index] - model_bone_positions[dress_bone.parent_index]).normalized()
+                # model_parent_y_direction = model_parent_x_direction.cross(z_direction)
+                # model_parent_slope_qq = MQuaternion.from_direction(model_parent_x_direction, model_parent_y_direction)
 
-                if dress_bone.index in dress_fit_matrixes:
-                    # 登録済みのボーンは比率だけ求めてスルー
-                    continue
+                # 人物：自分の方向
+                model_tail_x_direction = model_bone_tail_relative_positions[dress_bone.index].normalized()
+                model_tail_y_direction = model_tail_x_direction.cross(z_direction)
+                model_tail_slope_qq = MQuaternion.from_direction(model_tail_x_direction, model_tail_y_direction)
 
-                # 中央値と標準偏差を計算
-                np_distance_scales = np.array(distance_scales)
-                median_distance_scales = np.median(np_distance_scales)
-                std_distance_scales = np.std(np_distance_scales)
+                # model_slope_qq = model_tail_slope_qq * model_parent_slope_qq.inverse()
 
-                # 中央値から標準偏差の1.5倍までの値を取得
-                filtered_distance_scales = np_distance_scales[
-                    (np_distance_scales >= median_distance_scales - 1.5 * std_distance_scales)
-                    & (np_distance_scales <= median_distance_scales + 1.5 * std_distance_scales)
-                ]
+                # # 衣装：親から見た自分の方向
+                # dress_parent_x_direction = dress_bone.parent_relative_position.normalized()
+                # dress_parent_y_direction = dress_parent_x_direction.cross(z_direction)
+                # dress_parent_slope_qq = MQuaternion.from_direction(dress_parent_x_direction, dress_parent_y_direction)
 
-                # 親ボーンからの差
-                dress_diff_pos = dress_bone.position - dress_parent_bone.position
-                # 中央距離比を加味したボーン位置
-                dress_fit_pos = dress_parent_fit_pos + dress_diff_pos * np.mean(filtered_distance_scales)
-                # 親ボーンから見たローカル位置
-                local_dress_fit_pos = dress_fit_matrixes[dress_parent_bone.index].inverse() * dress_fit_pos
-                dress_offset_pos = local_dress_fit_pos - dress_diff_pos
+                # 衣装：自分の方向
+                dress_tail_x_direction = dress_bone.tail_relative_position.normalized()
+                dress_tail_y_direction = dress_tail_x_direction.cross(z_direction)
+                dress_tail_slope_qq = MQuaternion.from_direction(dress_tail_x_direction, dress_tail_y_direction)
 
-                if dress_offset_pos:
-                    bone_fitting_offsets[dress_bone.index] = BoneMorphOffset(dress_bone.index, dress_offset_pos, MQuaternion())
+                # dress_slope_qq = dress_tail_slope_qq * dress_parent_slope_qq.inverse()
 
-                matrix = dress_fit_matrixes[dress_parent_bone.index].copy()
-                matrix.translate(local_dress_fit_pos)
-                dress_fit_matrixes[dress_bone.index] = matrix
+                # dress_matrix = dress_fit_matrixes[dress_bone.parent_index].copy()
+
+                # # 親までの向きを加味したグローバル位置
+                # dress_fit_position: MVector3D = dress_matrix * MVector3D()
+                # dress_fit_tail_position: MVector3D = dress_matrix * dress_bone.tail_relative_position
+
+                # dress_x_direction = (dress_fit_tail_position - dress_fit_position).normalized()
+                # dress_y_direction = dress_x_direction.cross(z_direction)
+                # dress_slope_qq = MQuaternion.from_direction(dress_x_direction, dress_y_direction)
+
+                # モデルのボーンの向きに衣装を合わせる
+                dress_fit_qq = model_tail_slope_qq * dress_tail_slope_qq.inverse()
+                # dress_matrix.rotate(dress_fit_qq)
+
+                for tree_bone_name in reversed(dress_bone_tree.names[:n]):
+                    # 自分より親は逆回転させる
+                    dress_fit_qq *= dress_fit_qqs.get(dress.bones[tree_bone_name].index, MQuaternion()).inverse()
+
+                dress_fit_qqs[dress_bone.index] = dress_fit_qq
+
+                # # 向きだけ合わせたフィッティングさせたローカル位置
+                # dress_fit_local_position = dress_matrix.inverse() * dress_fit_position
+                # model_local_position = model_bone_positions.get(dress_bone.index, MVector3D()) - model_bone_positions.get(dress_bone.parent_index, MVector3D())
+
+                # # モデルのボーンの向きに沿ったときのローカル位置を求め直す
+                # dress_fit_offset_position = model_local_position - dress_fit_local_position
+                # dress_matrix.translate(dress_fit_local_position)
+
+                bone_fitting_offsets[dress_bone.index] = BoneMorphOffset(dress_bone.index, MVector3D(), dress_fit_qq)
+                dress_fit_matrixes[dress_bone.index] = MMatrix4x4()
+        # for dress_bone_tree in dress.bone_trees:
+        #     mat = MMatrix4x4()
+        #     for n, dress_bone in enumerate(dress_bone_tree):
+        #         if dress_bone.name not in model.bones:
+        #             # 人物にも同じボーンが無い場合、スルー
+        #             continue
+        #         # is_not_target = False
+        #         # for not_target_name in ["全ての親", "センター", "グルーブ", "捩", "肩P", "肩C", "腰キャンセル"]:
+        #         #     if not_target_name in dress_bone.name:
+        #         #         is_not_target = True
+        #         #         break
+        #         # if is_not_target:
+        #         #     # 対象外ボーンはスルー
+        #         #     continue
+
+        #         z_direction = MVector3D(0, 0, -1)
+
+        #         model_x_direction = model.bones[dress_bone.name].tail_relative_position.normalized()
+        #         model_y_direction = model_x_direction.cross(z_direction)
+        #         model_slope_qq = MQuaternion.from_direction(model_x_direction, model_y_direction)
+
+        #         dress_x_direction = dress.bones[dress_bone.name].tail_relative_position.normalized()
+        #         dress_y_direction = dress_x_direction.cross(z_direction)
+        #         dress_slope_qq = MQuaternion.from_direction(dress_x_direction, dress_y_direction)
+
+        #         # 衣装のボーン角度をモデルのボーン角度に合わせる
+        #         dress_fit_qqs[dress_bone.index] = model_slope_qq * dress_slope_qq.inverse()
+
+        #         # 親を逆回転させる
+        #         dress_fit_qqs[dress_bone.index] *= dress_fit_qqs.get(dress_bone.parent_index, MQuaternion()).inverse()
+
+        # for dress_bone in dress.bones:
+        #     # if dress_bone.name in leg_bone_names:
+        #     #     # 足の末端系のボーンがある場合、相対位置の計算からは除外
+        #     #     continue
+        #     if not dress.bone_trees.is_in_standard(dress_bone.name):
+        #         # 準標準ボーンに含まれない場合、相対位置計算除外
+        #         continue
+        #     if dress_bone.index in bone_fitting_offsets:
+        #         # 計算済みはスルー
+        #         continue
+
+        #     dress_bone_tree = dress.bone_trees[dress_bone.name]
+        #     dress_fit_qq = MQuaternion()
+        #     for n, tree_bone_name in enumerate(reversed(dress_bone_tree.names)):
+        #         tree_bone = dress.bones[tree_bone_name]
+        #         if 0 == n:
+        #             # 初回はそのまま設定
+        #             dress_fit_qq = dress_fit_qqs.get(tree_bone.index, MQuaternion())
+        #         else:
+        #             # 自分より親は逆回転させる
+        #             dress_fit_qq *= dress_fit_qqs.get(tree_bone.index, MQuaternion()).inverse()
+
+        #     bone_fitting_offsets[dress_bone.index] = BoneMorphOffset(dress_bone.index, MVector3D(), dress_fit_qq)
+
+        # dress_fit_matrixes: dict[int, MMatrix4x4] = {-1: MMatrix4x4()}
+        # for dress_bone_tree in dress.bone_trees:
+        #     if not dress_bone_tree.last_name:
+        #         continue
+
+        #     dress_bone = dress.bones[dress_bone_tree.last_name]
+
+        #     # if dress_bone.name in leg_bone_names:
+        #     #     # 足の末端系のボーンがある場合、相対位置の計算からは除外
+        #     #     continue
+        #     if not dress.bone_trees.is_in_standard(dress_bone.name):
+        #         # 準標準ボーンに含まれない場合、相対位置計算除外
+        #         continue
+
+        #     dress_mat = MMatrix4x4()
+
+        #     if dress_bone.parent_index in dress_fit_matrixes:
+        #         # 既に計算済みの場合、行列を保持して次へ
+        #         dress_mat = dress_fit_matrixes[dress_bone.parent_index].copy()
+        #     else:
+        #         # 未計算の場合、末端までのボーン変形を計算する
+        #         for tree_bone_name in dress_bone_tree.names[:-1]:
+        #             tree_bone = dress.bones[tree_bone_name]
+
+        #             tree_model_pos = model_bone_positions[tree_bone.index]
+
+        #             # 角度をモデルのボーンに合わせる
+        #             dress_fit_qq = dress_fit_qqs.get(tree_bone.index, MQuaternion())
+        #             dress_mat.rotate(dress_fit_qq)
+
+        #             local_tree_model_pos = dress_mat.inverse() * tree_model_pos
+
+        #             # モデルのボーンに合わせて移動させる
+        #             dress_mat.translate(local_tree_model_pos)
+
+        #     # 末端（計算対象）ボーンの位置
+        #     model_pos = model_bone_positions[dress_bone.index]
+
+        #     # 角度をモデルのボーンに合わせる
+        #     dress_fit_qq = dress_fit_qqs.get(dress_bone.index, MQuaternion())
+        #     dress_mat.rotate(dress_fit_qq)
+
+        #     # 合わせたいボーンのローカル位置
+        #     dress_local_fit_pos = dress_mat.inverse() * model_pos
+
+        #     # （親まではフィッティング済みで）自分がそのままだった場合のローカル位置
+        #     mat = MMatrix4x4()
+        #     mat.rotate(dress_mat.to_quaternion())
+        #     dress_local_parent_pos = mat.inverse() * dress_bone.parent_relative_position
+
+        #     # モデルのボーンに合わせて移動させる
+        #     dress_local_offset_pos = dress_local_fit_pos - dress_local_parent_pos
+
+        #     bone_fitting_offsets[dress_bone.index] = BoneMorphOffset(dress_bone.index, dress_local_offset_pos, dress_fit_qq)
+
+        #     dress_mat.translate(dress_local_fit_pos)
+
+        #     # 行列を保存
+        #     dress_fit_matrixes[dress_bone.index] = dress_mat.copy()
+
+        # # 足系の調整
+        # for leg_bone_name, knee_bone_name, ankle_bone_name, leg_ik_bone_name, toe_ik_bone_name, leg_ik_parent_bone_name, ex_bone_name in [
+        #     ("右足", "右ひざ", "右足首", "右足ＩＫ", "右つま先ＩＫ", "右足IK親", "右足先EX"),
+        #     ("左足", "左ひざ", "左足首", "左足ＩＫ", "左つま先ＩＫ", "左足IK親", "左足先EX"),
+        # ]:
+        #     if (
+        #         leg_bone_name in dress.bones
+        #         and knee_bone_name in dress.bones
+        #         and ankle_bone_name in dress.bones
+        #         and leg_ik_bone_name in dress.bones
+        #         and toe_ik_bone_name in dress.bones
+        #         and dress.bones[leg_ik_bone_name].ik
+        #         and dress.bones[toe_ik_bone_name].ik
+        #     ):
+        #         # 足位置は揃ってるはず
+        #         model_leg_pos = model_bone_positions[dress.bones[leg_bone_name].index]
+        #         dress_leg_mat = dress_fit_matrixes[dress.bones[leg_bone_name].index]
+
+        #         # ひざ
+        #         model_knee_pos = model_bone_positions[dress.bones[knee_bone_name].index]
+
+        #         # 足首
+        #         model_ankle_pos = model_bone_positions[dress.bones[ankle_bone_name].index]
+        #         dress_ankle_original_pos = dress.bones[ankle_bone_name].position
+        #         dress_ankle_scale_pos: MVector3D = dress_leg_mat * (dress.bones[ankle_bone_name].position - dress.bones[leg_bone_name].position)
+
+        #         # 踵
+        #         model_sole_fit_pos = MVector3D(model_ankle_pos.x, 0, model_ankle_pos.z)
+        #         dress_sole_scale_pos: MVector3D = dress_leg_mat * (
+        #             MVector3D(dress_ankle_scale_pos.x, 0, dress_ankle_scale_pos.z) - dress.bones[leg_bone_name].position
+        #         )
+        #         dress_sole_fit_pos = MVector3D(dress_sole_scale_pos.x, 0, dress_sole_scale_pos.z)
+
+        #         # つま先
+        #         model_toe_pos = model.bones[model.bones[toe_ik_bone_name].ik.bone_index].position
+        #         model_toe_fit_pos = MVector3D(model_toe_pos.x, 0, model_toe_pos.z)
+        #         dress_toe_original_pos: MVector3D = dress.bones[dress.bones[toe_ik_bone_name].ik.bone_index].position
+        #         dress_toe_scale_pos: MVector3D = dress_leg_mat * (
+        #             dress.bones[dress.bones[toe_ik_bone_name].ik.bone_index].position - dress.bones[leg_bone_name].position
+        #         )
+
+        #         # 足底の長さの縮尺で靴のサイズを調整
+        #         sole_scale = (model_toe_fit_pos - model_sole_fit_pos).length() / (
+        #             MVector3D(dress_toe_scale_pos.x, 0, dress_toe_scale_pos.z) - dress_sole_fit_pos
+        #         ).length()
+
+        #         # ひざ
+        #         model_knee_scale = (model_sole_fit_pos - model_knee_pos) / ((model_sole_fit_pos - model_knee_pos) + (model_knee_pos - model_leg_pos))
+        #         dress_knee_fit_pos = model_sole_fit_pos - ((model_sole_fit_pos - model_knee_pos) + (model_knee_pos - model_leg_pos)) * model_knee_scale
+        #         local_dress_knee_pos = dress_leg_mat.inverse() * dress_knee_fit_pos
+        #         global_dress_knee_scale_pos = dress_leg_mat * (dress.bones[knee_bone_name].position - dress.bones[leg_bone_name].position)
+
+        #         local_knee_offset_pos = dress_knee_fit_pos - global_dress_knee_scale_pos
+        #         bone_fitting_offsets[dress.bones[knee_bone_name].index] = BoneMorphOffset(
+        #             dress.bones[knee_bone_name].index, local_knee_offset_pos, MQuaternion()
+        #         )
+
+        #         dress_knee_mat = dress_leg_mat.copy()
+        #         dress_knee_mat.translate(local_dress_knee_pos)
+        #         dress_fit_matrixes[dress.bones[knee_bone_name].index] = dress_knee_mat
+
+        #         # 足首
+        #         dress_ankle_scale_pos = dress_knee_mat * (dress.bones[ankle_bone_name].position - dress.bones[knee_bone_name].position)
+        #         dress_ankle_fit_pos = MVector3D(model_ankle_pos.x, dress.bones[ankle_bone_name].position.y * sole_scale, model_ankle_pos.z)
+        #         local_dress_ankle_pos = dress_knee_mat.inverse() * dress_ankle_fit_pos
+        #         global_dress_ankle_scale_pos = dress_knee_mat * (dress.bones[ankle_bone_name].position - dress.bones[knee_bone_name].position)
+
+        #         local_ankle_offset_pos = dress_ankle_fit_pos - global_dress_ankle_scale_pos
+        #         bone_fitting_offsets[dress.bones[ankle_bone_name].index] = BoneMorphOffset(
+        #             dress.bones[ankle_bone_name].index, local_ankle_offset_pos, MQuaternion()
+        #         )
+
+        #         dress_ankle_mat = dress_knee_mat.copy()
+        #         dress_ankle_mat.translate(local_dress_ankle_pos)
+        #         dress_fit_matrixes[dress.bones[ankle_bone_name].index] = dress_ankle_mat
+
+        #         # つま先
+        #         toe_bone_name = dress.bones[dress.bones[toe_ik_bone_name].ik.bone_index].name
+        #         dress_toe_scale_pos = dress_ankle_mat * (dress.bones[toe_bone_name].position - dress.bones[ankle_bone_name].position)
+        #         dress_toe_fit_pos = MVector3D(model_toe_pos.x, dress.bones[toe_bone_name].position.y * sole_scale, model_toe_pos.z)
+        #         local_dress_toe_pos = dress_ankle_mat.inverse() * dress_toe_fit_pos
+        #         global_dress_toe_scale_pos = dress_ankle_mat * (dress.bones[toe_bone_name].position - dress.bones[ankle_bone_name].position)
+
+        #         local_toe_offset_pos = dress_toe_fit_pos - global_dress_toe_scale_pos
+        #         bone_fitting_offsets[dress.bones[toe_bone_name].index] = BoneMorphOffset(dress.bones[toe_bone_name].index, local_toe_offset_pos, MQuaternion())
+
+        #         dress_toe_mat = dress_ankle_mat.copy()
+        #         dress_toe_mat.translate(local_dress_toe_pos)
+        #         dress_fit_matrixes[dress.bones[toe_bone_name].index] = dress_toe_mat
+
+        #         # IK親
+        #         if leg_ik_parent_bone_name in dress.bones:
+        #             leg_ik_parent_mat = dress_fit_matrixes[dress.bones[leg_ik_parent_bone_name].parent_index].copy()
+
+        #             leg_ik_parent_bone_index = dress.bones[leg_ik_parent_bone_name].index
+        #             leg_ik_parent_fit_pos = MVector3D(dress_ankle_fit_pos.x, 0, dress_ankle_fit_pos.z)
+        #             global_dress_leg_ik_parent_scale_pos = leg_ik_parent_mat * (
+        #                 dress.bones[leg_ik_parent_bone_name].position - dress.bones[dress.bones[leg_ik_parent_bone_name].parent_index].position
+        #             )
+
+        #             local_leg_ik_parent_pos = leg_ik_parent_mat.inverse() * leg_ik_parent_fit_pos
+        #             local_leg_ik_parent_offset_pos = leg_ik_parent_fit_pos - global_dress_leg_ik_parent_scale_pos
+        #             bone_fitting_offsets[leg_ik_parent_bone_index] = BoneMorphOffset(leg_ik_parent_bone_index, local_leg_ik_parent_offset_pos, MQuaternion())
+
+        #             leg_ik_parent_mat.translate(local_leg_ik_parent_pos)
+        #             dress_fit_matrixes[leg_ik_parent_bone_index] = leg_ik_parent_mat
+        #         else:
+        #             # IK親が無い場合、親ボーンの位置を親とする
+        #             leg_ik_parent_bone_index = dress.bones[leg_ik_bone_name].parent_index
+        #             leg_ik_parent_mat = dress_fit_matrixes[leg_ik_parent_bone_index]
+        #             leg_ik_parent_fit_pos = dress.bones[leg_ik_parent_bone_index].position
+
+        #         # 足ＩＫ
+        #         local_dress_leg_ik_fit_pos = leg_ik_parent_mat.inverse() * dress_ankle_fit_pos
+        #         global_dress_leg_ik_scale_pos = leg_ik_parent_mat * (dress.bones[leg_ik_bone_name].position - dress.bones[leg_ik_parent_bone_index].position)
+        #         local_leg_ik_offset_pos = dress_ankle_fit_pos - global_dress_leg_ik_scale_pos
+
+        #         bone_fitting_offsets[dress.bones[leg_ik_bone_name].index] = BoneMorphOffset(
+        #             dress.bones[leg_ik_bone_name].index, local_leg_ik_offset_pos, MQuaternion()
+        #         )
+
+        #         leg_ik_mat = leg_ik_parent_mat.copy()
+        #         leg_ik_mat.translate(local_dress_leg_ik_fit_pos)
+        #         dress_fit_matrixes[dress.bones[leg_ik_bone_name].index] = leg_ik_mat
+
+        #         # つま先ＩＫ
+        #         local_dress_toe_ik_fit_pos = leg_ik_mat.inverse() * dress_toe_fit_pos
+        #         global_dress_toe_ik_scale_pos = leg_ik_mat * (dress.bones[toe_ik_bone_name].position - dress.bones[leg_ik_bone_name].position)
+        #         local_toe_ik_offset_pos = dress_toe_fit_pos - global_dress_toe_ik_scale_pos
+
+        #         bone_fitting_offsets[dress.bones[toe_ik_bone_name].index] = BoneMorphOffset(
+        #             dress.bones[toe_ik_bone_name].index, local_toe_ik_offset_pos, MQuaternion()
+        #         )
+
+        #         toe_ik_mat = leg_ik_mat.copy()
+        #         toe_ik_mat.translate(local_dress_toe_ik_fit_pos)
+        #         dress_fit_matrixes[dress.bones[toe_ik_bone_name].index] = toe_ik_mat
+
+        #         # 足D
+        #         if f"{leg_bone_name}D" in dress.bones:
+        #             dress_leg_d_bone_index = dress.bones[f"{leg_bone_name}D"].index
+        #             bone_fitting_offsets[dress_leg_d_bone_index] = BoneMorphOffset(
+        #                 dress_leg_d_bone_index,
+        #                 bone_fitting_offsets[dress.bones[leg_bone_name].index].position,
+        #                 bone_fitting_offsets[dress.bones[leg_bone_name].index].rotation.qq,
+        #             )
+        #             dress_fit_matrixes[dress_leg_d_bone_index] = dress_leg_mat.copy()
+
+        #         # ひざD
+        #         if f"{knee_bone_name}D" in dress.bones:
+        #             dress_knee_d_bone_index = dress.bones[f"{knee_bone_name}D"].index
+        #             bone_fitting_offsets[dress_knee_d_bone_index] = BoneMorphOffset(
+        #                 dress_knee_d_bone_index,
+        #                 bone_fitting_offsets[dress.bones[knee_bone_name].index].position,
+        #                 bone_fitting_offsets[dress.bones[knee_bone_name].index].rotation.qq,
+        #             )
+        #             dress_fit_matrixes[dress_knee_d_bone_index] = dress_knee_mat.copy()
+
+        #         # 足首D
+        #         if f"{ankle_bone_name}D" in dress.bones:
+        #             dress_ankle_d_bone_index = dress.bones[f"{ankle_bone_name}D"].index
+        #             bone_fitting_offsets[dress_ankle_d_bone_index] = BoneMorphOffset(
+        #                 dress_ankle_d_bone_index,
+        #                 bone_fitting_offsets[dress.bones[ankle_bone_name].index].position,
+        #                 bone_fitting_offsets[dress.bones[ankle_bone_name].index].rotation.qq,
+        #             )
+        #             dress_fit_matrixes[dress_ankle_d_bone_index] = dress_ankle_mat.copy()
+
+        #         # 足先EX
+        #         if ex_bone_name in dress.bones:
+        #             dress_ex_original_pos = dress.bones[ex_bone_name].position
+
+        #             # 足首とつま先の比率から求める
+        #             dress_ex_scale = (dress_ex_original_pos - dress_ankle_original_pos) / (dress_toe_original_pos - dress_ankle_original_pos)
+        #             dress_ex_fit_pos = dress_ankle_fit_pos + (dress_toe_original_pos - dress_ankle_original_pos) * dress_ex_scale
+
+        #             dress_ex_scale_pos = dress_ankle_mat * (dress_ex_original_pos - dress_ankle_original_pos)
+
+        #             ex_local_offset_pos = dress_ex_scale_pos - dress_ex_fit_pos
+        #             bone_fitting_offsets[dress.bones[ex_bone_name].index] = BoneMorphOffset(dress.bones[ex_bone_name].index, ex_local_offset_pos, MQuaternion())
+
+        #             ex_mat = dress_leg_mat.copy()
+        #             ex_mat.translate((dress_ex_original_pos - dress_ankle_original_pos) + ex_local_offset_pos)
+        #             dress_fit_matrixes[dress.bones[ex_bone_name].index] = ex_mat
+
+        # for dress_bone_tree in dress.bone_trees:
+        #     if dress_bone_tree.last_index in dress_fit_matrixes:
+        #         # ボーンツリーの末端まで登録されている場合、スルー
+        #         continue
+        #     distance_scales: list[float] = []
+        #     for n, dress_bone in enumerate(dress_bone_tree):
+        #         if 2 > n:
+        #             # ルートからの孫以下ボーンではない場合、スルー
+        #             continue
+        #         # 自分の親とその親の距離比から縮尺を求める
+        #         dress_parent_bone = dress_bone_tree[dress_bone_tree.names[n - 1]]
+        #         dress_parent_parent_bone = dress_bone_tree[dress_bone_tree.names[n - 2]]
+        #         # 本来の距離
+        #         parent_distance = dress_parent_bone.position.distance(dress_parent_parent_bone.position) or 1
+        #         # 縮尺後の距離
+        #         dress_parent_fit_pos = dress_fit_matrixes[dress_parent_bone.index] * MVector3D()
+        #         dress_parent_parent_fit_pos = dress_fit_matrixes[dress_parent_parent_bone.index] * MVector3D()
+        #         parent_fit_distance = dress_parent_fit_pos.distance(dress_parent_parent_fit_pos) or 1
+        #         # 距離比
+        #         distance_scale = parent_fit_distance / parent_distance
+        #         distance_scales.append(distance_scale)
+
+        #         if dress_bone.index in dress_fit_matrixes:
+        #             # 登録済みのボーンは比率だけ求めてスルー
+        #             continue
+
+        #         # 中央値と標準偏差を計算
+        #         np_distance_scales = np.array(distance_scales)
+        #         median_distance_scales = np.median(np_distance_scales)
+        #         std_distance_scales = np.std(np_distance_scales)
+
+        #         # 中央値から標準偏差の1.5倍までの値を取得
+        #         filtered_distance_scales = np_distance_scales[
+        #             (np_distance_scales >= median_distance_scales - 1.5 * std_distance_scales)
+        #             & (np_distance_scales <= median_distance_scales + 1.5 * std_distance_scales)
+        #         ]
+
+        #         # 親ボーンからの差
+        #         dress_diff_pos = dress_bone.position - dress_parent_bone.position
+        #         # 中央距離比を加味したボーン位置
+        #         dress_fit_pos = dress_parent_fit_pos + dress_diff_pos * np.mean(filtered_distance_scales)
+        #         # 親ボーンから見たローカル位置
+        #         local_dress_fit_pos = dress_fit_matrixes[dress_parent_bone.index].inverse() * dress_fit_pos
+        #         dress_offset_pos = local_dress_fit_pos - dress_diff_pos
+
+        #         if dress_offset_pos:
+        #             bone_fitting_offsets[dress_bone.index] = BoneMorphOffset(dress_bone.index, dress_offset_pos, MQuaternion())
+
+        #         matrix = dress_fit_matrixes[dress_parent_bone.index].copy()
+        #         matrix.translate(local_dress_fit_pos)
+        #         dress_fit_matrixes[dress_bone.index] = matrix
 
         bone_fitting_morph.offsets = list(bone_fitting_offsets.values())
         dress.morphs.append(bone_fitting_morph)
 
         return dress, dress_fit_matrixes
 
-    def get_model_position(self, model: PmxModel, dress: PmxModel, bone: Bone, model_bone_positions: dict[int, MVector3D]):
+    def get_model_position(
+        self,
+        model: PmxModel,
+        dress: PmxModel,
+        dress_bone_name: str,
+        model_bone_positions: dict[int, MVector3D],
+        model_bone_tail_relative_positions: dict[int, MVector3D],
+    ) -> tuple[dict[int, MVector3D], dict[int, MVector3D]]:
         """衣装モデルのボーン名に相当する人物モデルのボーン位置を取得する"""
-        if bone.name in model.bones:
-            model_bone_positions[bone.index] = model.bones[bone.name].position
-            return model.bones[bone.name].position, model_bone_positions
-        if bone.name in model_bone_positions:
-            return model_bone_positions[bone.index], model_bone_positions
+        dress_bone = dress.bones[dress_bone_name]
+
+        if dress_bone.index in model_bone_positions and dress_bone.index in model_bone_tail_relative_positions:
+            return model_bone_positions, model_bone_tail_relative_positions
+
+        if dress_bone.name in model.bones:
+            model_bone_positions[dress_bone.index] = model.bones[dress_bone.name].position
+            model_bone_tail_relative_positions[dress_bone.index] = model.bones[dress_bone.name].tail_relative_position
+            return model_bone_positions, model_bone_tail_relative_positions
+
+        dress_fit_scale = 1.0
         # まだ仮登録されていない場合、計算する
-        parent_name = self.get_parent_name(model, dress, bone)
-        child_names = self.get_child_names(model, dress, bone)
+        parent_name = self.get_parent_name(model, dress, dress_bone)
+        child_names = self.get_child_names(model, dress, dress_bone)
         if parent_name and not child_names:
             # 子どもが居ない場合、親ボーンの子どもから求め直す
             child_names = [b.name for b in model.bones if model.bones[parent_name].index == b.parent_index and b.name in dress.bones]
@@ -584,14 +678,13 @@ class LoadWorker(BaseWorker):
             dress_child_mean_pos = MVector3D(*np.mean([dress.bones[cname].position.vector for cname in child_names], axis=0))
             model_child_mean_pos = MVector3D(*np.mean([model.bones[cname].position.vector for cname in child_names], axis=0))
             # 人物にない衣装ボーンの縮尺
-            dress_wrap_scale = (bone.position - dress.bones[parent_name].position) / (
-                (dress_child_mean_pos - bone.position) + (bone.position - dress.bones[parent_name].position)
+            dress_fit_scale = (dress_bone.position - dress.bones[parent_name].position) / (
+                (dress_child_mean_pos - dress_bone.position) + (dress_bone.position - dress.bones[parent_name].position)
             )
             # 人物モデルに縮尺を当てはめる
-            model_fake_bone_position = model.bones[parent_name].position + (model_child_mean_pos - model.bones[parent_name].position) * dress_wrap_scale
-            model_bone_positions[bone.index] = model_fake_bone_position
+            model_fake_bone_position = model.bones[parent_name].position + (model_child_mean_pos - model.bones[parent_name].position) * dress_fit_scale
+            model_bone_positions[dress_bone.index] = model_fake_bone_position
 
-            return model_fake_bone_position, model_bone_positions
         if parent_name and not child_names:
             # 同じボーンがまったく人物モデルに無い場合、その親の縮尺を反映させる
             parent_parent_name = self.get_parent_name(model, dress, dress.bones[parent_name])
@@ -599,15 +692,23 @@ class LoadWorker(BaseWorker):
             model_parent_pos = model_bone_positions.get(dress.bones[parent_name].index, MVector3D())
             dress_parent_parent_pos = dress.bones[parent_parent_name].position
             dress_parent_pos = dress.bones[parent_name].position
-            model_fake_bone_position = model_parent_pos + ((bone.position - dress_parent_pos) / (dress_parent_pos - dress_parent_parent_pos)) * (
-                model_parent_pos - model_parent_parent_pos
+            dress_fit_scale = model_parent_pos - model_parent_parent_pos
+            model_fake_bone_position = (
+                model_parent_pos + ((dress_bone.position - dress_parent_pos) / (dress_parent_pos - dress_parent_parent_pos)) * dress_fit_scale
             )
-            model_bone_positions[bone.index] = model_fake_bone_position
+            model_bone_positions[dress_bone.index] = model_fake_bone_position
 
-            return model_fake_bone_position, model_bone_positions
+        if 0 <= dress_bone.tail_index:
+            # 末端ボーンがある場合、再計算して返す
+            model_bone_positions, model_bone_tail_relative_positions = self.get_model_position(
+                model, dress, dress_bone.tail_index, model_bone_positions, model_bone_tail_relative_positions
+            )
+            model_bone_tail_relative_positions[dress_bone.index] = model_bone_positions[dress_bone.tail_index]
+        else:
+            # 相対位置の場合はそのまま計算して返す
+            model_bone_tail_relative_positions[dress_bone.index] = dress_bone.tail_relative_position * dress_fit_scale
 
-        model_bone_positions[bone.index] = MVector3D()
-        return MVector3D(), model_bone_positions
+        return model_bone_positions, model_bone_tail_relative_positions
 
     def create_dress_scale_morphs2(self, model: PmxModel, dress: PmxModel) -> PmxModel:
         # ウェイト頂点の法線に基づいたスケールを取得
