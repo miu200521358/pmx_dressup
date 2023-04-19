@@ -235,44 +235,21 @@ class LoadWorker(BaseWorker):
         for dress_bone_tree in dress.bone_trees:
             for n, dress_bone in enumerate(dress_bone_tree):
                 if dress_bone.index not in vertices_by_bone or "捩" in dress_bone.name or dress_bone.has_fixed_axis or dress_bone.name not in model.bones:
-                    # ウェイトを持ってない場合、捩りの場合、人物に同じボーンがない場合、角度は計算しない
+                    # ウェイトを持ってない場合、捩りの場合、軸制限の場合、人物に同じボーンがない場合、角度は計算しない
                     continue
-                # # 人物：親から見た自分の方向
-                # model_parent_x_direction = (model_bone_positions[dress_bone.index] - model_bone_positions[dress_bone.parent_index]).normalized()
-                # model_parent_y_direction = model_parent_x_direction.cross(z_direction)
-                # model_parent_slope_qq = MQuaternion.from_direction(model_parent_x_direction, model_parent_y_direction)
 
                 # 人物：自分の方向
-                model_tail_x_direction = model_bone_tail_relative_positions[dress_bone.index].normalized()
-                model_tail_y_direction = model_tail_x_direction.cross(z_direction)
-                model_tail_slope_qq = MQuaternion.from_direction(model_tail_x_direction, model_tail_y_direction)
-
-                # model_slope_qq = model_tail_slope_qq * model_parent_slope_qq.inverse()
-
-                # # 衣装：親から見た自分の方向
-                # dress_parent_x_direction = dress_bone.parent_relative_position.normalized()
-                # dress_parent_y_direction = dress_parent_x_direction.cross(z_direction)
-                # dress_parent_slope_qq = MQuaternion.from_direction(dress_parent_x_direction, dress_parent_y_direction)
+                model_x_direction = model_bone_tail_relative_positions[dress_bone.index].normalized()
+                model_y_direction = model_x_direction.cross(z_direction)
+                model_slope_qq = MQuaternion.from_direction(model_x_direction, model_y_direction)
 
                 # 衣装：自分の方向
-                dress_tail_x_direction = dress_bone.tail_relative_position.normalized()
-                dress_tail_y_direction = dress_tail_x_direction.cross(z_direction)
-                dress_tail_slope_qq = MQuaternion.from_direction(dress_tail_x_direction, dress_tail_y_direction)
-
-                # dress_slope_qq = dress_tail_slope_qq * dress_parent_slope_qq.inverse()
-
-                # dress_matrix = dress_fit_matrixes[dress_bone.parent_index].copy()
-
-                # # 親までの向きを加味したグローバル位置
-                # dress_fit_position: MVector3D = dress_matrix * MVector3D()
-                # dress_fit_tail_position: MVector3D = dress_matrix * dress_bone.tail_relative_position
-
-                # dress_x_direction = (dress_fit_tail_position - dress_fit_position).normalized()
-                # dress_y_direction = dress_x_direction.cross(z_direction)
-                # dress_slope_qq = MQuaternion.from_direction(dress_x_direction, dress_y_direction)
+                dress_x_direction = dress_bone.tail_relative_position.normalized()
+                dress_y_direction = dress_x_direction.cross(z_direction)
+                dress_slope_qq = MQuaternion.from_direction(dress_x_direction, dress_y_direction)
 
                 # モデルのボーンの向きに衣装を合わせる
-                dress_fit_qq = model_tail_slope_qq * dress_tail_slope_qq.inverse()
+                dress_fit_qq = model_slope_qq * dress_slope_qq.inverse()
                 # dress_matrix.rotate(dress_fit_qq)
 
                 for tree_bone_name in reversed(dress_bone_tree.names[:n]):
@@ -281,16 +258,9 @@ class LoadWorker(BaseWorker):
 
                 dress_fit_qqs[dress_bone.index] = dress_fit_qq
 
-                # # 向きだけ合わせたフィッティングさせたローカル位置
-                # dress_fit_local_position = dress_matrix.inverse() * dress_fit_position
-                # model_local_position = model_bone_positions.get(dress_bone.index, MVector3D()) - model_bone_positions.get(dress_bone.parent_index, MVector3D())
-
-                # # モデルのボーンの向きに沿ったときのローカル位置を求め直す
-                # dress_fit_offset_position = model_local_position - dress_fit_local_position
-                # dress_matrix.translate(dress_fit_local_position)
-
                 bone_fitting_offsets[dress_bone.index] = BoneMorphOffset(dress_bone.index, MVector3D(), dress_fit_qq)
                 dress_fit_matrixes[dress_bone.index] = MMatrix4x4()
+
         # for dress_bone_tree in dress.bone_trees:
         #     mat = MMatrix4x4()
         #     for n, dress_bone in enumerate(dress_bone_tree):
