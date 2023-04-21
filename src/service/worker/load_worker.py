@@ -201,20 +201,21 @@ class LoadWorker(BaseWorker):
         total_index_count = len(dress.bone_trees)
         for i, dress_bone_tree in enumerate(dress.bone_trees):
             for n, dress_bone in enumerate(dress_bone_tree):
-                if dress_bone.index in bone_fitting_offsets:
+                if dress_bone.index in bone_fitting_offsets or 0 == n:
                     continue
+
+                dress_parent_bone = dress.bones[dress_bone.parent_index]
 
                 # 親までをフィッティングさせた上で改めてボーン位置を求める
                 dress_matrixes = dress_motion.bones.get_matrix_by_indexes([0], dress.bone_trees.filter(dress_bone.name), dress, append_ik=False)
-
-                dress_offset_position = model_bone_positions[dress_bone.index] - dress_matrixes[0][dress_bone.name].position
 
                 # 準標準ボーン系列の表示先であるか否か
                 is_standard_tail = dress.bone_trees.is_standard_tail(dress_bone.name)
 
                 if (dress_bone.name in model.bones or 2 > n) and not is_standard_tail:
                     # 人物に同じボーンがあり、準標準ボーンの表示先でない場合、フィッティングさせる
-                    dress_offset_position = model_bone_positions[dress_bone.index] - dress_matrixes[0][dress_bone.name].position
+                    model_diff_local_pos = dress_matrixes[0][dress_bone.name].global_matrix.inverse() * model_bone_positions[dress_bone.index]
+                    dress_offset_position = model_diff_local_pos
                 elif dress.bones[dress_bone.parent_index].name in model.bones and not is_standard_tail:
                     # 人物に同じボーンがなく、親ボーンがある場合、親ボーンからの距離に合わせる
                     dress_offset_position = MVector3D()
@@ -223,21 +224,19 @@ class LoadWorker(BaseWorker):
                     distance_scales: list[float] = []
                     for m in range(1, n):
                         # 自分の親とその親の距離比から縮尺を求める
-                        dress_parent_bone = dress_bone_tree[dress_bone_tree.names[m]]
-                        dress_parent_parent_bone = dress_bone_tree[dress_bone_tree.names[m - 1]]
+                        parent_bone = dress_bone_tree[dress_bone_tree.names[m]]
+                        parent_parent_bone = dress_bone_tree[dress_bone_tree.names[m - 1]]
 
                         # 本来の距離
-                        parent_distance = dress_parent_bone.position.distance(dress_parent_parent_bone.position)
+                        parent_distance = parent_bone.position.distance(parent_parent_bone.position)
                         # 縮尺後の距離
-                        dress_parent_fit_pos = dress_matrixes[0][dress_parent_bone.name].position
-                        dress_parent_parent_fit_pos = dress_matrixes[0][dress_parent_parent_bone.name].position
+                        dress_parent_fit_pos = dress_matrixes[0][parent_bone.name].position
+                        dress_parent_parent_fit_pos = dress_matrixes[0][parent_parent_bone.name].position
                         parent_fit_distance = dress_parent_fit_pos.distance(dress_parent_parent_fit_pos)
                         # 距離比
                         if parent_distance and parent_fit_distance:
                             distance_scale = parent_fit_distance / parent_distance
                             distance_scales.append(distance_scale)
-
-                    dress_parent_bone = dress.bones[dress_bone.parent_index]
 
                     # 親ボーンまでの縮尺の中央値と標準偏差を計算
                     np_distance_scales = np.array(distance_scales)
