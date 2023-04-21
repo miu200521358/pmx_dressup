@@ -9,13 +9,13 @@ from mlib.base.exception import MApplicationException
 from mlib.base.logger import MLogger
 from mlib.base.math import MMatrix4x4, MQuaternion, MVector3D, MVector4D
 from mlib.pmx.pmx_collection import PmxModel
-from mlib.pmx.pmx_part import Bone, BoneMorphOffset, MaterialMorphCalcMode, MaterialMorphOffset, Morph, MorphType, VertexMorphOffset
+from mlib.pmx.pmx_part import Bone, BoneMorphOffset, MaterialMorphCalcMode, MaterialMorphOffset, Morph, MorphType
 from mlib.pmx.pmx_writer import PmxWriter
 from mlib.service.base_worker import BaseWorker
 from mlib.service.form.base_panel import BasePanel
 from mlib.vmd.vmd_collection import VmdMotion
-from service.form.panel.file_panel import FilePanel
 from mlib.vmd.vmd_part import VmdBoneFrame
+from service.form.panel.file_panel import FilePanel
 
 logger = MLogger(os.path.basename(__file__), level=1)
 __ = logger.get_text
@@ -128,70 +128,6 @@ class LoadWorker(BaseWorker):
             morph.offsets = offsets
             model.morphs.append(morph)
         return model
-
-    def create_dress_fit_vertex_morphs(self, model: PmxModel, dress: PmxModel, dress_fit_matrixes: dict[int, MMatrix4x4]):
-        """衣装フィッティング頂点モーフを作成"""
-        vertex_fitting_morph = Morph(name="VertexFitting")
-        vertex_fitting_morph.is_system = True
-        vertex_fitting_morph.morph_type = MorphType.VERTEX
-        vertex_fitting_offsets: dict[int, VertexMorphOffset] = {}
-
-        dress_fit_global_poses = dict([(k, v * MVector3D()) for k, v in dress_fit_matrixes.items()])
-        for bone in dress.bones:
-            if bone.index not in dress_fit_global_poses:
-                # 行列がない場合、親に差分をかけて変形後の位置を取得
-                parent_index = self.get_exist_parent_index(dress, bone, dress_fit_matrixes)
-                dress_fit_pos = dress_fit_matrixes[parent_index] * (dress.bones[bone.index].position - dress.bones[parent_index].position)
-                dress_fit_global_poses[bone.index] = dress_fit_pos
-
-        total_index_count = len(dress.vertices)
-        for vertex in dress.vertices:
-            bone_indexes = vertex.deform.indexes
-            bone_weights = vertex.deform.weights
-
-            dress_bone_fit_positions: list[np.ndarray] = []
-            dress_bone_distances: list[np.ndarray] = []
-            model_bone_distances: list[np.ndarray] = []
-            dress_bone_weights: list[float] = []
-            for bone_index, bone_weight in zip(bone_indexes, bone_weights):
-                dress_bone = dress.bones[int(bone_index)]
-                dress_bone_fit_positions.append(dress_fit_global_poses[bone.index].vector)
-
-                dress_parent_bone = dress.bones[dress_bone.parent_index]
-                if dress_bone.name not in model.bones or dress_parent_bone.name not in model.bones:
-                    continue
-                model_bone = model.bones[dress_bone.name]
-                model_parent_bone = model.bones[dress_parent_bone.name]
-
-                dress_bone_distances.append((dress_fit_global_poses[bone.index] - dress_fit_global_poses[bone.parent_index]).vector)
-                model_bone_distances.append((model_bone.position - model_parent_bone.position).vector)
-                dress_bone_weights.append(bone_weight)
-
-            dress_bone_scales = np.nan_to_num(np.array(model_bone_distances) / np.array(dress_bone_distances), nan=1, posinf=1, neginf=1)
-            if len(bone_indexes) == 1:
-                dress_bone_average_scale = dress_bone_scales
-            else:
-                dress_bone_average_scale = np.average(dress_bone_scales, weights=dress_bone_weights, axis=0).reshape(1, 3)
-            dress_vertex_diff = (np.full((len(bone_indexes), 3), vertex.position.vector) - np.array(dress_bone_fit_positions)) * dress_bone_average_scale
-            dress_vertex_weighted_poses = dress_vertex_diff * bone_weights.reshape(len(bone_weights), 1) + np.array(dress_bone_fit_positions)
-            if len(bone_indexes) == 1:
-                vertex_fit_pos = np.average(dress_vertex_weighted_poses, weights=bone_weights, axis=0)
-            else:
-                vertex_fit_pos = dress_vertex_weighted_poses[0]
-
-            vertex_fitting_offsets[vertex.index] = VertexMorphOffset(vertex.index, MVector3D(*vertex_fit_pos) - vertex.position)
-
-            logger.count(
-                "衣装フィッティング頂点モーフ作成",
-                index=vertex.index,
-                total_index_count=total_index_count,
-                display_block=10000,
-            )
-
-        vertex_fitting_morph.offsets = list(vertex_fitting_offsets.values())
-        dress.morphs.append(vertex_fitting_morph)
-
-        return dress
 
     def get_exist_parent_index(self, dress: PmxModel, bone: Bone, dress_fit_matrixes: dict[int, MMatrix4x4]) -> int:
         if 0 > bone.parent_index or bone.parent_index in dress_fit_matrixes:
@@ -392,81 +328,6 @@ class LoadWorker(BaseWorker):
             model_bone_tail_relative_positions[dress_bone.index] = dress_bone.tail_relative_position * dress_fit_scale
 
         return model_bone_positions, model_bone_tail_relative_positions
-
-    def create_dress_scale_morphs2(self, model: PmxModel, dress: PmxModel) -> PmxModel:
-        # ウェイト頂点の法線に基づいたスケールを取得
-        weighted_vertex_scale = dress.get_weighted_vertex_scale()
-
-        # 変形用スケールモーフを追加
-        bone_scale_morph = Morph(name="BoneScale")
-        bone_scale_morph.is_system = True
-        bone_scale_morph.morph_type = MorphType.BONE
-        bone_scale_offsets: list[BoneMorphOffset] = []
-        model_fake_bone_positions: dict[int, MVector3D] = {}
-
-        for bone in dress.bones:
-            if 0 == bone.index and 0 > bone.parent_index:
-                # ルートで親がない場合、グローバル座標の差分を取る
-                bone_scale = model.bones[0].position - bone.position
-                bone_scale_offsets.append(BoneMorphOffset(bone.index, bone_scale, MQuaternion()))
-            else:
-                if bone.name in model.bones and dress.bones[bone.parent_index].name == model.bones[model.bones[bone.name].parent_index].name:
-                    # 自身と同じボーンで同じ親子関係の場合、親ボーンとのスケールモーフを追加
-                    bone_scale = model.bones[bone.name].parent_relative_position - bone.parent_relative_position
-                    bone_scale_offsets.append(BoneMorphOffset(bone.index, bone_scale, MQuaternion()))
-                elif bone.name in model.bones and bone.parent_index in model_fake_bone_positions:
-                    # 同じボーンがモデル側にある場合（親ボーンがない場合）、モデル側の仮ボーン位置で計算する
-                    model_parent_fake_bone_position = model_fake_bone_positions[bone.parent_index]
-                    bone_scale = (model.bones[bone.name].position - model_parent_fake_bone_position) - bone.parent_relative_position
-                    bone_scale_offsets.append(BoneMorphOffset(bone.index, bone_scale, MQuaternion()))
-                else:
-                    # 同じボーンがモデル側に無い場合、相対位置で求める
-                    parent_name = self.get_parent_name(model, dress, bone)
-                    child_names = self.get_child_names(model, dress, bone)
-                    if parent_name and child_names:
-                        dress_child_mean_pos = MVector3D(*np.mean([dress.bones[cname].position.vector for cname in child_names], axis=0))
-                        model_child_mean_pos = MVector3D(*np.mean([model.bones[cname].position.vector for cname in child_names], axis=0))
-                        # 人物にない衣装ボーンの縮尺
-                        dress_wrap_scale = (bone.position - dress.bones[parent_name].position) / (dress_child_mean_pos - dress.bones[parent_name].position)
-                        # 人物モデルに縮尺を当てはめる
-                        model_fake_bone_position = (
-                            model.bones[parent_name].position + (model_child_mean_pos - model.bones[parent_name].position) * dress_wrap_scale
-                        )
-                        bone_scale = (model_fake_bone_position - model.bones[parent_name].position) - bone.parent_relative_position
-                        bone_scale_offsets.append(BoneMorphOffset(bone.index, bone_scale, MQuaternion()))
-                        model_fake_bone_positions[bone.index] = model_fake_bone_position
-
-            for axis in ["X", "Y", "Z"]:
-                scale_morph = Morph(name=f"{bone.name}S{axis}")
-                scale_morph.is_system = True
-                scale_morph.morph_type = MorphType.VERTEX
-                offsets: list[VertexMorphOffset] = []
-                bone_weighted_vertices: dict[int, MVector3D] = weighted_vertex_scale.get(bone.index, {})
-                for vertex_index, scale in bone_weighted_vertices.items():
-                    axis_scale = MVector3D()
-                    match axis:
-                        case "X":
-                            axis_scale.x = scale.x
-                        case "Y":
-                            axis_scale.y = scale.y
-                        case "Z":
-                            axis_scale.z = scale.z
-                    offsets.append(VertexMorphOffset(vertex_index=vertex_index, position_offset=axis_scale))
-                if offsets:
-                    scale_morph.offsets = offsets
-                    dress.morphs.append(scale_morph)
-
-            logger.count(
-                "衣装モデル追加セットアップ：スケールモーフ追加",
-                index=bone.index,
-                total_index_count=len(dress.bones),
-                display_block=100,
-            )
-
-        bone_scale_morph.offsets = bone_scale_offsets
-        dress.morphs.append(bone_scale_morph)
-
-        return dress
 
     def get_parent_name(self, model: PmxModel, dress: PmxModel, bone: Bone) -> str:
         if bone.parent_index < 0:
