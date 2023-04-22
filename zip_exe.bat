@@ -5,12 +5,12 @@ cd /d %~dp0
 cls
 
 del dist\*.zip
-del dist\*.lnk
+del dist\*.bat
 move /y dist\*.exe dist\past
 
 pyinstaller --clean zip_exe.spec
 
 copy /y archive\Readme*.txt dist
 
-cd src && python create_lnk.py && cd ..
+cd src && python create_bat.py && cd ..
 
