@@ -78,5 +78,5 @@ exe = EXE(pyz,
             strip=False,
             upx=True,
             runtime_tmpdir=None,
-            console=True,
+            console=False,
             icon=data_keys[0][0])

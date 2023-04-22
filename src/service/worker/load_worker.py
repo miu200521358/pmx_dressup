@@ -144,7 +144,10 @@ class LoadWorker(BaseWorker):
         model_bone_tail_relative_positions: dict[int, MVector3D] = {-1: MVector3D()}
         dress_fit_qqs: dict[int, MQuaternion] = {}
 
-        for dress_bone_tree in dress.bone_trees:
+        logger.info("-- フィッティング用縮尺計算")
+
+        dress_bone_tree_count = len(dress.bone_trees)
+        for i, dress_bone_tree in enumerate(dress.bone_trees):
             for dress_bone in dress_bone_tree:
                 model_bone_positions, model_bone_tail_relative_positions = self.get_model_position(
                     model,
@@ -154,11 +157,20 @@ class LoadWorker(BaseWorker):
                     model_bone_tail_relative_positions,
                 )
 
+            logger.count(
+                "-- 縮尺計算",
+                index=i,
+                total_index_count=dress_bone_tree_count,
+                display_block=100,
+            )
+
         z_direction = MVector3D(0, 0, -1)
+
+        logger.info("-- フィッティング用ボーン回転計算")
 
         rot_target_bone_names: set[str] = set([])
         dress_motion = VmdMotion()
-        for dress_bone_tree in dress.bone_trees:
+        for i, dress_bone_tree in enumerate(dress.bone_trees):
             for n, dress_bone in enumerate(dress_bone_tree):
                 if (
                     dress_bone.name not in model.bones
@@ -198,7 +210,15 @@ class LoadWorker(BaseWorker):
                 # 計算対象に追加
                 rot_target_bone_names |= {dress_bone_tree.last_name}
 
-        total_index_count = len(dress.bone_trees)
+            logger.count(
+                "-- ボーン回転計算",
+                index=i,
+                total_index_count=dress_bone_tree_count,
+                display_block=100,
+            )
+
+        logger.info("-- フィッティングボーンモーフ追加")
+
         for i, dress_bone_tree in enumerate(dress.bone_trees):
             for n, dress_bone in enumerate(dress_bone_tree):
                 if dress_bone.index in bone_fitting_offsets or 0 == n:
@@ -266,10 +286,10 @@ class LoadWorker(BaseWorker):
                 dress_motion.bones[dress_bone.name].append(bf)
 
             logger.count(
-                "フィッティングボーンモーフ追加",
+                "-- ボーンモーフ追加",
                 index=i,
-                total_index_count=total_index_count,
-                display_block=50,
+                total_index_count=dress_bone_tree_count,
+                display_block=100,
             )
 
         bone_fitting_morph.offsets = list(bone_fitting_offsets.values())
