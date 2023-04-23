@@ -143,6 +143,7 @@ class LoadWorker(BaseWorker):
         model_bone_positions: dict[int, MVector3D] = {-1: MVector3D()}
         model_bone_tail_relative_positions: dict[int, MVector3D] = {-1: MVector3D()}
         dress_fit_qqs: dict[int, MQuaternion] = {}
+        dress_fit_scales: dict[int, MQuaternion] = {}
 
         logger.info("-- フィッティング用縮尺計算")
 
@@ -178,9 +179,9 @@ class LoadWorker(BaseWorker):
                     or dress_bone.has_fixed_axis
                     or dress_bone.is_leg_fk
                     or not dress.bone_trees.is_in_standard(dress_bone.name)
+                    or dress_bone.index in dress_fit_qqs
                 ):
-                    # 人物に同じボーンがない、IKボーン、捩ボーン、足D系列、準標準までに含まれない場合、角度は計算しない
-                    dress_fit_qqs[dress_bone.index] = MQuaternion()
+                    # 人物に同じボーンがない、IKボーン、捩ボーン、足D系列、準標準までに含まれない、計算済みの場合、角度は計算しない
                     continue
 
                 # 人物：自分の方向
@@ -202,9 +203,18 @@ class LoadWorker(BaseWorker):
 
                 dress_fit_qqs[dress_bone.index] = dress_fit_qq
 
+                # スケール
+                model_tail_diff_vec = model_bone_tail_relative_positions[dress_bone.index]
+                model_tail_diff_vec.effective(rtol=0.05, atol=0.05)
+                dress_tail_diff_vec = dress_bone.tail_relative_position
+                dress_tail_diff_vec.effective(rtol=0.05, atol=0.05)
+                dress_fit_scale = (model_tail_diff_vec / dress_tail_diff_vec.one()).one()
+                dress_fit_scales[dress_bone.index] = dress_fit_scale
+
                 # キーフレとして追加
                 bf = VmdBoneFrame(0, dress_bone.name)
                 bf.rotation = dress_fit_qq
+                bf.scale = dress_fit_scale
                 dress_motion.bones[dress_bone.name].append(bf)
 
                 # 計算対象に追加
@@ -230,51 +240,8 @@ class LoadWorker(BaseWorker):
                 # 準標準ボーン系列の表示先であるか否か
                 is_standard_tail = dress.bone_trees.is_standard_tail(dress_bone.name)
 
-                # if 1 < n:
-                #     dress_offset_scale = MVector3D(1, 1, 1)
-                #     # 親ボーンからの距離差をスケールとして保持する
-                #     model_parent_distance = model_bone_positions[dress_bone.index].distance(model_bone_positions[dress_parent_bone.index])
-                #     dress_parent_distance = dress_bone.position.distance(dress_parent_bone.position)
-
-                #     # スケールを設定
-                #     dress_fit_scale = model_parent_distance / (dress_parent_distance or 1.0)
-
-                #     # スケールを設定
-                #     dress_offset_scale = MVector3D(1, dress_fit_scale, 1).one()
-
-                #     bone_fitting_offsets[dress_parent_bone.index].position *= dress_offset_scale
-                #     bone_fitting_offsets[dress_parent_bone.index].scale = dress_offset_scale
-                #     dress_motion.bones[dress_parent_bone.name][0].position *= dress_offset_scale
-                #     dress_motion.bones[dress_parent_bone.name][0].scale = dress_offset_scale
-
                 # 親までをフィッティングさせた上で改めてボーン位置を求める
                 dress_matrixes = dress_motion.bones.get_matrix_by_indexes([0], dress.bone_trees.filter(dress_bone.name), dress, append_ik=False)
-
-                # if 1 < n and dress_bone.name in model.bones and dress_parent_bone.name in STANDARD_BONE_NAMES:
-                #     # 人物に同じボーンがあり、準標準ボーンである場合、スケールフィッティングさせる
-
-                #     # 親ボーンからの距離差をスケールとして保持する
-                #     model_parent_distance = model_bone_positions[dress_bone.index].distance(model_bone_positions[dress_parent_bone.index])
-                #     dress_parent_distance = dress_matrixes[0][dress_bone.name].position.distance(dress_matrixes[0][dress_parent_bone.name].position)
-
-                #     # スケールを設定
-                #     dress_fit_scale = model_parent_distance / (dress_parent_distance or 1.0)
-
-                #     # スケールを設定
-                #     dress_offset_scale = MVector3D(1, dress_fit_scale, 1).one()
-
-                #     # model_parent_local_pos = model_bone_positions[dress_bone.index] - model_bone_positions[dress_parent_bone.index]
-                #     # model_parent_local_pos.effective(rtol=0.05, atol=0.05)
-                #     # dress_parent_local_pos = dress_matrixes[0][dress_bone.name].position - dress_matrixes[0][dress_parent_bone.name].position
-                #     # dress_parent_local_pos.effective(rtol=0.05, atol=0.05)
-                #     # dress_offset_scale = (model_parent_local_pos / dress_parent_local_pos).one()
-
-                #     # スケールを設定
-                #     bone_fitting_offsets[dress_parent_bone.index].scale = dress_offset_scale
-                #     dress_motion.bones[dress_parent_bone.name][0].scale = dress_offset_scale
-
-                #     # スケーリング込みでフィッティングさせた上で改めてボーン位置を求める
-                #     dress_matrixes = dress_motion.bones.get_matrix_by_indexes([0], dress.bone_trees.filter(dress_bone.name), dress, append_ik=False)
 
                 if (dress_bone.name in model.bones or 2 > n) and not is_standard_tail:
                     # 人物に同じボーンがあり、準標準ボーンの表示先でない場合、フィッティングさせる
@@ -319,9 +286,10 @@ class LoadWorker(BaseWorker):
                     # ローカルボーン位置をオフセットとする
                     dress_offset_position = dress_matrixes[0][dress_bone.name].global_matrix.inverse() * dress_fit_pos
 
-                dress_fit_qq = dress_fit_qqs.get(dress_bone.index, MQuaternion())
+                dress_offset_qq = dress_fit_qqs.get(dress_bone.index, MQuaternion())
+                dress_offset_scale = dress_fit_scales.get(dress_bone.index, MVector3D(1, 1, 1))
 
-                bone_fitting_offsets[dress_bone.index] = BoneMorphOffset(dress_bone.index, dress_offset_position, dress_fit_qq)
+                bone_fitting_offsets[dress_bone.index] = BoneMorphOffset(dress_bone.index, dress_offset_position, dress_offset_qq, dress_offset_scale)
 
                 dress_motion.bones[dress_bone.name][0].position = dress_offset_position
 
