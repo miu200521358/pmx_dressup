@@ -230,23 +230,44 @@ class LoadWorker(BaseWorker):
                 # 準標準ボーン系列の表示先であるか否か
                 is_standard_tail = dress.bone_trees.is_standard_tail(dress_bone.name)
 
+                # if 1 < n:
+                #     dress_offset_scale = MVector3D(1, 1, 1)
+                #     # 親ボーンからの距離差をスケールとして保持する
+                #     model_parent_distance = model_bone_positions[dress_bone.index].distance(model_bone_positions[dress_parent_bone.index])
+                #     dress_parent_distance = dress_bone.position.distance(dress_parent_bone.position)
+
+                #     # スケールを設定
+                #     dress_fit_scale = model_parent_distance / (dress_parent_distance or 1.0)
+
+                #     # スケールを設定
+                #     dress_offset_scale = MVector3D(1, dress_fit_scale, 1).one()
+
+                #     bone_fitting_offsets[dress_parent_bone.index].position *= dress_offset_scale
+                #     bone_fitting_offsets[dress_parent_bone.index].scale = dress_offset_scale
+                #     dress_motion.bones[dress_parent_bone.name][0].position *= dress_offset_scale
+                #     dress_motion.bones[dress_parent_bone.name][0].scale = dress_offset_scale
+
                 # 親までをフィッティングさせた上で改めてボーン位置を求める
                 dress_matrixes = dress_motion.bones.get_matrix_by_indexes([0], dress.bone_trees.filter(dress_bone.name), dress, append_ik=False)
 
-                # 捩りを持つ場合、フィッティング後の軸方向を求め直す
-                if dress_bone.has_fixed_axis:
-                    model.bones[dress_bone.index].correct_fixed_axis(
-                        dress_matrixes[0][dress_bone.name].position - dress_matrixes[0][dress_parent_bone.name].position
-                    )
-
-                # dress_offset_scale = MVector3D(1, 1, 1)
                 # if 1 < n and dress_bone.name in model.bones and dress_parent_bone.name in STANDARD_BONE_NAMES:
                 #     # 人物に同じボーンがあり、準標準ボーンである場合、スケールフィッティングさせる
-                #     model_parent_local_pos = model_bone_positions[dress_bone.index] - model_bone_positions[dress_parent_bone.index]
-                #     model_parent_local_pos.effective(rtol=0.05, atol=0.05)
-                #     dress_parent_local_pos = dress_matrixes[0][dress_bone.name].position - dress_matrixes[0][dress_parent_bone.name].position
-                #     dress_parent_local_pos.effective(rtol=0.05, atol=0.05)
-                #     dress_offset_scale = (model_parent_local_pos / dress_parent_local_pos).one()
+
+                #     # 親ボーンからの距離差をスケールとして保持する
+                #     model_parent_distance = model_bone_positions[dress_bone.index].distance(model_bone_positions[dress_parent_bone.index])
+                #     dress_parent_distance = dress_matrixes[0][dress_bone.name].position.distance(dress_matrixes[0][dress_parent_bone.name].position)
+
+                #     # スケールを設定
+                #     dress_fit_scale = model_parent_distance / (dress_parent_distance or 1.0)
+
+                #     # スケールを設定
+                #     dress_offset_scale = MVector3D(1, dress_fit_scale, 1).one()
+
+                #     # model_parent_local_pos = model_bone_positions[dress_bone.index] - model_bone_positions[dress_parent_bone.index]
+                #     # model_parent_local_pos.effective(rtol=0.05, atol=0.05)
+                #     # dress_parent_local_pos = dress_matrixes[0][dress_bone.name].position - dress_matrixes[0][dress_parent_bone.name].position
+                #     # dress_parent_local_pos.effective(rtol=0.05, atol=0.05)
+                #     # dress_offset_scale = (model_parent_local_pos / dress_parent_local_pos).one()
 
                 #     # スケールを設定
                 #     bone_fitting_offsets[dress_parent_bone.index].scale = dress_offset_scale
@@ -257,10 +278,9 @@ class LoadWorker(BaseWorker):
 
                 if (dress_bone.name in model.bones or 2 > n) and not is_standard_tail:
                     # 人物に同じボーンがあり、準標準ボーンの表示先でない場合、フィッティングさせる
-                    model_diff_local_pos = dress_matrixes[0][dress_bone.name].global_matrix.inverse() * model_bone_positions[dress_bone.index]
-                    dress_offset_position = model_diff_local_pos
+                    dress_offset_position = dress_matrixes[0][dress_bone.name].global_matrix.inverse() * model_bone_positions[dress_bone.index]
                 elif dress_parent_bone.name in model.bones and not is_standard_tail:
-                    # 人物に同じボーンがなく、親ボーンがある場合、親ボーンからの距離に合わせる
+                    # 人物に同じボーンがないが、親ボーンがある場合、親ボーンからの距離に合わせる
                     dress_offset_position = MVector3D()
                 else:
                     # 人物に同じボーンが無い場合、縮尺込みでフィッティングさせる
@@ -303,10 +323,13 @@ class LoadWorker(BaseWorker):
 
                 bone_fitting_offsets[dress_bone.index] = BoneMorphOffset(dress_bone.index, dress_offset_position, dress_fit_qq)
 
-                bf = VmdBoneFrame(0, dress_bone.name)
-                bf.rotation = dress_fit_qq
-                bf.position = dress_offset_position
-                dress_motion.bones[dress_bone.name].append(bf)
+                dress_motion.bones[dress_bone.name][0].position = dress_offset_position
+
+                # 捩りを持つ場合、フィッティング後の軸方向を求め直す
+                if dress_bone.has_fixed_axis:
+                    model.bones[dress_bone.index].correct_fixed_axis(
+                        (dress_matrixes[0][dress_bone.name].position + dress_offset_position) - dress_matrixes[0][dress_parent_bone.name].position
+                    )
 
             logger.count(
                 "-- ボーンモーフ追加",
