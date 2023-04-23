@@ -9,7 +9,7 @@ from mlib.base.exception import MApplicationException
 from mlib.base.logger import MLogger
 from mlib.base.math import MMatrix4x4, MQuaternion, MVector3D, MVector4D
 from mlib.pmx.pmx_collection import PmxModel
-from mlib.pmx.pmx_part import Bone, BoneMorphOffset, MaterialMorphCalcMode, MaterialMorphOffset, Morph, MorphType
+from mlib.pmx.pmx_part import STANDARD_BONE_NAMES, Bone, BoneMorphOffset, MaterialMorphCalcMode, MaterialMorphOffset, Morph, MorphType
 from mlib.pmx.pmx_writer import PmxWriter
 from mlib.service.base_worker import BaseWorker
 from mlib.service.form.base_panel import BasePanel
@@ -224,19 +224,42 @@ class LoadWorker(BaseWorker):
                 if dress_bone.index in bone_fitting_offsets or 0 == n:
                     continue
 
+                # 親ボーン
                 dress_parent_bone = dress.bones[dress_bone.parent_index]
+
+                # 準標準ボーン系列の表示先であるか否か
+                is_standard_tail = dress.bone_trees.is_standard_tail(dress_bone.name)
 
                 # 親までをフィッティングさせた上で改めてボーン位置を求める
                 dress_matrixes = dress_motion.bones.get_matrix_by_indexes([0], dress.bone_trees.filter(dress_bone.name), dress, append_ik=False)
 
-                # 準標準ボーン系列の表示先であるか否か
-                is_standard_tail = dress.bone_trees.is_standard_tail(dress_bone.name)
+                # 捩りを持つ場合、フィッティング後の軸方向を求め直す
+                if dress_bone.has_fixed_axis:
+                    model.bones[dress_bone.index].correct_fixed_axis(
+                        dress_matrixes[0][dress_bone.name].position - dress_matrixes[0][dress_parent_bone.name].position
+                    )
+
+                # dress_offset_scale = MVector3D(1, 1, 1)
+                # if 1 < n and dress_bone.name in model.bones and dress_parent_bone.name in STANDARD_BONE_NAMES:
+                #     # 人物に同じボーンがあり、準標準ボーンである場合、スケールフィッティングさせる
+                #     model_parent_local_pos = model_bone_positions[dress_bone.index] - model_bone_positions[dress_parent_bone.index]
+                #     model_parent_local_pos.effective(rtol=0.05, atol=0.05)
+                #     dress_parent_local_pos = dress_matrixes[0][dress_bone.name].position - dress_matrixes[0][dress_parent_bone.name].position
+                #     dress_parent_local_pos.effective(rtol=0.05, atol=0.05)
+                #     dress_offset_scale = (model_parent_local_pos / dress_parent_local_pos).one()
+
+                #     # スケールを設定
+                #     bone_fitting_offsets[dress_parent_bone.index].scale = dress_offset_scale
+                #     dress_motion.bones[dress_parent_bone.name][0].scale = dress_offset_scale
+
+                #     # スケーリング込みでフィッティングさせた上で改めてボーン位置を求める
+                #     dress_matrixes = dress_motion.bones.get_matrix_by_indexes([0], dress.bone_trees.filter(dress_bone.name), dress, append_ik=False)
 
                 if (dress_bone.name in model.bones or 2 > n) and not is_standard_tail:
                     # 人物に同じボーンがあり、準標準ボーンの表示先でない場合、フィッティングさせる
                     model_diff_local_pos = dress_matrixes[0][dress_bone.name].global_matrix.inverse() * model_bone_positions[dress_bone.index]
                     dress_offset_position = model_diff_local_pos
-                elif dress.bones[dress_bone.parent_index].name in model.bones and not is_standard_tail:
+                elif dress_parent_bone.name in model.bones and not is_standard_tail:
                     # 人物に同じボーンがなく、親ボーンがある場合、親ボーンからの距離に合わせる
                     dress_offset_position = MVector3D()
                 else:
