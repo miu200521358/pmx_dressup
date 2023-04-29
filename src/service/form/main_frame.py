@@ -103,8 +103,11 @@ class MainFrame(BaseFrame):
         self.config_panel.fno = 0
 
         try:
+            logger.info("人物モデル描画準備")
             self.config_panel.canvas.append_model_set(self.file_panel.model_ctrl.data, self.model_motion)
+            logger.info("衣装モデル描画準備")
             self.config_panel.canvas.append_model_set(self.file_panel.dress_ctrl.data, self.dress_motion)
+            logger.info("モデル描画")
             self.config_panel.canvas.Refresh()
             self.notebook.ChangeSelection(self.config_panel.tab_idx)
         except:
@@ -133,8 +136,11 @@ class MainFrame(BaseFrame):
         self.config_panel.fno = 0
 
         try:
+            logger.info("人物モデル描画準備")
             self.config_panel.canvas.append_model_set(self.file_panel.model_ctrl.data, self.model_motion)
+            logger.info("衣装モデル描画準備")
             self.config_panel.canvas.append_model_set(self.file_panel.dress_ctrl.data, self.dress_motion)
+            logger.info("モデル描画")
             self.config_panel.canvas.Refresh()
             self.notebook.ChangeSelection(self.config_panel.tab_idx)
         except:
@@ -166,10 +172,6 @@ class MainFrame(BaseFrame):
         bmf = VmdMorphFrame(0, "BoneFitting")
         bmf.ratio = 1
         self.dress_motion.morphs[bmf.name].append(bmf)
-
-        vmf = VmdMorphFrame(0, "VertexFitting")
-        vmf.ratio = 1
-        self.dress_motion.morphs[vmf.name].append(bmf)
 
         for material in dress.materials:
             mf = VmdMorphFrame(0, f"{material.name}TR")
