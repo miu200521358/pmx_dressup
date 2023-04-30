@@ -1,5 +1,6 @@
 import logging
 import os
+import re
 from typing import Optional
 
 import numpy as np
@@ -87,6 +88,13 @@ class LoadWorker(BaseWorker):
             logger.debug(f"変形モーフ付き衣装モデル出力: {out_path}")
 
         self.result_data = (model, dress, motion)
+
+    def output_log(self):
+        file_panel: FilePanel = self.panel
+        output_log_path = re.sub(r"\.pmx$", ".log", file_panel.output_pmx_ctrl.path)
+
+        # 出力されたメッセージを全部出力
+        file_panel.console_ctrl.text_ctrl.SaveFile(filename=output_log_path)
 
     def valid_model(self, model: PmxModel, type_name: str) -> None:
         """フィッティングに最低限必要なボーンで不足しているボーンリストを取得する"""

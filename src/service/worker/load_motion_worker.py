@@ -1,4 +1,5 @@
 import os
+import re
 from typing import Optional
 
 import wx
@@ -29,3 +30,10 @@ class LoadMotionWorker(BaseWorker):
             motion = VmdMotion()
 
         self.result_data = motion
+
+    def output_log(self):
+        file_panel: FilePanel = self.panel
+        output_log_path = re.sub(r"\.pmx$", ".log", file_panel.output_pmx_ctrl.path)
+
+        # 出力されたメッセージを全部出力
+        file_panel.console_ctrl.text_ctrl.SaveFile(filename=output_log_path)
