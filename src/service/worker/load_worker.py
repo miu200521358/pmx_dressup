@@ -10,7 +10,7 @@ from mlib.base.exception import MApplicationException
 from mlib.base.logger import MLogger
 from mlib.base.math import MMatrix4x4, MQuaternion, MVector3D, MVector4D
 from mlib.pmx.pmx_collection import PmxModel
-from mlib.pmx.pmx_part import Bone, BoneMorphOffset, MaterialMorphCalcMode, MaterialMorphOffset, Morph, MorphType, STANDARD_BONE_NAMES
+from mlib.pmx.pmx_part import Bone, BoneMorphOffset, MaterialMorphCalcMode, MaterialMorphOffset, Morph, MorphType
 from mlib.pmx.pmx_writer import PmxWriter
 from mlib.service.base_worker import BaseWorker
 from mlib.service.form.base_panel import BasePanel
@@ -143,6 +143,25 @@ class LoadWorker(BaseWorker):
 
     def create_dress_fit_bone_morphs(self, model: PmxModel, dress: PmxModel) -> PmxModel:
         """衣装フィッティング用ボーンモーフを作成"""
+        SCALE_BONE_NAMES = (
+            # ("上半身", "首"),
+            ("左腕", "左手首"),
+            ("左親指１", "左親指２"),
+            ("左人指１", "左人指３"),
+            ("左中指１", "左中指３"),
+            ("左薬指１", "左薬指３"),
+            ("左小指１", "左小指３"),
+            ("右腕", "右手首"),
+            ("右親指１", "右親指２"),
+            ("右人指１", "右人指３"),
+            ("右中指１", "右中指３"),
+            ("右薬指１", "右薬指３"),
+            ("右小指１", "右小指３"),
+            # ("下半身", "足中心"),
+            ("左足", "左足首"),
+            ("右足", "右足首"),
+        )
+
         bone_fitting_morph = Morph(name="BoneFitting")
         bone_fitting_morph.is_system = True
         bone_fitting_morph.morph_type = MorphType.BONE
@@ -186,6 +205,8 @@ class LoadWorker(BaseWorker):
         z_direction = MVector3D(0, 0, -1)
         for i, dress_bone_tree in enumerate(dress.bone_trees):
             for n, dress_bone in enumerate(dress_bone_tree):
+                if dress_bone.index in dress_offset_qqs:
+                    continue
                 if (
                     dress_bone.name not in model.bones
                     or not dress.bone_trees.is_in_standard(dress_bone.name)
@@ -204,6 +225,10 @@ class LoadWorker(BaseWorker):
 
                 # 衣装：自分の方向
                 dress_x_direction = dress_bone.tail_relative_position.normalized()
+                if not dress_x_direction:
+                    # 末端が取れてない場合、とりあえずスルー
+                    continue
+
                 dress_y_direction = dress_x_direction.cross(z_direction)
                 dress_slope_qq = MQuaternion.from_direction(dress_x_direction, dress_y_direction)
 
@@ -231,16 +256,24 @@ class LoadWorker(BaseWorker):
         logger.info("-- フィッティングスケール計算")
 
         dress_standard_scales: list[MVector3D] = []
-        for bone_name in STANDARD_BONE_NAMES.keys():
-            if not (bone_name in model.bones and bone_name in dress.bones):
-                continue
+        for from_name, to_name in SCALE_BONE_NAMES:
             # 人物と衣装の両方にある準標準ボーンの場合、縮尺計算
-            dress_relative_position = dress.bones[bone_name].tail_relative_position.effective(rtol=0.05, atol=0.05)
-            model_relative_position = model.bones[bone_name].tail_relative_position.effective(rtol=0.05, atol=0.05)
+            if not (from_name in dress.bones and to_name in dress.bones and from_name in model.bones and to_name in model.bones):
+                continue
+
+            dress_from_bone = dress.bones[from_name]
+            dress_to_bone = dress.bones[to_name]
+
+            model_from_position = model_bone_positions[dress_from_bone.index]
+            model_to_position = model_bone_positions[dress_to_bone.index]
+            model_relative_position = (model_to_position - model_from_position).effective(rtol=0.05, atol=0.05).abs()
+
+            dress_relative_position = (dress_to_bone.position - dress_from_bone.position).effective(rtol=0.05, atol=0.05).abs()
+
             scale = model_relative_position / dress_relative_position
             if scale and scale.length() != 1:
                 dress_standard_scales.append(scale)
-        dress_root_scale = np.max(MVector3D.std_mean(dress_standard_scales).vector)
+        dress_root_scale = np.max(MVector3D.std_mean(dress_standard_scales).vector) if dress_standard_scales else 1
         dress_offset_root_scale = MVector3D(dress_root_scale, dress_root_scale, dress_root_scale)
 
         for dress_bone in dress.bones:
@@ -255,23 +288,7 @@ class LoadWorker(BaseWorker):
 
         logger.info("-- -- スケール計算 [全身][{s}]", s=dress_offset_root_scale)
 
-        for from_name, to_name in (
-            ("上半身", "首"),
-            ("左腕", "左手首"),
-            ("左親指１", "左親指２"),
-            ("左人指１", "左人指３"),
-            ("左中指１", "左中指３"),
-            ("左薬指１", "左薬指３"),
-            ("左小指１", "左小指３"),
-            ("右腕", "右手首"),
-            ("右親指１", "右親指２"),
-            ("右人指１", "右人指３"),
-            ("右中指１", "右中指３"),
-            ("右薬指１", "右薬指３"),
-            ("右小指１", "右小指３"),
-            ("左足", "左足首"),
-            ("右足", "右足首"),
-        ):
+        for from_name, to_name in SCALE_BONE_NAMES:
             if not (from_name in dress.bones and to_name in dress.bones and from_name in model.bones and to_name in model.bones):
                 continue
 
@@ -304,6 +321,17 @@ class LoadWorker(BaseWorker):
             dress_fit_scales[dress.bones[from_name].index] = dress_fit_scale
 
             logger.info("-- -- スケール計算 [{b}][{s}]", b=from_name, s=dress_fit_scale)
+
+        # upper_bone = dress.bones["上半身"]
+        # lower_bone = dress.bones["下半身"]
+        # dress_offset_scales[lower_bone.index] = dress_offset_scales[upper_bone.index].copy()
+        # dress_fit_scales[lower_bone.index] = dress_fit_scales[upper_bone.index].copy()
+
+        # bf = dress_motion.bones[lower_bone.name][0]
+        # bf.scale = dress_offset_scales[lower_bone.index]
+        # dress_motion.bones[lower_bone.name].append(bf)
+
+        # logger.info("-- -- スケール計算 [{b}][{s}]", b=lower_bone.name, s=dress_fit_scales[lower_bone.index])
 
         # 足Dは足をコピーする
         for leg_d_name, leg_fk_name in (("左足D", "左足"), ("右足D", "右足")):
