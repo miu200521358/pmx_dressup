@@ -270,11 +270,8 @@ class LoadWorker(BaseWorker):
             ("右中指１", "右中指３", ("右腕", "上半身")),
             ("右薬指１", "右薬指３", ("右腕", "上半身")),
             ("右小指１", "右小指３", ("右腕", "上半身")),
-            ("下半身", "足中心", []),
-            ("左足", "左ひざ", ("下半身",)),
-            ("左ひざ", "左足首", ("左足", "下半身")),
-            ("右足", "右ひざ", ("下半身",)),
-            ("右ひざ", "右足首", ("右足", "下半身")),
+            ("左足", "左足首", []),
+            ("右足", "右足首", []),
         ):
             if not (from_name in dress.bones and to_name in dress.bones and from_name in model.bones and to_name in model.bones):
                 continue
@@ -310,7 +307,7 @@ class LoadWorker(BaseWorker):
             logger.info("-- -- スケール計算 [{b}][{s}]", b=from_name, s=dress_fit_scale)
 
         # 足Dは足をコピーする
-        for leg_d_name, leg_fk_name in (("左足D", "左足"), ("左ひざD", "左ひざ"), ("右足D", "右足"), ("右ひざD", "右ひざ")):
+        for leg_d_name, leg_fk_name in (("左足D", "左足"), ("右足D", "右足")):
             if not (leg_d_name in dress.bones and leg_fk_name in dress.bones):
                 continue
 
