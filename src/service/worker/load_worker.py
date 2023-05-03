@@ -10,7 +10,7 @@ from mlib.base.exception import MApplicationException
 from mlib.base.logger import MLogger
 from mlib.base.math import MMatrix4x4, MQuaternion, MVector3D, MVector4D
 from mlib.pmx.pmx_collection import PmxModel
-from mlib.pmx.pmx_part import Bone, BoneMorphOffset, MaterialMorphCalcMode, MaterialMorphOffset, Morph, MorphType
+from mlib.pmx.pmx_part import Bone, BoneMorphOffset, MaterialMorphCalcMode, MaterialMorphOffset, Morph, MorphType, STANDARD_BONE_NAMES
 from mlib.pmx.pmx_writer import PmxWriter
 from mlib.service.base_worker import BaseWorker
 from mlib.service.form.base_panel import BasePanel
@@ -100,6 +100,7 @@ class LoadWorker(BaseWorker):
         """フィッティングに最低限必要なボーンで不足しているボーンリストを取得する"""
         required_bone_names = {
             "センター",
+            "頭",
             "上半身",
             "下半身",
         }
@@ -151,6 +152,7 @@ class LoadWorker(BaseWorker):
         model_bone_tail_relative_positions: dict[int, MVector3D] = {-1: MVector3D()}
         dress_offset_qqs: dict[int, MQuaternion] = {}
         dress_offset_scales: dict[int, MVector3D] = {}
+        dress_fit_scales: dict[int, MVector3D] = {}
         dress_offset_positions: dict[int, MVector3D] = {}
         dress_motion = VmdMotion()
 
@@ -174,48 +176,11 @@ class LoadWorker(BaseWorker):
                 display_block=100,
             )
 
-        logger.info("-- フィッティング縮尺計算")
+        logger.info("-- フィッティング用ウェイト別頂点取得（人物）")
+        model_vertices_by_bones = model.get_vertices_by_bone()
 
-        dress_standard_scales: dict[int, float] = {0: 1}
-        dress_bone_count = len(dress.bones)
-        for i, dress_bone in enumerate(dress.bones):
-            if dress_bone.name in model.bones and dress.bone_trees.is_in_standard(dress_bone.name):
-                # 人物と衣装の両方にある準標準ボーンの場合、縮尺計算
-                dress_length = dress_bone.tail_relative_position.length()
-                model_length = model.bones[dress_bone.name].tail_relative_position.length()
-                scale = model_length / dress_length
-                if scale != 1.0:
-                    dress_standard_scales[dress_bone.index] = scale
-
-            logger.count(
-                "-- 縮尺計算",
-                index=i,
-                total_index_count=dress_bone_count,
-                display_block=1000,
-            )
-
-        np_dress_standard_scales = np.array(list(dress_standard_scales.values()))
-        median_dress_standard_scales = np.median(np_dress_standard_scales)
-        std_dress_standard_scales = np.std(np_dress_standard_scales)
-
-        # 中央値から標準偏差の1.5倍までの値を取得
-        filtered_dress_standard_scales = np_dress_standard_scales[
-            (np_dress_standard_scales >= median_dress_standard_scales - 1.5 * std_dress_standard_scales)
-            & (np_dress_standard_scales <= median_dress_standard_scales + 1.5 * std_dress_standard_scales)
-        ]
-
-        dress_standard_scale = np.mean(filtered_dress_standard_scales)
-        logger.info("-- 準標準ボーンスケール: {s:.3f}", s=dress_standard_scale)
-
-        for dress_bone in dress.bones:
-            if 0 <= dress_bone.parent_index:
-                continue
-            # ルートボーンにスケールキーフレとして追加
-            dress_offset_scale = MVector3D(dress_standard_scale, dress_standard_scale, dress_standard_scale)
-            bf = dress_motion.bones[dress_bone.name][0]
-            bf.scale = dress_offset_scale
-            dress_motion.bones[dress_bone.name].append(bf)
-            dress_offset_scales[dress_bone.index] = dress_offset_scale
+        logger.info("-- フィッティング用ウェイト別頂点取得（衣装）")
+        dress_vertices_by_bones = dress.get_vertices_by_bone()
 
         logger.info("-- フィッティング回転計算")
 
@@ -227,10 +192,9 @@ class LoadWorker(BaseWorker):
                     or not dress.bone_trees.is_in_standard(dress_bone.name)
                     or dress_bone.is_ik
                     or dress_bone.has_fixed_axis
-                    or dress_bone.is_leg_d
-                    or dress_bone.name in ["全ての親", "センター", "グルーブ"]
+                    or dress_bone.name in ["全ての親", "センター", "グルーブ", "腰"]
                 ):
-                    # 人物に同じボーンがない、IKボーン、捩ボーン、足D系列、準標準までに含まれない場合、角度は計算しない
+                    # 人物に同じボーンがない、IKボーン、捩ボーン、準標準までに含まれない場合、角度は計算しない
                     dress_offset_qqs[dress_bone.index] = MQuaternion()
                     continue
 
@@ -265,6 +229,170 @@ class LoadWorker(BaseWorker):
                 display_block=100,
             )
 
+        logger.info("-- フィッティングスケール計算")
+
+        dress_standard_scales: list[MVector3D] = []
+        for bone_name in STANDARD_BONE_NAMES.keys():
+            if not (bone_name in model.bones and bone_name in dress.bones):
+                continue
+            # 人物と衣装の両方にある準標準ボーンの場合、縮尺計算
+            dress_relative_position = dress.bones[bone_name].tail_relative_position.effective(rtol=0.05, atol=0.05)
+            model_relative_position = model.bones[bone_name].tail_relative_position.effective(rtol=0.05, atol=0.05)
+            scale = model_relative_position / dress_relative_position
+            if scale and scale.length() != 1:
+                dress_standard_scales.append(scale)
+        dress_root_scale = np.mean(np.mean(MVector3D.std_mean(dress_standard_scales).vector, axis=0))
+        dress_offset_root_scale = MVector3D(dress_root_scale, dress_root_scale, dress_root_scale)
+
+        for dress_bone in dress.bones:
+            if 0 <= dress_bone.parent_index:
+                continue
+            # ルートボーンにスケールキーフレとして追加
+            bf = dress_motion.bones[dress_bone.name][0]
+            bf.scale = dress_offset_root_scale
+            dress_motion.bones[dress_bone.name].append(bf)
+            dress_offset_scales[dress_bone.index] = dress_offset_root_scale
+            dress_fit_scales[dress_bone.index] = dress_offset_root_scale
+
+        logger.info("-- -- スケール計算 [全身][{s}]", s=dress_offset_root_scale)
+
+        for from_name, to_name, parent_names in (
+            ("上半身", "首", []),
+            ("左腕", "左手首", ("上半身",)),
+            ("左親指１", "左親指２", ("左腕", "上半身")),
+            ("左人指１", "左人指３", ("左腕", "上半身")),
+            ("左中指１", "左中指３", ("左腕", "上半身")),
+            ("左薬指１", "左薬指３", ("左腕", "上半身")),
+            ("左小指１", "左小指３", ("左腕", "上半身")),
+            ("右腕", "右手首", ("上半身",)),
+            ("右親指１", "右親指２", ("右腕", "上半身")),
+            ("右人指１", "右人指３", ("右腕", "上半身")),
+            ("右中指１", "右中指３", ("右腕", "上半身")),
+            ("右薬指１", "右薬指３", ("右腕", "上半身")),
+            ("右小指１", "右小指３", ("右腕", "上半身")),
+            ("下半身", "足中心", []),
+            ("左足", "左ひざ", ("下半身",)),
+            ("左ひざ", "左足首", ("左足", "下半身")),
+            ("右足", "右ひざ", ("下半身",)),
+            ("右ひざ", "右足首", ("右足", "下半身")),
+        ):
+            if not (from_name in dress.bones and to_name in dress.bones and from_name in model.bones and to_name in model.bones):
+                continue
+
+            # 親までをフィッティングさせた上で改めてボーン位置を求める
+            dress_from_matrixes = dress_motion.bones.get_matrix_by_indexes([0], dress.bone_trees.filter(from_name), dress, append_ik=False)
+            dress_to_matrixes = dress_motion.bones.get_matrix_by_indexes([0], dress.bone_trees.filter(to_name), dress, append_ik=False)
+
+            model_from_position = model_bone_positions[dress.bones[from_name].index]
+            model_to_position = model_bone_positions[dress.bones[to_name].index]
+
+            model_relative_position = (model_to_position - model_from_position).effective(rtol=0.05, atol=0.05).abs()
+            dress_relative_position = (
+                (dress_from_matrixes[0][from_name].global_matrix.inverse() * dress_to_matrixes[0][to_name].position).effective(rtol=0.05, atol=0.05).abs()
+            )
+
+            # dress_scale_vec = (model_relative_position / dress_relative_position).vector
+            # dress_scale = abs(np.mean(dress_scale_vec[dress_scale_vec != 0]))
+
+            # dress_fit_scale = MVector3D(*np.where(np.isclose(dress_scale_vec, 0), dress_scale, dress_scale_vec))
+
+            dress_scale = np.max(model_relative_position.vector) / np.max(dress_relative_position.vector)
+            dress_fit_scale = MVector3D(dress_scale, dress_scale, dress_scale)
+
+            # 必ずルートのスケールをキャンセルする
+            dress_offset_scale = (MVector3D(1, 1, 1) / dress_offset_root_scale) * dress_fit_scale
+
+            for parent_name in parent_names:
+                # 親ボーンが指定されていてキャンセルが必要な場合
+                dress_offset_scale *= MVector3D(1, 1, 1) / dress_offset_scales[dress.bones[parent_name].index]
+
+            bf = dress_motion.bones[from_name][0]
+            bf.scale = dress_offset_scale
+            dress_motion.bones[from_name].append(bf)
+            dress_offset_scales[dress.bones[from_name].index] = dress_offset_scale
+            dress_fit_scales[dress.bones[from_name].index] = dress_fit_scale
+
+            logger.info("-- -- スケール計算 [{b}][{s}]", b=from_name, s=dress_fit_scale)
+
+        # 足Dは足をコピーする
+        for leg_d_name, leg_fk_name in (("左足D", "左足"), ("左ひざD", "左ひざ"), ("右足D", "右足"), ("右ひざD", "右ひざ")):
+            if not (leg_d_name in dress.bones and leg_fk_name in dress.bones):
+                continue
+
+            leg_d_bone = dress.bones[leg_d_name]
+            leg_fk_bone = dress.bones[leg_fk_name]
+
+            dress_offset_scales[leg_d_bone.index] = dress_offset_scales[leg_fk_bone.index].copy()
+            dress_fit_scales[leg_d_bone.index] = dress_fit_scales[leg_fk_bone.index].copy()
+
+            bf = dress_motion.bones[leg_d_bone.name][0]
+            bf.scale = dress_offset_scales[leg_d_bone.index]
+            dress_motion.bones[leg_d_bone.name].append(bf)
+
+            logger.info("-- -- スケール計算 [{b}][{s}]", b=leg_d_bone.name, s=dress_fit_scales[leg_d_bone.index])
+
+        # # IK
+        # for dress_bone in dress.bones:
+        #     if not dress_bone.is_ik:
+        #         continue
+
+        #     link_scales: list[np.ndarray] = []
+        #     for link in dress_bone.ik.links:
+        #         if link.bone_index in dress_fit_scales:
+        #             link_scales.append(dress_fit_scales[link.bone_index].vector)
+
+        #     if not link_scales:
+        #         continue
+
+        #     # リンクボーンにスケールがかけられている場合
+        #     dress_fit_scale = MVector3D(*np.mean(link_scales, axis=0))
+        #     dress_offset_scale = dress_fit_scale.copy()
+        #     for parent_index in dress.bone_trees[dress_bone.index].indexes:
+        #         if parent_index in dress_offset_scales:
+        #             dress_offset_scale *= MVector3D(1, 1, 1) / dress_offset_scales[parent_index]
+
+        #     bf = dress_motion.bones[dress_bone.index][0]
+        #     bf.scale = dress_offset_scale
+        #     dress_motion.bones[dress_bone.index].append(bf)
+        #     dress_offset_scales[dress_bone.index] = dress_offset_scale
+        #     dress_fit_scales[dress_bone.index] = dress_fit_scale
+
+        #     logger.info("-- -- スケール計算 [{b}][{s}]", b=dress_bone.name, s=dress_fit_scale)
+
+        # 頭のスケーリングは頭部の頂点から求める
+
+        model_head_vertex_poses: list[np.ndarray] = []
+        for vertex_index in model_vertices_by_bones[model.bones["頭"].index]:
+            model_head_vertex_poses.append(model.vertices[vertex_index].position.vector)
+
+        dress_head_vertex_poses: list[np.ndarray] = []
+        for vertex_index in dress_vertices_by_bones[dress.bones["頭"].index]:
+            dress_head_vertex_poses.append(dress.vertices[vertex_index].position.vector)
+
+        mean_model_head_vertex_poses = np.mean(model_head_vertex_poses, axis=0)
+        max_model_head_vertex_poses = np.max(model_head_vertex_poses, axis=0)
+
+        mean_dress_head_vertex_poses = np.mean(dress_head_vertex_poses, axis=0)
+        max_dress_head_vertex_poses = np.max(dress_head_vertex_poses, axis=0)
+
+        # 球体の中心から最大までのスケールの平均値で全体を縮尺させる
+        head_fit_scale = MVector3D(
+            *((max_model_head_vertex_poses - mean_model_head_vertex_poses) / (max_dress_head_vertex_poses - mean_dress_head_vertex_poses))
+        )
+        dress_head_scale = np.mean(head_fit_scale.vector)
+        dress_fit_scale = MVector3D(dress_head_scale, dress_head_scale, dress_head_scale)
+        dress_offset_scale = (
+            (MVector3D(1, 1, 1) / dress_offset_root_scale) * (MVector3D(1, 1, 1) / dress_offset_scales[dress.bones["上半身"].index]) * dress_fit_scale
+        )
+
+        bf = dress_motion.bones["頭"][0]
+        bf.scale = dress_offset_scale
+        dress_motion.bones["頭"].append(bf)
+        dress_offset_scales[dress.bones["頭"].index] = dress_offset_scale
+        dress_fit_scales[dress.bones["頭"].index] = dress_fit_scale
+
+        logger.info("-- -- スケール計算 [{b}][{s}]", b="頭", s=dress_fit_scale)
+
         logger.info("-- フィッティング移動計算")
 
         for i, dress_bone_tree in enumerate(dress.bone_trees):
@@ -272,20 +400,35 @@ class LoadWorker(BaseWorker):
                 if dress_bone.index in dress_offset_positions or 0 == n:
                     continue
 
-                dress_offset_position = MVector3D()
+                if dress.bone_trees.is_in_standard(dress_bone.name):
+                    # 親までをフィッティングさせた上で改めてボーン位置を求める
+                    # if dress_bone.is_ik:
+                    #     # IK
+                    #     ik_target_name = dress.bones[dress_bone.ik.bone_index].name
+                    #     # dress_fk_matrixes = dress_motion.bones.get_matrix_by_indexes([0], dress.bone_trees.filter(ik_target_name), dress, append_ik=False)
+                    #     # dress_offset_position = dress_matrixes[0][dress_bone.name].global_matrix.inverse() * dress_fk_matrixes[0][ik_target_name].position
+                    #     dress_matrixes = dress_motion.bones.get_matrix_by_indexes([0], dress.bone_trees.filter(dress_bone.name), dress, append_ik=False)
+                    #     dress_offset_position = dress_matrixes[0][dress_bone.name].global_matrix.inverse() * dress_bone
+                    # else:
+                    #     # FK
+                    # if dress_bone.is_leg_d:
+                    #     if "D" == dress_bone.name[-1]:
+                    #         # 足Dは足FKの位置をコピーする
+                    #         dress_offset_position = dress_offset_positions[dress.bones[dress_bone.name[:-1]].index].copy()
+                    #     else:
+                    #         # 足先EXは足FKの行列から求め直す
+                    #         dress_matrixes = dress_motion.bones.get_matrix_by_indexes([0], dress.bone_trees.filter(dress_bone.name), dress, append_ik=False)
+                    #         dress_offset_position = dress_matrixes[0][dress_bone.name].global_matrix.inverse() * model_bone_positions[dress_bone.index]
+                    # else:
+                    dress_matrixes = dress_motion.bones.get_matrix_by_indexes([0], dress.bone_trees.filter(dress_bone.name), dress, append_ik=False)
+                    dress_offset_position = dress_matrixes[0][dress_bone.name].global_matrix.inverse() * model_bone_positions[dress_bone.index]
 
-                # 親までをフィッティングさせた上で改めてボーン位置を求める
-                dress_matrixes = dress_motion.bones.get_matrix_by_indexes([0], dress.bone_trees.filter(dress_bone.name), dress, append_ik=False)
+                    # キーフレとして追加
+                    bf = dress_motion.bones[dress_bone.name][0]
+                    bf.position = dress_offset_position
+                    dress_motion.bones[dress_bone.name].append(bf)
 
-                if dress_bone.name in model.bones and dress.bone_trees.is_in_standard(dress_bone.name):
-                    dress_offset_position = model_bone_positions[dress_bone.index] - dress_matrixes[0][dress_bone.name].position
-
-                # キーフレとして追加
-                bf = dress_motion.bones[dress_bone.name][0]
-                bf.position = dress_offset_position
-                dress_motion.bones[dress_bone.name].append(bf)
-
-                dress_offset_positions[dress_bone.index] = dress_offset_position
+                    dress_offset_positions[dress_bone.index] = dress_offset_position
 
             logger.count(
                 "-- 移動計算",
@@ -293,6 +436,20 @@ class LoadWorker(BaseWorker):
                 total_index_count=dress_bone_tree_count,
                 display_block=100,
             )
+
+        # for dress_bone in dress.bones:
+        #     if not (dress_bone.is_leg_d and "足先EX" not in dress_bone.name and dress.bones[dress_bone.name[:-1]].index in dress_offset_positions):
+        #         # 足Dではないもしくは足先EXの場合は一旦スルー
+        #         continue
+
+        #     dress_offset_position = dress_offset_positions[dress.bones[dress_bone.name[:-1]].index].copy()
+
+        #     # キーフレとして追加
+        #     bf = dress_motion.bones[dress_bone.name][0]
+        #     bf.position = dress_offset_position
+        #     dress_motion.bones[dress_bone.name].append(bf)
+
+        #     dress_offset_positions[dress_bone.index] = dress_offset_position
 
         logger.info("-- フィッティングボーンモーフ追加")
 
@@ -348,6 +505,22 @@ class LoadWorker(BaseWorker):
             # 人物モデルに縮尺を当てはめる
             model_fake_bone_position = model.bones[parent_name].position + (model_child_mean_pos - model.bones[parent_name].position) * dress_fit_scale
             model_bone_positions[dress_bone.index] = model_fake_bone_position
+        elif dress_bone.is_leg_d:
+            # 衣装側にだけ足D系列がある場合
+            if "D" == dress_bone.name[-1]:
+                # 足D系はFKをコピーする
+                model_bone_positions[dress_bone.index] = model.bones[dress_bone.name[:-1]].position.copy()
+            else:
+                # 足先EXはつま先と足首の縮尺から求める
+                ankle_name = f"{dress_bone.name[0]}足首"
+                model_ankle_pos = model.bones[ankle_name].position
+                dress_ankle_pos = dress.bones[ankle_name].position
+                # つま先はつま先ＩＫのターゲット
+                toe_ik_name = f"{dress_bone.name[0]}つま先ＩＫ"
+                model_toe_pos = model.bones[model.bones[toe_ik_name].ik.bone_index].position
+                dress_toe_pos = dress.bones[dress.bones[toe_ik_name].ik.bone_index].position
+                dress_ex_scale = (dress_bone.position - dress_ankle_pos) / (dress_toe_pos - dress_ankle_pos)
+                model_bone_positions[dress_bone.index] = model_ankle_pos + (model_toe_pos - model_ankle_pos) * dress_ex_scale
         elif parent_name and not child_names:
             # 同じボーンがまったく人物モデルに無い場合、人物の親ボーンにそのまま紐付ける
             model_bone_positions[dress_bone.index] = model.bones[parent_name].position + (dress_bone.position - dress.bones[parent_name].position)
@@ -384,3 +557,20 @@ class LoadWorker(BaseWorker):
                 child_names.append(bname)
         # なければ終了
         return child_names
+
+    def get_mean_scale(self, model: PmxModel, dress: PmxModel, from_to_names: list[tuple[str, str]]) -> MVector3D:
+        """指定されたボーンの組み合わせのスケールを取得する"""
+        dress_scales: dict[int, MVector3D] = {}
+        for from_bone_name, to_bone_name in from_to_names:
+            if not (from_bone_name in dress.bones and to_bone_name in dress.bones and from_bone_name in model.bones and to_bone_name in model.bones):
+                continue
+            # 人物と衣装の両方にある準標準ボーンの場合、縮尺計算
+            model_relative_poses = (model.bones[to_bone_name].position - model.bones[from_bone_name].position).effective()
+            dress_relative_poses = (dress.bones[to_bone_name].position - dress.bones[from_bone_name].position).effective()
+            scales = model_relative_poses / dress_relative_poses
+            dress_scales[model.bones[to_bone_name].index] = scales
+
+        if not dress_scales:
+            return MVector3D(1, 1, 1)
+
+        return MVector3D.std_mean(list(dress_scales.values()))

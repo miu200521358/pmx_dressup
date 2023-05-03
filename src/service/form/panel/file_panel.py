@@ -97,4 +97,6 @@ class FilePanel(BasePanel):
         if self.model_ctrl.valid() and self.dress_ctrl.valid():
             model_dir_path, model_file_name, model_file_ext = separate_path(self.model_ctrl.path)
             dress_dir_path, dress_file_name, dress_file_ext = separate_path(self.dress_ctrl.path)
-            self.output_pmx_ctrl.path = os.path.join(model_dir_path, dress_file_name, f"{model_file_name}_{datetime.now():%Y%m%d_%H%M%S}{model_file_ext}")
+            self.output_pmx_ctrl.path = os.path.join(
+                model_dir_path, dress_file_name, f"{model_file_name}_{dress_file_name}_{datetime.now():%Y%m%d_%H%M%S}{model_file_ext}"
+            )
