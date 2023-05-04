@@ -166,7 +166,7 @@ class LoadWorker(BaseWorker):
     def create_dress_fit_bone_morphs(self, model: PmxModel, dress: PmxModel) -> PmxModel:
         """衣装フィッティング用ボーンモーフを作成"""
         SCALE_BONE_NAMES = (
-            # ("上半身", "首"),
+            ("上半身", "首"),
             ("左腕", "左手首"),
             ("左親指１", "左親指２"),
             ("左人指１", "左人指３"),
@@ -179,7 +179,7 @@ class LoadWorker(BaseWorker):
             ("右中指１", "右中指３"),
             ("右薬指１", "右薬指３"),
             ("右小指１", "右小指３"),
-            # ("下半身", "足中心"),
+            ("下半身", "足中心"),
             ("左足", "左足首"),
             ("右足", "右足首"),
         )
