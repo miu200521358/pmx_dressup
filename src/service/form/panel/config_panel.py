@@ -216,7 +216,12 @@ class MaterialCtrlSet:
         for material_name in material_names:
             self.material_choice_ctrl.Append(material_name)
             self.alphas[material_name] = 1.0
-        # 最後にボーンの透過度も調整出来るようにしておく
+        # 全材質の透過度も調整出来るようにしておく
+        self.material_choice_ctrl.Append(__("全材質"))
+        self.alphas[__("全材質")] = 1.0
+        self.material_choice_ctrl.SetSelection(0)
+        self.slider.SetValue(1.0)
+        # ボーンの透過度も調整出来るようにしておく
         self.material_choice_ctrl.Append(__("ボーンライン"))
         self.alphas[__("ボーンライン")] = 1.0
         self.material_choice_ctrl.SetSelection(0)

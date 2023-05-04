@@ -159,6 +159,10 @@ class MainFrame(BaseFrame):
             mf.ratio = abs(material_alphas.get(material.name, 1.0) - 1)
             self.model_motion.morphs[mf.name].append(mf)
 
+        mf = VmdMorphFrame(0, "全材質TR")
+        mf.ratio = abs(material_alphas.get(__("全材質"), 1.0) - 1)
+        self.model_motion.morphs[mf.name].append(mf)
+
     def set_dress_motion_morphs(self, axis_scale_sets: dict[str, MVector3D] = {}, material_alphas: dict[str, float] = {}):
         if self.dress_motion is None:
             return
@@ -177,6 +181,10 @@ class MainFrame(BaseFrame):
             mf = VmdMorphFrame(0, f"{material.name}TR")
             mf.ratio = abs(material_alphas.get(material.name, 1.0) - 1)
             self.dress_motion.morphs[mf.name].append(mf)
+
+        mf = VmdMorphFrame(0, "全材質TR")
+        mf.ratio = abs(material_alphas.get(__("全材質"), 1.0) - 1)
+        self.dress_motion.morphs[mf.name].append(mf)
 
         for dress_bone in dress.bones:
             if dress_bone.name in model.bones and dress.bones[dress_bone.parent_index].name in model.bones:

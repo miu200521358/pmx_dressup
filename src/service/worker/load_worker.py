@@ -112,7 +112,6 @@ class LoadWorker(BaseWorker):
 
     def create_material_transparent_morphs(self, model: PmxModel) -> PmxModel:
         """材質OFFモーフ追加"""
-        # vertices_by_material = model.get_vertices_by_material()
         for material in model.materials:
             morph = Morph(name=f"{material.name}TR")
             morph.is_system = True
@@ -134,6 +133,29 @@ class LoadWorker(BaseWorker):
             ]
             morph.offsets = offsets
             model.morphs.append(morph)
+
+        # 全材質透明化
+        morph = Morph(name="全材質TR")
+        morph.is_system = True
+        morph.morph_type = MorphType.MATERIAL
+        offsets = [
+            MaterialMorphOffset(
+                -1,
+                MaterialMorphCalcMode.ADDITION,
+                MVector4D(0.0, 0.0, 0.0, -1.0),
+                MVector3D(0.0, 0.0, 0.0),
+                0.0,
+                MVector3D(0.0, 0.0, 0.0),
+                MVector4D(0.0, 0.0, 0.0, 0.0),
+                0.0,
+                MVector4D(0.0, 0.0, 0.0, 0.0),
+                MVector4D(0.0, 0.0, 0.0, 0.0),
+                MVector4D(0.0, 0.0, 0.0, 0.0),
+            )
+        ]
+        morph.offsets = offsets
+        model.morphs.append(morph)
+
         return model
 
     def get_exist_parent_index(self, dress: PmxModel, bone: Bone, dress_fit_matrixes: dict[int, MMatrix4x4]) -> int:
