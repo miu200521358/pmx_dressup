@@ -24,8 +24,8 @@ class LoadMotionWorker(BaseWorker):
 
         if file_panel.motion_ctrl.valid() and not file_panel.motion_ctrl.data:
             motion = file_panel.motion_ctrl.reader.read_by_filepath(file_panel.motion_ctrl.path)
-        elif file_panel.motion_ctrl.data:
-            motion = file_panel.motion_ctrl.data
+        elif file_panel.motion_ctrl.original_data:
+            motion = file_panel.motion_ctrl.original_data
         else:
             motion = VmdMotion()
 

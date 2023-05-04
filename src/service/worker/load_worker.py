@@ -43,8 +43,8 @@ class LoadWorker(BaseWorker):
             model = self.create_material_transparent_morphs(model)
 
             is_model_change = True
-        elif file_panel.model_ctrl.data:
-            model = file_panel.model_ctrl.data
+        elif file_panel.model_ctrl.original_data:
+            model = file_panel.model_ctrl.original_data
         else:
             model = PmxModel()
 
@@ -66,15 +66,15 @@ class LoadWorker(BaseWorker):
             # dress = self.create_dress_fit_vertex_morphs(model, dress, dress_fit_matrixes)
 
             is_dress_change = True
-        elif file_panel.dress_ctrl.data:
-            dress = file_panel.dress_ctrl.data
+        elif file_panel.dress_ctrl.original_data:
+            dress = file_panel.dress_ctrl.original_data
         else:
             dress = PmxModel()
 
         if file_panel.motion_ctrl.valid() and (not file_panel.motion_ctrl.data or is_model_change or is_dress_change):
             motion = file_panel.motion_ctrl.reader.read_by_filepath(file_panel.motion_ctrl.path)
-        elif file_panel.motion_ctrl.data:
-            motion = file_panel.motion_ctrl.data
+        elif file_panel.motion_ctrl.original_data:
+            motion = file_panel.motion_ctrl.original_data
         else:
             motion = VmdMotion()
 

@@ -84,9 +84,12 @@ class MainFrame(BaseFrame):
         model: PmxModel = data1
         dress: PmxModel = data2
         motion: VmdMotion = data3
-        self.file_panel.model_ctrl.data = model
-        self.file_panel.dress_ctrl.data = dress
-        self.file_panel.motion_ctrl.data = motion
+        self.file_panel.model_ctrl.set_data(model)
+        self.file_panel.dress_ctrl.set_data(dress)
+        self.file_panel.motion_ctrl.set_data(motion)
+
+        if not (self.file_panel.model_ctrl.data and self.file_panel.dress_ctrl.data and self.file_panel.motion_ctrl.data):
+            return
 
         # モデルとドレスのボーンの縮尺を合わせる
         self.model_motion = motion
