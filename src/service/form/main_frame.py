@@ -170,7 +170,7 @@ class MainFrame(BaseFrame):
         if self.dress_motion is None:
             return
 
-        model: PmxModel = self.file_panel.model_ctrl.data
+        # model: PmxModel = self.file_panel.model_ctrl.data
         dress: PmxModel = self.file_panel.dress_ctrl.data
 
         self.dress_motion.path = "fit motion"
@@ -189,21 +189,21 @@ class MainFrame(BaseFrame):
         mf.ratio = abs(material_alphas.get(__("全材質"), 1.0) - 1)
         self.dress_motion.morphs[mf.name].append(mf)
 
-        for dress_bone in dress.bones:
-            if dress_bone.name in model.bones and dress.bones[dress_bone.parent_index].name in model.bones:
-                # スケールをモーフで加味する
-                axis_scale: MVector3D = axis_scale_sets.get(dress_bone.name, MVector3D()) + axis_scale_sets.get("ALL", MVector3D())
-                xmf = VmdMorphFrame(0, f"{dress_bone.name}SX")
-                xmf.ratio = axis_scale.x
-                self.dress_motion.morphs[xmf.name].append(xmf)
+        # for dress_bone in dress.bones:
+        #     if dress_bone.name in model.bones and dress.bones[dress_bone.parent_index].name in model.bones:
+        #         # スケールをモーフで加味する
+        #         axis_scale: MVector3D = axis_scale_sets.get(dress_bone.name, MVector3D()) + axis_scale_sets.get("ALL", MVector3D())
+        #         xmf = VmdMorphFrame(0, f"{dress_bone.name}SX")
+        #         xmf.ratio = axis_scale.x
+        #         self.dress_motion.morphs[xmf.name].append(xmf)
 
-                ymf = VmdMorphFrame(0, f"{dress_bone.name}SY")
-                ymf.ratio = axis_scale.y
-                self.dress_motion.morphs[ymf.name].append(ymf)
+        #         ymf = VmdMorphFrame(0, f"{dress_bone.name}SY")
+        #         ymf.ratio = axis_scale.y
+        #         self.dress_motion.morphs[ymf.name].append(ymf)
 
-                zmf = VmdMorphFrame(0, f"{dress_bone.name}SZ")
-                zmf.ratio = axis_scale.z
-                self.dress_motion.morphs[zmf.name].append(zmf)
+        #         zmf = VmdMorphFrame(0, f"{dress_bone.name}SZ")
+        #         zmf.ratio = axis_scale.z
+        #         self.dress_motion.morphs[zmf.name].append(zmf)
 
     def fit_model_motion(self, bone_alpha: float = 1.0, is_bone_deform: bool = True):
         self.config_panel.canvas.model_sets[0].motion = self.model_motion
