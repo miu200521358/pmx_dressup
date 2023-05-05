@@ -495,3 +495,39 @@ msgstr ""
 msgid "衣装モデル描画準備"
 msgstr ""
 
+
+msgid "人物モデルの追加対象準標準ボーン: {b}"
+msgstr ""
+
+
+msgid "衣装モデルの追加対象準標準ボーン: {b}"
+msgstr ""
+
+
+msgid "-- 人物モデルの追加対象準標準ボーン: {b}"
+msgstr ""
+
+
+msgid "-- 衣装モデルの追加対象準標準ボーン: {b}"
+msgstr ""
+
+
+msgid "-- {p}: ウェイト置換"
+msgstr ""
+
+
+msgid "-- -- {p}: 準標準ボーン追加: {b}"
+msgstr ""
+
+
+msgid "-- 人物: ウェイト置換"
+msgstr ""
+
+
+msgid "-- -- 衣装: 準標準ボーン追加: {b}"
+msgstr ""
+
+
+msgid "-- 衣装: ウェイト置換"
+msgstr ""
+
