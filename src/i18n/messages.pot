@@ -547,3 +547,11 @@ msgstr ""
 msgid "-- モデルセットアップ：ボーンツリー [{i} ({p:.2f}%)]"
 msgstr ""
 
+
+msgid "-- 人物: 再設定"
+msgstr ""
+
+
+msgid "-- 衣装: 再設定"
+msgstr ""
+
