@@ -555,3 +555,7 @@ msgstr ""
 msgid "-- 衣装: 再設定"
 msgstr ""
 
+
+msgid "停止"
+msgstr ""
+

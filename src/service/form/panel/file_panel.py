@@ -6,8 +6,8 @@ import wx
 from mlib.base.logger import MLogger
 from mlib.service.form.base_frame import BaseFrame
 from mlib.service.form.base_panel import BasePanel
-from mlib.service.form.parts.console_ctrl import ConsoleCtrl
-from mlib.service.form.parts.file_ctrl import MPmxFilePickerCtrl, MVmdFilePickerCtrl
+from mlib.service.form.widgets.console_ctrl import ConsoleCtrl
+from mlib.service.form.widgets.file_ctrl import MPmxFilePickerCtrl, MVmdFilePickerCtrl
 from mlib.utils.file_utils import separate_path
 
 logger = MLogger(os.path.basename(__file__))
