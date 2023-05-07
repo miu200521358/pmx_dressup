@@ -559,3 +559,11 @@ msgstr ""
 msgid "停止"
 msgstr ""
 
+
+msgid "-- 人物: 再セットアップ"
+msgstr ""
+
+
+msgid "-- 衣装: 再セットアップ"
+msgstr ""
+
