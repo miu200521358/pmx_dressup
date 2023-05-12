@@ -567,3 +567,35 @@ msgstr ""
 msgid "-- 衣装: 再セットアップ"
 msgstr ""
 
+
+msgid "不足ボーン調整"
+msgstr ""
+
+
+msgid "衣装モデル上半身2位置調整"
+msgstr ""
+
+
+msgid "-- 衣装: 上半身2再計算位置: {p}"
+msgstr ""
+
+
+msgid "-- フィッティング移動回転計算"
+msgstr ""
+
+
+msgid "-- オフセット移動回転計算"
+msgstr ""
+
+
+msgid "-- -- オフセット移動回転計算 [{i} ({p:.2f}%)]"
+msgstr ""
+
+
+msgid "-- 衣装: 上半身2再計算位置: {u} → {p}"
+msgstr ""
+
+
+msgid "-- 衣装: 上半身再計算位置: {u} → {p}"
+msgstr ""
+

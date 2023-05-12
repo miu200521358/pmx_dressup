@@ -51,15 +51,21 @@ class LoadWorker(BaseWorker):
 
             usecase.valid_model(dress, "衣装")
 
+            # 不足ボーン追加
+            logger.info("不足ボーン調整")
             model, dress = usecase.add_mismatch_bones(model, dress)
+
+            # 上半身2の再設定
+            logger.info("衣装モデル上半身2位置調整")
+            model, dress = usecase.replace_upper2(model, dress)
 
             # 衣装に材質透明モーフを入れる
             logger.info("衣装モデル追加セットアップ：材質透過モーフ追加")
             dress = usecase.create_material_transparent_morphs(dress)
 
-            # 衣装にフィッティングボーンモーフを入れる
-            logger.info("衣装モデル追加セットアップ：フィッティングボーンモーフ追加")
-            dress = usecase.create_dress_fit_bone_morphs(model, dress)
+            # # 衣装にフィッティングボーンモーフを入れる
+            # logger.info("衣装モデル追加セットアップ：フィッティングボーンモーフ追加")
+            # dress = usecase.create_dress_fit_bone_morphs(model, dress)
 
             # # 衣装にフィッティング頂点モーフを入れる
             # logger.info("衣装モデル追加セットアップ：フィッティング頂点モーフ追加")
