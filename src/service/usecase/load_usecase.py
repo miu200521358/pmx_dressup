@@ -1,5 +1,4 @@
 import os
-from turtle import position
 
 import numpy as np
 
@@ -185,8 +184,19 @@ class LoadUsecase:
         logger.info("-- フィッティングスケール計算")
         dress_offset_scales, dress_fit_scales = self.get_dress_offset_scales(model, dress, dress_motion, model_matrixes)
 
-        logger.info("-- フィッティング移動回転計算")
-        dress_offset_qqs, dress_offset_positions = self.get_dress_offsets(model, dress, dress_motion, model_matrixes, dress_offset_scales, dress_fit_scales)
+        # logger.info("-- フィッティング回転計算")
+        dress_offset_qqs = self.get_dress_offset_qqs(model, dress, dress_motion, model_matrixes)
+        # dress_offset_qqs: dict[int, MQuaternion] = {}
+
+        # dress_offset_scales: dict[int, MVector3D] = {}
+        # dress_fit_scales: dict[int, MVector3D] = {}
+
+        # logger.info("-- フィッティング移動計算")
+        # dress_offset_positions = self.get_dress_offset_positions(model, dress, dress_motion, model_matrixes, dress_offset_qqs)
+        dress_offset_positions: dict[int, MVector3D] = {}
+
+        # logger.info("-- フィッティング移動回転計算")
+        # dress_offset_qqs, dress_offset_positions = self.get_dress_offsets(model, dress, dress_motion, model_matrixes, dress_offset_scales, dress_fit_scales)
 
         # dress_offset_qqs: dict[int, MQuaternion] = {}
         # dress_offset_positions: dict[int, MVector3D] = {}
@@ -196,9 +206,6 @@ class LoadUsecase:
 
         # logger.info("-- フィッティング回転計算")
         # # dress_offset_qqs = self.get_dress_offset_qqs(model, dress, dress_motion, model_matrixes)
-
-        # logger.info("-- フィッティング移動計算")
-        # # dress_offset_positions = self.get_dress_offset_positions(model, dress, dress_motion, model_matrixes, dress_offset_qqs)
 
         logger.info("-- フィッティングボーンモーフ追加")
 
@@ -351,80 +358,6 @@ class LoadUsecase:
 
         return dress_offset_qqs, dress_offset_positions
 
-    # def get_dress_offset_qqs(self, model: PmxModel, dress: PmxModel, dress_motion: VmdMotion, model_matrixes: VmdBoneFrameTrees) -> dict[int, MQuaternion]:
-    #     dress_bone_tree_count = len(dress.bone_trees)
-    #     dress_offset_qqs: dict[int, MQuaternion] = {}
-
-    #     z_direction = MVector3D(0, 0, -1)
-    #     for i, (bone_name, bone_setting) in enumerate(STANDARD_BONE_NAMES.items()):
-    #         if not (bone_name in dress.bones and bone_name in model.bones):
-    #             # 人物と衣装のいずれかにボーンがなければスルー
-    #             continue
-    #         dress_bone = dress.bones[bone_name]
-    #         if dress_bone.name in ["全ての親", "センター", "グルーブ", "腰", Bone.SYSTEM_ROOT_NAME]:
-    #             # 特定の名前のボーンはスルー
-    #             continue
-    #         if dress_bone.can_translate or dress_bone.has_fixed_axis or dress_bone.is_ik:
-    #             # 移動可能、軸制限あり、IKはスルー
-    #             continue
-
-    #         # 衣装：自分の方向
-    #         dress_x_direction = dress_bone.tail_relative_position.normalized()
-    #         dress_y_direction = dress_x_direction.cross(z_direction)
-    #         dress_slope_qq = MQuaternion.from_direction(dress_x_direction, dress_y_direction)
-
-    #         # 人物：自分の方向
-    #         if 0 > model.bones[dress_bone.name].tail_index:
-    #             model_x_direction = dress_x_direction.copy()
-    #         elif isinstance(bone_setting.relative, MVector3D):
-    #             model_x_direction = bone_setting.relative
-    #         else:
-    #             model_x_direction = (
-    #                 model_matrixes[0, model.bones[model.bones[dress_bone.name].tail_index].name].position - model_matrixes[0, dress_bone.name].position
-    #             )
-    #             model_x_direction.normalize()
-    #         model_y_direction = model_x_direction.cross(z_direction)
-    #         model_slope_qq = MQuaternion.from_direction(model_x_direction, model_y_direction)
-
-    #         # モデルのボーンの向きに衣装を合わせる
-    #         dress_fit_qq = model_slope_qq * dress_slope_qq.inverse()
-
-    #         for tree_bone_name in reversed(dress.bone_trees[bone_name].names[:-1]):
-    #             # 自分より親は逆回転させる
-    #             dress_fit_qq *= dress_offset_qqs.get(dress.bones[tree_bone_name].index, MQuaternion()).inverse()
-
-    #         dress_offset_qqs[dress_bone.index] = dress_fit_qq
-
-    #         # キーフレとして追加
-    #         bf = dress_motion.bones[dress_bone.name][0]
-    #         bf.rotation = dress_fit_qq
-    #         dress_motion.bones[dress_bone.name].append(bf)
-
-    #         logger.debug(f"回転オフセット[{dress_bone.name}][{dress_fit_qq.to_euler_degrees()}]")
-
-    #         logger.count(
-    #             "-- 回転計算",
-    #             index=i,
-    #             total_index_count=dress_bone_tree_count,
-    #             display_block=50,
-    #         )
-
-    #     for dress_bone in dress.bones:
-    #         for parent_bone_index in (dress.bones["上半身"].index, dress.bones["下半身"].index):
-    #             if dress_bone.parent_index == parent_bone_index and not dress.bone_trees.is_in_standard(dress_bone.name):
-    #                 # 親ボーンが体幹かつ準標準ボーンの範囲外の場合、体幹の回転を打ち消した回転を持つ
-    #                 dress_fit_qq = dress_offset_qqs.get(parent_bone_index, MQuaternion()).inverse()
-    #                 dress_offset_qqs[dress_bone.index] = dress_fit_qq
-
-    #                 # キーフレとして追加
-    #                 bf = dress_motion.bones[dress_bone.name][0]
-    #                 bf.rotation = dress_fit_qq
-    #                 dress_motion.bones[dress_bone.name].append(bf)
-
-    #                 logger.debug(f"回転オフセット[{dress_bone.name}][{dress_fit_qq.to_euler_degrees()}]")
-
-    #     return dress_offset_qqs
-
     def get_dress_offset_scales(
         self, model: PmxModel, dress: PmxModel, dress_motion: VmdMotion, model_matrixes: VmdBoneFrameTrees
     ) -> tuple[dict[int, MVector3D], dict[int, MVector3D]]:
@@ -563,65 +496,180 @@ class LoadUsecase:
 
         return dress_offset_scales, dress_fit_scales
 
-    # def get_dress_offset_positions(
-    #     self,
-    #     model: PmxModel,
-    #     dress: PmxModel,
-    #     dress_motion: VmdMotion,
-    #     model_matrixes: VmdBoneFrameTrees,
-    #     dress_offset_qqs: dict[int, MQuaternion],
-    # ) -> dict[int, MVector3D]:
-    #     """衣装移動計算"""
-    #     dress_offset_positions: dict[int, MVector3D] = {}
-    #     dress_bone_tree_count = len(dress.bone_trees)
+    def get_dress_offset_qqs(self, model: PmxModel, dress: PmxModel, dress_motion: VmdMotion, model_matrixes: VmdBoneFrameTrees) -> dict[int, MQuaternion]:
+        dress_bone_tree_count = len(dress.bone_trees)
+        dress_offset_qqs: dict[int, MQuaternion] = {}
 
-    #     for i, bone_name in enumerate(list(STANDARD_BONE_NAMES.keys())[1:]):
-    #         # for i, bone_name in enumerate(("センター", "グルーブ", "腰", "上半身", "下半身", "上半身2")):
-    #         if not (bone_name in dress.bones and bone_name in model.bones):
-    #             # 人物と衣装のいずれかにボーンがなければスルー
-    #             continue
-    #         dress_bone = dress.bones[bone_name]
+        z_direction = MVector3D(0, 0, -1)
+        for i, (bone_name, bone_setting) in enumerate(list(STANDARD_BONE_NAMES.items())[5:]):
+            if not (bone_name in dress.bones and bone_name in model.bones):
+                # 人物と衣装のいずれかにボーンがなければスルー
+                continue
+            dress_bone = dress.bones[bone_name]
 
-    #         # 親までをフィッティングさせた上で改めてボーン位置を求める
-    #         dress_matrixes = dress_motion.bones.get_matrix_by_indexes([0], [dress_bone.name], dress, append_ik=False)
+            if dress_bone.is_system:
+                # システムボーンはスルー
+                continue
+            if dress_bone.can_translate or dress_bone.has_fixed_axis or dress_bone.is_ik:
+                # 移動可能、軸制限あり、IKはスルー
+                continue
 
-    #         # model_local_position = dress_matrixes[0, dress.bones[dress_bone.parent_index].name].matrix.inverse() * model_matrixes[0, dress_bone.name].position
-    #         # dress_local_position = dress_matrixes[0, dress.bones[dress_bone.parent_index].name].matrix.inverse() * dress_matrixes[0, dress_bone.name].position
-    #         # dress_offset_position = model_local_position - dress_local_position
-    #         # dress_offset_position = model_matrixes[0, dress_bone.name].position - dress_matrixes[0, dress_bone.name].position
+            model_bone = model.bones[dress_bone.name]
+            tail_bone_names = [bname for bname in bone_setting.tails if bname in dress.bones and bname in model.bones]
+            tail_bone_name = tail_bone_names[0] if tail_bone_names else bone_name
 
-    #         # mat = MMatrix4x4()
-    #         # # 親ボーン位置に移動
-    #         # mat.translate(dress_matrixes[0, dress.bones[dress.bones[dress_bone.name].parent_index].name].position)
-    #         # # 向きを合わせる
-    #         # mat.rotate(dress_offset_qqs.get(dress_bone.index, MQuaternion()))
+            dress_matrixes = dress_motion.bones.get_matrix_by_indexes([0], [tail_bone_name], dress, append_ik=False)
 
-    #         # dress_offset_position = mat.inverse() * model_matrixes[0, dress_bone.name].position
+            # 衣装：自分の方向
+            if isinstance(bone_setting.relative, MVector3D):
+                dress_x_direction = bone_setting.relative
+            elif 0 > dress_bone.tail_index:
+                dress_x_direction = MVector3D(1, 0, 0)
+            else:
+                dress_x_direction = dress_matrixes[0, dress_bone.name].matrix.inverse() * dress_matrixes[0, tail_bone_name].position
+            dress_x_direction.normalize()
 
-    #         # dress_offset_position = dress_matrixes[0, dress_bone.name].matrix.inverse() * model_matrixes[0, dress_bone.name].position
+            dress_y_direction = dress_x_direction.cross(z_direction)
+            dress_slope_qq = MQuaternion.from_direction(dress_x_direction, dress_y_direction)
 
-    #         dress_offset_position = model_matrixes[0, dress_bone.name].position - dress_matrixes[0, dress_bone.name].position
+            # 人物：自分の方向
+            if isinstance(bone_setting.relative, MVector3D):
+                model_x_direction = bone_setting.relative
+            elif 0 > model_bone.tail_index:
+                model_x_direction = MVector3D(1, 0, 0)
+            else:
+                model_x_direction = model_matrixes[0, model_bone.name].matrix.inverse() * model_matrixes[0, tail_bone_name].position
+            model_x_direction.normalize()
 
-    #         # キーフレとして追加
-    #         bf = dress_motion.bones[dress_bone.name][0]
-    #         bf.position = dress_offset_position
-    #         dress_motion.bones[dress_bone.name].append(bf)
+            model_y_direction = model_x_direction.cross(z_direction)
+            model_slope_qq = MQuaternion.from_direction(model_x_direction, model_y_direction)
 
-    #         dress_offset_positions[dress_bone.index] = dress_offset_position
+            # モデルのボーンの向きに衣装を合わせる
+            dress_fit_qq = model_slope_qq * dress_slope_qq.inverse()
 
-    #         logger.debug(
-    #             f"移動オフセット[{dress_bone.name}][{dress_offset_position}]"
-    #             + f"[m={model_matrixes[0, dress_bone.name].position}][d={dress_matrixes[0, dress_bone.name].position}]"
-    #         )
+            for tree_bone_name in reversed(dress.bone_trees[bone_name].names[:-1]):
+                # 自分より親は逆回転させる
+                dress_fit_qq *= dress_offset_qqs.get(dress.bones[tree_bone_name].index, MQuaternion()).inverse()
 
-    #         logger.count(
-    #             "-- 移動計算",
-    #             index=i,
-    #             total_index_count=dress_bone_tree_count,
-    #             display_block=50,
-    #         )
+            dress_offset_qqs[dress_bone.index] = dress_fit_qq
 
-    #     return dress_offset_positions
+            # # 衣装：自分の方向
+            # dress_x_direction = dress_bone.tail_relative_position.normalized()
+            # dress_y_direction = dress_x_direction.cross(z_direction)
+            # dress_slope_qq = MQuaternion.from_direction(dress_x_direction, dress_y_direction)
+
+            # # 人物：自分の方向
+            # if 0 > model.bones[dress_bone.name].tail_index:
+            #     model_x_direction = dress_x_direction.copy()
+            # elif isinstance(bone_setting.relative, MVector3D):
+            #     model_x_direction = bone_setting.relative
+            # else:
+            #     model_x_direction = (
+            #         model_matrixes[0, model.bones[model.bones[dress_bone.name].tail_index].name].position - model_matrixes[0, dress_bone.name].position
+            #     )
+            #     model_x_direction.normalize()
+            # model_y_direction = model_x_direction.cross(z_direction)
+            # model_slope_qq = MQuaternion.from_direction(model_x_direction, model_y_direction)
+
+            # # モデルのボーンの向きに衣装を合わせる
+            # dress_fit_qq = model_slope_qq * dress_slope_qq.inverse()
+
+            # for tree_bone_name in reversed(dress.bone_trees[bone_name].names[:-1]):
+            #     # 自分より親は逆回転させる
+            #     dress_fit_qq *= dress_offset_qqs.get(dress.bones[tree_bone_name].index, MQuaternion()).inverse()
+
+            # dress_offset_qqs[dress_bone.index] = dress_fit_qq
+
+            # キーフレとして追加
+            bf = dress_motion.bones[dress_bone.name][0]
+            bf.rotation = dress_fit_qq
+            dress_motion.bones[dress_bone.name].append(bf)
+
+            logger.debug(f"回転オフセット[{dress_bone.name}][{dress_fit_qq.to_euler_degrees()}]")
+
+            logger.count(
+                "-- 回転計算",
+                index=i,
+                total_index_count=dress_bone_tree_count,
+                display_block=50,
+            )
+
+        for dress_bone in dress.bones:
+            for parent_bone_index in (dress.bones["上半身"].index, dress.bones["下半身"].index):
+                if dress_bone.parent_index == parent_bone_index and not dress.bone_trees.is_in_standard(dress_bone.name):
+                    # 親ボーンが体幹かつ準標準ボーンの範囲外の場合、体幹の回転を打ち消した回転を持つ
+                    dress_fit_qq = dress_offset_qqs.get(parent_bone_index, MQuaternion()).inverse()
+                    if dress_fit_qq:
+                        dress_offset_qqs[dress_bone.index] = dress_fit_qq
+
+                        # キーフレとして追加
+                        bf = dress_motion.bones[dress_bone.name][0]
+                        bf.rotation = dress_fit_qq
+                        dress_motion.bones[dress_bone.name].append(bf)
+
+                        logger.debug(f"回転オフセット(順標準外)[{dress_bone.name}][{dress_fit_qq.to_euler_degrees()}]")
+
+        return dress_offset_qqs
+
+    def get_dress_offset_positions(
+        self,
+        model: PmxModel,
+        dress: PmxModel,
+        dress_motion: VmdMotion,
+        model_matrixes: VmdBoneFrameTrees,
+        dress_offset_qqs: dict[int, MQuaternion],
+    ) -> dict[int, MVector3D]:
+        """衣装移動計算"""
+        dress_offset_positions: dict[int, MVector3D] = {}
+        dress_bone_tree_count = len(dress.bone_trees)
+
+        for i, bone_name in enumerate(list(STANDARD_BONE_NAMES.keys())[1:]):
+            # for i, bone_name in enumerate(("センター", "グルーブ", "腰", "上半身", "下半身", "上半身2")):
+            if not (bone_name in dress.bones and bone_name in model.bones):
+                # 人物と衣装のいずれかにボーンがなければスルー
+                continue
+            dress_bone = dress.bones[bone_name]
+
+            # 親までをフィッティングさせた上で改めてボーン位置を求める
+            dress_matrixes = dress_motion.bones.get_matrix_by_indexes([0], [dress_bone.name], dress, append_ik=False)
+
+            # model_local_position = dress_matrixes[0, dress.bones[dress_bone.parent_index].name].matrix.inverse() * model_matrixes[0, dress_bone.name].position
+            # dress_local_position = dress_matrixes[0, dress.bones[dress_bone.parent_index].name].matrix.inverse() * dress_matrixes[0, dress_bone.name].position
+            # dress_offset_position = model_local_position - dress_local_position
+            # dress_offset_position = model_matrixes[0, dress_bone.name].position - dress_matrixes[0, dress_bone.name].position
+
+            # mat = MMatrix4x4()
+            # # 親ボーン位置に移動
+            # mat.translate(dress_matrixes[0, dress.bones[dress.bones[dress_bone.name].parent_index].name].position)
+            # # 向きを合わせる
+            # mat.rotate(dress_offset_qqs.get(dress_bone.index, MQuaternion()))
+
+            # dress_offset_position = mat.inverse() * model_matrixes[0, dress_bone.name].position
+
+            # dress_offset_position = dress_matrixes[0, dress_bone.name].matrix.inverse() * model_matrixes[0, dress_bone.name].position
+
+            dress_offset_position = model_matrixes[0, dress_bone.name].position - dress_matrixes[0, dress_bone.name].position
+
+            # キーフレとして追加
+            bf = dress_motion.bones[dress_bone.name][0]
+            bf.position = dress_offset_position
+            dress_motion.bones[dress_bone.name].append(bf)
+
+            dress_offset_positions[dress_bone.index] = dress_offset_position
+
+            logger.debug(
+                f"移動オフセット[{dress_bone.name}][{dress_offset_position}]"
+                + f"[m={model_matrixes[0, dress_bone.name].position}][d={dress_matrixes[0, dress_bone.name].position}]"
+            )
+
+            logger.count(
+                "-- 移動計算",
+                index=i,
+                total_index_count=dress_bone_tree_count,
+                display_block=50,
+            )
+
+        return dress_offset_positions
 
 
 FIT_ROOT_BONE_NAMES = [

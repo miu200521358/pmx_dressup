@@ -63,9 +63,9 @@ class LoadWorker(BaseWorker):
             logger.info("衣装モデル追加セットアップ：材質透過モーフ追加")
             dress = usecase.create_material_transparent_morphs(dress)
 
-            # # 衣装にフィッティングボーンモーフを入れる
-            # logger.info("衣装モデル追加セットアップ：フィッティングボーンモーフ追加")
-            # dress = usecase.create_dress_fit_bone_morphs(model, dress)
+            # 衣装にフィッティングボーンモーフを入れる
+            logger.info("衣装モデル追加セットアップ：フィッティングボーンモーフ追加")
+            dress = usecase.create_dress_fit_bone_morphs(model, dress)
 
             # # 衣装にフィッティング頂点モーフを入れる
             # logger.info("衣装モデル追加セットアップ：フィッティング頂点モーフ追加")
