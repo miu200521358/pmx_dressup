@@ -78,7 +78,7 @@ class LoadWorker(BaseWorker):
 
             # 個別調整用モーフ追加
             logger.info("衣装モデル追加セットアップ：個別調整ボーンモーフ追加", decoration=MLogger.Decoration.BOX)
-            dress = usecase.create_dress_individual_bone_morphs(dress)
+            dress = usecase.create_dress_individual_bone_morphs(model, dress)
 
             is_dress_change = True
         elif file_panel.dress_ctrl.original_data:

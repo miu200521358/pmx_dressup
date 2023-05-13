@@ -1,4 +1,5 @@
 import os
+from typing import Iterable
 
 import wx
 
@@ -65,8 +66,8 @@ class BoneCtrlSet:
         self.scale_x_slider = FloatSliderCtrl(
             parent=self.window,
             value=0,
-            min_value=-1,
-            max_value=1,
+            min_value=-3,
+            max_value=3,
             increment=0.01,
             spin_increment=0.1,
             border=3,
@@ -82,8 +83,8 @@ class BoneCtrlSet:
         self.scale_y_slider = FloatSliderCtrl(
             parent=self.window,
             value=0,
-            min_value=-1,
-            max_value=1,
+            min_value=-3,
+            max_value=3,
             increment=0.01,
             spin_increment=0.1,
             border=3,
@@ -99,8 +100,8 @@ class BoneCtrlSet:
         self.scale_z_slider = FloatSliderCtrl(
             parent=self.window,
             value=0,
-            min_value=-1,
-            max_value=1,
+            min_value=-3,
+            max_value=3,
             increment=0.01,
             spin_increment=0.1,
             border=3,
@@ -116,8 +117,8 @@ class BoneCtrlSet:
         self.degree_x_slider = FloatSliderCtrl(
             parent=self.window,
             value=0,
-            min_value=-2,
-            max_value=2,
+            min_value=-3,
+            max_value=3,
             increment=0.01,
             spin_increment=0.1,
             border=3,
@@ -133,8 +134,8 @@ class BoneCtrlSet:
         self.degree_y_slider = FloatSliderCtrl(
             parent=self.window,
             value=0,
-            min_value=-2,
-            max_value=2,
+            min_value=-3,
+            max_value=3,
             increment=0.01,
             spin_increment=0.1,
             border=3,
@@ -150,8 +151,8 @@ class BoneCtrlSet:
         self.degree_z_slider = FloatSliderCtrl(
             parent=self.window,
             value=0,
-            min_value=-2,
-            max_value=2,
+            min_value=-3,
+            max_value=3,
             increment=0.01,
             spin_increment=0.1,
             border=3,
@@ -167,8 +168,8 @@ class BoneCtrlSet:
         self.position_x_slider = FloatSliderCtrl(
             parent=self.window,
             value=0,
-            min_value=-2,
-            max_value=2,
+            min_value=-3,
+            max_value=3,
             increment=0.01,
             spin_increment=0.1,
             border=3,
@@ -184,8 +185,8 @@ class BoneCtrlSet:
         self.position_y_slider = FloatSliderCtrl(
             parent=self.window,
             value=0,
-            min_value=-2,
-            max_value=2,
+            min_value=-3,
+            max_value=3,
             increment=0.01,
             spin_increment=0.1,
             border=3,
@@ -201,8 +202,8 @@ class BoneCtrlSet:
         self.position_z_slider = FloatSliderCtrl(
             parent=self.window,
             value=0,
-            min_value=-2,
-            max_value=2,
+            min_value=-3,
+            max_value=3,
             increment=0.01,
             spin_increment=0.1,
             border=3,
@@ -214,9 +215,24 @@ class BoneCtrlSet:
 
         self.sizer.Add(self.grid_sizer, 0, wx.ALL, 0)
 
+        self.btn_sizer = wx.BoxSizer(wx.HORIZONTAL)
+
+        self.clear_btn_ctrl = wx.Button(
+            self.window,
+            wx.ID_ANY,
+            "Clear",
+            wx.DefaultPosition,
+            wx.Size(80, -1),
+        )
+        self.clear_btn_ctrl.SetToolTip(__("ボーン調整値をすべて初期化します"))
+        self.clear_btn_ctrl.Bind(wx.EVT_BUTTON, self.on_change_clear)
+        self.btn_sizer.Add(self.clear_btn_ctrl, 0, wx.RIGHT, 3)
+
+        self.sizer.Add(self.btn_sizer, 0, wx.RIGHT, 0)
+
     def initialize(self):
         self.bone_choice_ctrl.Clear()
-        for bone_name in ("体幹", "下半身", "上半身", "上半身2", "首", "頭", "頭部装飾", "肩", "腕", "ひじ", "手のひら", "足", "ひざ", "足の甲"):
+        for bone_name in FIT_BONE_NAMES:
             self.bone_choice_ctrl.Append(__(bone_name))
             self.scales[__(bone_name)] = MVector3D()
             self.degrees[__(bone_name)] = MVector3D()
@@ -245,57 +261,66 @@ class BoneCtrlSet:
         self.position_z_slider.ChangeValue(self.positions[bone_name].z)
 
     def on_change_scale_x_slider(self, event: wx.Event):
-        scale_x = self.scale_x_slider.GetValue()
         bone_name = self.bone_choice_ctrl.GetStringSelection()
-        self.scales[bone_name].x = float(scale_x)
+        self.scales[bone_name].x = self.scale_x_slider.GetValue()
+        for cancel_bone_name in self.cancel_bone_names(bone_name):
+            self.scales[cancel_bone_name].x += -self.scale_x_slider.GetValue()
         self.parent.on_change(event)
 
     def on_change_scale_y_slider(self, event: wx.Event):
-        scale_y = self.scale_y_slider.GetValue()
         bone_name = self.bone_choice_ctrl.GetStringSelection()
-        self.scales[bone_name].y = float(scale_y)
+        self.scales[bone_name].y = self.scale_y_slider.GetValue()
+        for cancel_bone_name in self.cancel_bone_names(bone_name):
+            self.scales[cancel_bone_name].y += -self.scale_y_slider.GetValue()
         self.parent.on_change(event)
 
     def on_change_scale_z_slider(self, event: wx.Event):
-        scale_z = self.scale_z_slider.GetValue()
         bone_name = self.bone_choice_ctrl.GetStringSelection()
-        self.scales[bone_name].z = float(scale_z)
+        self.scales[bone_name].z = self.scale_z_slider.GetValue()
+        for cancel_bone_name in self.cancel_bone_names(bone_name):
+            self.scales[cancel_bone_name].z += -self.scale_z_slider.GetValue()
         self.parent.on_change(event)
 
     def on_change_degree_x_slider(self, event: wx.Event):
-        degree_x = self.degree_x_slider.GetValue()
         bone_name = self.bone_choice_ctrl.GetStringSelection()
-        self.degrees[bone_name].x = float(degree_x)
+        self.degrees[bone_name].x = self.degree_x_slider.GetValue()
+        for cancel_bone_name in self.cancel_bone_names(bone_name):
+            self.degrees[cancel_bone_name].x += -self.degree_x_slider.GetValue()
         self.parent.on_change(event)
 
     def on_change_degree_y_slider(self, event: wx.Event):
-        degree_y = self.degree_y_slider.GetValue()
         bone_name = self.bone_choice_ctrl.GetStringSelection()
-        self.degrees[bone_name].y = float(degree_y)
+        self.degrees[bone_name].y = self.degree_y_slider.GetValue()
+        for cancel_bone_name in self.cancel_bone_names(bone_name):
+            self.degrees[cancel_bone_name].y += -self.degree_y_slider.GetValue()
         self.parent.on_change(event)
 
     def on_change_degree_z_slider(self, event: wx.Event):
-        degree_z = self.degree_z_slider.GetValue()
         bone_name = self.bone_choice_ctrl.GetStringSelection()
-        self.degrees[bone_name].z = float(degree_z)
+        self.degrees[bone_name].z = self.degree_z_slider.GetValue()
+        for cancel_bone_name in self.cancel_bone_names(bone_name):
+            self.degrees[cancel_bone_name].z += -self.degree_z_slider.GetValue()
         self.parent.on_change(event)
 
     def on_change_position_x_slider(self, event: wx.Event):
-        position_x = self.position_x_slider.GetValue()
         bone_name = self.bone_choice_ctrl.GetStringSelection()
-        self.positions[bone_name].x = float(position_x)
+        self.positions[bone_name].x = self.position_x_slider.GetValue()
+        for cancel_bone_name in self.cancel_bone_names(bone_name):
+            self.positions[cancel_bone_name].x += -self.position_x_slider.GetValue()
         self.parent.on_change(event)
 
     def on_change_position_y_slider(self, event: wx.Event):
-        position_y = self.position_y_slider.GetValue()
         bone_name = self.bone_choice_ctrl.GetStringSelection()
-        self.positions[bone_name].y = float(position_y)
+        self.positions[bone_name].y = self.position_y_slider.GetValue()
+        for cancel_bone_name in self.cancel_bone_names(bone_name):
+            self.positions[cancel_bone_name].y += -self.position_y_slider.GetValue()
         self.parent.on_change(event)
 
     def on_change_position_z_slider(self, event: wx.Event):
-        position_z = self.position_z_slider.GetValue()
         bone_name = self.bone_choice_ctrl.GetStringSelection()
-        self.positions[bone_name].z = float(position_z)
+        self.positions[bone_name].z = self.position_z_slider.GetValue()
+        for cancel_bone_name in self.cancel_bone_names(bone_name):
+            self.positions[cancel_bone_name].z += -self.position_z_slider.GetValue()
         self.parent.on_change(event)
 
     def on_change_bone_right(self, event: wx.Event):
@@ -312,6 +337,23 @@ class BoneCtrlSet:
         self.bone_choice_ctrl.SetSelection(selection - 1)
         self.on_change_bone(event)
 
+    def on_change_clear(self, event: wx.Event):
+        for bone_name in FIT_BONE_NAMES:
+            self.scales[__(bone_name)] = MVector3D()
+            self.degrees[__(bone_name)] = MVector3D()
+            self.positions[__(bone_name)] = MVector3D()
+        self.bone_choice_ctrl.SetSelection(0)
+        self.scale_x_slider.ChangeValue(0.0)
+        self.scale_y_slider.ChangeValue(0.0)
+        self.scale_z_slider.ChangeValue(0.0)
+        self.degree_x_slider.ChangeValue(0.0)
+        self.degree_y_slider.ChangeValue(0.0)
+        self.degree_z_slider.ChangeValue(0.0)
+        self.position_x_slider.ChangeValue(0.0)
+        self.position_y_slider.ChangeValue(0.0)
+        # 最後だけSetで変形イベント発生させる
+        self.position_z_slider.SetValue(0.0)
+
     def enable(self, enable: bool):
         self.bone_choice_ctrl.Enable(enable)
         self.left_btn_ctrl.Enable(enable)
@@ -325,3 +367,31 @@ class BoneCtrlSet:
         self.position_x_slider.enable(enable)
         self.position_y_slider.enable(enable)
         self.position_z_slider.enable(enable)
+
+    def cancel_bone_names(self, bone_name: str) -> Iterable[str]:
+        return []
+        # match bone_name:
+        #     case "体幹":
+        #         return ("上半身2", "足")
+        #     case "下半身":
+        #         return ("足",)
+        #     case "上半身":
+        #         return ("上半身2",)
+        #     case "上半身2":
+        #         return ("肩", "首")
+        #     case "首":
+        #         return ("頭",)
+        #     case "肩":
+        #         return ("腕",)
+        #     case "腕":
+        #         return ("ひじ",)
+        #     case "ひじ":
+        #         return ("手のひら",)
+        #     case "足":
+        #         return ("ひざ",)
+        #     case "ひざ":
+        #         return ("足の甲",)
+        # return []
+
+
+FIT_BONE_NAMES = ("体幹", "下半身", "上半身", "上半身2", "首", "頭", "頭部装飾", "肩", "腕", "ひじ", "手のひら", "足", "ひざ", "足の甲")

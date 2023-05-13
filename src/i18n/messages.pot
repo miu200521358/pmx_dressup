@@ -569,3 +569,7 @@ msgstr ""
 msgid "移動Z"
 msgstr ""
 
+
+msgid "ボーン調整値をすべて初期化します"
+msgstr ""
+

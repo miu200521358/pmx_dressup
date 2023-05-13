@@ -361,25 +361,28 @@ class LoadUsecase:
 
         return model, dress, True
 
-    def create_dress_individual_bone_morphs(self, dress: PmxModel) -> PmxModel:
+    def create_dress_individual_bone_morphs(self, model: PmxModel, dress: PmxModel) -> PmxModel:
         """衣装個別フィッティング用ボーンモーフを作成"""
+
         for morph_name, target_bone_names in FIT_INDIVIDUAL_BONE_NAMES:
             for axis_name, position, qq, scale in (
                 ("SX", MVector3D(), MQuaternion(), MVector3D(1, 0, 0)),
                 ("SY", MVector3D(), MQuaternion(), MVector3D(0, 1, 0)),
                 ("SZ", MVector3D(), MQuaternion(), MVector3D(0, 0, 1)),
-                ("RX", MVector3D(), MQuaternion.from_euler_degrees(90, 0, 0), MVector3D()),
-                ("RY", MVector3D(), MQuaternion.from_euler_degrees(0, 90, 0), MVector3D()),
-                ("RZ", MVector3D(), MQuaternion.from_euler_degrees(0, 0, 90), MVector3D()),
-                ("MX", MVector3D(2, 0, 0), MQuaternion(), MVector3D()),
-                ("MY", MVector3D(0, 2, 0), MQuaternion(), MVector3D()),
-                ("MZ", MVector3D(0, 0, 2), MQuaternion(), MVector3D()),
+                ("RX", MVector3D(), MQuaternion.from_euler_degrees(0, 0, 10), MVector3D()),
+                ("RY", MVector3D(), MQuaternion.from_euler_degrees(0, 10, 0), MVector3D()),
+                ("RZ", MVector3D(), MQuaternion.from_euler_degrees(10, 0, 0), MVector3D()),
+                ("MX", MVector3D(1, 0, 0), MQuaternion(), MVector3D()),
+                ("MY", MVector3D(0, 1, 0), MQuaternion(), MVector3D()),
+                ("MZ", MVector3D(0, 0, 1), MQuaternion(), MVector3D()),
             ):
                 morph = Morph(name=f"{__('調整')}:{__(morph_name)}:{axis_name}")
                 morph.is_system = True
                 morph.morph_type = MorphType.BONE
                 for bone_name in target_bone_names:
-                    morph.offsets.append(BoneMorphOffset(dress.bones[bone_name].index, position, qq, scale))
+                    offset_position = position * (-1 if "右" in bone_name else 1)
+                    offset_qq = qq.inverse() if "右" in bone_name else qq
+                    morph.offsets.append(BoneMorphOffset(dress.bones[bone_name].index, offset_position, offset_qq, scale))
                 dress.morphs.append(morph)
 
             logger.info("-- 個別調整ボーンモーフ [{m}]", m=morph_name)
@@ -745,7 +748,7 @@ FIT_INDIVIDUAL_BONE_NAMES = [
     (__("腕"), ("右腕", "左腕")),
     (__("ひじ"), ("右ひじ", "左ひじ")),
     (__("手のひら"), ("右手首", "左手首")),
-    (__("足"), ("右足", "左足")),
-    (__("ひざ"), ("右ひざ", "左ひざ")),
-    (__("足の甲"), ("右足首", "左足首")),
+    (__("足"), ("右足", "左足", "右足D", "左足D")),
+    (__("ひざ"), ("右ひざ", "左ひざ", "右ひざD", "左ひざD")),
+    (__("足の甲"), ("右足首", "左足首", "右足首D", "左足首D")),
 ]
