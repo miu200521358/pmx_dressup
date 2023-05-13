@@ -52,32 +52,29 @@ class LoadWorker(BaseWorker):
             usecase.valid_model(dress, "衣装")
 
             # 不足ボーン追加
-            logger.info("不足ボーン調整")
+            logger.info("不足ボーン調整", decoration=MLogger.Decoration.BOX)
             model, dress = usecase.add_mismatch_bones(model, dress)
 
             # 上半身2の再設定
-            logger.info("衣装モデル上半身2位置調整")
+            logger.info("衣装モデル上半身2位置調整", decoration=MLogger.Decoration.BOX)
             model, dress, replaced_bone_names = usecase.replace_upper2(model, dress)
 
             # 捩りの再設定
-            logger.info("衣装モデル捩り位置調整")
+            logger.info("衣装モデル捩り位置調整", decoration=MLogger.Decoration.BOX)
             model, dress, replaced_bone_names = usecase.replace_twist(model, dress, replaced_bone_names)
 
             if replaced_bone_names:
                 # 置換ボーンがある場合、ウェイト置き換え
+                logger.info("衣装モデルウェイト調整", decoration=MLogger.Decoration.BOX)
                 dress.replace_standard_weights(replaced_bone_names)
 
             # 衣装に材質透明モーフを入れる
-            logger.info("衣装モデル追加セットアップ：材質透過モーフ追加")
+            logger.info("衣装モデル追加セットアップ：材質透過モーフ追加", decoration=MLogger.Decoration.BOX)
             dress = usecase.create_material_transparent_morphs(dress)
 
             # 衣装にフィッティングボーンモーフを入れる
-            logger.info("衣装モデル追加セットアップ：フィッティングボーンモーフ追加")
+            logger.info("衣装モデル追加セットアップ：フィッティングボーンモーフ追加", decoration=MLogger.Decoration.BOX)
             dress = usecase.create_dress_fit_bone_morphs(model, dress)
-
-            # # 衣装にフィッティング頂点モーフを入れる
-            # logger.info("衣装モデル追加セットアップ：フィッティング頂点モーフ追加")
-            # dress = self.create_dress_fit_vertex_morphs(model, dress, dress_fit_matrixes)
 
             is_dress_change = True
         elif file_panel.dress_ctrl.original_data:
