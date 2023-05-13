@@ -435,13 +435,12 @@ class LoadUsecase:
             model_relative_position = (model_matrixes[0, to_name].position - model_matrixes[0, from_name].position).effective(rtol=0.05, atol=0.05).abs()
             dress_relative_position = (dress.bones[to_name].position - dress.bones[from_name].position).effective(rtol=0.05, atol=0.05).abs()
 
-            dress_trunk_scale = model_relative_position.length() / dress_relative_position.length()
+            dress_trunk_scale = model_relative_position.y / dress_relative_position.y
             dress_trunk_fit_scales.append(dress_trunk_scale)
 
         # スケール計算: 体幹
-        dress_trunk_mean_scale = np.min(dress_trunk_fit_scales)
+        dress_trunk_mean_scale = np.mean(dress_trunk_fit_scales)
         dress_trunk_fit_scale = MVector3D(dress_trunk_mean_scale, dress_trunk_mean_scale, dress_trunk_mean_scale)
-        logger.debug("-- -- スケールオフセット [{b}][{s:.3f}]", b="体幹", s=dress_trunk_mean_scale)
 
         for from_name, to_name in FIT_TRUNK_BONE_NAMES:
             if not (from_name in dress.bones and from_name in model.bones):
@@ -454,7 +453,7 @@ class LoadUsecase:
             dress_fit_scales[dress.bones[from_name].index] = dress_trunk_fit_scale
             dress_offset_scales[dress.bones[from_name].index] = dress_trunk_fit_scale.copy()
 
-            logger.debug(f"-- -- スケールオフセット [{from_name}][{dress_trunk_mean_scale:.5f}]")
+            logger.info("-- -- スケールオフセット [{b}][{s:.3f}]", b=from_name, s=dress_trunk_mean_scale)
 
         for scale_bone_name, scale_axis, measure_bone_names in FIT_EXTREMITIES_BONE_NAMES + FIT_FINGER_BONE_NAMES:
             dress_extremities_fit_scales: list[float] = []
@@ -498,7 +497,7 @@ class LoadUsecase:
             dress_fit_scales[dress.bones[scale_bone_name].index] = dress_fit_scale
             dress_offset_scales[dress.bones[scale_bone_name].index] = dress_offset_scale
 
-            logger.debug("-- -- スケールオフセット [{b}][{f:.3f}][{o:.3f}]", b=scale_bone_name, f=dress_fit_scale.x, o=dress_offset_scale.x)
+            logger.info("-- -- スケールオフセット [{b}][{s:.3f}({o:.3f})]", b=scale_bone_name, s=dress_fit_scale.x, o=dress_offset_scale.x)
 
         # 足Dは足をコピーする
         for leg_d_name, leg_fk_name in (("左足D", "左足"), ("右足D", "右足")):
@@ -514,6 +513,54 @@ class LoadUsecase:
             bf = dress_motion.bones[leg_d_bone.name][0]
             bf.scale = dress_offset_scales[leg_d_bone.index]
             dress_motion.bones[leg_d_bone.name].append(bf)
+
+        if "頭" in model.bones and "頭" in dress.bones:
+            logger.info("-- -- フィッティング用ウェイト別頂点取得（人物）")
+            model_vertices_by_bones = model.get_vertices_by_bone()
+
+            logger.info("-- -- フィッティング用ウェイト別頂点取得（衣装）")
+            dress_vertices_by_bones = dress.get_vertices_by_bone()
+
+            # 頭のスケーリングは頭部の頂点から求める
+            model_head_vertex_poses: list[np.ndarray] = []
+            for vertex_index in model_vertices_by_bones.get(model.bones["頭"].index, []):
+                model_head_vertex_poses.append(model.vertices[vertex_index].position.vector)
+
+            dress_head_vertex_poses: list[np.ndarray] = []
+            for vertex_index in dress_vertices_by_bones.get(dress.bones["頭"].index, []):
+                dress_head_vertex_poses.append(dress.vertices[vertex_index].position.vector)
+
+            if model_head_vertex_poses and dress_head_vertex_poses:
+                mean_model_head_vertex_poses = np.mean(model_head_vertex_poses, axis=0)
+                max_model_head_vertex_poses = np.max(model_head_vertex_poses, axis=0)
+
+                mean_dress_head_vertex_poses = np.mean(dress_head_vertex_poses, axis=0)
+                max_dress_head_vertex_poses = np.max(dress_head_vertex_poses, axis=0)
+
+                model_head_size = np.mean(max_model_head_vertex_poses - mean_model_head_vertex_poses)
+                dress_head_size = np.mean(max_dress_head_vertex_poses - mean_dress_head_vertex_poses)
+
+                if model_head_size * dress_trunk_mean_scale * 0.5 < dress_head_size:
+                    # 衣装の頭ウェイト頂点から計算したサイズが、スケーリングした頭部の半分以上である場合のみ縮尺対象とする
+                    # 球体の中心から最大までのスケールの平均値で全体を縮尺させる
+                    dress_fit_scale = MVector3D(
+                        *((max_model_head_vertex_poses - mean_model_head_vertex_poses) / (max_dress_head_vertex_poses - mean_dress_head_vertex_poses))
+                    )
+
+                    # 親をキャンセルしていく
+                    dress_offset_scale = dress_fit_scale.copy()
+                    for parent_index in dress.bone_trees["頭"].indexes[:-1]:
+                        if parent_index in dress_offset_scales:
+                            dress_offset_scale *= MVector3D(1, 1, 1) / dress_offset_scales[parent_index]
+
+                    bf = dress_motion.bones["頭"][0]
+                    bf.scale = dress_offset_scale
+                    dress_motion.bones["頭"].append(bf)
+
+                    dress_offset_scales[dress.bones["頭"].index] = dress_offset_scale
+                    dress_fit_scales[dress.bones["頭"].index] = dress_offset_scale
+
+                    logger.info("-- -- スケールオフセット [{b}][{s:.3f}({o:.3f})]", b="頭", s=dress_fit_scale.x, o=dress_offset_scale.x)
 
         # if "頭" in model.bones and "頭" in dress.bones:
         #     logger.info("-- -- フィッティング用ウェイト別頂点取得（人物）")
@@ -559,7 +606,7 @@ class LoadUsecase:
         #         dress_offset_scales[dress.bones["頭"].index] = dress_offset_scale
         #         dress_fit_scales[dress.bones["頭"].index] = dress_offset_scale
 
-        #         logger.debug("-- -- スケールオフセット [{b}][{o:.3f}][{f:.3f}]", b="頭", o=dress_offset_scale.x, f=dress_fit_scale.x)
+        #         logger.info("-- -- スケールオフセット [{b}][{s:.3f}({o:.3f})]", b="頭", s=dress_fit_scale.x, o=dress_offset_scale.x)
 
         return dress_offset_scales, dress_fit_scales
 
@@ -699,7 +746,6 @@ class LoadUsecase:
 
 
 FIT_ROOT_BONE_NAMES = [
-    ("全ての親", "上半身"),
     ("足中心", "首根元"),
 ]
 
