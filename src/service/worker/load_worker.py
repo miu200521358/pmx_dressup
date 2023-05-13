@@ -57,7 +57,15 @@ class LoadWorker(BaseWorker):
 
             # 上半身2の再設定
             logger.info("衣装モデル上半身2位置調整")
-            model, dress = usecase.replace_upper2(model, dress)
+            model, dress, replaced_bone_names = usecase.replace_upper2(model, dress)
+
+            # 捩りの再設定
+            logger.info("衣装モデル捩り位置調整")
+            model, dress, replaced_bone_names = usecase.replace_twist(model, dress, replaced_bone_names)
+
+            if replaced_bone_names:
+                # 置換ボーンがある場合、ウェイト置き換え
+                dress.replace_standard_weights(replaced_bone_names)
 
             # 衣装に材質透明モーフを入れる
             logger.info("衣装モデル追加セットアップ：材質透過モーフ追加")

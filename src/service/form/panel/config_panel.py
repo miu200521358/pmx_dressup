@@ -134,8 +134,8 @@ class ConfigPanel(CanvasPanel):
         self.dress_material_ctrl.enable(enable)
 
     def on_frame_change(self, event: wx.Event):
-        self.frame.fit_model_motion(self.model_material_ctrl.alphas.get(__("ボーンライン"), 1.0))
-        self.frame.fit_dress_motion(self.dress_material_ctrl.alphas.get(__("ボーンライン"), 1.0))
+        self.frame.fit_model_motion(self.model_material_ctrl.alphas.get(__("ボーンライン"), 0.5))
+        self.frame.fit_dress_motion(self.dress_material_ctrl.alphas.get(__("ボーンライン"), 0.5))
 
     def on_change_alpha(self, event: wx.Event):
         self.change_motion(False)
@@ -148,7 +148,7 @@ class ConfigPanel(CanvasPanel):
         axis_scale_sets["ALL"] = self.all_axis_set.get_scale()
 
         self.frame.set_model_motion_morphs(self.model_material_ctrl.alphas)
-        self.frame.fit_model_motion(self.model_material_ctrl.alphas.get(__("ボーンライン"), 1.0), is_bone_deform)
+        self.frame.fit_model_motion(self.model_material_ctrl.alphas.get(__("ボーンライン"), 0.5), is_bone_deform)
 
         self.frame.set_dress_motion_morphs(axis_scale_sets, self.dress_material_ctrl.alphas)
-        self.frame.fit_dress_motion(self.dress_material_ctrl.alphas.get(__("ボーンライン"), 1.0), is_bone_deform)
+        self.frame.fit_dress_motion(self.dress_material_ctrl.alphas.get(__("ボーンライン"), 0.5), is_bone_deform)

@@ -85,7 +85,7 @@ class MaterialCtrlSet:
         self.slider.SetValue(1.0)
         # ボーンの透過度も調整出来るようにしておく
         self.material_choice_ctrl.Append(__("ボーンライン"))
-        self.alphas[__("ボーンライン")] = 1.0
+        self.alphas[__("ボーンライン")] = 0.5
         self.material_choice_ctrl.SetSelection(0)
         self.slider.SetValue(1.0)
 

@@ -32,9 +32,12 @@ class LoadUsecase:
 
     def add_mismatch_bones(self, model: PmxModel, dress: PmxModel):
         """準標準ボーンの不足分を追加"""
+        # 必ず追加するボーン
+        add_bone_names = {"全ての親", "上半身2", "右腕捩", "左腕捩", "右手捩", "左手捩"}
+
         # 準標準ボーンで足りないボーン名を抽出
-        short_model_bone_names = set(list(STANDARD_BONE_NAMES.keys())) - set({"右目", "左目", "両目"}) - set(model.bones.names) | {"全ての親", "上半身2"}
-        short_dress_bone_names = set(list(STANDARD_BONE_NAMES.keys())) - set({"右目", "左目", "両目"}) - set(dress.bones.names) | {"全ての親", "上半身2"}
+        short_model_bone_names = set(list(STANDARD_BONE_NAMES.keys())) - set({"右目", "左目", "両目"}) - set(model.bones.names) | add_bone_names
+        short_dress_bone_names = set(list(STANDARD_BONE_NAMES.keys())) - set({"右目", "左目", "両目"}) - set(dress.bones.names) | add_bone_names
 
         # 両方の片方にしかないボーン名を抽出
         mismatch_bone_names = short_model_bone_names ^ short_dress_bone_names
@@ -152,88 +155,211 @@ class LoadUsecase:
         return model
 
     def replace_upper2(self, model: PmxModel, dress: PmxModel):
-        """
-        上半身2の配置を変える
-        """
+        """上半身2のボーン置き換え"""
+        replace_bone_names = ["上半身", "首根元", "上半身2"]
+        if not (model.bones.exists(replace_bone_names) and model.bones.exists(replace_bone_names)):
+            return model, dress, []
 
         logger.info("-- フィッティング用ウェイト別頂点取得（衣装）")
         dress_vertices_by_bones = dress.get_vertices_by_bone()
 
-        # 一旦衣装の上半身2ウェイトを上半身に置き換える
+        # 一旦衣装の置き換えウェイトを元ボーンに置き換える
         replaced_bone_map = dict([(b.index, b.index) for b in dress.bones])
         replaced_bone_map[dress.bones["上半身2"].index] = dress.bones["上半身"].index
         for vidx in dress_vertices_by_bones.get("上半身2", []):
             v = dress.vertices[vidx]
             v.deform.indexes = np.vectorize(replaced_bone_map.get)(v.deform.indexes)
 
-        model_upper_pos = model.bones["上半身"].position
-        model_upper2_pos = model.bones["上半身2"].position
-        model_neck_pos = model.bones["首根元"].position
-        dress_upper_pos = dress.bones["上半身"].position
-        dress_upper2_pos = dress.bones["上半身2"].position
-        dress_neck_pos = dress.bones["首根元"].position
+        model, dress, is_add = self.replace_bone_position_y(model, dress, *replace_bone_names)
 
-        # 上半身-上半身2 ベースで求めた時の位置 ---------------
+        return model, dress, (["上半身2"] if is_add else [])
 
-        # 上半身-上半身2:Y軸の縮尺
-        upper_upper2_scale = ((model_upper2_pos.y - model_upper_pos.y) / (model_neck_pos.y - model_upper_pos.y)) / (
-            (dress_upper2_pos.y - dress_upper_pos.y) / (dress_neck_pos.y - dress_upper_pos.y)
+    def replace_bone_position_y(self, model: PmxModel, dress: PmxModel, from_name: str, to_name: str, replace_name: str):
+        """
+        衣装のボーン位置を人物ボーン位置に合わせて配置を変える
+        """
+        if not (model.bones.exists([from_name, to_name, replace_name]) and model.bones.exists([from_name, to_name, replace_name])):
+            # ボーンが足りなかったら追加しない
+            return model, dress, False
+
+        model_from_pos = model.bones[from_name].position
+        model_replace_pos = model.bones[replace_name].position
+        model_to_pos = model.bones[to_name].position
+        dress_from_pos = dress.bones[from_name].position
+        dress_replace_pos = dress.bones[replace_name].position
+        dress_to_pos = dress.bones[to_name].position
+
+        # 元ボーン-置換ボーン ベースで求めた時の位置 ---------------
+
+        # 元ボーン-置換ボーン:Y軸の縮尺
+        from_replace_scale = ((model_replace_pos.y - model_from_pos.y) / (model_to_pos.y - model_from_pos.y)) / (
+            (dress_replace_pos.y - dress_from_pos.y) / (dress_to_pos.y - dress_from_pos.y)
         )
 
-        # 衣装の上半身2が配置されうる縮尺Yに合わせたXZ平面
-        dress_upper_new_upper2_plane = MVector3D(
-            dress_upper2_pos.x,
-            dress_upper_pos.y + ((dress_upper2_pos.y - dress_upper_pos.y) * upper_upper2_scale),
-            dress_upper2_pos.z,
+        # 衣装の置換ボーンが配置されうる縮尺Yに合わせたXZ平面
+        dress_from_new_replace_plane = MVector3D(
+            dress_replace_pos.x,
+            dress_from_pos.y + ((dress_replace_pos.y - dress_from_pos.y) * from_replace_scale),
+            dress_replace_pos.z,
         )
 
-        # 衣装の上半身2の位置を求め直す
-        dress_upper_new_upper2_pos = intersect_line_plane(
-            dress_upper_pos,
-            dress_upper_pos + (model_upper2_pos - model_upper_pos).normalized(),
-            dress_upper_new_upper2_plane,
+        # 衣装の置換ボーンの位置を求め直す
+        dress_from_new_replace_pos = intersect_line_plane(
+            dress_from_pos,
+            dress_from_pos + (model_replace_pos - model_from_pos).normalized(),
+            dress_from_new_replace_plane,
             MVector3D(0, 1, 0),
         )
 
-        # 首-上半身2 ベースで求めた時の位置 ---------------
+        # 先ボーン-置換ボーン ベースで求めた時の位置 ---------------
 
         # Y軸の縮尺
-        neck_upper2_scale = ((model_upper2_pos.y - model_neck_pos.y) / (model_upper_pos.y - model_neck_pos.y)) / (
-            (dress_upper2_pos.y - dress_neck_pos.y) / (dress_upper_pos.y - dress_neck_pos.y)
+        to_replace_scale = ((model_replace_pos.y - model_to_pos.y) / (model_from_pos.y - model_to_pos.y)) / (
+            (dress_replace_pos.y - dress_to_pos.y) / (dress_from_pos.y - dress_to_pos.y)
         )
 
-        # 衣装の上半身2が配置されうる縮尺Yに合わせたXZ平面
-        dress_neck_new_upper2_plane = MVector3D(
-            dress_upper2_pos.x,
-            dress_neck_pos.y + ((dress_upper2_pos.y - dress_neck_pos.y) * neck_upper2_scale),
-            dress_upper2_pos.z,
+        # 衣装の置換ボーンが配置されうる縮尺Yに合わせたXZ平面
+        dress_to_new_replace_plane = MVector3D(
+            dress_replace_pos.x,
+            dress_to_pos.y + ((dress_replace_pos.y - dress_to_pos.y) * to_replace_scale),
+            dress_replace_pos.z,
         )
 
-        # 衣装の上半身2の位置を求め直す
-        dress_neck_new_upper2_pos = intersect_line_plane(
-            dress_neck_pos,
-            (model_upper2_pos - model_neck_pos).normalized(),
-            dress_neck_new_upper2_plane,
+        # 衣装の置換ボーンの位置を求め直す
+        dress_to_new_replace_pos = intersect_line_plane(
+            dress_to_pos,
+            (model_replace_pos - model_to_pos).normalized(),
+            dress_to_new_replace_plane,
             MVector3D(0, -1, 0),
         )
 
-        # 最終的な上半身2は上半身-上半身2,首-上半身2の中間とする
-        dress.bones["上半身2"].position = (dress_upper_new_upper2_pos + dress_neck_new_upper2_pos) / 2
-        logger.info("-- 衣装: 上半身2再計算位置: {u} → {p}", u=dress_upper2_pos, p=dress_upper_new_upper2_pos)
+        # 最終的な置換ボーンは元ボーン-置換ボーン,先ボーン-置換ボーンの中間とする
+        dress.bones[replace_name].position = (dress_from_new_replace_pos + dress_to_new_replace_pos) / 2
+        logger.info("-- 衣装: {r}: 位置再計算: {u} → {p}", r=replace_name, u=dress_replace_pos, p=dress.bones[replace_name].position)
 
-        # 上半身のウェイトを上半身2にも振り分ける
-        dress.separate_weights(
-            "上半身",
-            "上半身2",
-            VecAxis.Y,
-            0.2,
-            list(set(dress_vertices_by_bones.get(dress.bones["上半身"].index, [])) | set(dress_vertices_by_bones.get(dress.bones["上半身2"].index, []))),
+        return model, dress, True
+
+    def replace_twist(self, model: PmxModel, dress: PmxModel, replaced_bone_names: list[str]):
+        """腕捩・手捩のボーン置き換え"""
+
+        replace_bone_names = [
+            "右腕",
+            "右ひじ",
+            "右腕捩",
+            "右腕捩1",
+            "右腕捩2",
+            "右腕捩3",
+            "右手首",
+            "右手捩",
+            "右手捩1",
+            "右手捩2",
+            "右手捩3",
+            "左腕",
+            "左ひじ",
+            "左腕捩",
+            "左腕捩1",
+            "左腕捩2",
+            "左腕捩3",
+            "左手首",
+            "左手捩",
+            "左手捩1",
+            "左手捩2",
+            "左手捩3",
+        ]
+        if not (model.bones.exists(replace_bone_names) and model.bones.exists(replace_bone_names)):
+            return model, dress, []
+
+        logger.info("-- フィッティング用ウェイト別頂点取得（衣装）")
+        dress_vertices_by_bones = dress.get_vertices_by_bone()
+
+        replace_bone_set = (
+            ("右腕", "右ひじ", "右腕捩"),
+            ("右ひじ", "右手首", "右手捩"),
+            ("左腕", "左ひじ", "左腕捩"),
+            ("左ひじ", "左手首", "左手捩"),
         )
 
-        dress.setup()
-        logger.info("-- 衣装: 上半身2再セットアップ")
+        # 一旦衣装の置き換えウェイトを元ボーンに置き換える
+        replaced_bone_map = dict([(b.index, b.index) for b in dress.bones])
+        for from_name, to_name, replace_name in replace_bone_set:
+            if replace_name in dress.bones and from_name and dress.bones:
+                replaced_bone_map[dress.bones[replace_name].index] = dress.bones[from_name].index
+            for no in range(1, 5):
+                replace_twist_name = f"{replace_name}{no}"
+                if replace_twist_name in dress.bones and replace_twist_name and dress.bones:
+                    replaced_bone_map[dress.bones[replace_twist_name].index] = dress.bones[from_name].index
 
-        return model, dress
+        # 捩り系の頂点リストを取得する
+        dress_vertex_indexes = set([])
+        for bone_name in [
+            "右腕捩",
+            "右腕捩1",
+            "右腕捩2",
+            "右腕捩3",
+            "右手捩",
+            "右手捩1",
+            "右手捩2",
+            "右手捩3",
+            "左腕捩",
+            "左腕捩1",
+            "左腕捩2",
+            "左腕捩3",
+            "左手捩",
+            "左手捩1",
+            "左手捩2",
+            "左手捩3",
+        ]:
+            dress_vertex_indexes |= set(dress_vertices_by_bones.get(bone_name, []))
+
+        # 捩りにウェイトが乗っているのを元ボーンに置き換える
+        for vidx in list(dress_vertex_indexes):
+            v = dress.vertices[vidx]
+            v.deform.indexes = np.vectorize(replaced_bone_map.get)(v.deform.indexes)
+
+        for from_name, to_name, replace_name in replace_bone_set:
+            # 捩りボーンそのもの
+            model, dress, is_add = self.replace_bone_position_twist(model, dress, from_name, to_name, replace_name)
+            if is_add:
+                replaced_bone_names.append(replace_name)
+
+            # 分散の付与ボーン
+            for no in range(1, 5):
+                model, dress, is_add = self.replace_bone_position_twist(model, dress, from_name, to_name, f"{replace_name}{no}")
+                if is_add:
+                    replaced_bone_names.append(replace_name)
+
+        return model, dress, replaced_bone_names
+
+    def replace_bone_position_twist(self, model: PmxModel, dress: PmxModel, from_name: str, to_name: str, replace_name: str):
+        """
+        衣装のボーン位置を人物ボーン位置に合わせて配置を変える(斜め)
+        """
+        if not (model.bones.exists([from_name, to_name, replace_name]) and model.bones.exists([from_name, to_name, replace_name])):
+            # ボーンが足りなかったら追加しない
+            return model, dress, False
+
+        model_from_pos = model.bones[from_name].position
+        model_replace_pos = model.bones[replace_name].position
+        model_to_pos = model.bones[to_name].position
+        dress_from_pos = dress.bones[from_name].position
+        dress_replace_pos = dress.bones[replace_name].position
+        dress_to_pos = dress.bones[to_name].position
+
+        # 元ボーン-置換ボーン ベースで求めた時の位置 ---------------
+
+        # 元ボーン-置換ボーン:縮尺
+        from_replace_scale = ((model_replace_pos - model_from_pos) / (model_to_pos - model_from_pos)) / (
+            (dress_replace_pos - dress_from_pos) / (dress_to_pos - dress_from_pos)
+        )
+
+        # 縮尺に合わせた位置
+        dress_new_twist_pos = dress_from_pos + ((dress_replace_pos - dress_from_pos) * from_replace_scale)
+
+        # 最終的な置換ボーンは元ボーン-置換ボーン,先ボーン-置換ボーンの中間とする
+        dress.bones[replace_name].position = dress_new_twist_pos
+        logger.info("-- 衣装: {r}: 位置再計算: {u} → {p}", r=replace_name, u=dress_replace_pos, p=dress_new_twist_pos)
+
+        return model, dress, True
 
     def create_dress_fit_bone_morphs(self, model: PmxModel, dress: PmxModel) -> PmxModel:
         """衣装フィッティング用ボーンモーフを作成"""
@@ -347,13 +473,13 @@ class LoadUsecase:
                 )
 
                 # 計測対象軸を対象とする
-                dress_extremities_fit_scales.append((model_relative_position.length() / dress_relative_position.length()))
+                dress_extremities_fit_scales.append((model_relative_position / dress_relative_position).vector[scale_axis])
 
             if not dress_extremities_fit_scales:
                 continue
 
-            dress_mean_scale = np.mean(dress_extremities_fit_scales)
-            dress_fit_scale = MVector3D(dress_mean_scale, dress_mean_scale, dress_mean_scale)
+            dress_min_scale = np.min(dress_extremities_fit_scales)
+            dress_fit_scale = MVector3D(dress_min_scale, dress_min_scale, dress_min_scale)
 
             for from_name, to_name in measure_bone_names:
                 if not (from_name in dress.bones and to_name in dress.bones and from_name in model.bones and to_name in model.bones):

@@ -107,9 +107,9 @@ class MainFrame(BaseFrame):
 
         try:
             logger.info("人物モデル描画準備")
-            self.config_panel.canvas.append_model_set(self.file_panel.model_ctrl.data, self.model_motion)
+            self.config_panel.canvas.append_model_set(self.file_panel.model_ctrl.data, self.model_motion, bone_alpha=0.5)
             logger.info("衣装モデル描画準備")
-            self.config_panel.canvas.append_model_set(self.file_panel.dress_ctrl.data, self.dress_motion)
+            self.config_panel.canvas.append_model_set(self.file_panel.dress_ctrl.data, self.dress_motion, bone_alpha=0.5)
             logger.info("モデル描画")
             self.config_panel.canvas.Refresh()
             self.notebook.ChangeSelection(self.config_panel.tab_idx)
@@ -140,9 +140,9 @@ class MainFrame(BaseFrame):
 
         try:
             logger.info("人物モデル描画準備")
-            self.config_panel.canvas.append_model_set(self.file_panel.model_ctrl.data, self.model_motion)
+            self.config_panel.canvas.append_model_set(self.file_panel.model_ctrl.data, self.model_motion, bone_alpha=0.5)
             logger.info("衣装モデル描画準備")
-            self.config_panel.canvas.append_model_set(self.file_panel.dress_ctrl.data, self.dress_motion)
+            self.config_panel.canvas.append_model_set(self.file_panel.dress_ctrl.data, self.dress_motion, bone_alpha=0.5)
             logger.info("モデル描画")
             self.config_panel.canvas.Refresh()
             self.notebook.ChangeSelection(self.config_panel.tab_idx)
