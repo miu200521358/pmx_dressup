@@ -2,14 +2,14 @@ import os
 
 import numpy as np
 
+from mlib.base.base import VecAxis
 from mlib.base.exception import MApplicationException
 from mlib.base.logger import MLogger
 from mlib.base.math import MQuaternion, MVector3D, MVector4D, intersect_line_plane
 from mlib.pmx.pmx_collection import PmxModel
-from mlib.pmx.pmx_part import BoneMorphOffset, MaterialMorphCalcMode, MaterialMorphOffset, Morph, MorphType, STANDARD_BONE_NAMES
+from mlib.pmx.pmx_part import STANDARD_BONE_NAMES, Bone, BoneFlg, BoneMorphOffset, MaterialMorphCalcMode, MaterialMorphOffset, Morph, MorphType
 from mlib.vmd.vmd_collection import VmdMotion
 from mlib.vmd.vmd_tree import VmdBoneFrameTrees
-from mlib.base.base import VecAxis
 
 logger = MLogger(os.path.basename(__file__), level=1)
 __ = logger.get_text
@@ -77,9 +77,28 @@ class LoadUsecase:
                     dress_inserted_bone_names.append(bone_name)
                     logger.info("-- -- 衣装: 準標準ボーン追加: {b}", b=bone_name)
 
+        if "頭" in dress.bones:
+            # 頭ボーンがある場合、頭部装飾用ボーンを追加する
+            head_accessory_bone = Bone(name="頭部装飾用", index=dress.bones["頭"].index + 1)
+            head_accessory_bone.parent_index = dress.bones["頭"].index
+            head_accessory_bone.position = dress.bones["頭"].position
+            head_accessory_bone.bone_flg = BoneFlg.CAN_MANIPULATE | BoneFlg.CAN_ROTATE | BoneFlg.CAN_TRANSLATE | BoneFlg.IS_VISIBLE
+            head_accessory_bone.tail_position = MVector3D(0, 1, 0)
+            dress.insert_bone(head_accessory_bone)
+            dress_inserted_bone_names.append("頭部装飾用")
+
         if dress_inserted_bone_names:
             dress.setup()
             dress.replace_standard_weights(dress_inserted_bone_names)
+            if "頭部装飾用" in dress_inserted_bone_names:
+                logger.info("-- フィッティング用ウェイト別頂点取得（衣装:頭部装飾用）")
+                dress_vertices_by_bones = dress.get_vertices_by_bone()
+                replaced_bone_map = dict([(b.index, b.index) for b in dress.bones])
+                replaced_bone_map[dress.bones["頭"].index] = dress.bones["頭部装飾用"].index
+                for vidx in dress_vertices_by_bones.get("頭", []):
+                    v = dress.vertices[vidx]
+                    v.deform.indexes = np.vectorize(replaced_bone_map.get)(v.deform.indexes)
+
             logger.info("-- 衣装: 再セットアップ")
 
         return model, dress
@@ -359,53 +378,51 @@ class LoadUsecase:
             bf.scale = dress_offset_scales[leg_d_bone.index]
             dress_motion.bones[leg_d_bone.name].append(bf)
 
-        if "頭" in model.bones and "頭" in dress.bones:
-            logger.info("-- -- フィッティング用ウェイト別頂点取得（人物）")
-            model_vertices_by_bones = model.get_vertices_by_bone()
+        # if "頭" in model.bones and "頭" in dress.bones:
+        #     logger.info("-- -- フィッティング用ウェイト別頂点取得（人物）")
+        #     model_vertices_by_bones = model.get_vertices_by_bone()
 
-            logger.info("-- -- フィッティング用ウェイト別頂点取得（衣装）")
-            dress_vertices_by_bones = dress.get_vertices_by_bone()
+        #     logger.info("-- -- フィッティング用ウェイト別頂点取得（衣装）")
+        #     dress_vertices_by_bones = dress.get_vertices_by_bone()
 
-            # 頭のスケーリングは頭部の頂点から求める
-            model_head_vertex_poses: list[np.ndarray] = []
-            for vertex_index in model_vertices_by_bones.get(model.bones["頭"].index, []):
-                model_head_vertex_poses.append(model.vertices[vertex_index].position.vector)
+        #     # 頭のスケーリングは頭部の頂点から求める
+        #     model_head_vertex_poses: list[np.ndarray] = []
+        #     for vertex_index in model_vertices_by_bones.get(model.bones["頭"].index, []):
+        #         model_head_vertex_poses.append(model.vertices[vertex_index].position.vector)
 
-            dress_head_vertex_poses: list[np.ndarray] = []
-            for vertex_index in dress_vertices_by_bones.get(dress.bones["頭"].index, []):
-                dress_head_vertex_poses.append(dress.vertices[vertex_index].position.vector)
+        #     dress_head_vertex_poses: list[np.ndarray] = []
+        #     for vertex_index in dress_vertices_by_bones.get(dress.bones["頭"].index, []):
+        #         dress_head_vertex_poses.append(dress.vertices[vertex_index].position.vector)
 
-            if model_head_vertex_poses and dress_head_vertex_poses:
-                mean_model_head_vertex_poses = np.mean(model_head_vertex_poses, axis=0)
-                max_model_head_vertex_poses = np.max(model_head_vertex_poses, axis=0)
+        #     if model_head_vertex_poses and dress_head_vertex_poses:
+        #         mean_model_head_vertex_poses = np.mean(model_head_vertex_poses, axis=0)
+        #         max_model_head_vertex_poses = np.max(model_head_vertex_poses, axis=0)
 
-                mean_dress_head_vertex_poses = np.mean(dress_head_vertex_poses, axis=0)
-                max_dress_head_vertex_poses = np.max(dress_head_vertex_poses, axis=0)
+        #         mean_dress_head_vertex_poses = np.mean(dress_head_vertex_poses, axis=0)
+        #         max_dress_head_vertex_poses = np.max(dress_head_vertex_poses, axis=0)
 
-                model_head_size = np.mean(max_model_head_vertex_poses - mean_model_head_vertex_poses)
-                dress_head_size = np.mean(max_dress_head_vertex_poses - mean_dress_head_vertex_poses)
+        #         model_head_size = np.mean(max_model_head_vertex_poses - mean_model_head_vertex_poses)
+        #         dress_head_size = np.mean(max_dress_head_vertex_poses - mean_dress_head_vertex_poses)
 
-                if model_head_size * dress_trunk_mean_scale * 0.5 < dress_head_size:
-                    # 衣装の頭ウェイト頂点から計算したサイズが、スケーリングした頭部の半分以上である場合のみ縮尺対象とする
-                    # 球体の中心から最大までのスケールの平均値で全体を縮尺させる
-                    dress_fit_scale = MVector3D(
-                        *((max_model_head_vertex_poses - mean_model_head_vertex_poses) / (max_dress_head_vertex_poses - mean_dress_head_vertex_poses))
-                    )
+        #         head_fit_scale = model_head_size / dress_head_size
 
-                    # 親をキャンセルしていく
-                    dress_offset_scale = dress_fit_scale.copy()
-                    for parent_index in dress.bone_trees["頭"].indexes[:-1]:
-                        if parent_index in dress_offset_scales:
-                            dress_offset_scale *= MVector3D(1, 1, 1) / dress_offset_scales[parent_index]
+        #         # 球体の中心から最大までのスケールの平均値で全体を縮尺させる
+        #         dress_fit_scale = MVector3D(head_fit_scale, head_fit_scale, head_fit_scale)
 
-                    bf = dress_motion.bones["頭"][0]
-                    bf.scale = dress_offset_scale
-                    dress_motion.bones["頭"].append(bf)
+        #         # 親をキャンセルしていく
+        #         dress_offset_scale = dress_fit_scale.copy()
+        #         for parent_index in dress.bone_trees["頭"].indexes[:-1]:
+        #             if parent_index in dress_offset_scales:
+        #                 dress_offset_scale *= MVector3D(1, 1, 1) / dress_offset_scales[parent_index]
 
-                    dress_offset_scales[dress.bones["頭"].index] = dress_offset_scale
-                    dress_fit_scales[dress.bones["頭"].index] = dress_offset_scale
+        #         bf = dress_motion.bones["頭"][0]
+        #         bf.scale = dress_offset_scale
+        #         dress_motion.bones["頭"].append(bf)
 
-                    logger.debug("-- -- スケールオフセット [{b}][{o:.3f}][{f:.3f}]", b="頭", o=dress_offset_scale.x, f=dress_fit_scale.x)
+        #         dress_offset_scales[dress.bones["頭"].index] = dress_offset_scale
+        #         dress_fit_scales[dress.bones["頭"].index] = dress_offset_scale
+
+        #         logger.debug("-- -- スケールオフセット [{b}][{o:.3f}][{f:.3f}]", b="頭", o=dress_offset_scale.x, f=dress_fit_scale.x)
 
         return dress_offset_scales, dress_fit_scales
 

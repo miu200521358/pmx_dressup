@@ -3,8 +3,8 @@ import os
 import wx
 
 from mlib.base.logger import MLogger
-from mlib.service.form.widgets.float_slider_ctrl import FloatSliderCtrl
 from mlib.service.form.base_panel import BasePanel
+from mlib.service.form.widgets.float_slider_ctrl import FloatSliderCtrl
 
 logger = MLogger(os.path.basename(__file__))
 __ = logger.get_text

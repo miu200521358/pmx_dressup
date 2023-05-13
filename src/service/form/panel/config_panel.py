@@ -10,7 +10,6 @@ from mlib.service.form.widgets.spin_ctrl import WheelSpinCtrl
 from service.form.widgets.axis_ctrl_set import AxisCtrlSet
 from service.form.widgets.material_ctrl_set import MaterialCtrlSet
 
-
 logger = MLogger(os.path.basename(__file__))
 __ = logger.get_text
 
