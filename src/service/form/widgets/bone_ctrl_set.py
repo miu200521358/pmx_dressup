@@ -367,6 +367,7 @@ class BoneCtrlSet:
         self.position_x_slider.enable(enable)
         self.position_y_slider.enable(enable)
         self.position_z_slider.enable(enable)
+        self.clear_btn_ctrl.Enable(enable)
 
     def cancel_bone_names(self, bone_name: str) -> Iterable[str]:
         return []
