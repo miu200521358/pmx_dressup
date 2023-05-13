@@ -178,7 +178,7 @@ class LoadUsecase:
         """
         衣装のボーン位置を人物ボーン位置に合わせて配置を変える
         """
-        if not (model.bones.exists([from_name, to_name, replace_name]) and model.bones.exists([from_name, to_name, replace_name])):
+        if not (model.bones.exists([from_name, to_name, replace_name]) and dress.bones.exists([from_name, to_name, replace_name])):
             # ボーンが足りなかったら追加しない
             return model, dress, False
 
@@ -334,7 +334,7 @@ class LoadUsecase:
         """
         衣装のボーン位置を人物ボーン位置に合わせて配置を変える(斜め)
         """
-        if not (model.bones.exists([from_name, to_name, replace_name]) and model.bones.exists([from_name, to_name, replace_name])):
+        if not (model.bones.exists([from_name, to_name, replace_name]) and dress.bones.exists([from_name, to_name, replace_name])):
             # ボーンが足りなかったら追加しない
             return model, dress, False
 

@@ -615,3 +615,7 @@ msgstr ""
 msgid "-- 衣装: {r}: 位置再計算: {u} → {p}"
 msgstr ""
 
+
+msgid "-- 面データ読み取り [{i} ({p:.2f}%)]"
+msgstr ""
+
