@@ -101,6 +101,8 @@ class MainFrame(BaseFrame):
         # 材質の選択肢を入れ替える
         self.config_panel.model_material_ctrl.initialize(model.materials.names)
         self.config_panel.dress_material_ctrl.initialize(dress.materials.names)
+        # ボーン調整の選択肢を入れ替える
+        self.config_panel.dress_bone_ctrl.initialize()
 
         # キーフレを戻す
         self.config_panel.fno = 0
@@ -134,7 +136,12 @@ class MainFrame(BaseFrame):
 
         # 既存のモーフを適用
         self.set_model_motion_morphs(self.config_panel.model_material_ctrl.alphas)
-        self.set_dress_motion_morphs({}, self.config_panel.dress_material_ctrl.alphas)
+        self.set_dress_motion_morphs(
+            self.config_panel.dress_material_ctrl.alphas,
+            self.config_panel.dress_bone_ctrl.scales,
+            self.config_panel.dress_bone_ctrl.degrees,
+            self.config_panel.dress_bone_ctrl.positions,
+        )
         # キーフレを戻す
         self.config_panel.fno = 0
 
@@ -166,7 +173,13 @@ class MainFrame(BaseFrame):
         mf.ratio = abs(material_alphas.get(__("全材質"), 1.0) - 1)
         self.model_motion.morphs[mf.name].append(mf)
 
-    def set_dress_motion_morphs(self, axis_scale_sets: dict[str, MVector3D] = {}, material_alphas: dict[str, float] = {}):
+    def set_dress_motion_morphs(
+        self,
+        material_alphas: dict[str, float] = {},
+        bone_scales: dict[str, MVector3D] = {},
+        bone_degrees: dict[str, MVector3D] = {},
+        bone_positions: dict[str, MVector3D] = {},
+    ):
         if self.dress_motion is None:
             return
 
@@ -189,21 +202,21 @@ class MainFrame(BaseFrame):
         mf.ratio = abs(material_alphas.get(__("全材質"), 1.0) - 1)
         self.dress_motion.morphs[mf.name].append(mf)
 
-        # for dress_bone in dress.bones:
-        #     if dress_bone.name in model.bones and dress.bones[dress_bone.parent_index].name in model.bones:
-        #         # スケールをモーフで加味する
-        #         axis_scale: MVector3D = axis_scale_sets.get(dress_bone.name, MVector3D()) + axis_scale_sets.get("ALL", MVector3D())
-        #         xmf = VmdMorphFrame(0, f"{dress_bone.name}SX")
-        #         xmf.ratio = axis_scale.x
-        #         self.dress_motion.morphs[xmf.name].append(xmf)
-
-        #         ymf = VmdMorphFrame(0, f"{dress_bone.name}SY")
-        #         ymf.ratio = axis_scale.y
-        #         self.dress_motion.morphs[ymf.name].append(ymf)
-
-        #         zmf = VmdMorphFrame(0, f"{dress_bone.name}SZ")
-        #         zmf.ratio = axis_scale.z
-        #         self.dress_motion.morphs[zmf.name].append(zmf)
+        for bone_type_name, scale, degree, position in zip(bone_scales.keys(), bone_scales.values(), bone_degrees.values(), bone_positions.values()):
+            for ratio, axis_name in (
+                (scale.x, "SX"),
+                (scale.y, "SY"),
+                (scale.z, "SZ"),
+                (degree.x, "RX"),
+                (degree.y, "RY"),
+                (degree.z, "RZ"),
+                (position.x, "MX"),
+                (position.y, "MY"),
+                (position.z, "MZ"),
+            ):
+                mf = VmdMorphFrame(0, f"{__('調整')}:{__(bone_type_name)}:{axis_name}")
+                mf.ratio = ratio
+                self.dress_motion.morphs[mf.name].append(mf)
 
     def fit_model_motion(self, bone_alpha: float = 1.0, is_bone_deform: bool = True):
         self.config_panel.canvas.model_sets[0].motion = self.model_motion

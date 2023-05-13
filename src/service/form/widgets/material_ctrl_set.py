@@ -69,7 +69,7 @@ class MaterialCtrlSet:
             spin_increment=0.1,
             border=3,
             size=wx.Size(240, -1),
-            change_event=self.on_change_alpha,
+            change_event=self.on_change_morph,
         )
         self.sizer.Add(self.slider.sizer, 0, wx.ALL, 3)
 
@@ -93,11 +93,11 @@ class MaterialCtrlSet:
         material_name = self.material_choice_ctrl.GetStringSelection()
         self.slider.SetValue(self.alphas[material_name])
 
-    def on_change_alpha(self, event: wx.Event):
+    def on_change_morph(self, event: wx.Event):
         alpha = self.slider.GetValue()
         material_name = self.material_choice_ctrl.GetStringSelection()
         self.alphas[material_name] = float(alpha)
-        self.parent.on_change_alpha(event)
+        self.parent.on_change_morph(event)
 
     def on_change_material_right(self, event: wx.Event):
         selection = self.material_choice_ctrl.GetSelection()

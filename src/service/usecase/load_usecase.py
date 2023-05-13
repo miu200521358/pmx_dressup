@@ -81,23 +81,23 @@ class LoadUsecase:
                     logger.info("-- -- 衣装: 準標準ボーン追加: {b}", b=bone_name)
 
         if "頭" in dress.bones:
-            # 頭ボーンがある場合、頭部装飾用ボーンを追加する
-            head_accessory_bone = Bone(name="頭部装飾用", index=dress.bones["頭"].index + 1)
+            # 頭ボーンがある場合、頭部装飾ボーンを追加する
+            head_accessory_bone = Bone(name="頭部装飾", index=dress.bones["頭"].index + 1)
             head_accessory_bone.parent_index = dress.bones["頭"].index
             head_accessory_bone.position = dress.bones["頭"].position
             head_accessory_bone.bone_flg = BoneFlg.CAN_MANIPULATE | BoneFlg.CAN_ROTATE | BoneFlg.CAN_TRANSLATE | BoneFlg.IS_VISIBLE
             head_accessory_bone.tail_position = MVector3D(0, 1, 0)
             dress.insert_bone(head_accessory_bone)
-            dress_inserted_bone_names.append("頭部装飾用")
+            dress_inserted_bone_names.append("頭部装飾")
 
         if dress_inserted_bone_names:
             dress.setup()
             dress.replace_standard_weights(dress_inserted_bone_names)
-            if "頭部装飾用" in dress_inserted_bone_names:
-                logger.info("フィッティング用ウェイト別頂点取得（衣装:頭部装飾用）")
+            if "頭部装飾" in dress_inserted_bone_names:
+                logger.info("フィッティング用ウェイト別頂点取得（衣装:頭部装飾）")
                 dress_vertices_by_bones = dress.get_vertices_by_bone()
                 replaced_bone_map = dict([(b.index, b.index) for b in dress.bones])
-                replaced_bone_map[dress.bones["頭"].index] = dress.bones["頭部装飾用"].index
+                replaced_bone_map[dress.bones["頭"].index] = dress.bones["頭部装飾"].index
                 for vidx in dress_vertices_by_bones.get("頭", []):
                     v = dress.vertices[vidx]
                     v.deform.indexes = np.vectorize(replaced_bone_map.get)(v.deform.indexes)
@@ -361,6 +361,31 @@ class LoadUsecase:
 
         return model, dress, True
 
+    def create_dress_individual_bone_morphs(self, dress: PmxModel) -> PmxModel:
+        """衣装個別フィッティング用ボーンモーフを作成"""
+        for morph_name, target_bone_names in FIT_INDIVIDUAL_BONE_NAMES:
+            for axis_name, position, qq, scale in (
+                ("SX", MVector3D(), MQuaternion(), MVector3D(1, 0, 0)),
+                ("SY", MVector3D(), MQuaternion(), MVector3D(0, 1, 0)),
+                ("SZ", MVector3D(), MQuaternion(), MVector3D(0, 0, 1)),
+                ("RX", MVector3D(), MQuaternion.from_euler_degrees(90, 0, 0), MVector3D()),
+                ("RY", MVector3D(), MQuaternion.from_euler_degrees(0, 90, 0), MVector3D()),
+                ("RZ", MVector3D(), MQuaternion.from_euler_degrees(0, 0, 90), MVector3D()),
+                ("MX", MVector3D(2, 0, 0), MQuaternion(), MVector3D()),
+                ("MY", MVector3D(0, 2, 0), MQuaternion(), MVector3D()),
+                ("MZ", MVector3D(0, 0, 2), MQuaternion(), MVector3D()),
+            ):
+                morph = Morph(name=f"{__('調整')}:{__(morph_name)}:{axis_name}")
+                morph.is_system = True
+                morph.morph_type = MorphType.BONE
+                for bone_name in target_bone_names:
+                    morph.offsets.append(BoneMorphOffset(dress.bones[bone_name].index, position, qq, scale))
+                dress.morphs.append(morph)
+
+            logger.info("-- 個別調整ボーンモーフ [{m}]", m=morph_name)
+
+        return dress
+
     def create_dress_fit_bone_morphs(self, model: PmxModel, dress: PmxModel) -> PmxModel:
         """衣装フィッティング用ボーンモーフを作成"""
         bone_fitting_morph = Morph(name="BoneFitting")
@@ -395,8 +420,8 @@ class LoadUsecase:
                 continue
             dress_offset_position = dress_offset_positions.get(dress_bone.index, MVector3D())
             dress_offset_qq = dress_offset_qqs.get(dress_bone.index, MQuaternion())
-            dress_offset_scale = dress_offset_scales.get(dress_bone.index, MVector3D(1, 1, 1))
-            dress_fit_scale = dress_fit_scales.get(dress_bone.index, MVector3D(1, 1, 1))
+            dress_offset_scale = dress_offset_scales.get(dress_bone.index, MVector3D(1, 1, 1)) - MVector3D(1, 1, 1)
+            dress_fit_scale = dress_fit_scales.get(dress_bone.index, MVector3D(1, 1, 1)) - MVector3D(1, 1, 1)
 
             logger.info(
                 "-- ボーンモーフ [{b}][移動={p}][回転={q}][縮尺:{o:.3f}({f:.3f})]",
@@ -706,4 +731,21 @@ FIT_FINGER_BONE_NAMES = [
     ("右中指１", VecAxis.X, (("右中指１", "右中指２"), ("右中指２", "右中指３"))),
     ("右薬指１", VecAxis.X, (("右薬指１", "右薬指２"), ("右薬指２", "右薬指３"))),
     ("右小指１", VecAxis.X, (("右小指１", "右小指２"), ("右小指２", "右小指３"))),
+]
+
+FIT_INDIVIDUAL_BONE_NAMES = [
+    (__("体幹"), ("上半身", "下半身")),
+    (__("下半身"), ("下半身",)),
+    (__("上半身"), ("上半身",)),
+    (__("上半身2"), ("上半身2",)),
+    (__("首"), ("首",)),
+    (__("頭"), ("頭",)),
+    (__("頭部装飾"), ("頭部装飾",)),
+    (__("肩"), ("右肩", "左肩")),
+    (__("腕"), ("右腕", "左腕")),
+    (__("ひじ"), ("右ひじ", "左ひじ")),
+    (__("手のひら"), ("右手首", "左手首")),
+    (__("足"), ("右足", "左足")),
+    (__("ひざ"), ("右ひざ", "左ひざ")),
+    (__("足の甲"), ("右足首", "左足首")),
 ]

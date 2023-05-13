@@ -3,12 +3,11 @@ import os
 import wx
 
 from mlib.base.logger import MLogger
-from mlib.base.math import MVector3D
 from mlib.pmx.canvas import CanvasPanel
 from mlib.service.form.base_frame import BaseFrame
 from mlib.service.form.widgets.spin_ctrl import WheelSpinCtrl
-from service.form.widgets.axis_ctrl_set import AxisCtrlSet
 from service.form.widgets.material_ctrl_set import MaterialCtrlSet
+from service.form.widgets.bone_ctrl_set import BoneCtrlSet
 
 logger = MLogger(os.path.basename(__file__))
 __ = logger.get_text
@@ -62,7 +61,7 @@ class ConfigPanel(CanvasPanel):
         self.window_sizer = wx.BoxSizer(wx.VERTICAL)
 
         # --------------
-        # 材質表示
+        # 材質透過度
 
         self.material_sizer = wx.StaticBoxSizer(wx.StaticBox(self.scrolled_window, wx.ID_ANY, __("材質透過度")), orient=wx.VERTICAL)
 
@@ -72,22 +71,13 @@ class ConfigPanel(CanvasPanel):
         self.window_sizer.Add(self.material_sizer, 0, wx.ALL, 3)
 
         # --------------
-        # 追加縮尺
+        # ボーン調整
 
-        self.scale_sizer = wx.BoxSizer(wx.VERTICAL)
-        self.scale_title_ctrl = wx.StaticText(self.scrolled_window, wx.ID_ANY, __("追加縮尺"), wx.DefaultPosition, wx.DefaultSize, 0)
-        self.scale_title_ctrl.SetToolTip(__("全体やボーンごとに追加でどの程度伸縮させるかを、XYZ別に設定することができます"))
-        self.scale_sizer.Add(self.scale_title_ctrl, 0, wx.ALL, 3)
+        self.bone_sizer = wx.StaticBoxSizer(wx.StaticBox(self.scrolled_window, wx.ID_ANY, __("衣装:ボーン別調整")), orient=wx.VERTICAL)
 
-        self.grid_sizer = wx.FlexGridSizer(rows=1, cols=7, vgap=0, hgap=0)
+        self.dress_bone_ctrl = BoneCtrlSet(self, self.scrolled_window, self.bone_sizer)
 
-        # 全体
-        self.all_axis_set = AxisCtrlSet(self, self.scrolled_window, self.grid_sizer, "全体")
-
-        # 衣装ボーン別
-
-        self.scale_sizer.Add(self.grid_sizer, 0, wx.ALL, 3)
-        self.window_sizer.Add(self.scale_sizer, 0, wx.ALL, 3)
+        self.window_sizer.Add(self.bone_sizer, 0, wx.ALL, 3)
 
         # --------------
 
@@ -132,23 +122,26 @@ class ConfigPanel(CanvasPanel):
     def enable(self, enable: bool):
         self.model_material_ctrl.enable(enable)
         self.dress_material_ctrl.enable(enable)
+        self.dress_bone_ctrl.enable(enable)
 
     def on_frame_change(self, event: wx.Event):
         self.frame.fit_model_motion(self.model_material_ctrl.alphas.get(__("ボーンライン"), 0.5))
         self.frame.fit_dress_motion(self.dress_material_ctrl.alphas.get(__("ボーンライン"), 0.5))
 
-    def on_change_alpha(self, event: wx.Event):
+    def on_change_morph(self, event: wx.Event):
         self.change_motion(False)
 
     def on_change(self, event: wx.Event):
         self.change_motion(True)
 
     def change_motion(self, is_bone_deform: bool):
-        axis_scale_sets: dict[str, MVector3D] = {}
-        axis_scale_sets["ALL"] = self.all_axis_set.get_scale()
-
         self.frame.set_model_motion_morphs(self.model_material_ctrl.alphas)
         self.frame.fit_model_motion(self.model_material_ctrl.alphas.get(__("ボーンライン"), 0.5), is_bone_deform)
 
-        self.frame.set_dress_motion_morphs(axis_scale_sets, self.dress_material_ctrl.alphas)
+        self.frame.set_dress_motion_morphs(
+            self.dress_material_ctrl.alphas,
+            self.dress_bone_ctrl.scales,
+            self.dress_bone_ctrl.degrees,
+            self.dress_bone_ctrl.positions,
+        )
         self.frame.fit_dress_motion(self.dress_material_ctrl.alphas.get(__("ボーンライン"), 0.5), is_bone_deform)

@@ -409,3 +409,163 @@ msgstr ""
 msgid "衣装モデル欄に有効なパスが設定されていない為、タブ遷移を中断します。"
 msgstr ""
 
+
+msgid "調整:体幹"
+msgstr ""
+
+
+msgid "調整:下半身"
+msgstr ""
+
+
+msgid "調整:上半身"
+msgstr ""
+
+
+msgid "調整:上半身2"
+msgstr ""
+
+
+msgid "調整:首"
+msgstr ""
+
+
+msgid "調整:頭"
+msgstr ""
+
+
+msgid "調整:頭部装飾"
+msgstr ""
+
+
+msgid "調整:肩"
+msgstr ""
+
+
+msgid "調整:腕"
+msgstr ""
+
+
+msgid "調整:ひじ"
+msgstr ""
+
+
+msgid "調整:手のひら"
+msgstr ""
+
+
+msgid "調整:足"
+msgstr ""
+
+
+msgid "調整:ひざ"
+msgstr ""
+
+
+msgid "調整:足の甲"
+msgstr ""
+
+
+msgid "フィッティング用ウェイト別頂点取得（衣装:頭部装飾）"
+msgstr ""
+
+
+msgid "衣装モデル追加セットアップ：個別調整ボーンモーフ追加"
+msgstr ""
+
+
+msgid "-- 個別調整ボーンモーフ [{b}]"
+msgstr ""
+
+
+msgid "衣装:ボーン別調整"
+msgstr ""
+
+
+msgid "ボーンプルダウンの選択肢を上方向に移動できます。"
+msgstr ""
+
+
+msgid "スライダーで調整対象となる衣装のボーンです。\n左右は一括で調整できます。"
+msgstr ""
+
+
+msgid "ボーンプルダウンの選択肢を下方向に移動できます。"
+msgstr ""
+
+
+msgid "選択されたボーンのX軸方向の縮尺を調整できます"
+msgstr ""
+
+
+msgid "選択されたボーンのY軸方向の縮尺を調整できます"
+msgstr ""
+
+
+msgid "選択されたボーンのZ軸方向の縮尺を調整できます"
+msgstr ""
+
+
+msgid "選択されたボーンのX軸方向の回転を調整できます"
+msgstr ""
+
+
+msgid "選択されたボーンのY軸方向の回転を調整できます"
+msgstr ""
+
+
+msgid "選択されたボーンのZ軸方向の回転を調整できます"
+msgstr ""
+
+
+msgid "選択されたボーンのX軸方向の移動を調整できます"
+msgstr ""
+
+
+msgid "選択されたボーンのY軸方向の移動を調整できます"
+msgstr ""
+
+
+msgid "選択されたボーンのZ軸方向の移動を調整できます"
+msgstr ""
+
+
+msgid "-- 個別調整ボーンモーフ [{m}]"
+msgstr ""
+
+
+msgid "縮尺X"
+msgstr ""
+
+
+msgid "縮尺Y"
+msgstr ""
+
+
+msgid "縮尺Z"
+msgstr ""
+
+
+msgid "回転X"
+msgstr ""
+
+
+msgid "回転Y"
+msgstr ""
+
+
+msgid "回転Z"
+msgstr ""
+
+
+msgid "移動X"
+msgstr ""
+
+
+msgid "移動Y"
+msgstr ""
+
+
+msgid "移動Z"
+msgstr ""
+
