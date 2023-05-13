@@ -4,7 +4,7 @@ import numpy as np
 
 from mlib.base.exception import MApplicationException
 from mlib.base.logger import MLogger
-from mlib.base.math import MQuaternion, MVector3D, MVector4D, align_triangle
+from mlib.base.math import MQuaternion, MVector3D, MVector4D, intersect_line_plane
 from mlib.pmx.pmx_collection import PmxModel
 from mlib.pmx.pmx_part import BoneMorphOffset, MaterialMorphCalcMode, MaterialMorphOffset, Morph, MorphType, STANDARD_BONE_NAMES
 from mlib.vmd.vmd_collection import VmdMotion
@@ -154,10 +154,53 @@ class LoadUsecase:
         dress_upper2_pos = dress.bones["上半身2"].position
         dress_neck_pos = dress.bones["首根元"].position
 
+        # 上半身-上半身2 ベースで求めた時の位置 ---------------
+
+        # 上半身-上半身2:Y軸の縮尺
+        upper_upper2_scale = ((model_upper2_pos.y - model_upper_pos.y) / (model_neck_pos.y - model_upper_pos.y)) / (
+            (dress_upper2_pos.y - dress_upper_pos.y) / (dress_neck_pos.y - dress_upper_pos.y)
+        )
+
+        # 衣装の上半身2が配置されうる縮尺Yに合わせたXZ平面
+        dress_upper_new_upper2_plane = MVector3D(
+            dress_upper2_pos.x,
+            dress_upper_pos.y + ((dress_upper2_pos.y - dress_upper_pos.y) * upper_upper2_scale),
+            dress_upper2_pos.z,
+        )
+
         # 衣装の上半身2の位置を求め直す
-        dress_new_upper2_pos = align_triangle(model_neck_pos, model_upper_pos, model_upper2_pos, dress_neck_pos, dress_upper_pos)
-        dress.bones["上半身2"].position = dress_new_upper2_pos
-        logger.info("-- 衣装: 上半身2再計算位置: {u} → {p}", u=dress_upper2_pos, p=dress_new_upper2_pos)
+        dress_upper_new_upper2_pos = intersect_line_plane(
+            dress_upper_pos,
+            dress_upper_pos + (model_upper2_pos - model_upper_pos).normalized(),
+            dress_upper_new_upper2_plane,
+            MVector3D(0, 1, 0),
+        )
+
+        # 首-上半身2 ベースで求めた時の位置 ---------------
+
+        # Y軸の縮尺
+        neck_upper2_scale = ((model_upper2_pos.y - model_neck_pos.y) / (model_upper_pos.y - model_neck_pos.y)) / (
+            (dress_upper2_pos.y - dress_neck_pos.y) / (dress_upper_pos.y - dress_neck_pos.y)
+        )
+
+        # 衣装の上半身2が配置されうる縮尺Yに合わせたXZ平面
+        dress_neck_new_upper2_plane = MVector3D(
+            dress_upper2_pos.x,
+            dress_neck_pos.y + ((dress_upper2_pos.y - dress_neck_pos.y) * neck_upper2_scale),
+            dress_upper2_pos.z,
+        )
+
+        # 衣装の上半身2の位置を求め直す
+        dress_neck_new_upper2_pos = intersect_line_plane(
+            dress_neck_pos,
+            (model_upper2_pos - model_neck_pos).normalized(),
+            dress_neck_new_upper2_plane,
+            MVector3D(0, -1, 0),
+        )
+
+        # 最終的な上半身2は上半身-上半身2,首-上半身2の中間とする
+        dress.bones["上半身2"].position = (dress_upper_new_upper2_pos + dress_neck_new_upper2_pos) / 2
+        logger.info("-- 衣装: 上半身2再計算位置: {u} → {p}", u=dress_upper2_pos, p=dress_upper_new_upper2_pos)
 
         # 上半身のウェイトを上半身2にも振り分ける
         dress.separate_weights(
