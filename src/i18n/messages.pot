@@ -599,3 +599,7 @@ msgstr ""
 msgid "-- 衣装: 上半身再計算位置: {u} → {p}"
 msgstr ""
 
+
+msgid "-- 衣装: 上半身2再セットアップ"
+msgstr ""
+
