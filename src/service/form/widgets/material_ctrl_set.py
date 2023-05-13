@@ -82,16 +82,16 @@ class MaterialCtrlSet:
         self.material_choice_ctrl.Append(__("全材質"))
         self.alphas[__("全材質")] = 1.0
         self.material_choice_ctrl.SetSelection(0)
-        self.slider.SetValue(1.0)
+        self.slider.ChangeValue(1.0)
         # ボーンの透過度も調整出来るようにしておく
         self.material_choice_ctrl.Append(__("ボーンライン"))
         self.alphas[__("ボーンライン")] = 0.5
         self.material_choice_ctrl.SetSelection(0)
-        self.slider.SetValue(1.0)
+        self.slider.ChangeValue(1.0)
 
     def on_change_material(self, event: wx.Event):
         material_name = self.material_choice_ctrl.GetStringSelection()
-        self.slider.SetValue(self.alphas[material_name])
+        self.slider.ChangeValue(self.alphas[material_name])
 
     def on_change_morph(self, event: wx.Event):
         alpha = self.slider.GetValue()
