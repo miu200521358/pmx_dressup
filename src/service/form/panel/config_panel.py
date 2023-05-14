@@ -120,6 +120,8 @@ class ConfigPanel(CanvasPanel):
         self.Enable(False)
 
     def Enable(self, enable: bool):
+        self.frame_ctrl.Enable(enable)
+        self.play_ctrl.Enable(enable)
         self.model_material_ctrl.Enable(enable)
         self.dress_material_ctrl.Enable(enable)
         self.dress_bone_ctrl.Enable(enable)

@@ -100,3 +100,9 @@ class FilePanel(BasePanel):
             self.output_pmx_ctrl.path = os.path.join(
                 model_dir_path, dress_file_name, f"{model_file_name}_{dress_file_name}_{datetime.now():%Y%m%d_%H%M%S}{model_file_ext}"
             )
+
+    def Enable(self, enable: bool):
+        self.model_ctrl.Enable(enable)
+        self.dress_ctrl.Enable(enable)
+        self.motion_ctrl.Enable(enable)
+        self.output_pmx_ctrl.Enable(enable)

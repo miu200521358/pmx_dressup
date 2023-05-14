@@ -55,12 +55,14 @@ class MainFrame(BaseFrame):
                     self.config_panel.canvas.clear_model_set()
                     self.save_histories()
 
+                    self.file_panel.Enable(False)
                     self.worker.start()
                 elif self.file_panel.motion_ctrl.path and not self.file_panel.motion_ctrl.data:
                     # モーションだけ変わった場合、設定はそのままでモーションだけ変更する
                     self.config_panel.canvas.clear_model_set()
                     self.save_histories()
 
+                    self.file_panel.Enable(False)
                     self.motion_worker.start()
                 else:
                     # 既に読み取りが完了していたらそのまま表示
@@ -118,6 +120,7 @@ class MainFrame(BaseFrame):
         except:
             logger.critical("モデル描画初期化処理失敗")
 
+        self.file_panel.Enable(True)
         self.on_sound()
 
     def on_motion_result(self, result: bool, data: Optional[Any], elapsed_time: str):
@@ -156,6 +159,7 @@ class MainFrame(BaseFrame):
         except:
             logger.critical("モデル描画初期化処理失敗")
 
+        self.file_panel.Enable(True)
         self.on_sound()
 
     def set_model_motion_morphs(self, material_alphas: dict[str, float] = {}):

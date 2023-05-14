@@ -33,7 +33,7 @@ class LoadUsecase:
     def add_mismatch_bones(self, model: PmxModel, dress: PmxModel):
         """準標準ボーンの不足分を追加"""
         # 必ず追加するボーン
-        add_bone_names = {"全ての親", "上半身2", "右腕捩", "左腕捩", "右手捩", "左手捩"}
+        add_bone_names = {"全ての親", "上半身2", "右腕捩", "左腕捩", "右手捩", "左手捩", "右足D", "左足D", "右ひざD", "左ひざD", "右足首D", "左足首D", "右足先EX", "左足先EX"}
 
         # 準標準ボーンで足りないボーン名を抽出
         short_model_bone_names = set(list(STANDARD_BONE_NAMES.keys())) - set({"右目", "左目", "両目"}) - set(model.bones.names) | add_bone_names
@@ -535,6 +535,8 @@ class LoadUsecase:
             bf.scale = dress_offset_scales[leg_d_bone.index]
             dress_motion.bones[leg_d_bone.name].append(bf)
 
+            logger.info("-- スケールオフセット [{b}][{s:.3f}({o:.3f})]", b=leg_d_name, s=dress_fit_scale.x, o=dress_offset_scale.x)
+
         return dress_offset_scales, dress_fit_scales
 
     def get_dress_offsets(
@@ -573,7 +575,6 @@ class LoadUsecase:
             # 移動計算 ------------------
 
             dress_matrixes = dress_motion.bones.get_matrix_by_indexes([0], [dress_bone.name], dress, append_ik=False)
-
             dress_offset_position = dress_matrixes[0, dress_bone.name].matrix.inverse() * model_matrixes[0, dress_bone.name].position
 
             # キーフレとして追加
