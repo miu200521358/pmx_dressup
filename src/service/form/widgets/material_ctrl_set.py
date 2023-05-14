@@ -113,8 +113,8 @@ class MaterialCtrlSet:
         self.material_choice_ctrl.SetSelection(selection - 1)
         self.on_change_material(event)
 
-    def enable(self, enable: bool):
+    def Enable(self, enable: bool):
         self.material_choice_ctrl.Enable(enable)
         self.left_btn_ctrl.Enable(enable)
         self.right_btn_ctrl.Enable(enable)
-        self.slider.enable(enable)
+        self.slider.Enable(enable)

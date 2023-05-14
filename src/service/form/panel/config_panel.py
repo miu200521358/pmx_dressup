@@ -113,16 +113,16 @@ class ConfigPanel(CanvasPanel):
 
     def stop_play(self):
         self.play_ctrl.SetLabelText(__("再生"))
-        self.enable(True)
+        self.Enable(True)
 
     def start_play(self):
         self.play_ctrl.SetLabelText(__("停止"))
-        self.enable(False)
+        self.Enable(False)
 
-    def enable(self, enable: bool):
-        self.model_material_ctrl.enable(enable)
-        self.dress_material_ctrl.enable(enable)
-        self.dress_bone_ctrl.enable(enable)
+    def Enable(self, enable: bool):
+        self.model_material_ctrl.Enable(enable)
+        self.dress_material_ctrl.Enable(enable)
+        self.dress_bone_ctrl.Enable(enable)
 
     def on_frame_change(self, event: wx.Event):
         self.frame.fit_model_motion(self.model_material_ctrl.alphas.get(__("ボーンライン"), 0.5))
