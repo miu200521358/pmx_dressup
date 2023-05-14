@@ -380,9 +380,10 @@ class LoadUsecase:
                 morph.is_system = True
                 morph.morph_type = MorphType.BONE
                 for bone_name in target_bone_names:
-                    offset_position = position * (-1 if "右" in bone_name else 1)
-                    offset_qq = qq.inverse() if "右" in bone_name else qq
-                    morph.offsets.append(BoneMorphOffset(dress.bones[bone_name].index, offset_position, offset_qq, scale))
+                    if bone_name in dress.bones:
+                        offset_position = position * (-1 if "右" in bone_name else 1)
+                        offset_qq = qq.inverse() if "右" in bone_name else qq
+                        morph.offsets.append(BoneMorphOffset(dress.bones[bone_name].index, offset_position, offset_qq, scale))
                 dress.morphs.append(morph)
 
             logger.info("-- 個別調整ボーンモーフ [{m}]", m=morph_name)

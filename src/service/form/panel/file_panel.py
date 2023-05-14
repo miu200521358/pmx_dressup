@@ -7,6 +7,7 @@ from mlib.base.logger import MLogger
 from mlib.service.form.base_frame import BaseFrame
 from mlib.service.form.base_panel import BasePanel
 from mlib.service.form.widgets.console_ctrl import ConsoleCtrl
+from mlib.service.form.widgets.exec_btn_ctrl import ExecButton
 from mlib.service.form.widgets.file_ctrl import MPmxFilePickerCtrl, MVmdFilePickerCtrl
 from mlib.utils.file_utils import separate_path
 
@@ -70,11 +71,28 @@ class FilePanel(BasePanel):
         )
         self.output_pmx_ctrl.set_parent_sizer(self.root_sizer)
 
+        self.exec_btn_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.exec_btn_ctrl = ExecButton(
+            self,
+            __("お着替えモデル出力"),
+            __("お着替えモデル出力中"),
+            self.exec,
+            200,
+            __("フィッティングさせた衣装と人物を合成して、PMXデータを出力します。\nフィッティング結果を設定タブで確認した後にクリックできるようになります。"),
+        )
+        # 初期では無効化
+        self.exec_btn_ctrl.Enable(False)
+        self.exec_btn_sizer.Add(self.exec_btn_ctrl, 0, wx.ALL, 3)
+        self.root_sizer.Add(self.exec_btn_sizer, 0, wx.ALIGN_CENTER | wx.SHAPED, 5)
+
         self.console_ctrl = ConsoleCtrl(self.frame, self, rows=300)
         self.console_ctrl.set_parent_sizer(self.root_sizer)
 
         self.root_sizer.Add(wx.StaticLine(self, wx.ID_ANY), wx.GROW)
         self.fit()
+
+    def exec(self, event: wx.Event):
+        self.frame.on_exec()
 
     def on_change_model_pmx(self, event: wx.Event):
         self.model_ctrl.unwrap()

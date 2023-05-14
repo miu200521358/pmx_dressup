@@ -6,8 +6,8 @@ from mlib.base.logger import MLogger
 from mlib.pmx.canvas import CanvasPanel
 from mlib.service.form.base_frame import BaseFrame
 from mlib.service.form.widgets.spin_ctrl import WheelSpinCtrl
-from service.form.widgets.material_ctrl_set import MaterialCtrlSet
 from service.form.widgets.bone_ctrl_set import BoneCtrlSet
+from service.form.widgets.material_ctrl_set import MaterialCtrlSet
 
 logger = MLogger(os.path.basename(__file__))
 __ = logger.get_text

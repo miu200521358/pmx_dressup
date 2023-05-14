@@ -31,7 +31,11 @@ class LoadWorker(BaseWorker):
         is_dress_change = False
         usecase = LoadUsecase()
 
+        logger.info("お着替えモデル読み込み開始", decoration=MLogger.Decoration.BOX)
+
         if file_panel.model_ctrl.valid() and not file_panel.model_ctrl.data:
+            logger.info("人物モデル読み込み開始", decoration=MLogger.Decoration.BOX)
+
             model = file_panel.model_ctrl.reader.read_by_filepath(file_panel.model_ctrl.path)
 
             usecase.valid_model(model, "人物")
@@ -47,6 +51,8 @@ class LoadWorker(BaseWorker):
             model = PmxModel()
 
         if file_panel.dress_ctrl.valid() and (is_model_change or not file_panel.dress_ctrl.data):
+            logger.info("衣装モデル読み込み開始", decoration=MLogger.Decoration.BOX)
+
             dress = file_panel.dress_ctrl.reader.read_by_filepath(file_panel.dress_ctrl.path)
 
             usecase.valid_model(dress, "衣装")
@@ -87,6 +93,8 @@ class LoadWorker(BaseWorker):
             dress = PmxModel()
 
         if file_panel.motion_ctrl.valid() and (not file_panel.motion_ctrl.data or is_model_change or is_dress_change):
+            logger.info("モーション読み込み開始", decoration=MLogger.Decoration.BOX)
+
             motion = file_panel.motion_ctrl.reader.read_by_filepath(file_panel.motion_ctrl.path)
         elif file_panel.motion_ctrl.original_data:
             motion = file_panel.motion_ctrl.original_data
@@ -104,9 +112,11 @@ class LoadWorker(BaseWorker):
 
         self.result_data = (model, dress, motion)
 
+        logger.info("お着替えモデル読み込み完了", decoration=MLogger.Decoration.BOX)
+
     def output_log(self):
         file_panel: FilePanel = self.panel
-        output_log_path = re.sub(r"\.pmx$", ".log", file_panel.output_pmx_ctrl.path)
+        output_log_path = re.sub(r"\.pmx$", "_load.log", file_panel.output_pmx_ctrl.path)
 
         # 出力されたメッセージを全部出力
         file_panel.console_ctrl.text_ctrl.SaveFile(filename=output_log_path)

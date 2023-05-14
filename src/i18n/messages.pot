@@ -577,3 +577,67 @@ msgstr ""
 msgid "チェックをONにすると、縮尺XとZを同時に操作することができます"
 msgstr ""
 
+
+msgid "お着替えモデル出力"
+msgstr ""
+
+
+msgid "お着替えモデル出力中"
+msgstr ""
+
+
+msgid "フィッティングさせた衣装と人物を合成して、PMXデータを出力します。\nフィッティング結果を設定タブで確認した後にクリックできるようになります。"
+msgstr ""
+
+
+msgid "ボーン出力"
+msgstr ""
+
+
+msgid "-- ボーン出力: {s}"
+msgstr ""
+
+
+msgid "ボーン定義再設定"
+msgstr ""
+
+
+msgid "-- ボーン定義再設定: {s}"
+msgstr ""
+
+
+msgid "材質出力"
+msgstr ""
+
+
+msgid "-- 材質出力: {s}"
+msgstr ""
+
+
+msgid "お着替えモデル読み込み開始"
+msgstr ""
+
+
+msgid "お着替えモデル読み込み完了"
+msgstr ""
+
+
+msgid "お着替えモデル出力開始"
+msgstr ""
+
+
+msgid "人物モデル読み込み開始"
+msgstr ""
+
+
+msgid "衣装モデル読み込み開始"
+msgstr ""
+
+
+msgid "描画準備開始"
+msgstr ""
+
+
+msgid "*** お着替えモデル出力成功 ***\n出力先: {f}"
+msgstr ""
+

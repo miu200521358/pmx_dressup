@@ -14,6 +14,7 @@ from service.form.panel.config_panel import ConfigPanel
 from service.form.panel.file_panel import FilePanel
 from service.worker.load_motion_worker import LoadMotionWorker
 from service.worker.load_worker import LoadWorker
+from service.worker.save_worker import SaveWorker
 
 logger = MLogger(os.path.basename(__file__))
 __ = logger.get_text
@@ -39,15 +40,18 @@ class MainFrame(BaseFrame):
 
         self.worker = LoadWorker(self.file_panel, self.on_result)
         self.motion_worker = LoadMotionWorker(self.file_panel, self.on_motion_result)
+        self.save_worker = SaveWorker(self.file_panel, self.on_save_result)
 
     def on_change_tab(self, event: wx.Event):
         if self.notebook.GetSelection() == self.config_panel.tab_idx:
             self.notebook.ChangeSelection(self.file_panel.tab_idx)
             if not self.worker.started:
                 if not self.file_panel.model_ctrl.valid():
+                    self.file_panel.exec_btn_ctrl.Enable(False)
                     logger.warning("人物モデル欄に有効なパスが設定されていない為、タブ遷移を中断します。")
                     return
                 if not self.file_panel.dress_ctrl.valid():
+                    self.file_panel.exec_btn_ctrl.Enable(False)
                     logger.warning("衣装モデル欄に有効なパスが設定されていない為、タブ遷移を中断します。")
                     return
                 if not self.file_panel.model_ctrl.data or not self.file_panel.dress_ctrl.data:
@@ -58,6 +62,7 @@ class MainFrame(BaseFrame):
                     self.file_panel.Enable(False)
                     self.worker.start()
                 elif self.file_panel.motion_ctrl.path and not self.file_panel.motion_ctrl.data:
+                    self.file_panel.exec_btn_ctrl.Enable(False)
                     # モーションだけ変わった場合、設定はそのままでモーションだけ変更する
                     self.config_panel.canvas.clear_model_set()
                     self.save_histories()
@@ -82,6 +87,8 @@ class MainFrame(BaseFrame):
             self.on_sound()
             return
 
+        logger.info("描画準備開始", decoration=MLogger.Decoration.BOX)
+
         data1, data2, data3 = data
         model: PmxModel = data1
         dress: PmxModel = data2
@@ -89,6 +96,7 @@ class MainFrame(BaseFrame):
         self.file_panel.model_ctrl.set_data(model)
         self.file_panel.dress_ctrl.set_data(dress)
         self.file_panel.motion_ctrl.set_data(motion)
+        self.file_panel.exec_btn_ctrl.Enable(True)
 
         if not (self.file_panel.model_ctrl.data and self.file_panel.dress_ctrl.data and self.file_panel.motion_ctrl.data):
             return
@@ -132,6 +140,7 @@ class MainFrame(BaseFrame):
 
         motion: VmdMotion = data
         self.file_panel.motion_ctrl.data = motion
+        self.file_panel.exec_btn_ctrl.Enable(True)
 
         # モデルとドレスのボーンの縮尺を合わせる
         self.model_motion = motion
@@ -160,6 +169,12 @@ class MainFrame(BaseFrame):
             logger.critical("モデル描画初期化処理失敗")
 
         self.file_panel.Enable(True)
+        self.on_sound()
+
+    def on_exec(self):
+        self.save_worker.start()
+
+    def on_save_result(self, result: bool, data: Optional[Any], elapsed_time: str):
         self.on_sound()
 
     def set_model_motion_morphs(self, material_alphas: dict[str, float] = {}):
