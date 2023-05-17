@@ -57,70 +57,75 @@ class BoneCtrlSet:
 
         self.sizer.Add(self.bone_sizer, 0, wx.ALL, 3)
 
-        self.grid_sizer = wx.FlexGridSizer(0, 3, 0, 0)
+        self.grid_sizer = wx.FlexGridSizer(0, 2, 0, 0)
 
+        scale_x_tooltip = __("選択されたボーンのローカルX軸（ボーンの向き）方向の縮尺を調整できます")
         self.scale_x_label = wx.StaticText(self.window, wx.ID_ANY, __("縮尺X"))
+        self.scale_x_label.SetToolTip(scale_x_tooltip)
         self.grid_sizer.Add(self.scale_x_label, 0, wx.ALL, 3)
 
         self.scale_x_slider = FloatSliderCtrl(
             parent=self.window,
-            value=0,
-            min_value=-1,
-            max_value=3,
+            value=1,
+            min_value=0,
+            max_value=4,
             increment=0.01,
             spin_increment=0.1,
             border=3,
             size=wx.Size(160, -1),
             change_event=self.on_change_scale_x_slider,
-            tooltip=__("選択されたボーンのX軸方向の縮尺を調整できます"),
+            tooltip=scale_x_tooltip,
         )
         self.grid_sizer.Add(self.scale_x_slider.sizer, 0, wx.ALL, 3)
 
-        self.scale_link_top_label = wx.StaticText(self.window, wx.ID_ANY, "┐")
-        self.grid_sizer.Add(self.scale_link_top_label, 0, wx.ALL, 3)
-
+        scale_y_tooltip = __("選択されたボーンのローカルY軸（ボーンの縦方向の太さ）方向の縮尺を調整できます")
         self.scale_y_label = wx.StaticText(self.window, wx.ID_ANY, __("縮尺Y"))
+        self.scale_y_label.SetToolTip(scale_y_tooltip)
         self.grid_sizer.Add(self.scale_y_label, 0, wx.ALL, 3)
 
         self.scale_y_slider = FloatSliderCtrl(
             parent=self.window,
-            value=0,
-            min_value=-1,
-            max_value=3,
+            value=1,
+            min_value=0,
+            max_value=4,
             increment=0.01,
             spin_increment=0.1,
             border=3,
             size=wx.Size(160, -1),
             change_event=self.on_change_scale_y_slider,
-            tooltip=__("選択されたボーンのY軸方向の縮尺を調整できます"),
+            tooltip=scale_y_tooltip,
         )
         self.grid_sizer.Add(self.scale_y_slider.sizer, 0, wx.ALL, 3)
 
-        self.scale_link_check_ctrl = wx.CheckBox(self.window, wx.ID_ANY, "", wx.DefaultPosition, wx.DefaultSize, 0)
-        self.scale_link_check_ctrl.SetToolTip(__("チェックをONにすると、縮尺XとZを同時に操作することができます"))
+        self.scale_link_label = wx.StaticText(self.window, wx.ID_ANY, "＋")
+        self.grid_sizer.Add(self.scale_link_label, 0, wx.ALIGN_RIGHT, 3)
+
+        self.scale_link_check_ctrl = wx.CheckBox(self.window, wx.ID_ANY, "縮尺YZリンク", wx.DefaultPosition, wx.DefaultSize, 0)
+        self.scale_link_check_ctrl.SetToolTip(__("チェックをONにすると、縮尺YとZを同時に操作することができます"))
         self.grid_sizer.Add(self.scale_link_check_ctrl, 0, wx.ALL, 3)
 
+        scale_z_tooltip = __("選択されたボーンのローカルZ軸（ボーンの奥行き方向の太さ）方向の縮尺を調整できます")
         self.scale_z_label = wx.StaticText(self.window, wx.ID_ANY, __("縮尺Z"))
+        self.scale_z_label.SetToolTip(scale_z_tooltip)
         self.grid_sizer.Add(self.scale_z_label, 0, wx.ALL, 3)
 
         self.scale_z_slider = FloatSliderCtrl(
             parent=self.window,
-            value=0,
-            min_value=-1,
-            max_value=3,
+            value=1,
+            min_value=0,
+            max_value=4,
             increment=0.01,
             spin_increment=0.1,
             border=3,
             size=wx.Size(160, -1),
             change_event=self.on_change_scale_z_slider,
-            tooltip=__("選択されたボーンのZ軸方向の縮尺を調整できます"),
+            tooltip=scale_z_tooltip,
         )
         self.grid_sizer.Add(self.scale_z_slider.sizer, 0, wx.ALL, 3)
 
-        self.scale_link_top_label = wx.StaticText(self.window, wx.ID_ANY, "┘")
-        self.grid_sizer.Add(self.scale_link_top_label, 0, wx.ALL, 3)
-
+        degree_x_tooltip = __("選択されたボーンのローカルX軸方向の回転を調整できます")
         self.degree_x_label = wx.StaticText(self.window, wx.ID_ANY, __("回転X"))
+        self.degree_x_label.SetToolTip(degree_x_tooltip)
         self.grid_sizer.Add(self.degree_x_label, 0, wx.ALL, 3)
 
         self.degree_x_slider = FloatSliderCtrl(
@@ -133,13 +138,13 @@ class BoneCtrlSet:
             border=3,
             size=wx.Size(160, -1),
             change_event=self.on_change_degree_x_slider,
-            tooltip=__("選択されたボーンのX軸方向の回転を調整できます"),
+            tooltip=degree_x_tooltip,
         )
         self.grid_sizer.Add(self.degree_x_slider.sizer, 0, wx.ALL, 3)
 
-        self.grid_sizer.Add(wx.StaticText(self.window, wx.ID_ANY, ""), 0, wx.ALL, 3)
-
+        degree_y_tooltip = __("選択されたボーンのY軸方向の回転を調整できます")
         self.degree_y_label = wx.StaticText(self.window, wx.ID_ANY, __("回転Y"))
+        self.degree_y_label.SetToolTip(degree_y_tooltip)
         self.grid_sizer.Add(self.degree_y_label, 0, wx.ALL, 3)
 
         self.degree_y_slider = FloatSliderCtrl(
@@ -152,13 +157,13 @@ class BoneCtrlSet:
             border=3,
             size=wx.Size(160, -1),
             change_event=self.on_change_degree_y_slider,
-            tooltip=__("選択されたボーンのY軸方向の回転を調整できます"),
+            tooltip=degree_y_tooltip,
         )
         self.grid_sizer.Add(self.degree_y_slider.sizer, 0, wx.ALL, 3)
 
-        self.grid_sizer.Add(wx.StaticText(self.window, wx.ID_ANY, ""), 0, wx.ALL, 3)
-
+        degree_z_tooltip = __("選択されたボーンのZ軸方向の回転を調整できます")
         self.degree_z_label = wx.StaticText(self.window, wx.ID_ANY, __("回転Z"))
+        self.degree_z_label.SetToolTip(degree_z_tooltip)
         self.grid_sizer.Add(self.degree_z_label, 0, wx.ALL, 3)
 
         self.degree_z_slider = FloatSliderCtrl(
@@ -171,13 +176,13 @@ class BoneCtrlSet:
             border=3,
             size=wx.Size(160, -1),
             change_event=self.on_change_degree_z_slider,
-            tooltip=__("選択されたボーンのZ軸方向の回転を調整できます"),
+            tooltip=degree_z_tooltip,
         )
         self.grid_sizer.Add(self.degree_z_slider.sizer, 0, wx.ALL, 3)
 
-        self.grid_sizer.Add(wx.StaticText(self.window, wx.ID_ANY, ""), 0, wx.ALL, 3)
-
+        position_x_tooltip = __("選択されたボーンのX軸（ボーンの向き）方向の移動を調整できます")
         self.position_x_label = wx.StaticText(self.window, wx.ID_ANY, __("移動X"))
+        self.position_x_label.SetToolTip(position_x_tooltip)
         self.grid_sizer.Add(self.position_x_label, 0, wx.ALL, 3)
 
         self.position_x_slider = FloatSliderCtrl(
@@ -190,13 +195,13 @@ class BoneCtrlSet:
             border=3,
             size=wx.Size(160, -1),
             change_event=self.on_change_position_x_slider,
-            tooltip=__("選択されたボーンのX軸方向の移動を調整できます"),
+            tooltip=position_x_tooltip,
         )
         self.grid_sizer.Add(self.position_x_slider.sizer, 0, wx.ALL, 3)
 
-        self.grid_sizer.Add(wx.StaticText(self.window, wx.ID_ANY, ""), 0, wx.ALL, 3)
-
+        position_y_tooltip = __("選択されたボーンのY軸方向の移動を調整できます")
         self.position_y_label = wx.StaticText(self.window, wx.ID_ANY, __("移動Y"))
+        self.position_y_label.SetToolTip(position_y_tooltip)
         self.grid_sizer.Add(self.position_y_label, 0, wx.ALL, 3)
 
         self.position_y_slider = FloatSliderCtrl(
@@ -209,13 +214,13 @@ class BoneCtrlSet:
             border=3,
             size=wx.Size(160, -1),
             change_event=self.on_change_position_y_slider,
-            tooltip=__("選択されたボーンのY軸方向の移動を調整できます"),
+            tooltip=position_y_tooltip,
         )
         self.grid_sizer.Add(self.position_y_slider.sizer, 0, wx.ALL, 3)
 
-        self.grid_sizer.Add(wx.StaticText(self.window, wx.ID_ANY, ""), 0, wx.ALL, 3)
-
+        position_z_tooltip = __("選択されたボーンのZ軸方向の移動を調整できます")
         self.position_z_label = wx.StaticText(self.window, wx.ID_ANY, __("移動Z"))
+        self.position_z_label.SetToolTip(position_z_tooltip)
         self.grid_sizer.Add(self.position_z_label, 0, wx.ALL, 3)
 
         self.position_z_slider = FloatSliderCtrl(
@@ -228,7 +233,7 @@ class BoneCtrlSet:
             border=3,
             size=wx.Size(160, -1),
             change_event=self.on_change_position_z_slider,
-            tooltip=__("選択されたボーンのZ軸方向の移動を調整できます"),
+            tooltip=position_z_tooltip,
         )
         self.grid_sizer.Add(self.position_z_slider.sizer, 0, wx.ALL, 3)
 
@@ -253,13 +258,13 @@ class BoneCtrlSet:
         self.bone_choice_ctrl.Clear()
         for bone_name in FIT_BONE_NAMES:
             self.bone_choice_ctrl.Append(__(bone_name))
-            self.scales[__(bone_name)] = MVector3D()
+            self.scales[__(bone_name)] = MVector3D(1, 1, 1)
             self.degrees[__(bone_name)] = MVector3D()
             self.positions[__(bone_name)] = MVector3D()
         self.bone_choice_ctrl.SetSelection(0)
-        self.scale_x_slider.ChangeValue(0.0)
-        self.scale_y_slider.ChangeValue(0.0)
-        self.scale_z_slider.ChangeValue(0.0)
+        self.scale_x_slider.ChangeValue(1.0)
+        self.scale_y_slider.ChangeValue(1.0)
+        self.scale_z_slider.ChangeValue(1.0)
         self.degree_x_slider.ChangeValue(0.0)
         self.degree_y_slider.ChangeValue(0.0)
         self.degree_z_slider.ChangeValue(0.0)
@@ -283,9 +288,6 @@ class BoneCtrlSet:
     def on_change_scale_x_slider(self, event: wx.Event):
         bone_name = self.bone_choice_ctrl.GetStringSelection()
         self.scales[bone_name].x = self.scale_x_slider.GetValue()
-        if self.scale_link_check_ctrl.GetValue():
-            self.scale_z_slider.ChangeValue(self.scale_x_slider.GetValue())
-            self.scales[bone_name].z = self.scale_z_slider.GetValue()
 
         self.parent.Enable(False)
         self.parent.on_change(event)
@@ -295,6 +297,10 @@ class BoneCtrlSet:
         bone_name = self.bone_choice_ctrl.GetStringSelection()
         self.scales[bone_name].y = self.scale_y_slider.GetValue()
 
+        if self.scale_link_check_ctrl.GetValue():
+            self.scale_z_slider.ChangeValue(self.scale_y_slider.GetValue())
+            self.scales[bone_name].z = self.scale_y_slider.GetValue()
+
         self.parent.Enable(False)
         self.parent.on_change(event)
         self.parent.Enable(True)
@@ -302,9 +308,10 @@ class BoneCtrlSet:
     def on_change_scale_z_slider(self, event: wx.Event):
         bone_name = self.bone_choice_ctrl.GetStringSelection()
         self.scales[bone_name].z = self.scale_z_slider.GetValue()
+
         if self.scale_link_check_ctrl.GetValue():
-            self.scale_x_slider.ChangeValue(self.scale_z_slider.GetValue())
-            self.scales[bone_name].x = self.scale_x_slider.GetValue()
+            self.scale_y_slider.ChangeValue(self.scale_z_slider.GetValue())
+            self.scales[bone_name].y = self.scale_z_slider.GetValue()
 
         self.parent.Enable(False)
         self.parent.on_change(event)
@@ -374,19 +381,20 @@ class BoneCtrlSet:
 
     def on_change_clear(self, event: wx.Event):
         for bone_name in FIT_BONE_NAMES:
-            self.scales[__(bone_name)] = MVector3D()
+            self.scales[__(bone_name)] = MVector3D(1, 1, 1)
             self.degrees[__(bone_name)] = MVector3D()
             self.positions[__(bone_name)] = MVector3D()
-        self.bone_choice_ctrl.SetSelection(0)
-        self.scale_x_slider.ChangeValue(0.0)
-        self.scale_y_slider.ChangeValue(0.0)
-        self.scale_z_slider.ChangeValue(0.0)
+        # self.bone_choice_ctrl.SetSelection(0)
+        self.scale_x_slider.ChangeValue(1.0)
+        self.scale_y_slider.ChangeValue(1.0)
+        self.scale_z_slider.ChangeValue(1.0)
         self.degree_x_slider.ChangeValue(0.0)
         self.degree_y_slider.ChangeValue(0.0)
         self.degree_z_slider.ChangeValue(0.0)
         self.position_x_slider.ChangeValue(0.0)
         self.position_y_slider.ChangeValue(0.0)
         self.position_z_slider.ChangeValue(0.0)
+        self.scale_link_check_ctrl.SetValue(1)
 
         self.parent.Enable(False)
         self.parent.on_change(event)
@@ -406,6 +414,7 @@ class BoneCtrlSet:
         self.position_y_slider.Enable(enable)
         self.position_z_slider.Enable(enable)
         self.clear_btn_ctrl.Enable(enable)
+        self.scale_link_check_ctrl.Enable(enable)
 
 
-FIT_BONE_NAMES = ("足", "ひざ", "足の甲", "肩", "腕", "ひじ", "手のひら", "体幹", "下半身", "上半身", "上半身2", "首", "頭", "頭部装飾")
+FIT_BONE_NAMES = ("上半身", "上半身2", "首", "頭", "頭部装飾", "下半身", "足", "ひざ", "足の甲", "肩", "腕", "ひじ", "手のひら")

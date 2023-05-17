@@ -222,19 +222,19 @@ class MainFrame(BaseFrame):
         self.dress_motion.morphs[mf.name].append(mf)
 
         for bone_type_name, scale, degree, position in zip(bone_scales.keys(), bone_scales.values(), bone_degrees.values(), bone_positions.values()):
-            for ratio, axis_name in (
-                (scale.x, "SX"),
-                (scale.y, "SY"),
-                (scale.z, "SZ"),
-                (degree.x, "RX"),
-                (degree.y, "RY"),
-                (degree.z, "RZ"),
-                (position.x, "MX"),
-                (position.y, "MY"),
-                (position.z, "MZ"),
+            for ratio, axis_name, origin in (
+                (scale.x, "SX", 1),
+                (scale.y, "SY", 1),
+                (scale.z, "SZ", 1),
+                (degree.x, "RX", 0),
+                (degree.y, "RY", 0),
+                (degree.z, "RZ", 0),
+                (position.x, "MX", 0),
+                (position.y, "MY", 0),
+                (position.z, "MZ", 0),
             ):
                 mf = VmdMorphFrame(0, f"{__('調整')}:{__(bone_type_name)}:{axis_name}")
-                mf.ratio = ratio
+                mf.ratio = ratio - origin
                 self.dress_motion.morphs[mf.name].append(mf)
 
     def fit_model_motion(self, bone_alpha: float = 1.0, is_bone_deform: bool = True):

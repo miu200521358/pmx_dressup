@@ -174,6 +174,30 @@ class LoadUsecase:
 
         return model, dress, (["上半身2"] if is_add else [])
 
+    def replace_neck(self, model: PmxModel, dress: PmxModel):
+        """首のボーン置き換え"""
+        replace_bone_names = ["上半身2", "頭", "首"]
+        if not (model.bones.exists(replace_bone_names) and model.bones.exists(replace_bone_names)):
+            return model, dress, []
+
+        model, dress, is_add = self.replace_bone_position_y(model, dress, *replace_bone_names)
+
+        return model, dress, (["首"] if is_add else [])
+
+    def replace_shoulder(self, model: PmxModel, dress: PmxModel, direction: str):
+        """肩のボーン置き換え"""
+        replace_bone_names = ["首根元", "腕", f"{direction}肩"]
+        if not (model.bones.exists(replace_bone_names) and model.bones.exists(replace_bone_names)):
+            return model, dress, []
+
+        model, dress, is_add = self.replace_bone_position_y(model, dress, *replace_bone_names)
+
+        if is_add:
+            if f"{direction}肩P" in dress.bones:
+                dress.bones[f"{direction}肩P"].position = dress.bones[f"{direction}肩"].position.copy()
+
+        return model, dress, ([f"{direction}肩"] if is_add else [])
+
     def replace_bone_position_y(self, model: PmxModel, dress: PmxModel, from_name: str, to_name: str, replace_name: str):
         """
         衣装のボーン位置を人物ボーン位置に合わせて配置を変える
@@ -365,7 +389,7 @@ class LoadUsecase:
         """衣装個別フィッティング用ボーンモーフを作成"""
 
         for morph_name, target_bone_names in FIT_INDIVIDUAL_BONE_NAMES:
-            for axis_name, position, qq, scale in (
+            for axis_name, position, qq, local_scale in (
                 ("SX", MVector3D(), MQuaternion(), MVector3D(1, 0, 0)),
                 ("SY", MVector3D(), MQuaternion(), MVector3D(0, 1, 0)),
                 ("SZ", MVector3D(), MQuaternion(), MVector3D(0, 0, 1)),
@@ -381,9 +405,13 @@ class LoadUsecase:
                 morph.morph_type = MorphType.BONE
                 for bone_name in target_bone_names:
                     if bone_name in dress.bones:
-                        offset_position = position * (-1 if "右" in bone_name else 1)
-                        offset_qq = qq.inverse() if "右" in bone_name else qq
-                        morph.offsets.append(BoneMorphOffset(dress.bones[bone_name].index, offset_position, offset_qq, scale))
+                        if axis_name in ["MX", "RX", "RY"]:
+                            offset_position = position * (-1 if "右" in bone_name else 1)
+                            offset_qq = qq.inverse() if "右" in bone_name else qq
+                        else:
+                            offset_position = position
+                            offset_qq = qq
+                        morph.offsets.append(BoneMorphOffset(dress.bones[bone_name].index, offset_position, offset_qq, local_scale=local_scale))
                 dress.morphs.append(morph)
 
             logger.info("-- 個別調整ボーンモーフ [{m}]", m=morph_name)
@@ -407,7 +435,7 @@ class LoadUsecase:
         # dress_fit_scales: dict[int, MVector3D] = {}
 
         logger.info("フィッティングオフセット計算", decoration=MLogger.Decoration.LINE)
-        dress_offset_positions, dress_offset_qqs, dress_offset_scales = self.get_dress_offsets(
+        dress, dress_offset_positions, dress_offset_qqs, dress_offset_scales = self.get_dress_offsets(
             model, dress, model_matrixes, dress_fit_scales, dress_offset_scales
         )
 
@@ -469,13 +497,13 @@ class LoadUsecase:
                 continue
 
             bf = dress_motion.bones[from_name][0]
-            bf.scale = dress_trunk_fit_scale
+            bf.scale = dress_trunk_fit_scale - MVector3D(1, 1, 1)
             dress_motion.bones[from_name].append(bf)
 
             dress_fit_scales[dress.bones[from_name].index] = dress_trunk_fit_scale
             dress_offset_scales[dress.bones[from_name].index] = dress_trunk_fit_scale.copy()
 
-            logger.info("-- スケールオフセット [{b}][{s:.3f}]", b=from_name, s=dress_trunk_mean_scale)
+            logger.info("-- -- スケールオフセット [{b}][{s:.3f}]", b=from_name, s=dress_trunk_mean_scale)
 
         for scale_bone_name, scale_axis, measure_bone_names in FIT_EXTREMITIES_BONE_NAMES:
             dress_extremities_fit_scales: list[float] = []
@@ -513,13 +541,13 @@ class LoadUsecase:
                     dress_offset_scale *= MVector3D(1, 1, 1) / dress_offset_scales[parent_index]
 
             bf = dress_motion.bones[scale_bone_name][0]
-            bf.scale = dress_offset_scale
+            bf.scale = dress_offset_scale - MVector3D(1, 1, 1)
             dress_motion.bones[scale_bone_name].append(bf)
 
             dress_fit_scales[dress.bones[scale_bone_name].index] = dress_fit_scale
             dress_offset_scales[dress.bones[scale_bone_name].index] = dress_offset_scale
 
-            logger.info("-- スケールオフセット [{b}][{s:.3f}({o:.3f})]", b=scale_bone_name, s=dress_fit_scale.x, o=dress_offset_scale.x)
+            logger.info("-- -- スケールオフセット [{b}][{s:.3f}({o:.3f})]", b=scale_bone_name, s=dress_fit_scale.x, o=dress_offset_scale.x)
 
         # 足Dは足をコピーする
         for leg_d_name, leg_fk_name in (("左足D", "左足"), ("右足D", "右足")):
@@ -533,10 +561,10 @@ class LoadUsecase:
             dress_fit_scales[leg_d_bone.index] = dress_fit_scales[leg_fk_bone.index].copy()
 
             bf = dress_motion.bones[leg_d_bone.name][0]
-            bf.scale = dress_offset_scales[leg_d_bone.index]
+            bf.scale = dress_offset_scales[leg_d_bone.index] - MVector3D(1, 1, 1)
             dress_motion.bones[leg_d_bone.name].append(bf)
 
-            logger.info("-- スケールオフセット [{b}][{s:.3f}({o:.3f})]", b=leg_d_name, s=dress_fit_scale.x, o=dress_offset_scale.x)
+            logger.info("-- -- スケールオフセット [{b}][{s:.3f}({o:.3f})]", b=leg_d_name, s=dress_fit_scale.x, o=dress_offset_scale.x)
 
         return dress_offset_scales, dress_fit_scales
 
@@ -547,7 +575,7 @@ class LoadUsecase:
         model_matrixes: VmdBoneFrameTrees,
         dress_fit_scales: dict[int, MVector3D],
         dress_offset_scales: dict[int, MVector3D],
-    ) -> tuple[dict[int, MVector3D], dict[int, MQuaternion], dict[int, MVector3D]]:
+    ) -> tuple[PmxModel, dict[int, MVector3D], dict[int, MQuaternion], dict[int, MVector3D]]:
         dress_standard_count = len(STANDARD_BONE_NAMES)
 
         dress_motion = VmdMotion()
@@ -573,6 +601,9 @@ class LoadUsecase:
                 display_block=50,
             )
 
+            tail_bone_names = [bname for bname in bone_setting.tails if bname in dress.bones and bname in model.bones]
+            tail_bone_name = tail_bone_names[0] if tail_bone_names else None
+
             # 移動計算 ------------------
 
             dress_matrixes = dress_motion.bones.get_matrix_by_indexes([0], [dress_bone.name], dress, append_ik=False)
@@ -586,14 +617,11 @@ class LoadUsecase:
             dress_offset_positions[dress_bone.index] = dress_offset_position
 
             logger.debug(
-                f"移動オフセット[{dress_bone.name}][{dress_offset_position}]"
+                f"-- -- 移動オフセット[{dress_bone.name}][{dress_offset_position}]"
                 + f"[m={model_matrixes[0, dress_bone.name].position}][d={dress_matrixes[0, dress_bone.name].position}]"
             )
 
             if not (dress_bone.can_translate or dress_bone.has_fixed_axis or dress_bone.is_ik or dress_bone.is_shoulder_p):
-                tail_bone_names = [bname for bname in bone_setting.tails if bname in dress.bones and bname in model.bones]
-                tail_bone_name = tail_bone_names[0] if tail_bone_names else None
-
                 # 移動可能、軸制限あり、IK、肩P系列は回転スルー
 
                 if isinstance(bone_setting.relative, list) and tail_bone_name and tail_bone_name in dress.bones and tail_bone_name in model.bones:
@@ -627,20 +655,19 @@ class LoadUsecase:
                     bf.rotation = dress_fit_qq
                     dress_motion.bones[dress_bone.name].append(bf)
 
-                    logger.debug(f"回転オフセット[{dress_bone.name}][{dress_fit_qq.to_euler_degrees()}]")
+                    logger.debug(f"-- -- 回転オフセット[{dress_bone.name}][{dress_fit_qq.to_euler_degrees()}]")
 
             dress_fit_scale = dress_fit_scales.get(dress_bone.index, MVector3D(1, 1, 1))
             dress_offset_scale = dress_offset_scales.get(dress_bone.index, MVector3D(1, 1, 1))
 
             # 事前計算していたスケールをキーフレとして追加
             bf = dress_motion.bones[dress_bone.name][0]
-            bf.scale = dress_offset_scale
+            bf.scale = dress_offset_scale - MVector3D(1, 1, 1)
             dress_motion.bones[dress_bone.name].append(bf)
 
-            dress_fit_scales[dress_bone.index] = dress_fit_scale
-            dress_offset_scales[dress_bone.index] = dress_offset_scale
+            logger.debug(f"-- -- スケールオフセット[{dress_bone.name}][f={dress_fit_scale}][o={dress_offset_scale}]")
 
-            logger.debug(f"-- スケールオフセット[{dress_bone.name}][f={dress_fit_scale}][o={dress_offset_scale}]")
+            # dress_bone.tail_relative_position = model_bone.tail_relative_position.copy()
 
         for dress_other_bone in dress.bones:
             for parent_bone_index in (dress.bones["上半身"].index, dress.bones["下半身"].index):
@@ -655,9 +682,9 @@ class LoadUsecase:
                         bf.rotation = dress_fit_qq
                         dress_motion.bones[dress_other_bone.name].append(bf)
 
-                        logger.debug(f"回転オフセット(順標準外)[{dress_other_bone.name}][{dress_fit_qq.to_euler_degrees()}]")
+                        logger.debug(f"-- -- 回転オフセット(順標準外)[{dress_other_bone.name}][{dress_fit_qq.to_euler_degrees()}]")
 
-        return dress_offset_positions, dress_offset_qqs, dress_offset_scales
+        return dress, dress_offset_positions, dress_offset_qqs, dress_offset_scales
 
 
 FIT_ROOT_BONE_NAMES = [
@@ -693,15 +720,15 @@ FIT_INDIVIDUAL_BONE_NAMES = [
     (__("体幹"), ("上半身", "下半身")),
     (__("下半身"), ("下半身",)),
     (__("上半身"), ("上半身",)),
-    (__("上半身2"), ("上半身2",)),
+    (__("上半身2"), ("上半身2", "上半身3")),
     (__("首"), ("首",)),
     (__("頭"), ("頭",)),
     (__("頭部装飾"), ("頭部装飾",)),
     (__("肩"), ("右肩", "左肩")),
-    (__("腕"), ("右腕", "左腕")),
-    (__("ひじ"), ("右ひじ", "左ひじ")),
+    (__("腕"), ("右腕", "右腕捩", "右腕捩1", "右腕捩2", "右腕捩3", "右腕捩4", "右腕捩5", "左腕", "左腕捩", "左腕捩1", "左腕捩2", "左腕捩3", "左腕捩4", "左腕捩5")),
+    (__("ひじ"), ("右ひじ", "右手捩", "右手捩1", "右手捩2", "右手捩3", "右手捩4", "右手捩5", "左ひじ", "左手捩", "左手捩1", "左手捩2", "左手捩3", "左手捩4", "左手捩5")),
     (__("手のひら"), ("右手首", "左手首")),
     (__("足"), ("右足", "左足", "右足D", "左足D")),
     (__("ひざ"), ("右ひざ", "左ひざ", "右ひざD", "左ひざD")),
-    (__("足の甲"), ("右足首", "左足首", "右足首D", "左足首D")),
+    (__("足の甲"), ("右足首", "左足首", "右足首D", "左足首D", "右足先EX", "左足先EX", "右つま先", "左つま先")),
 ]

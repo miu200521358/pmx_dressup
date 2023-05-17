@@ -65,6 +65,18 @@ class LoadWorker(BaseWorker):
             logger.info("衣装モデル上半身2位置調整", decoration=MLogger.Decoration.BOX)
             model, dress, replaced_bone_names = usecase.replace_upper2(model, dress)
 
+            # 首の再設定
+            logger.info("衣装モデル首位置調整", decoration=MLogger.Decoration.BOX)
+            model, dress, replaced_bone_names = usecase.replace_neck(model, dress)
+
+            # 左肩の再設定
+            logger.info("衣装モデル肩位置調整", decoration=MLogger.Decoration.BOX)
+            model, dress, replaced_bone_names = usecase.replace_shoulder(model, dress, "左")
+
+            # 右肩の再設定
+            logger.info("衣装モデル肩位置調整", decoration=MLogger.Decoration.BOX)
+            model, dress, replaced_bone_names = usecase.replace_shoulder(model, dress, "右")
+
             # 捩りの再設定
             logger.info("衣装モデル捩り位置調整", decoration=MLogger.Decoration.BOX)
             model, dress, replaced_bone_names = usecase.replace_twist(model, dress, replaced_bone_names)

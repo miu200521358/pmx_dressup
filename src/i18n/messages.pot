@@ -641,3 +641,1644 @@ msgstr ""
 msgid "*** お着替えモデル出力成功 ***\n出力先: {f}"
 msgstr ""
 
+
+msgid "-- -- スケールオフセット [{b}][{s:.3f}]"
+msgstr ""
+
+
+msgid "-- -- スケールオフセット [{b}][{s:.3f}({o:.3f})]"
+msgstr ""
+
+
+msgid "チェックをONにすると、縮尺YとZを同時に操作することができます"
+msgstr ""
+
+
+msgid "選択されたボーンのローカルX軸（ボーンの向き）方向の縮尺を調整できます"
+msgstr ""
+
+
+msgid "選択されたボーンのローカルY軸（ボーンの縦方向の太さ）方向の縮尺を調整できます"
+msgstr ""
+
+
+msgid "選択されたボーンのローカルZ軸（ボーンの奥行き方向の太さ）方向の縮尺を調整できます"
+msgstr ""
+
+
+msgid "選択されたボーンのローカルX軸（ボーンの向き）方向の回転を調整できます"
+msgstr ""
+
+
+msgid "選択されたボーンのローカルY軸（ボーンの向きに直交する上向き）方向の回転を調整できます"
+msgstr ""
+
+
+msgid "選択されたボーンのローカルZ軸（ボーンの向きに直交する奥向き）方向の回転を調整できます"
+msgstr ""
+
+
+msgid "選択されたボーンのローカルX軸（ボーンの向き）方向の移動を調整できます"
+msgstr ""
+
+
+msgid "選択されたボーンのローカルY軸（ボーンの向きに直交する上向き）方向の移動を調整できます"
+msgstr ""
+
+
+msgid "選択されたボーンのローカルZ軸（ボーンの向きに直交する奥向き）方向の移動を調整できます"
+msgstr ""
+
+
+msgid "衣装モデル首位置調整"
+msgstr ""
+
+
+msgid "衣装モデル肩位置調整"
+msgstr ""
+
+
+msgid "選択されたボーンのローカルX軸方向の回転を調整できます"
+msgstr ""
+
+
+msgid "選択されたボーンのX軸（ボーンの向き）方向の移動を調整できます"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}\n\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "人物モデル
+\n"
+msgstr ""
+
+
+msgid "衣装モデル
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "人物モデル
+\n"
+msgstr ""
+
+
+msgid "衣装モデル
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "人物モデル
+\n"
+msgstr ""
+
+
+msgid "衣装モデル
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "人物モデル
+\n"
+msgstr ""
+
+
+msgid "衣装モデル
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "人物モデル
+\n"
+msgstr ""
+
+
+msgid "衣装モデル
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "人物モデル
+\n"
+msgstr ""
+
+
+msgid "衣装モデル
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "人物モデル
+\n"
+msgstr ""
+
+
+msgid "衣装モデル
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "人物モデル
+\n"
+msgstr ""
+
+
+msgid "衣装モデル
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "人物モデル
+\n"
+msgstr ""
+
+
+msgid "衣装モデル
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "人物モデル
+\n"
+msgstr ""
+
+
+msgid "衣装モデル
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "人物モデル
+\n"
+msgstr ""
+
+
+msgid "人物モデル
+\n"
+msgstr ""
+
+
+msgid "衣装モデル
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "人物モデル
+\n"
+msgstr ""
+
+
+msgid "衣装モデル
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "人物モデル
+\n"
+msgstr ""
+
+
+msgid "衣装モデル
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "人物モデル
+\n"
+msgstr ""
+
+
+msgid "衣装モデル
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "人物モデル
+\n"
+msgstr ""
+
+
+msgid "衣装モデル
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "人物モデル
+\n"
+msgstr ""
+
+
+msgid "衣装モデル
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "人物モデル
+\n"
+msgstr ""
+
+
+msgid "衣装モデル
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "人物モデル
+\n"
+msgstr ""
+
+
+msgid "衣装モデル
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "人物モデル
+\n"
+msgstr ""
+
+
+msgid "衣装モデル
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "人物モデル
+\n"
+msgstr ""
+
+
+msgid "衣装モデル
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}
+\n"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}\n"
+msgstr ""
+

@@ -4,7 +4,7 @@ import shutil
 import numpy as np
 
 from mlib.base.logger import MLogger
-from mlib.base.math import MVector3D
+from mlib.base.math import MVector3D, MMatrix4x4
 from mlib.pmx.pmx_collection import PmxModel
 from mlib.pmx.pmx_part import (
     Bone,
@@ -44,29 +44,33 @@ class SaveUsecase:
         bmf.ratio = 1
         motion.morphs[bmf.name].append(bmf)
 
+        dress_model = PmxModel(output_path)
+        dress_model.comment = (
+            __("人物モデル\r\n") + model.comment + "\r\n\r\n------------------\r\n\r\n" + __("衣装モデル\r\n") + dress.comment + "\r\n\r\n------------------\r\n\r\n"
+        )
+
         for bone_type_name, scale, degree, position in zip(dress_scales.keys(), dress_scales.values(), dress_degrees.values(), dress_positions.values()):
-            for ratio, axis_name in (
-                (scale.x, "SX"),
-                (scale.y, "SY"),
-                (scale.z, "SZ"),
-                (degree.x, "RX"),
-                (degree.y, "RY"),
-                (degree.z, "RZ"),
-                (position.x, "MX"),
-                (position.y, "MY"),
-                (position.z, "MZ"),
+            for ratio, axis_name, origin in (
+                (scale.x, "SX", 1),
+                (scale.y, "SY", 1),
+                (scale.z, "SZ", 1),
+                (degree.x, "RX", 0),
+                (degree.y, "RY", 0),
+                (degree.z, "RZ", 0),
+                (position.x, "MX", 0),
+                (position.y, "MY", 0),
+                (position.z, "MZ", 0),
             ):
                 mf = VmdMorphFrame(0, f"{__('調整')}:{__(bone_type_name)}:{axis_name}")
-                mf.ratio = ratio
+                mf.ratio = ratio - origin
                 motion.morphs[mf.name].append(mf)
+            dress_model.comment += __("  {b}: 縮尺{s}, 回転{r}, 移動{p}\r\n", b=bone_type_name, s=scale, r=degree, p=position)
 
         # 変形結果
         (bone_matrixes, vertex_morph_poses, uv_morph_poses, uv1_morph_poses, material_morphs) = motion.animate(0, dress, is_gl=False)
 
         # ---------------------------------
 
-        dress_model = PmxModel(output_path)
-        dress_model.comment = model.comment + "\n------------------\n" + dress.comment
         dress_model.initialize_display_slots()
 
         bone_map: dict[int, dict[str, list[str]]] = {}
@@ -133,6 +137,8 @@ class SaveUsecase:
                 continue
             copy_bone = bone.copy()
             copy_bone.index = len(dress_model.bones.writable())
+            # 変形後の位置にボーンを配置する
+            copy_bone.position = MMatrix4x4(*bone_matrixes[bone.index].flatten()) * copy_bone.position
             bone_map[copy_bone.index] = {
                 "parent": [dress.bones[bone.parent_index].name],
                 "tail": [dress.bones[bone.tail_index].name],
@@ -158,7 +164,7 @@ class SaveUsecase:
                 for n in range(len(bone.ik.links)):
                     bone.ik.links[n].bone_index = dress_model.bones[bone_setting["ik_link"][n]].index
 
-            if not bone.index % 100:
+            if 0 < bone.index and not bone.index % 100:
                 logger.info("-- ボーン定義再設定: {s}", s=bone.index)
 
         # ---------------------------------
@@ -244,6 +250,15 @@ class SaveUsecase:
                         copy_vertex = dress.vertices[vertex_index].copy()
                         copy_vertex.index = -1
                         copy_vertex.deform.indexes = np.vectorize(dress_bone_map.get)(copy_vertex.deform.indexes)
+
+                        # 変形後の位置に頂点を配置する
+                        mat = np.zeros((4, 4))
+                        for n in range(copy_vertex.deform.count):
+                            bone_index = dress.vertices[vertex_index].deform.indexes[n]
+                            bone_weight = dress.vertices[vertex_index].deform.weights[n]
+                            mat += bone_matrixes[bone_index] * bone_weight
+                        copy_vertex.position = MMatrix4x4(*mat.flatten()) * copy_vertex.position
+
                         faces.append(len(dress_model.vertices))
                         dress_vertex_map[vertex_index] = len(dress_model.vertices)
                         dress_model.vertices.append(copy_vertex, is_sort=False)
