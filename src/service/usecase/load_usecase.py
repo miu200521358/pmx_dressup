@@ -485,10 +485,10 @@ class LoadUsecase:
 
             bone_fitting_offsets[dress_bone.index] = BoneMorphOffset(dress_bone.index, dress_offset_position, dress_offset_qq, dress_offset_scale)
 
-            # if dress_bone.name in model.bones:
-            #     # ローカル軸を合わせておく
-            #     dress_bone.tail_relative_position = model.bones[dress_bone.name].tail_relative_position.copy()
-            #     dress_bone.local_axis = model.bones[dress_bone.name].local_axis.copy()
+            if dress_bone.name in model.bones:
+                # ローカル軸を合わせておく
+                dress_bone.tail_relative_position = model.bones[dress_bone.name].tail_relative_position.copy()
+                dress_bone.local_axis = model.bones[dress_bone.name].local_axis.copy()
 
         bone_fitting_morph.offsets = list(bone_fitting_offsets.values())
         dress.morphs.append(bone_fitting_morph)
@@ -693,43 +693,6 @@ class LoadUsecase:
             dress_motion.bones[dress_bone.name].append(bf)
 
             logger.debug(f"-- -- スケールオフセット[{dress_bone.name}][f={dress_fit_scale}][o={dress_offset_scale}]")
-
-        # # 全部計算が終わったら一旦再計算する
-        # dress_motion.bones.clear()
-        # dress_matrixes = dress_motion.bones.get_matrix_by_indexes([0], dress.bones.tail_bone_names, dress, append_ik=False)
-
-        # for i, (bone_name, bone_setting) in enumerate(list(STANDARD_BONE_NAMES.items())):
-        #     if not (bone_name in dress.bones and bone_name in model.bones):
-        #         # 人物と衣装のいずれかにボーンがなければスルー
-        #         continue
-        #     dress_bone = dress.bones[bone_name]
-        #     model_bone = model.bones[bone_name]
-
-        #     if dress_bone.is_system and bone_name not in ("足中心", "首根元"):
-        #         # システムボーンはスルー
-        #         continue
-
-        #     tail_bone_names = [bname for bname in bone_setting.tails if bname in dress.bones and bname in model.bones]
-        #     tail_bone_name = tail_bone_names[0] if tail_bone_names else None
-
-        #     if not tail_bone_name:
-        #         continue
-
-        #     dress_tail_relative_position = dress_matrixes[0, dress_bone.name].matrix.inverse() * dress_matrixes[0, tail_bone_name].position
-
-        #     logger.debug(
-        #         f"-- -- ローカル軸[{dress_bone.name}] {dress_bone.tail_relative_position} -> {dress_tail_relative_position} ({model_bone.tail_relative_position})"
-        #     )
-
-        #     dress_bone.tail_relative_position = dress_tail_relative_position
-        #     dress_bone.local_axis = dress_tail_relative_position.normalized()
-
-        #     logger.count(
-        #         "-- ローカル軸計算",
-        #         index=i,
-        #         total_index_count=dress_standard_count,
-        #         display_block=100,
-        #     )
 
         for dress_other_bone in dress.bones:
             for parent_bone_index in (dress.bones["上半身"].index, dress.bones["下半身"].index):
