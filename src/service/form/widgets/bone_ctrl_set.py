@@ -123,7 +123,7 @@ class BoneCtrlSet:
         )
         self.grid_sizer.Add(self.scale_z_slider.sizer, 0, wx.ALL, 3)
 
-        degree_x_tooltip = __("選択されたボーンのローカルX軸方向の回転を調整できます")
+        degree_x_tooltip = __("選択されたボーンのローカルX軸（ボーンの向き）方向の回転を調整できます")
         self.degree_x_label = wx.StaticText(self.window, wx.ID_ANY, __("回転X"))
         self.degree_x_label.SetToolTip(degree_x_tooltip)
         self.grid_sizer.Add(self.degree_x_label, 0, wx.ALL, 3)
@@ -142,7 +142,7 @@ class BoneCtrlSet:
         )
         self.grid_sizer.Add(self.degree_x_slider.sizer, 0, wx.ALL, 3)
 
-        degree_y_tooltip = __("選択されたボーンのY軸方向の回転を調整できます")
+        degree_y_tooltip = __("選択されたボーンのローカルY軸（ボーンの向きに直交する上向き）方向の回転を調整できます")
         self.degree_y_label = wx.StaticText(self.window, wx.ID_ANY, __("回転Y"))
         self.degree_y_label.SetToolTip(degree_y_tooltip)
         self.grid_sizer.Add(self.degree_y_label, 0, wx.ALL, 3)
@@ -161,7 +161,7 @@ class BoneCtrlSet:
         )
         self.grid_sizer.Add(self.degree_y_slider.sizer, 0, wx.ALL, 3)
 
-        degree_z_tooltip = __("選択されたボーンのZ軸方向の回転を調整できます")
+        degree_z_tooltip = __("選択されたボーンのローカルZ軸（ボーンの向きに直交する奥向き）方向の回転を調整できます")
         self.degree_z_label = wx.StaticText(self.window, wx.ID_ANY, __("回転Z"))
         self.degree_z_label.SetToolTip(degree_z_tooltip)
         self.grid_sizer.Add(self.degree_z_label, 0, wx.ALL, 3)
@@ -180,7 +180,7 @@ class BoneCtrlSet:
         )
         self.grid_sizer.Add(self.degree_z_slider.sizer, 0, wx.ALL, 3)
 
-        position_x_tooltip = __("選択されたボーンのX軸（ボーンの向き）方向の移動を調整できます")
+        position_x_tooltip = __("選択されたボーンのローカルX軸（ボーンの向き）方向の移動を調整できます")
         self.position_x_label = wx.StaticText(self.window, wx.ID_ANY, __("移動X"))
         self.position_x_label.SetToolTip(position_x_tooltip)
         self.grid_sizer.Add(self.position_x_label, 0, wx.ALL, 3)
@@ -199,7 +199,7 @@ class BoneCtrlSet:
         )
         self.grid_sizer.Add(self.position_x_slider.sizer, 0, wx.ALL, 3)
 
-        position_y_tooltip = __("選択されたボーンのY軸方向の移動を調整できます")
+        position_y_tooltip = __("選択されたボーンのローカルY軸（ボーンの向きに直交する上向き）方向の移動を調整できます")
         self.position_y_label = wx.StaticText(self.window, wx.ID_ANY, __("移動Y"))
         self.position_y_label.SetToolTip(position_y_tooltip)
         self.grid_sizer.Add(self.position_y_label, 0, wx.ALL, 3)
@@ -218,7 +218,7 @@ class BoneCtrlSet:
         )
         self.grid_sizer.Add(self.position_y_slider.sizer, 0, wx.ALL, 3)
 
-        position_z_tooltip = __("選択されたボーンのZ軸方向の移動を調整できます")
+        position_z_tooltip = __("選択されたボーンのローカルZ軸（ボーンの向きに直交する奥向き）方向の移動を調整できます")
         self.position_z_label = wx.StaticText(self.window, wx.ID_ANY, __("移動Z"))
         self.position_z_label.SetToolTip(position_z_tooltip)
         self.grid_sizer.Add(self.position_z_label, 0, wx.ALL, 3)

@@ -37,7 +37,7 @@ class ConfigPanel(CanvasPanel):
         self.play_sizer.Add(self.frame_title_ctrl, 0, wx.ALL, 3)
 
         self.frame_ctrl = WheelSpinCtrl(self, initial=0, min=0, max=10000, size=wx.Size(70, -1), change_event=self.on_frame_change)
-        self.frame_title_ctrl.SetToolTip(__("モーションを指定している場合、任意のキーフレの結果を表示することができます"))
+        self.frame_title_ctrl.SetToolTip(__("モーションを指定している場合、任意のキーフレの結果の表示や再生ができます"))
         self.play_sizer.Add(self.frame_ctrl, 0, wx.ALL, 3)
 
         self.play_ctrl = wx.Button(self, wx.ID_ANY, "Play", wx.DefaultPosition, wx.Size(80, -1))
