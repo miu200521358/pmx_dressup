@@ -645,3 +645,23 @@ msgstr ""
 
 
 
+
+msgid "体幹"
+msgstr ""
+
+
+msgid "胸"
+msgstr ""
+
+
+msgid "お着替えモデル出力停止"
+msgstr ""
+
+
+msgid "再フィット"
+msgstr ""
+
+
+msgid "人物と衣装の選択されたボーンの位置が合う様に再度フィッティングします"
+msgstr ""
+
