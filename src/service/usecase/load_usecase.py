@@ -86,7 +86,8 @@ class LoadUsecase:
             head_accessory_bone.parent_index = dress.bones["頭"].index
             head_accessory_bone.position = dress.bones["頭"].position
             head_accessory_bone.bone_flg = BoneFlg.CAN_MANIPULATE | BoneFlg.CAN_ROTATE | BoneFlg.CAN_TRANSLATE | BoneFlg.IS_VISIBLE
-            head_accessory_bone.tail_position = MVector3D(0, 1, 0)
+            head_accessory_bone.tail_position = MVector3D(1, 0, 0)
+            head_accessory_bone.local_axis = MVector3D(1, 0, 0)
             dress.insert_bone(head_accessory_bone)
             dress_inserted_bone_names.append("頭部装飾")
 
@@ -398,7 +399,7 @@ class LoadUsecase:
                     morph.offsets.append(BoneMorphOffset(dress.bones[bone_name].index, MVector3D(), MQuaternion()))
             dress.morphs.append(morph)
 
-        for morph_name, target_bone_names, _ in FIT_INDIVIDUAL_BONE_NAMES:
+        for morph_name, target_bone_names, refit_bone_names in FIT_INDIVIDUAL_BONE_NAMES:
             for axis_name, position, qq, local_scale in (
                 ("SX", MVector3D(), MQuaternion(), MVector3D(1, 0, 0)),
                 ("SY", MVector3D(), MQuaternion(), MVector3D(0, 1, 0)),
@@ -415,22 +416,32 @@ class LoadUsecase:
                 morph.morph_type = MorphType.BONE
                 for bone_name in target_bone_names:
                     if bone_name in dress.bones:
-                        if axis_name in ["MX", "RX", "RY"]:
+                        if axis_name in ["MY", "RX", "RY"]:
                             offset_position = position * (-1 if "右" in bone_name else 1)
                             offset_qq = qq.inverse() if "右" in bone_name else qq
                         else:
                             offset_position = position
                             offset_qq = qq
-                        morph.offsets.append(
-                            BoneMorphOffset(
-                                dress.bones[bone_name].index,
-                                MVector3D(),
-                                MQuaternion(),
-                                local_position=offset_position,
-                                local_qq=offset_qq,
-                                local_scale=local_scale,
+                        if not refit_bone_names:
+                            # 末端のスケールはグローバル
+                            morph.offsets.append(
+                                BoneMorphOffset(
+                                    dress.bones[bone_name].index,
+                                    offset_position,
+                                    offset_qq,
+                                    local_scale=local_scale,
+                                )
                             )
-                        )
+                        else:
+                            morph.offsets.append(
+                                BoneMorphOffset(
+                                    dress.bones[bone_name].index,
+                                    offset_position,
+                                    MQuaternion(),
+                                    local_qq=offset_qq,
+                                    local_scale=local_scale,
+                                )
+                            )
                 dress.morphs.append(morph)
 
             logger.info("-- 個別調整ボーンモーフ [{m}]", m=morph_name)
@@ -485,10 +496,10 @@ class LoadUsecase:
 
             bone_fitting_offsets[dress_bone.index] = BoneMorphOffset(dress_bone.index, dress_offset_position, dress_offset_qq, dress_offset_scale)
 
-            if dress_bone.name in model.bones:
-                # ローカル軸を合わせておく
-                dress_bone.tail_relative_position = model.bones[dress_bone.name].tail_relative_position.copy()
-                dress_bone.local_axis = model.bones[dress_bone.name].local_axis.copy()
+            # if dress_bone.name in model.bones:
+            #     # ローカル軸を合わせておく
+            #     dress_bone.tail_relative_position = model.bones[dress_bone.name].tail_relative_position.copy()
+            #     dress_bone.local_axis = model.bones[dress_bone.name].local_axis.copy()
 
         bone_fitting_morph.offsets = list(bone_fitting_offsets.values())
         dress.morphs.append(bone_fitting_morph)
@@ -711,15 +722,25 @@ class LoadUsecase:
 
         return dress, dress_offset_positions, dress_offset_qqs, dress_offset_scales
 
-    def refit_dress_morphs(self, dress: PmxModel, model_matrixes: VmdBoneFrameTrees, dress_morph_motion: VmdMotion, refit_bone_name: str) -> PmxModel:
+    def refit_dress_morphs(
+        self,
+        model: PmxModel,
+        dress: PmxModel,
+        dress_morph_motion: VmdMotion,
+        refit_bone_name: str,
+    ) -> PmxModel:
         morph = dress.morphs[f"{__('調整')}:{__(refit_bone_name)}:Refit"]
 
+        # モデルの初期姿勢を求める
+        model_matrixes = VmdMotion().animate_bone(0, model)
+        # 衣装は変形を加味する
         dress_matrixes = dress_morph_motion.animate_bone(0, dress)
 
         for offset in morph.offsets:
             bone_offset: BoneMorphOffset = offset
             dress_bone = dress.bones[bone_offset.bone_index]
-            bone_offset.position2 = model_matrixes[0, dress_bone.name].position - dress_matrixes[0, dress_bone.name].position
+            if model_matrixes.exists(0, dress_bone.name) and dress_matrixes.exists(0, dress_bone.name):
+                bone_offset.position2 = model_matrixes[0, dress_bone.name].position - dress_matrixes[0, dress_bone.name].position
 
         return dress
 
@@ -766,7 +787,8 @@ FIT_INDIVIDUAL_BONE_NAMES = [
     (__("腕"), ("右腕", "左腕"), ("右腕捩", "左腕捩", "右腕捩1", "左腕捩1", "右腕捩2", "左腕捩2", "右腕捩3", "左腕捩3", "右腕捩4", "左腕捩4", "右ひじ", "左ひじ")),
     (__("ひじ"), ("右ひじ", "左ひじ"), ("右手捩", "左手捩", "右手捩1", "左手捩1", "右手捩2", "左手捩2", "右手捩3", "左手捩3", "右手捩4", "左手捩4", "右手首", "左手首")),
     (__("手のひら"), ("右手首", "左手首"), []),
-    (__("足"), ("右足", "左足"), ("右ひざ", "左ひざ", "右ひざD", "左ひざD")),
-    (__("ひざ"), ("右ひざ", "左ひざ"), ("右足首", "左足首", "右足首D", "左足首D", "右足先EX", "左足先EX")),
-    (__("足の甲"), ("右足首", "左足首", "右足先EX", "左足先EX"), []),
+    (__("足"), ("右足", "左足", "右足D", "左足D"), ("右ひざ", "左ひざ", "右ひざD", "左ひざD")),
+    (__("ひざ"), ("右ひざ", "左ひざ", "右ひざD", "左ひざD"), ("右足首", "左足首", "右足首D", "左足首D")),
+    (__("足首"), ("右足首", "左足首", "右足首D", "左足首D"), ("右つま先", "左つま先", "右足先EX", "左足先EX")),
+    (__("つま先"), ("右つま先", "左つま先", "右足先EX", "左足先EX"), []),
 ]

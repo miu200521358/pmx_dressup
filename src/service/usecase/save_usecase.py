@@ -64,7 +64,7 @@ class SaveUsecase:
                 mf = VmdMorphFrame(0, f"{__('調整')}:{__(bone_type_name)}:{axis_name}")
                 mf.ratio = ratio - origin
                 motion.morphs[mf.name].append(mf)
-            dress_model.comment += __("  {b}: 縮尺{s}, 回転{r}, 移動{p}\r\n", b=bone_type_name, s=scale, r=degree, p=position)
+            dress_model.comment += __("  {b}: 縮尺{s}, 回転{r}, 移動{p}", b=bone_type_name, s=scale, r=degree, p=position) + "\r\n"
 
         # 変形結果
         (bone_matrixes, vertex_morph_poses, uv_morph_poses, uv1_morph_poses, material_morphs) = motion.animate(0, dress, is_gl=False)

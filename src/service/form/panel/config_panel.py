@@ -62,9 +62,9 @@ class ConfigPanel(CanvasPanel):
         self.window_sizer = wx.BoxSizer(wx.VERTICAL)
 
         # --------------
-        # 材質透過度
+        # 材質非透過度
 
-        self.material_sizer = wx.StaticBoxSizer(wx.StaticBox(self.scrolled_window, wx.ID_ANY, __("材質透過度")), orient=wx.VERTICAL)
+        self.material_sizer = wx.StaticBoxSizer(wx.StaticBox(self.scrolled_window, wx.ID_ANY, __("材質非透過度")), orient=wx.VERTICAL)
 
         self.model_material_ctrl = MaterialCtrlSet(self, self.scrolled_window, self.material_sizer, "人物")
         self.dress_material_ctrl = MaterialCtrlSet(self, self.scrolled_window, self.material_sizer, "衣装")
@@ -154,11 +154,11 @@ class ConfigPanel(CanvasPanel):
             self.frame.refit(target_bone_name)
         self.frame.fit_dress_motion(self.dress_material_ctrl.alphas.get(__("ボーンライン"), 0.5), is_bone_deform)
 
-    def refit(self, refit_bone_name: str):
-        self.frame.set_dress_motion_morphs(
-            self.dress_material_ctrl.alphas,
-            self.dress_bone_ctrl.scales,
-            self.dress_bone_ctrl.degrees,
-            self.dress_bone_ctrl.positions,
-        )
-        self.frame.refit(refit_bone_name)
+    # def refit(self, refit_bone_name: str):
+    #     self.frame.set_dress_motion_morphs(
+    #         self.dress_material_ctrl.alphas,
+    #         self.dress_bone_ctrl.scales,
+    #         self.dress_bone_ctrl.degrees,
+    #         self.dress_bone_ctrl.positions,
+    #     )
+    #     self.frame.refit(refit_bone_name)

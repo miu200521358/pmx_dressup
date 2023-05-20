@@ -254,15 +254,10 @@ class MainFrame(BaseFrame):
         self.config_panel.canvas.change_motion(wx.SpinEvent(), is_bone_deform, 1)
 
     def refit(self, refit_bone_name: str):
-        model: PmxModel = self.file_panel.model_ctrl.data
-
-        # モデルの初期姿勢を求める
-        model_matrixes = VmdMotion().bones.get_matrix_by_indexes([0], model.bones.tail_bone_names, model)
-
         # 再フィットしたモデルデータを設定する
         self.file_panel.dress_ctrl.data = LoadUsecase().refit_dress_morphs(
+            self.file_panel.model_ctrl.data,
             self.file_panel.dress_ctrl.data,
-            model_matrixes,
             self.dress_motion,
             refit_bone_name,
         )
