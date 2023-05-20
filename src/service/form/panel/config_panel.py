@@ -133,7 +133,9 @@ class ConfigPanel(CanvasPanel):
     def on_change_morph(self, event: wx.Event):
         self.change_motion(False)
 
-    def on_change(self, event: wx.Event):
+    def on_change(self, event: wx.Event, is_clear: bool = False):
+        if is_clear:
+            self.frame.clear_refit()
         self.change_motion(True)
 
     def change_motion(self, is_bone_deform: bool):
@@ -147,3 +149,12 @@ class ConfigPanel(CanvasPanel):
             self.dress_bone_ctrl.positions,
         )
         self.frame.fit_dress_motion(self.dress_material_ctrl.alphas.get(__("ボーンライン"), 0.5), is_bone_deform)
+
+    def refit(self, refit_bone_name: str):
+        self.frame.set_dress_motion_morphs(
+            self.dress_material_ctrl.alphas,
+            self.dress_bone_ctrl.scales,
+            self.dress_bone_ctrl.degrees,
+            self.dress_bone_ctrl.positions,
+        )
+        self.frame.refit(refit_bone_name)

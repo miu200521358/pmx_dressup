@@ -241,18 +241,30 @@ class BoneCtrlSet:
 
         self.btn_sizer = wx.BoxSizer(wx.HORIZONTAL)
 
+        self.refit_btn_ctrl = wx.Button(
+            self.window,
+            wx.ID_ANY,
+            __("再フィット"),
+            wx.DefaultPosition,
+            wx.Size(80, -1),
+        )
+        self.refit_btn_ctrl.SetToolTip(__("人物と衣装の選択されたボーンの位置が合う様に再度フィッティングします"))
+        self.refit_btn_ctrl.Bind(wx.EVT_BUTTON, self.on_refit)
+        self.btn_sizer.Add(self.refit_btn_ctrl, 0, wx.ALL, 3)
+        self.btn_sizer.AddStretchSpacer()
+
         self.clear_btn_ctrl = wx.Button(
             self.window,
             wx.ID_ANY,
-            "Clear",
+            __("初期化"),
             wx.DefaultPosition,
             wx.Size(80, -1),
         )
         self.clear_btn_ctrl.SetToolTip(__("ボーン調整値をすべて初期化します"))
         self.clear_btn_ctrl.Bind(wx.EVT_BUTTON, self.on_change_clear)
-        self.btn_sizer.Add(self.clear_btn_ctrl, 0, wx.RIGHT, 3)
+        self.btn_sizer.Add(self.clear_btn_ctrl, 0, wx.ALL, 3)
 
-        self.sizer.Add(self.btn_sizer, 0, wx.RIGHT, 0)
+        self.sizer.Add(self.btn_sizer, 1, wx.EXPAND, 0)
 
     def initialize(self):
         self.bone_choice_ctrl.Clear()
@@ -397,6 +409,14 @@ class BoneCtrlSet:
         self.scale_link_check_ctrl.SetValue(1)
 
         self.parent.Enable(False)
+        self.parent.on_change(event, is_clear=True)
+        self.parent.Enable(True)
+
+    def on_refit(self, event: wx.Event):
+        bone_name = self.bone_choice_ctrl.GetStringSelection()
+
+        self.parent.Enable(False)
+        self.parent.refit(bone_name)
         self.parent.on_change(event)
         self.parent.Enable(True)
 
@@ -414,7 +434,8 @@ class BoneCtrlSet:
         self.position_y_slider.Enable(enable)
         self.position_z_slider.Enable(enable)
         self.clear_btn_ctrl.Enable(enable)
+        self.refit_btn_ctrl.Enable(enable)
         self.scale_link_check_ctrl.Enable(enable)
 
 
-FIT_BONE_NAMES = ("上半身", "上半身2", "首", "頭", "頭部装飾", "下半身", "足", "ひざ", "足の甲", "肩", "腕", "ひじ", "手のひら")
+FIT_BONE_NAMES = ("上半身", "上半身2", "胸", "肩", "腕", "ひじ", "手のひら", "首", "頭", "頭部装飾", "下半身", "足", "ひざ", "足の甲")

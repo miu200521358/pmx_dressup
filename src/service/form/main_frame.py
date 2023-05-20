@@ -15,6 +15,8 @@ from service.form.panel.file_panel import FilePanel
 from service.worker.load_motion_worker import LoadMotionWorker
 from service.worker.load_worker import LoadWorker
 from service.worker.save_worker import SaveWorker
+from service.usecase.load_usecase import LoadUsecase
+from mlib.pmx.pmx_part import BoneMorphOffset, MorphType
 
 logger = MLogger(os.path.basename(__file__))
 __ = logger.get_text
@@ -222,6 +224,10 @@ class MainFrame(BaseFrame):
         self.dress_motion.morphs[mf.name].append(mf)
 
         for bone_type_name, scale, degree, position in zip(bone_scales.keys(), bone_scales.values(), bone_degrees.values(), bone_positions.values()):
+            # 再フィットは倍率は常に1（実際に与える値の方で調整する）
+            mf = VmdMorphFrame(0, f"{__('調整')}:{__(bone_type_name)}:Refit")
+            mf.ratio = 1
+            self.dress_motion.morphs[mf.name].append(mf)
             for ratio, axis_name, origin in (
                 (scale.x, "SX", 1),
                 (scale.y, "SY", 1),
@@ -240,9 +246,32 @@ class MainFrame(BaseFrame):
     def fit_model_motion(self, bone_alpha: float = 1.0, is_bone_deform: bool = True):
         self.config_panel.canvas.model_sets[0].motion = self.model_motion
         self.config_panel.canvas.model_sets[0].bone_alpha = bone_alpha
-        self.config_panel.canvas.change_motion(wx.SpinEvent(), is_bone_deform)
+        self.config_panel.canvas.change_motion(wx.SpinEvent(), is_bone_deform, 0)
 
     def fit_dress_motion(self, bone_alpha: float = 1.0, is_bone_deform: bool = True):
         self.config_panel.canvas.model_sets[1].motion = self.dress_motion
         self.config_panel.canvas.model_sets[1].bone_alpha = bone_alpha
-        self.config_panel.canvas.change_motion(wx.SpinEvent(), is_bone_deform)
+        self.config_panel.canvas.change_motion(wx.SpinEvent(), is_bone_deform, 1)
+
+    def refit(self, refit_bone_name: str):
+        model: PmxModel = self.file_panel.model_ctrl.data
+
+        # モデルの初期姿勢を求める
+        model_matrixes = VmdMotion().bones.get_matrix_by_indexes([0], model.bones.tail_bone_names, model)
+
+        # 再フィットしたモデルデータを設定する
+        self.file_panel.dress_ctrl.data = LoadUsecase().refit_dress_morphs(
+            self.file_panel.dress_ctrl.data,
+            model_matrixes,
+            self.dress_motion,
+            refit_bone_name,
+        )
+
+    def clear_refit(self):
+        dress: PmxModel = self.file_panel.dress_ctrl.data
+        for bone_morph in dress.morphs.filter_by_type(MorphType.BONE):
+            if "Refit" not in bone_morph.name:
+                continue
+            for offset in bone_morph.offsets:
+                bone_offset: BoneMorphOffset = offset
+                bone_offset.clear()
