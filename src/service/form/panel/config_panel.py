@@ -1,4 +1,5 @@
 import os
+from typing import Optional
 
 import wx
 
@@ -130,15 +131,15 @@ class ConfigPanel(CanvasPanel):
         self.frame.fit_model_motion(self.model_material_ctrl.alphas.get(__("ボーンライン"), 0.5))
         self.frame.fit_dress_motion(self.dress_material_ctrl.alphas.get(__("ボーンライン"), 0.5))
 
-    def on_change_morph(self, event: wx.Event):
-        self.change_motion(False)
+    def on_change_morph(self, target_bone_name: Optional[str] = None):
+        self.change_motion(False, target_bone_name)
 
-    def on_change(self, event: wx.Event, is_clear: bool = False):
+    def on_change(self, target_bone_name: Optional[str] = None, is_clear: bool = False):
         if is_clear:
             self.frame.clear_refit()
-        self.change_motion(True)
+        self.change_motion(True, target_bone_name)
 
-    def change_motion(self, is_bone_deform: bool):
+    def change_motion(self, is_bone_deform: bool, target_bone_name: Optional[str] = None):
         self.frame.set_model_motion_morphs(self.model_material_ctrl.alphas)
         self.frame.fit_model_motion(self.model_material_ctrl.alphas.get(__("ボーンライン"), 0.5), is_bone_deform)
 
@@ -148,6 +149,9 @@ class ConfigPanel(CanvasPanel):
             self.dress_bone_ctrl.degrees,
             self.dress_bone_ctrl.positions,
         )
+        self.frame.clear_refit()
+        if target_bone_name:
+            self.frame.refit(target_bone_name)
         self.frame.fit_dress_motion(self.dress_material_ctrl.alphas.get(__("ボーンライン"), 0.5), is_bone_deform)
 
     def refit(self, refit_bone_name: str):

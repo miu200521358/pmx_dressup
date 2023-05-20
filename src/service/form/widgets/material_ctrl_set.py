@@ -97,7 +97,7 @@ class MaterialCtrlSet:
         alpha = self.slider.GetValue()
         material_name = self.material_choice_ctrl.GetStringSelection()
         self.alphas[material_name] = float(alpha)
-        self.parent.on_change_morph(event)
+        self.parent.on_change_morph()
 
     def on_change_material_right(self, event: wx.Event):
         selection = self.material_choice_ctrl.GetSelection()
