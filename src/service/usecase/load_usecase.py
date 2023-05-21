@@ -416,32 +416,21 @@ class LoadUsecase:
                 morph.morph_type = MorphType.BONE
                 for bone_name in target_bone_names:
                     if bone_name in dress.bones:
-                        if axis_name in ["MY", "RX", "RY"]:
+                        if axis_name in ["MX", "RX", "RZ"]:
                             offset_position = position * (-1 if "右" in bone_name else 1)
                             offset_qq = qq.inverse() if "右" in bone_name else qq
                         else:
                             offset_position = position
                             offset_qq = qq
-                        if not refit_bone_names:
-                            # 末端のスケールはグローバル
-                            morph.offsets.append(
-                                BoneMorphOffset(
-                                    dress.bones[bone_name].index,
-                                    offset_position,
-                                    offset_qq,
-                                    local_scale=local_scale,
-                                )
+                        morph.offsets.append(
+                            BoneMorphOffset(
+                                dress.bones[bone_name].index,
+                                offset_position,
+                                MQuaternion(),
+                                local_qq=offset_qq,
+                                local_scale=local_scale,
                             )
-                        else:
-                            morph.offsets.append(
-                                BoneMorphOffset(
-                                    dress.bones[bone_name].index,
-                                    offset_position,
-                                    MQuaternion(),
-                                    local_qq=offset_qq,
-                                    local_scale=local_scale,
-                                )
-                            )
+                        )
                 dress.morphs.append(morph)
 
             logger.info("-- 個別調整ボーンモーフ [{m}]", m=morph_name)
@@ -644,7 +633,26 @@ class LoadUsecase:
 
             dress_motion.bones.clear()
             dress_matrixes = dress_motion.bones.get_matrix_by_indexes([0], [dress_bone.name], dress, append_ik=False)
-            dress_offset_position = dress_matrixes[0, dress_bone.name].matrix.inverse() * model_matrixes[0, dress_bone.name].position
+
+            if dress_bone.is_ik:
+                # IK系はFKの位置に合わせる
+                fk_dress_bone = dress.bones[dress_bone.ik.bone_index]
+                fk_dress_matrixes = dress_motion.bones.get_matrix_by_indexes([0], [fk_dress_bone.name], dress, append_ik=False)
+
+                dress_offset_position = dress_matrixes[0, dress_bone.name].matrix.inverse() * fk_dress_matrixes[0, fk_dress_bone.name].position
+            elif dress_bone.is_leg_d:
+                # 足D系列はFKの位置に合わせる
+                if "D" == dress_bone.name[-1]:
+                    fk_dress_bone = dress.bones[dress_bone.name[:-1]]
+                    fk_dress_matrixes = dress_motion.bones.get_matrix_by_indexes([0], [fk_dress_bone.name], dress, append_ik=False)
+                    dress_offset_position = dress_matrixes[0, dress_bone.name].matrix.inverse() * fk_dress_matrixes[0, fk_dress_bone.name].position
+                elif "足先EX" in dress_bone.name:
+                    # 足先EXは動かさない
+                    dress_offset_position = MVector3D()
+            elif "つま先" in dress_bone.name:
+                dress_offset_position = MVector3D()
+            else:
+                dress_offset_position = dress_matrixes[0, dress_bone.name].matrix.inverse() * model_matrixes[0, dress_bone.name].position
 
             # キーフレとして追加
             mbf = dress_motion.bones[dress_bone.name][0]
@@ -658,8 +666,8 @@ class LoadUsecase:
                 + f"[m={model_matrixes[0, dress_bone.name].position}][d={dress_matrixes[0, dress_bone.name].position}]"
             )
 
-            if not (dress_bone.can_translate or dress_bone.has_fixed_axis or dress_bone.is_ik or dress_bone.is_shoulder_p):
-                # 移動可能、軸制限あり、IK、肩P系列は回転スルー
+            if not (dress_bone.can_translate or dress_bone.has_fixed_axis or dress_bone.is_ik or dress_bone.is_shoulder_p or dress_bone.is_ankle):
+                # 移動可能、軸制限あり、IK、肩P系列、足首から先は回転スルー
 
                 if isinstance(bone_setting.relative, list) and tail_bone_name and tail_bone_name in dress.bones and tail_bone_name in model.bones:
                     # ボーン設定が相対位置、末端ボーンがない、末端ボーンが衣装・人物のいずれかに無い場合、スルー
@@ -739,8 +747,14 @@ class LoadUsecase:
         for offset in morph.offsets:
             bone_offset: BoneMorphOffset = offset
             dress_bone = dress.bones[bone_offset.bone_index]
-            if model_matrixes.exists(0, dress_bone.name) and dress_matrixes.exists(0, dress_bone.name):
-                bone_offset.position2 = model_matrixes[0, dress_bone.name].position - dress_matrixes[0, dress_bone.name].position
+            if dress_bone.is_ik:
+                # IK系はFKの位置に合わせる
+                fk_dress_bone = dress.bones[dress_bone.ik.bone_index]
+                if dress_matrixes.exists(0, fk_dress_bone.name):
+                    bone_offset.position2 = dress_matrixes[0, fk_dress_bone.name].position - dress_matrixes[0, dress_bone.name].position
+            else:
+                if model_matrixes.exists(0, dress_bone.name) and dress_matrixes.exists(0, dress_bone.name):
+                    bone_offset.position2 = model_matrixes[0, dress_bone.name].position - dress_matrixes[0, dress_bone.name].position
 
         return dress
 
@@ -774,6 +788,7 @@ FIT_FINGER_BONE_NAMES = [
     ("右小指１", VecAxis.X, (("右小指１", "右小指２"), ("右小指２", "右小指３"))),
 ]
 
+# IKはFKの後に指定する事
 FIT_INDIVIDUAL_BONE_NAMES = [
     (__("体幹"), ("上半身", "下半身"), ("上半身2", "足中心")),
     (__("下半身"), ("下半身",), ("足中心",)),
@@ -789,6 +804,6 @@ FIT_INDIVIDUAL_BONE_NAMES = [
     (__("手のひら"), ("右手首", "左手首"), []),
     (__("足"), ("右足", "左足", "右足D", "左足D"), ("右ひざ", "左ひざ", "右ひざD", "左ひざD")),
     (__("ひざ"), ("右ひざ", "左ひざ", "右ひざD", "左ひざD"), ("右足首", "左足首", "右足首D", "左足首D")),
-    (__("足首"), ("右足首", "左足首", "右足首D", "左足首D"), ("右つま先", "左つま先", "右足先EX", "左足先EX")),
-    (__("つま先"), ("右つま先", "左つま先", "右足先EX", "左足先EX"), []),
+    (__("足首"), ("右足首", "左足首", "右足首D", "左足首D"), ("右つま先EX", "左つま先EX", "右つま先", "左つま先", "右足ＩＫ", "右つま先ＩＫ", "左足ＩＫ", "左つま先ＩＫ", "右足IK親", "左足IK親")),
+    (__("つま先"), ("右つま先EX", "左つま先EX", "右つま先", "左つま先"), ["右つま先ＩＫ", "左つま先ＩＫ"]),
 ]

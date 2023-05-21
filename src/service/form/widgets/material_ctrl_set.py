@@ -58,6 +58,17 @@ class MaterialCtrlSet:
         self.right_btn_ctrl.Bind(wx.EVT_BUTTON, self.on_change_material_right)
         self.material_sizer.Add(self.right_btn_ctrl, 0, wx.ALL, 3)
 
+        self.half_btn_ctrl = wx.Button(
+            self.window,
+            wx.ID_ANY,
+            "0.5",
+            wx.DefaultPosition,
+            wx.Size(30, -1),
+        )
+        self.half_btn_ctrl.SetToolTip(__(f"{type_name}の材質の非透過度を0.5に設定します"))
+        self.half_btn_ctrl.Bind(wx.EVT_BUTTON, self.on_change_material_half)
+        self.material_sizer.Add(self.half_btn_ctrl, 0, wx.ALL, 3)
+
         self.sizer.Add(self.material_sizer, 0, wx.ALL, 3)
 
         self.slider = FloatSliderCtrl(
@@ -97,7 +108,14 @@ class MaterialCtrlSet:
         alpha = self.slider.GetValue()
         material_name = self.material_choice_ctrl.GetStringSelection()
         self.alphas[material_name] = float(alpha)
+
+        self.parent.Enable(False)
         self.parent.on_change_morph()
+        self.parent.Enable(True)
+
+    def on_change_material_half(self, event: wx.Event):
+        self.slider.SetValue(0.5)
+        self.on_change_morph(event)
 
     def on_change_material_right(self, event: wx.Event):
         selection = self.material_choice_ctrl.GetSelection()
