@@ -391,7 +391,7 @@ class LoadUsecase:
 
         for morph_name, _, refit_bone_names in FIT_INDIVIDUAL_BONE_NAMES:
             # 再調整用のモーフ追加
-            morph = Morph(name=f"{__('調整')}:{__(morph_name)}:Refit")
+            morph = Morph(name=f"調整:{morph_name}:Refit")
             morph.is_system = True
             morph.morph_type = MorphType.BONE
             for bone_name in refit_bone_names:
@@ -411,7 +411,7 @@ class LoadUsecase:
                 ("MY", MVector3D(0, 1, 0), MQuaternion(), MVector3D()),
                 ("MZ", MVector3D(0, 0, 1), MQuaternion(), MVector3D()),
             ):
-                morph = Morph(name=f"{__('調整')}:{__(morph_name)}:{axis_name}")
+                morph = Morph(name=f"調整:{morph_name}:{axis_name}")
                 morph.is_system = True
                 morph.morph_type = MorphType.BONE
                 for bone_name in target_bone_names:
@@ -433,7 +433,7 @@ class LoadUsecase:
                         )
                 dress.morphs.append(morph)
 
-            logger.info("-- 個別調整ボーンモーフ [{m}]", m=morph_name)
+            logger.info("-- 個別調整ボーンモーフ [{m}]", m=__(morph_name))
 
         return dress
 
@@ -740,7 +740,7 @@ class LoadUsecase:
         dress_morph_motion: VmdMotion,
         refit_bone_name: str,
     ) -> PmxModel:
-        morph = dress.morphs[f"{__('調整')}:{__(refit_bone_name)}:Refit"]
+        morph = dress.morphs[f"調整:{refit_bone_name}:Refit"]
 
         # モデルの初期姿勢を求める
         model_matrixes = VmdMotion().animate_bone(0, model)

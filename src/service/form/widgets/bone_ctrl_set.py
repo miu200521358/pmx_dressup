@@ -100,7 +100,7 @@ class BoneCtrlSet:
         self.scale_link_label = wx.StaticText(self.window, wx.ID_ANY, "＋")
         self.grid_sizer.Add(self.scale_link_label, 0, wx.ALIGN_RIGHT, 3)
 
-        self.scale_link_check_ctrl = wx.CheckBox(self.window, wx.ID_ANY, "縮尺YZリンク", wx.DefaultPosition, wx.DefaultSize, 0)
+        self.scale_link_check_ctrl = wx.CheckBox(self.window, wx.ID_ANY, __("縮尺YZリンク"), wx.DefaultPosition, wx.DefaultSize, 0)
         self.scale_link_check_ctrl.SetToolTip(__("チェックをONにすると、縮尺YとZを同時に操作することができます"))
         self.grid_sizer.Add(self.scale_link_check_ctrl, 0, wx.ALL, 3)
 

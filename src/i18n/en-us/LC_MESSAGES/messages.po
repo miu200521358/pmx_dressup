@@ -33,7 +33,7 @@ msgid "履歴"
 msgstr "History"
 
 msgid "これまでに指定された事のある{t}を再指定することができます。"
-msgstr "You can re-specify {t} if it has ever been specified before"
+msgstr "You can re-specify {t} that has been previously specified"
 
 msgid "VMDモーションデータ"
 msgstr "VMD motion data"
@@ -178,7 +178,7 @@ msgid "衣装の材質プルダウンの選択肢を上方向に移動できま�
 msgstr "You can move the material pull-down choices for costumes upward"
 
 msgid "スライダーで調整対象となる衣装の材質です。\n「ボーンライン」はボーンを表す線を示します。\n透過度が1でない状態でエクスポートすると、お着替え結果には出力されません\n(ボーンラインは常に出力されません)"
-msgstr "Material of the costume to be adjusted with the slider. \ዄn "Bone line" indicates the line that represents the bone. \If you export with the ɑn transparency not 1, it will not be output in the result of the outfit.ɑn(Bone lines are always not output)"
+msgstr "Material" is the material of the costume to be adjusted with the slider. \ዄn "Bone line" indicates the line that represents the bone. \If you export with the ɑn transparency not 1, it will not be output in the result of the outfit.ɑn(Bone lines are always not output)"
 
 msgid "衣装の材質プルダウンの選択肢を下方向に移動できます。"
 msgstr "You can move the material pull-down choices for costumes downward"
@@ -282,6 +282,9 @@ msgstr "Preparing to draw a human model"
 msgid "衣装モデル描画準備"
 msgstr "Preparing to draw a costume model"
 
+msgid "モデル描画"
+msgstr "Model Drawing"
+
 msgid "-- -- 人物: 準標準ボーン追加: {b}"
 msgstr "-- -- People: semi-standard bone addition: {b}"
 
@@ -294,44 +297,44 @@ msgstr "The tab transition is aborted because no valid path is set in the person
 msgid "衣装モデル欄に有効なパスが設定されていない為、タブ遷移を中断します。"
 msgstr "The tab transition is aborted because no valid path is set in the Costume Model column"
 
-msgid "調整:下半身"
-msgstr "Adjustment: lower body"
+msgid "下半身"
+msgstr "Lower half"
 
-msgid "調整:上半身"
-msgstr "Adjustment: upper body"
+msgid "上半身"
+msgstr "Upper body"
 
-msgid "調整:上半身2"
-msgstr "Adjustment: upper body 2"
+msgid "上半身2"
+msgstr "Upper body 2"
 
-msgid "調整:首"
-msgstr "Adjustment: neck"
+msgid "首"
+msgstr "neck"
 
-msgid "調整:頭"
-msgstr "Adjustment: head"
+msgid "頭"
+msgstr "Head"
 
-msgid "調整:頭部装飾"
-msgstr "Adjustment: head decoration"
+msgid "頭部装飾"
+msgstr "Head decoration"
 
-msgid "調整:肩"
-msgstr "Adjustment: shoulder"
+msgid "肩"
+msgstr "Shoulder"
 
-msgid "調整:腕"
-msgstr "Adjustment: arms"
+msgid "腕"
+msgstr "Arms"
 
-msgid "調整:ひじ"
-msgstr "Adjustment: elbow"
+msgid "ひじ"
+msgstr "Elbow"
 
-msgid "調整:手のひら"
-msgstr "Adjustment: palm"
+msgid "手のひら"
+msgstr "Palm of the hand"
 
-msgid "調整:足"
-msgstr "Adjustment: feet"
+msgid "足"
+msgstr "Feet"
 
-msgid "調整:ひざ"
-msgstr "Adjustment: knee"
+msgid "ひざ"
+msgstr "Knees"
 
-msgid "調整:足の甲"
-msgstr "Adjustment: instep"
+msgid "足の甲"
+msgstr "Instep"
 
 msgid "フィッティング用ウェイト別頂点取得（衣装:頭部装飾）"
 msgstr "Acquisition of vertices by weight for fitting (costume: head decoration)"
@@ -349,10 +352,10 @@ msgid "ボーンプルダウンの選択肢を上方向に移動できます。"
 msgstr "You can move the choices in the bone pulldown upward"
 
 msgid "スライダーで調整対象となる衣装のボーンです。\n左右は一括で調整できます。"
-msgstr "These are the bones of the costume to be adjusted with the slider. \You can adjust the ᥉n left and right in one batch"
+msgstr "These are the bones of the costume to be adjusted with the slider. \You can adjust the ᥉n left and right at once"
 
 msgid "ボーンプルダウンの選択肢を下方向に移動できます。"
-msgstr "You can move the choices in the bone pulldown downwards"
+msgstr "You can move the choices in the bone pull-down downward"
 
 msgid "-- 個別調整ボーンモーフ [{m}]"
 msgstr "-- individually adjusted bone morph [{m}]"
@@ -391,7 +394,7 @@ msgid "チェックをONにすると、縮尺XとZを同時に操作すること
 msgstr "Check ON to operate scale X and Z at the same time"
 
 msgid "お着替えモデル出力"
-msgstr "Output of model for change of clothes"
+msgstr "Change of clothes model output"
 
 msgid "お着替えモデル出力中"
 msgstr "Model is being output for change of clothes"
@@ -436,7 +439,7 @@ msgid "描画準備開始"
 msgstr "Prepare to draw"
 
 msgid "*** お着替えモデル出力成功 ***\n出力先: {f}"
-msgstr "*** Success in outputting changeover model ***\noutput: {f}"
+msgstr "*** Success in outputting changeover model ***Succeeded ***Succeeded in outputting changeover model: {f}"
 
 msgid "-- -- スケールオフセット [{b}][{s:.3f}]"
 msgstr "-- -- Scale offset [{b}][{s:.3f}]"
@@ -502,7 +505,7 @@ msgid "人物の材質プルダウンから選択した材質の非透過度を�
 msgstr "You can adjust the non-transparency of the material selected from the Person Material pull-down with the slider below"
 
 msgid "スライダーで調整対象となる人物の材質です。\n「ボーンライン」はボーンを表す線を示します。\n非透過度が1でない状態でエクスポートすると、お着替え結果には出力されません\n(ボーンラインは常に出力されません)"
-msgstr "Material of the person to be adjusted with the slider. \ዄn "Bone line" indicates the line that represents the bone. \If you export with the ɑn non-transparency not 1, it will not be output in the result of your dressing.ɑn(Bone lines are always not output)"
+msgstr "Material of the person to be adjusted with the slider. \ዄn "Bone line" indicates the line that represents the bone. \If you export the image with the ɑn non-transparency not 1, it will not be output in the result of your change. "ɑn(Bone lines are always not output.)"
 
 msgid "衣装の材質プルダウンから選択した材質の非透過度を下のスライダーで調整できます。"
 msgstr "You can adjust the non-transparency of the material selected from the Costume Material pull-down with the slider below"
@@ -560,3 +563,32 @@ msgstr "Joint output"
 
 msgid "-- ジョイント出力: {s}"
 msgstr "-- Joint output: {s}"
+
+msgid "処理が継続できないため、中断しました\n----------------\n人物モデルデータが読み込まれていません"
+msgstr "Aborted because the process cannot continue!\n----------------\nPersonnel model data has not been loaded"
+
+msgid "設定"
+msgstr "Settings"
+
+msgid "人物モデル"
+msgstr "People Models"
+
+msgid "モデルセットアップ：ボーンツリー"
+msgstr "Model Setup: Bone Tree"
+
+msgid "モデルセットアップ：システム用ボーン"
+msgstr "Model Setup: bones for systems"
+
+msgid "フィッティングボーンモーフ追加"
+msgstr "Fitting bone morphs added"
+
+msgid "縮尺YZリンク"
+msgstr "Scale YZ Link"
+
+msgid "初期化"
+msgstr "Initialization"
+
+msgid "モーション"
+msgstr "Motion"
+
+

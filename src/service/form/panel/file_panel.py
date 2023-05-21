@@ -28,7 +28,7 @@ class FilePanel(BasePanel):
             key="model_pmx",
             title="人物モデル",
             is_show_name=True,
-            name_spacer=20,
+            name_spacer=3,
             is_save=False,
             tooltip="お着替えさせたい対象の人物モデルを指定してください。",
             file_change_event=self.on_change_model_pmx,
@@ -41,7 +41,7 @@ class FilePanel(BasePanel):
             key="dress_pmx",
             title="衣装モデル",
             is_show_name=True,
-            name_spacer=20,
+            name_spacer=3,
             is_save=False,
             tooltip="お着替えしたい衣装モデルを指定してください。",
             file_change_event=self.on_change_dress_pmx,
@@ -54,7 +54,7 @@ class FilePanel(BasePanel):
             key="motion_vmd",
             title="表示モーション",
             is_show_name=True,
-            name_spacer=20,
+            name_spacer=1,
             is_save=False,
             tooltip="任意でVMDモーションデータを指定する事ができます。\n空欄の場合、人物と衣装は初期状態で表示します。",
             file_change_event=self.on_change_motion,
@@ -99,12 +99,14 @@ class FilePanel(BasePanel):
         if self.model_ctrl.read_name():
             self.model_ctrl.read_digest()
             self.create_output_path()
+        self.exec_btn_ctrl.Enable(False)
 
     def on_change_dress_pmx(self, event: wx.Event):
         self.dress_ctrl.unwrap()
         if self.dress_ctrl.read_name():
             self.dress_ctrl.read_digest()
             self.create_output_path()
+        self.exec_btn_ctrl.Enable(False)
 
     def on_change_motion(self, event: wx.Event):
         self.motion_ctrl.unwrap()

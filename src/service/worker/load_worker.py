@@ -8,22 +8,22 @@ from mlib.base.logger import MLogger
 from mlib.pmx.pmx_collection import PmxModel
 from mlib.pmx.pmx_writer import PmxWriter
 from mlib.service.base_worker import BaseWorker
-from mlib.service.form.base_panel import BasePanel
 from mlib.utils.file_utils import get_root_dir
 from mlib.vmd.vmd_collection import VmdMotion
 from service.form.panel.file_panel import FilePanel
 from service.usecase.load_usecase import LoadUsecase
+from mlib.service.form.base_frame import BaseFrame
 
 logger = MLogger(os.path.basename(__file__), level=1)
 __ = logger.get_text
 
 
 class LoadWorker(BaseWorker):
-    def __init__(self, panel: BasePanel, result_event: wx.Event) -> None:
-        super().__init__(panel, result_event)
+    def __init__(self, frame: BaseFrame, result_event: wx.Event) -> None:
+        super().__init__(frame, result_event)
 
     def thread_execute(self):
-        file_panel: FilePanel = self.panel
+        file_panel: FilePanel = self.frame.file_panel
         model: Optional[PmxModel] = None
         dress: Optional[PmxModel] = None
         motion: Optional[VmdMotion] = None
@@ -127,7 +127,7 @@ class LoadWorker(BaseWorker):
         logger.info("お着替えモデル読み込み完了", decoration=MLogger.Decoration.BOX)
 
     def output_log(self):
-        file_panel: FilePanel = self.panel
+        file_panel: FilePanel = self.frame.file_panel
         output_log_path = os.path.join(get_root_dir(), f"{os.path.basename(file_panel.output_pmx_ctrl.path)}.log")
         # 出力されたメッセージを全部出力
         file_panel.console_ctrl.text_ctrl.SaveFile(filename=output_log_path)

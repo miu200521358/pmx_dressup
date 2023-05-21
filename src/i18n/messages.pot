@@ -370,6 +370,10 @@ msgid "衣装モデル描画準備"
 msgstr ""
 
 
+msgid "モデル描画"
+msgstr ""
+
+
 msgid "-- -- 人物: 準標準ボーン追加: {b}"
 msgstr ""
 
@@ -386,55 +390,55 @@ msgid "衣装モデル欄に有効なパスが設定されていない為、タ�
 msgstr ""
 
 
-msgid "調整:下半身"
+msgid "下半身"
 msgstr ""
 
 
-msgid "調整:上半身"
+msgid "上半身"
 msgstr ""
 
 
-msgid "調整:上半身2"
+msgid "上半身2"
 msgstr ""
 
 
-msgid "調整:首"
+msgid "首"
 msgstr ""
 
 
-msgid "調整:頭"
+msgid "頭"
 msgstr ""
 
 
-msgid "調整:頭部装飾"
+msgid "頭部装飾"
 msgstr ""
 
 
-msgid "調整:肩"
+msgid "肩"
 msgstr ""
 
 
-msgid "調整:腕"
+msgid "腕"
 msgstr ""
 
 
-msgid "調整:ひじ"
+msgid "ひじ"
 msgstr ""
 
 
-msgid "調整:手のひら"
+msgid "手のひら"
 msgstr ""
 
 
-msgid "調整:足"
+msgid "足"
 msgstr ""
 
 
-msgid "調整:ひざ"
+msgid "ひざ"
 msgstr ""
 
 
-msgid "調整:足の甲"
+msgid "足の甲"
 msgstr ""
 
 
@@ -739,5 +743,61 @@ msgstr ""
 
 
 msgid "-- ジョイント出力: {s}"
+msgstr ""
+
+
+msgid "処理が継続できないため、中断しました\n----------------\n人物モデルデータが読み込まれていません"
+msgstr ""
+
+
+msgid "設定"
+msgstr ""
+
+
+msgid "人物モデル"
+msgstr ""
+
+
+msgid "モデルセットアップ：ボーンツリー"
+msgstr ""
+
+
+msgid "モデルセットアップ：システム用ボーン"
+msgstr ""
+
+
+msgid "フィッティングボーンモーフ追加"
+msgstr ""
+
+
+msgid "縮尺YZリンク"
+msgstr ""
+
+
+msgid "初期化"
+msgstr ""
+
+
+msgid "モーション"
+msgstr ""
+
+
+msgid "人物の材質の非透過度を任意の値に変更できます。\n非透過度を1未満にした場合、お着替えモデルには出力されません"
+msgstr ""
+
+
+msgid "\nEnterキーを押下したタイミングで値が反映されます。"
+msgstr ""
+
+
+msgid "衣装の材質の非透過度を任意の値に変更できます。\n非透過度を1未満にした場合、お着替えモデルには出力されません"
+msgstr ""
+
+
+msgid "処理を停止しました"
+msgstr ""
+
+
+msgid "*** 処理を停止します ***"
 msgstr ""
 

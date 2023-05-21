@@ -282,6 +282,9 @@ msgstr "人物モデル描画準備"
 msgid "衣装モデル描画準備"
 msgstr "衣装モデル描画準備"
 
+msgid "モデル描画"
+msgstr "モデル描画"
+
 msgid "-- -- 人物: 準標準ボーン追加: {b}"
 msgstr "-- -- 人物: 準標準ボーン追加: {b}"
 
@@ -294,44 +297,44 @@ msgstr "人物モデル欄に有効なパスが設定されていない為、タ
 msgid "衣装モデル欄に有効なパスが設定されていない為、タブ遷移を中断します。"
 msgstr "衣装モデル欄に有効なパスが設定されていない為、タブ遷移を中断します。"
 
-msgid "調整:下半身"
-msgstr "調整:下半身"
+msgid "下半身"
+msgstr "下半身"
 
-msgid "調整:上半身"
-msgstr "調整:上半身"
+msgid "上半身"
+msgstr "上半身"
 
-msgid "調整:上半身2"
-msgstr "調整:上半身2"
+msgid "上半身2"
+msgstr "上半身2"
 
-msgid "調整:首"
-msgstr "調整:首"
+msgid "首"
+msgstr "首"
 
-msgid "調整:頭"
-msgstr "調整:頭"
+msgid "頭"
+msgstr "頭"
 
-msgid "調整:頭部装飾"
-msgstr "調整:頭部装飾"
+msgid "頭部装飾"
+msgstr "頭部装飾"
 
-msgid "調整:肩"
-msgstr "調整:肩"
+msgid "肩"
+msgstr "肩"
 
-msgid "調整:腕"
-msgstr "調整:腕"
+msgid "腕"
+msgstr "腕"
 
-msgid "調整:ひじ"
-msgstr "調整:ひじ"
+msgid "ひじ"
+msgstr "ひじ"
 
-msgid "調整:手のひら"
-msgstr "調整:手のひら"
+msgid "手のひら"
+msgstr "手のひら"
 
-msgid "調整:足"
-msgstr "調整:足"
+msgid "足"
+msgstr "足"
 
-msgid "調整:ひざ"
-msgstr "調整:ひざ"
+msgid "ひざ"
+msgstr "ひざ"
 
-msgid "調整:足の甲"
-msgstr "調整:足の甲"
+msgid "足の甲"
+msgstr "足の甲"
 
 msgid "フィッティング用ウェイト別頂点取得（衣装:頭部装飾）"
 msgstr "フィッティング用ウェイト別頂点取得（衣装:頭部装飾）"
@@ -560,3 +563,32 @@ msgstr "ジョイント出力"
 
 msgid "-- ジョイント出力: {s}"
 msgstr "-- ジョイント出力: {s}"
+
+msgid "処理が継続できないため、中断しました\n----------------\n人物モデルデータが読み込まれていません"
+msgstr "処理が継続できないため、中断しました\n----------------\n人物モデルデータが読み込まれていません"
+
+msgid "設定"
+msgstr "設定"
+
+msgid "人物モデル"
+msgstr "人物モデル"
+
+msgid "モデルセットアップ：ボーンツリー"
+msgstr "モデルセットアップ：ボーンツリー"
+
+msgid "モデルセットアップ：システム用ボーン"
+msgstr "モデルセットアップ：システム用ボーン"
+
+msgid "フィッティングボーンモーフ追加"
+msgstr "フィッティングボーンモーフ追加"
+
+msgid "縮尺YZリンク"
+msgstr "縮尺YZリンク"
+
+msgid "初期化"
+msgstr "初期化"
+
+msgid "モーション"
+msgstr "モーション"
+
+

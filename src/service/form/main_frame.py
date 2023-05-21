@@ -30,6 +30,7 @@ class MainFrame(BaseFrame):
             title=title,
             size=size,
         )
+
         # ファイルタブ
         self.file_panel = FilePanel(self, 0)
         self.notebook.AddPage(self.file_panel, __("ファイル"), False)
@@ -40,14 +41,16 @@ class MainFrame(BaseFrame):
         self.config_panel = ConfigPanel(self, 1)
         self.notebook.AddPage(self.config_panel, __("設定"), False)
 
-        self.worker = LoadWorker(self.file_panel, self.on_result)
-        self.motion_worker = LoadMotionWorker(self.file_panel, self.on_motion_result)
-        self.save_worker = SaveWorker(self.file_panel, self.on_save_result)
+        self.load_worker = LoadWorker(self, self.on_result)
+        self.motion_load_worker = LoadMotionWorker(self, self.on_motion_result)
+        self.save_worker = SaveWorker(self, self.on_save_result)
+
+        self.file_panel.exec_btn_ctrl.exec_worker = self.save_worker
 
     def on_change_tab(self, event: wx.Event):
         if self.notebook.GetSelection() == self.config_panel.tab_idx:
             self.notebook.ChangeSelection(self.file_panel.tab_idx)
-            if not self.worker.started:
+            if not self.load_worker.started:
                 if not self.file_panel.model_ctrl.valid():
                     self.file_panel.exec_btn_ctrl.Enable(False)
                     logger.warning("人物モデル欄に有効なパスが設定されていない為、タブ遷移を中断します。")
@@ -62,7 +65,7 @@ class MainFrame(BaseFrame):
                     self.save_histories()
 
                     self.file_panel.Enable(False)
-                    self.worker.start()
+                    self.load_worker.start()
                 elif self.file_panel.motion_ctrl.path and not self.file_panel.motion_ctrl.data:
                     self.file_panel.exec_btn_ctrl.Enable(False)
                     # モーションだけ変わった場合、設定はそのままでモーションだけ変更する
@@ -70,7 +73,7 @@ class MainFrame(BaseFrame):
                     self.save_histories()
 
                     self.file_panel.Enable(False)
-                    self.motion_worker.start()
+                    self.motion_load_worker.start()
                 else:
                     # 既に読み取りが完了していたらそのまま表示
                     self.notebook.ChangeSelection(self.config_panel.tab_idx)

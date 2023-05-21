@@ -17,7 +17,7 @@ class MaterialCtrlSet:
         self.window = window
         self.alphas: dict[str, float] = {}
 
-        self.title_ctrl = wx.StaticText(self.window, wx.ID_ANY, __(type_name), wx.DefaultPosition, wx.DefaultSize, 0)
+        self.title_ctrl = wx.StaticText(self.window, wx.ID_ANY, __(f"{type_name}モデル"), wx.DefaultPosition, wx.DefaultSize, 0)
         self.title_ctrl.SetToolTip(__(f"{type_name}の材質プルダウンから選択した材質の非透過度を下のスライダーで調整できます。"))
         self.sizer.Add(self.title_ctrl, 0, wx.ALL, 3)
 
@@ -81,6 +81,7 @@ class MaterialCtrlSet:
             border=3,
             size=wx.Size(240, -1),
             change_event=self.on_change_morph,
+            tooltip=__(f"{type_name}の材質の非透過度を任意の値に変更できます。\n非透過度を1未満にした場合、お着替えモデルには出力されません"),
         )
         self.sizer.Add(self.slider.sizer, 0, wx.ALL, 3)
 
