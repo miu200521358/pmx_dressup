@@ -7,7 +7,7 @@ from mlib.base.exception import MApplicationException
 from mlib.base.logger import MLogger
 from mlib.base.math import MQuaternion, MVector3D, MVector4D, intersect_line_plane
 from mlib.pmx.pmx_collection import PmxModel
-from mlib.pmx.pmx_part import STANDARD_BONE_NAMES, Bone, BoneFlg, BoneMorphOffset, MaterialMorphCalcMode, MaterialMorphOffset, Morph, MorphType
+from mlib.pmx.pmx_part import STANDARD_BONE_NAMES, BoneMorphOffset, MaterialMorphCalcMode, MaterialMorphOffset, Morph, MorphType
 from mlib.vmd.vmd_collection import VmdMotion
 from mlib.vmd.vmd_tree import VmdBoneFrameTrees
 
@@ -80,30 +80,30 @@ class LoadUsecase:
                     dress_inserted_bone_names.append(bone_name)
                     logger.info("-- -- 衣装: 準標準ボーン追加: {b}", b=bone_name)
 
-        if "頭" in dress.bones:
-            # 頭ボーンがある場合、頭部装飾ボーンを追加する
-            head_accessory_bone = Bone(name="頭部装飾", index=dress.bones["頭"].index + 1)
-            head_accessory_bone.parent_index = dress.bones["頭"].index
-            head_accessory_bone.position = dress.bones["頭"].position
-            head_accessory_bone.bone_flg = BoneFlg.CAN_MANIPULATE | BoneFlg.CAN_ROTATE | BoneFlg.CAN_TRANSLATE | BoneFlg.IS_VISIBLE
-            head_accessory_bone.tail_position = MVector3D(1, 0, 0)
-            head_accessory_bone.local_axis = MVector3D(1, 0, 0)
-            dress.insert_bone(head_accessory_bone)
-            dress_inserted_bone_names.append("頭部装飾")
+        # if "頭" in dress.bones:
+        #     # 頭ボーンがある場合、頭部装飾ボーンを追加する
+        #     head_accessory_bone = Bone(name="頭部装飾", index=dress.bones["頭"].index + 1)
+        #     head_accessory_bone.parent_index = dress.bones["頭"].index
+        #     head_accessory_bone.position = dress.bones["頭"].position
+        #     head_accessory_bone.bone_flg = BoneFlg.CAN_MANIPULATE | BoneFlg.CAN_ROTATE | BoneFlg.CAN_TRANSLATE | BoneFlg.IS_VISIBLE
+        #     dress.insert_bone(head_accessory_bone)
+        #     dress_inserted_bone_names.append("頭部装飾")
+        #     dress.setup_bone(dress.bones["頭"])
+        #     dress.setup_bone(head_accessory_bone)
 
-        if dress_inserted_bone_names:
-            dress.setup()
-            dress.replace_standard_weights(dress_inserted_bone_names)
-            if "頭部装飾" in dress_inserted_bone_names:
-                logger.info("フィッティング用ウェイト別頂点取得（衣装:頭部装飾）")
-                dress_vertices_by_bones = dress.get_vertices_by_bone()
-                replaced_bone_map = dict([(b.index, b.index) for b in dress.bones])
-                replaced_bone_map[dress.bones["頭"].index] = dress.bones["頭部装飾"].index
-                for vidx in dress_vertices_by_bones.get("頭", []):
-                    v = dress.vertices[vidx]
-                    v.deform.indexes = np.vectorize(replaced_bone_map.get)(v.deform.indexes)
+        # if dress_inserted_bone_names:
+        #     dress.setup()
+        #     dress.replace_standard_weights(dress_inserted_bone_names)
+        #     if "頭部装飾" in dress_inserted_bone_names:
+        #         logger.info("フィッティング用ウェイト別頂点取得（衣装:頭部装飾）")
+        #         dress_vertices_by_bones = dress.get_vertices_by_bone()
+        #         replaced_bone_map = dict([(b.index, b.index) for b in dress.bones])
+        #         replaced_bone_map[dress.bones["頭"].index] = dress.bones["頭部装飾"].index
+        #         for vidx in dress_vertices_by_bones.get("頭", []):
+        #             v = dress.vertices[vidx]
+        #             v.deform.indexes = np.vectorize(replaced_bone_map.get)(v.deform.indexes)
 
-            logger.info("-- 衣装: 再セットアップ")
+        #     logger.info("-- 衣装: 再セットアップ")
 
         return model, dress
 
@@ -781,7 +781,7 @@ FIT_INDIVIDUAL_BONE_NAMES = [
     (__("上半身2"), ("上半身2", "上半身3"), ("首根元",)),
     (__("胸"), ("左胸", "右胸"), []),
     (__("首"), ("首",), ("頭",)),
-    (__("頭"), ("頭",), ("頭部装飾",)),
+    (__("頭"), ("頭",), []),
     (__("頭部装飾"), ("頭部装飾",), []),
     (__("肩"), ("右肩", "左肩"), ("右肩C", "左肩C", "右腕", "左腕")),
     (__("腕"), ("右腕", "左腕"), ("右腕捩", "左腕捩", "右腕捩1", "左腕捩1", "右腕捩2", "左腕捩2", "右腕捩3", "左腕捩3", "右腕捩4", "左腕捩4", "右ひじ", "左ひじ")),
