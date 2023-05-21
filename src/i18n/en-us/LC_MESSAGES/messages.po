@@ -439,7 +439,7 @@ msgid "描画準備開始"
 msgstr "Prepare to draw"
 
 msgid "*** お着替えモデル出力成功 ***\n出力先: {f}"
-msgstr "*** Success in outputting changeover model ***Succeeded ***Succeeded in outputting changeover model: {f}"
+msgstr "*** Success in outputting changeover model ***\nOutput: {f}"
 
 msgid "-- -- スケールオフセット [{b}][{s:.3f}]"
 msgstr "-- -- Scale offset [{b}][{s:.3f}]"

@@ -129,6 +129,7 @@ class SaveUsecase:
             "ik_link": [],
         }
 
+        # キー: 元々のINDEX、値: コピー先INDEX
         model_bone_map: dict[int, int] = {-1: -1}
         dress_bone_map: dict[int, int] = {-1: -1}
 
@@ -140,6 +141,14 @@ class SaveUsecase:
             if bone.name not in STANDARD_BONE_NAMES and bone.index in model_vertices and not set(model_vertices[bone.index]) & active_model_vertices:
                 # 準標準ではなく、元々ウェイトを持っていて、かつ出力先にウェイトが乗ってる頂点が無い場合、スルー
                 continue
+            if (
+                bone.name not in STANDARD_BONE_NAMES
+                and not bone.is_visible
+                and bone.parent_index in model_vertices
+                and not set(model_vertices[bone.parent_index]) & active_model_vertices
+            ):
+                # 準標準ではなく、非表示ボーンで、親ボーンが元々ウェイトを持っていて、かつ出力先にウェイトが乗ってる頂点が無い場合、スルー
+                continue
 
             for dress_bone in dress.bones.writable():
                 if 0 <= dress_bone.tail_index and dress_bone.name not in model.bones and dress.bones[dress_bone.tail_index].name == bone.name:
@@ -147,12 +156,42 @@ class SaveUsecase:
                     dress_prev_copy_bone: Bone = dress_bone.copy()
                     dress_prev_copy_bone.index = len(dress_model.bones.writable())
                     bone_map[dress_prev_copy_bone.index] = {
-                        "parent": [dress.bones[dress_bone.parent_index].name],
-                        "tail": [dress.bones[dress_bone.tail_index].name],
-                        "effect": [dress.bones[dress_bone.effect_index].name],
-                        "ik_target": [dress.bones[dress_bone.ik.bone_index].name if dress_bone.ik else Bone.SYSTEM_ROOT_NAME],
-                        "ik_link": [dress.bones[link.bone_index].name for link in dress_bone.ik.links] if dress_bone.ik else [],
+                        "parent": [
+                            dress.bones[bone.parent_index].name
+                            if dress.bones[bone.parent_index].is_standard or dress.bones[bone.parent_index].is_system
+                            else f"Cos:{dress.bones[bone.parent_index].name}"
+                        ],
+                        "tail": [
+                            dress.bones[bone.tail_index].name
+                            if dress.bones[bone.tail_index].is_standard or dress.bones[bone.tail_index].is_system
+                            else f"Cos:{dress.bones[bone.tail_index].name}"
+                        ],
+                        "effect": [
+                            dress.bones[bone.effect_index].name
+                            if dress.bones[bone.effect_index].is_standard or dress.bones[bone.effect_index].is_system
+                            else f"Cos:{dress.bones[bone.effect_index].name}"
+                        ],
+                        "ik_target": [
+                            (
+                                dress.bones[bone.ik.bone_index].name
+                                if dress.bones[bone.ik.bone_index].is_standard or dress.bones[bone.ik.bone_index].is_system
+                                else f"Cos:{dress.bones[bone.ik.bone_index].name}"
+                            )
+                            if bone.ik
+                            else Bone.SYSTEM_ROOT_NAME
+                        ],
+                        "ik_link": [
+                            (
+                                dress.bones[link.bone_index].name
+                                if dress.bones[link.bone_index].is_standard or dress.bones[link.bone_index].is_system
+                                else f"Cos:{dress.bones[link.bone_index].name}"
+                            )
+                            for link in bone.ik.links
+                        ]
+                        if bone.ik
+                        else [],
                     }
+
                     dress_model.bones.append(dress_prev_copy_bone, is_sort=False)
                     dress_bone_map[dress_bone.index] = dress_prev_copy_bone.index
 
@@ -200,24 +239,64 @@ class SaveUsecase:
                 logger.info("-- ボーン出力: {s}", s=len(dress_model.bones))
 
         for bone in dress.bones.writable():
-            if bone.name in dress_model.bones:
-                # 既に登録済みのボーンは追加しない
+            if bone.is_standard and bone.name in dress_model.bones:
+                # 既に登録済みの準標準ボーンは追加しない
                 dress_bone_map[bone.index] = dress_model.bones[bone.name].index
                 continue
             if bone.name not in STANDARD_BONE_NAMES and bone.index in dress_vertices and not set(dress_vertices[bone.index]) & active_dress_vertices:
                 # 準標準ではなく、元々ウェイトを持っていて、かつ出力先にウェイトが乗ってる頂点が無い場合、スルー
                 continue
+            if (
+                bone.name not in STANDARD_BONE_NAMES
+                and not bone.is_visible
+                and bone.parent_index in dress_vertices
+                and not set(dress_vertices[bone.parent_index]) & active_dress_vertices
+            ):
+                # 準標準ではなく、非表示ボーンで、親ボーンが元々ウェイトを持っていて、かつ出力先にウェイトが乗ってる頂点が無い場合、スルー
+                continue
 
             dress_copy_bone: Bone = bone.copy()
+            if not bone.is_standard:
+                # 準標準ではない場合、ボーン名をちょっと変える
+                dress_copy_bone.name = f"Cos:{bone.name}"
             dress_copy_bone.index = len(dress_model.bones.writable())
             # 変形後の位置にボーンを配置する
             dress_copy_bone.position = dress_matrixes[0, bone.name].matrix * dress_copy_bone.position
             bone_map[dress_copy_bone.index] = {
-                "parent": [dress.bones[bone.parent_index].name],
-                "tail": [dress.bones[bone.tail_index].name],
-                "effect": [dress.bones[bone.effect_index].name],
-                "ik_target": [dress.bones[bone.ik.bone_index].name if bone.ik else Bone.SYSTEM_ROOT_NAME],
-                "ik_link": [dress.bones[link.bone_index].name for link in bone.ik.links] if bone.ik else [],
+                "parent": [
+                    dress.bones[bone.parent_index].name
+                    if dress.bones[bone.parent_index].is_standard or dress.bones[bone.parent_index].is_system
+                    else f"Cos:{dress.bones[bone.parent_index].name}"
+                ],
+                "tail": [
+                    dress.bones[bone.tail_index].name
+                    if dress.bones[bone.tail_index].is_standard or dress.bones[bone.tail_index].is_system
+                    else f"Cos:{dress.bones[bone.tail_index].name}"
+                ],
+                "effect": [
+                    dress.bones[bone.effect_index].name
+                    if dress.bones[bone.effect_index].is_standard or dress.bones[bone.effect_index].is_system
+                    else f"Cos:{dress.bones[bone.effect_index].name}"
+                ],
+                "ik_target": [
+                    (
+                        dress.bones[bone.ik.bone_index].name
+                        if dress.bones[bone.ik.bone_index].is_standard or dress.bones[bone.ik.bone_index].is_system
+                        else f"Cos:{dress.bones[bone.ik.bone_index].name}"
+                    )
+                    if bone.ik
+                    else Bone.SYSTEM_ROOT_NAME
+                ],
+                "ik_link": [
+                    (
+                        dress.bones[link.bone_index].name
+                        if dress.bones[link.bone_index].is_standard or dress.bones[link.bone_index].is_system
+                        else f"Cos:{dress.bones[link.bone_index].name}"
+                    )
+                    for link in bone.ik.links
+                ]
+                if bone.ik
+                else [],
             }
             dress_model.bones.append(dress_copy_bone, is_sort=False)
             dress_bone_map[bone.index] = dress_copy_bone.index
@@ -432,38 +511,43 @@ class SaveUsecase:
             model_copy_rigidbody: RigidBody = rigidbody.copy()
             model_copy_rigidbody.index = len(dress_model.rigidbodies)
             model_copy_rigidbody.bone_index = model_bone_map[rigidbody.bone_index]
-            model_rigidbody_map[rigidbody.bone_index] = len(dress_model.rigidbodies)
+            model_rigidbody_map[rigidbody.index] = len(dress_model.rigidbodies)
             dress_model.rigidbodies.append(model_copy_rigidbody)
 
             if not len(dress_model.rigidbodies) % 50:
                 logger.info("-- 剛体出力: {s}", s=len(dress_model.rigidbodies))
 
         for rigidbody in dress.rigidbodies:
-            if rigidbody.is_system or rigidbody.bone_index not in dress_bone_map or dress.bones[rigidbody.bone_index].name not in dress_model.bones:
+            if (
+                rigidbody.is_system
+                or rigidbody.bone_index not in dress_bone_map
+                or (not dress.bones[rigidbody.bone_index].is_standard and f"Cos:{dress.bones[rigidbody.bone_index].name}" not in dress_model.bones)
+            ):
+                continue
+            if rigidbody.name in dress_model.rigidbodies and dress_model.bones[dress_model.rigidbodies[rigidbody.name].bone_index].is_standard:
+                # 既に同名の準標準ボーンに繋がる剛体がある場合、INDEXだけ保持してスルー
+                dress_rigidbody_map[rigidbody.index] = dress_model.rigidbodies[rigidbody.name].index
                 continue
 
             dress_copy_rigidbody: RigidBody = rigidbody.copy()
+            dress_copy_rigidbody.name = f"Cos:{rigidbody.name}"
             dress_copy_rigidbody.index = len(dress_model.rigidbodies)
             dress_copy_rigidbody.bone_index = dress_bone_map[rigidbody.bone_index]
+
+            # ボーンと剛体の位置関係から剛体位置を求め直す
             dress_bone_name = dress.bones[rigidbody.bone_index].name
+            rigidbody_local_position = dress_original_matrixes[0, dress_bone_name].matrix.inverse() * rigidbody.shape_position
+            rigidbody_copy_position = dress_matrixes[0, dress_bone_name].matrix * rigidbody_local_position
+            rigidbody_copy_scale = MVector3D(
+                dress_matrixes[0, dress_bone_name].matrix[0, 0],
+                dress_matrixes[0, dress_bone_name].matrix[1, 1],
+                dress_matrixes[0, dress_bone_name].matrix[2, 2],
+            )
 
-            if rigidbody.name in model.rigidbodies:
-                dress_copy_rigidbody.shape_size = model.rigidbodies[rigidbody.name].shape_size.copy()
-                dress_copy_rigidbody.shape_position = model.rigidbodies[rigidbody.name].shape_position.copy()
-                dress_copy_rigidbody.shape_rotation = model.rigidbodies[rigidbody.name].shape_rotation.copy()
-            else:
-                # ボーンと剛体の位置関係から剛体位置を求め直す
-                rigidbody_local_position = dress_original_matrixes[0, dress_bone_name].matrix.inverse() * rigidbody.shape_position
-                rigidbody_copy_position = dress_matrixes[0, dress_bone_name].matrix * rigidbody_local_position
-                rigidbody_copy_scale = MVector3D(
-                    dress_matrixes[0, dress_bone_name].matrix[0, 0],
-                    dress_matrixes[0, dress_bone_name].matrix[1, 1],
-                    dress_matrixes[0, dress_bone_name].matrix[2, 2],
-                )
+            dress_copy_rigidbody.shape_position = rigidbody_copy_position
+            dress_copy_rigidbody.shape_size *= rigidbody_copy_scale
 
-                dress_copy_rigidbody.shape_position = rigidbody_copy_position
-                dress_copy_rigidbody.shape_size *= rigidbody_copy_scale
-            dress_rigidbody_map[rigidbody.bone_index] = len(dress_model.rigidbodies)
+            dress_rigidbody_map[rigidbody.index] = len(dress_model.rigidbodies)
             dress_model.rigidbodies.append(dress_copy_rigidbody)
 
             if not len(dress_model.rigidbodies) % 50:
@@ -476,17 +560,16 @@ class SaveUsecase:
         for joint in model.joints:
             if joint.is_system:
                 continue
-            bone_a_name = model.bones[model.rigidbodies[joint.rigidbody_index_a].bone_index].name
-            bone_b_name = model.bones[model.rigidbodies[joint.rigidbody_index_b].bone_index].name
-            rigidbody_a = [rigidbody for rigidbody in dress_model.rigidbodies if dress_model.bones[rigidbody.bone_index].name == bone_a_name]
-            rigidbody_b = [rigidbody for rigidbody in dress_model.rigidbodies if dress_model.bones[rigidbody.bone_index].name == bone_b_name]
-            if not (rigidbody_a and rigidbody_b):
+            if not (joint.rigidbody_index_a in model_rigidbody_map and joint.rigidbody_index_b in model_rigidbody_map):
                 continue
+
+            rigidbody_a = dress_model.rigidbodies[model_rigidbody_map[joint.rigidbody_index_a]]
+            rigidbody_b = dress_model.rigidbodies[model_rigidbody_map[joint.rigidbody_index_b]]
 
             model_copy_joint: Joint = joint.copy()
             model_copy_joint.index = len(dress_model.joints)
-            model_copy_joint.rigidbody_index_a = rigidbody_a[0].index
-            model_copy_joint.rigidbody_index_b = rigidbody_b[0].index
+            model_copy_joint.rigidbody_index_a = rigidbody_a.index
+            model_copy_joint.rigidbody_index_b = rigidbody_b.index
             dress_model.joints.append(model_copy_joint)
 
             if not len(dress_model.joints) % 50:
@@ -495,27 +578,35 @@ class SaveUsecase:
         for joint in dress.joints:
             if joint.is_system:
                 continue
-            bone_a_name = dress.bones[dress.rigidbodies[joint.rigidbody_index_a].bone_index].name
-            bone_b_name = dress.bones[dress.rigidbodies[joint.rigidbody_index_b].bone_index].name
-            rigidbody_a = [rigidbody for rigidbody in dress_model.rigidbodies if dress_model.bones[rigidbody.bone_index].name == bone_a_name]
-            rigidbody_b = [rigidbody for rigidbody in dress_model.rigidbodies if dress_model.bones[rigidbody.bone_index].name == bone_b_name]
-            if not (rigidbody_a and rigidbody_b):
+            if not (joint.rigidbody_index_a in dress_rigidbody_map and joint.rigidbody_index_b in dress_rigidbody_map):
                 continue
 
-            joint_a_local_position = dress_original_matrixes[0, bone_a_name].matrix.inverse() * joint.position
-            joint_b_local_position = dress_original_matrixes[0, bone_b_name].matrix.inverse() * joint.position
-            joint_a_copy_position = dress_matrixes[0, bone_a_name].matrix * joint_a_local_position
-            joint_b_copy_position = dress_matrixes[0, bone_b_name].matrix * joint_b_local_position
+            rigidbody_a = dress_model.rigidbodies[dress_rigidbody_map[joint.rigidbody_index_a]]
+            rigidbody_b = dress_model.rigidbodies[dress_rigidbody_map[joint.rigidbody_index_b]]
 
             dress_copy_joint: Joint = joint.copy()
+            dress_copy_joint.name = f"Cos:{joint.name}"
             dress_copy_joint.index = len(dress_model.joints)
-            dress_copy_joint.rigidbody_index_a = rigidbody_a[0].index
-            dress_copy_joint.rigidbody_index_b = rigidbody_b[0].index
+            dress_copy_joint.rigidbody_index_a = rigidbody_a.index
+            dress_copy_joint.rigidbody_index_b = rigidbody_b.index
+
+            dress_bone_a = dress.bones[dress.rigidbodies[joint.rigidbody_index_a].bone_index]
+            dress_bone_b = dress.bones[dress.rigidbodies[joint.rigidbody_index_b].bone_index]
+
+            joint_a_local_position = dress_original_matrixes[0, dress_bone_a.name].matrix.inverse() * joint.position
+            joint_b_local_position = dress_original_matrixes[0, dress_bone_b.name].matrix.inverse() * joint.position
+            joint_a_copy_position = dress_matrixes[0, dress_bone_a.name].matrix * joint_a_local_position
+            joint_b_copy_position = dress_matrixes[0, dress_bone_b.name].matrix * joint_b_local_position
+
+            dress_copy_joint.index = len(dress_model.joints)
             dress_copy_joint.position = (joint_a_copy_position + joint_b_copy_position) / 2
+
             dress_model.joints.append(dress_copy_joint)
 
             if not len(dress_model.joints) % 50:
                 logger.info("-- ジョイント出力: {s}", s=len(dress_model.joints))
+
+        logger.info("モデル出力", decoration=MLogger.Decoration.LINE)
 
         PmxWriter(dress_model, output_path).save()
 
