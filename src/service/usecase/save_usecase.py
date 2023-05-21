@@ -18,6 +18,7 @@ from mlib.pmx.pmx_part import (
 from mlib.pmx.pmx_writer import PmxWriter
 from mlib.vmd.vmd_collection import VmdMotion
 from mlib.vmd.vmd_part import VmdMorphFrame
+from mlib.pmx.pmx_part import DisplaySlotReference
 
 logger = MLogger(os.path.basename(__file__), level=1)
 __ = logger.get_text
@@ -46,7 +47,14 @@ class SaveUsecase:
 
         dress_model = PmxModel(output_path)
         dress_model.comment = (
-            __("人物モデル\r\n") + model.comment + "\r\n\r\n------------------\r\n\r\n" + __("衣装モデル\r\n") + dress.comment + "\r\n\r\n------------------\r\n\r\n"
+            __("人物モデル")
+            + "\r\n"
+            + model.comment
+            + "\r\n\r\n------------------\r\n\r\n"
+            + __("衣装モデル")
+            + "\r\n"
+            + dress.comment
+            + "\r\n\r\n------------------\r\n\r\n"
         )
 
         for bone_type_name, scale, degree, position in zip(dress_scales.keys(), dress_scales.values(), dress_degrees.values(), dress_positions.values()):
@@ -67,7 +75,7 @@ class SaveUsecase:
             dress_model.comment += __("  {b}: 縮尺{s}, 回転{r}, 移動{p}", b=bone_type_name, s=scale, r=degree, p=position) + "\r\n"
 
         # 変形結果
-        (bone_matrixes, vertex_morph_poses, uv_morph_poses, uv1_morph_poses, material_morphs) = motion.animate(0, dress, is_gl=False)
+        dress_matrixes = motion.animate_bone(0, dress)
 
         # ---------------------------------
 
@@ -127,6 +135,10 @@ class SaveUsecase:
             dress_model.bones.append(copy_bone, is_sort=False)
             model_bone_map[bone.index] = copy_bone.index
 
+            # 表示枠
+            if 0 == copy_bone.index:
+                dress_model.display_slots["Root"].references.append(DisplaySlotReference(display_index=copy_bone.index))
+
             if not len(dress_model.bones) % 100:
                 logger.info("-- ボーン出力: {s}", s=len(dress_model.bones))
 
@@ -138,7 +150,7 @@ class SaveUsecase:
             copy_bone = bone.copy()
             copy_bone.index = len(dress_model.bones.writable())
             # 変形後の位置にボーンを配置する
-            copy_bone.position = MMatrix4x4(*bone_matrixes[bone.index].flatten()) * copy_bone.position
+            copy_bone.position = dress_matrixes[0, bone.name].matrix * copy_bone.position
             bone_map[copy_bone.index] = {
                 "parent": [dress.bones[bone.parent_index].name],
                 "tail": [dress.bones[bone.tail_index].name],
@@ -256,7 +268,7 @@ class SaveUsecase:
                         for n in range(copy_vertex.deform.count):
                             bone_index = dress.vertices[vertex_index].deform.indexes[n]
                             bone_weight = dress.vertices[vertex_index].deform.weights[n]
-                            mat += bone_matrixes[bone_index] * bone_weight
+                            mat += dress_matrixes[0, dress.bones[bone_index].name].matrix.vector * bone_weight
                         copy_vertex.position = MMatrix4x4(*mat.flatten()) * copy_vertex.position
 
                         faces.append(len(dress_model.vertices))
