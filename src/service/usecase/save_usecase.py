@@ -25,6 +25,7 @@ from mlib.vmd.vmd_part import VmdMorphFrame
 from mlib.pmx.pmx_part import BoneMorphOffset, GroupMorphOffset, MaterialMorphOffset, MorphType, UvMorphOffset
 from mlib.pmx.pmx_part import Morph, VertexMorphOffset
 from mlib.pmx.pmx_part import RigidBody
+from mlib.pmx.pmx_part import Joint
 
 logger = MLogger(os.path.basename(__file__), level=1)
 __ = logger.get_text
@@ -421,10 +422,10 @@ class SaveUsecase:
         dress_rigidbody_map: dict[int, int] = {-1: -1}
 
         for rigidbody in model.rigidbodies:
-            if rigidbody.is_system or rigidbody.bone_index not in model_bone_map or rigidbody.name in dress.rigidbodies:
+            if rigidbody.is_system or rigidbody.bone_index not in model_bone_map or model.bones[rigidbody.bone_index].name not in dress_model.bones:
                 continue
 
-            model_copy_rigidbody = rigidbody.copy()
+            model_copy_rigidbody: RigidBody = rigidbody.copy()
             model_copy_rigidbody.index = len(dress_model.rigidbodies)
             model_copy_rigidbody.bone_index = model_bone_map[rigidbody.bone_index]
             model_rigidbody_map[rigidbody.bone_index] = len(dress_model.rigidbodies)
@@ -434,10 +435,10 @@ class SaveUsecase:
                 logger.info("-- 剛体出力: {s}", s=len(dress_model.rigidbodies))
 
         for rigidbody in dress.rigidbodies:
-            if rigidbody.is_system or rigidbody.bone_index not in dress_bone_map:
+            if rigidbody.is_system or rigidbody.bone_index not in dress_bone_map or dress.bones[rigidbody.bone_index].name not in dress_model.bones:
                 continue
 
-            dress_copy_rigidbody = rigidbody.copy()
+            dress_copy_rigidbody: RigidBody = rigidbody.copy()
             dress_copy_rigidbody.index = len(dress_model.rigidbodies)
             dress_copy_rigidbody.bone_index = dress_bone_map[rigidbody.bone_index]
             dress_bone_name = dress.bones[rigidbody.bone_index].name
@@ -463,6 +464,54 @@ class SaveUsecase:
 
             if not len(dress_model.rigidbodies) % 50:
                 logger.info("-- 剛体出力: {s}", s=len(dress_model.rigidbodies))
+
+        # ---------------------------------
+
+        logger.info("ジョイント出力", decoration=MLogger.Decoration.LINE)
+
+        for joint in model.joints:
+            if joint.is_system:
+                continue
+            bone_a_name = model.bones[model.rigidbodies[joint.rigidbody_index_a].bone_index].name
+            bone_b_name = model.bones[model.rigidbodies[joint.rigidbody_index_b].bone_index].name
+            rigidbody_a = [rigidbody for rigidbody in dress_model.rigidbodies if dress_model.bones[rigidbody.bone_index].name == bone_a_name]
+            rigidbody_b = [rigidbody for rigidbody in dress_model.rigidbodies if dress_model.bones[rigidbody.bone_index].name == bone_b_name]
+            if not (rigidbody_a and rigidbody_b):
+                continue
+
+            model_copy_joint: Joint = joint.copy()
+            model_copy_joint.index = len(dress_model.joints)
+            model_copy_joint.rigidbody_index_a = rigidbody_a[0].index
+            model_copy_joint.rigidbody_index_b = rigidbody_b[0].index
+            dress_model.joints.append(model_copy_joint)
+
+            if not len(dress_model.joints) % 50:
+                logger.info("-- ジョイント出力: {s}", s=len(dress_model.joints))
+
+        for joint in dress.joints:
+            if joint.is_system:
+                continue
+            bone_a_name = dress.bones[dress.rigidbodies[joint.rigidbody_index_a].bone_index].name
+            bone_b_name = dress.bones[dress.rigidbodies[joint.rigidbody_index_b].bone_index].name
+            rigidbody_a = [rigidbody for rigidbody in dress_model.rigidbodies if dress_model.bones[rigidbody.bone_index].name == bone_a_name]
+            rigidbody_b = [rigidbody for rigidbody in dress_model.rigidbodies if dress_model.bones[rigidbody.bone_index].name == bone_b_name]
+            if not (rigidbody_a and rigidbody_b):
+                continue
+
+            joint_a_local_position = dress_original_matrixes[0, bone_a_name].matrix.inverse() * joint.position
+            joint_b_local_position = dress_original_matrixes[0, bone_b_name].matrix.inverse() * joint.position
+            joint_a_copy_position = dress_matrixes[0, bone_a_name].matrix * joint_a_local_position
+            joint_b_copy_position = dress_matrixes[0, bone_b_name].matrix * joint_b_local_position
+
+            dress_copy_joint: Joint = joint.copy()
+            dress_copy_joint.index = len(dress_model.joints)
+            dress_copy_joint.rigidbody_index_a = rigidbody_a[0].index
+            dress_copy_joint.rigidbody_index_b = rigidbody_b[0].index
+            dress_copy_joint.position = (joint_a_copy_position + joint_b_copy_position) / 2
+            dress_model.joints.append(dress_copy_joint)
+
+            if not len(dress_model.joints) % 50:
+                logger.info("-- ジョイント出力: {s}", s=len(dress_model.joints))
 
         PmxWriter(dress_model, output_path).save()
 

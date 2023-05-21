@@ -753,3 +753,11 @@ msgstr ""
 msgid "-- 剛体出力: {s}"
 msgstr ""
 
+
+msgid "ジョイント出力"
+msgstr ""
+
+
+msgid "-- ジョイント出力: {s}"
+msgstr ""
+
