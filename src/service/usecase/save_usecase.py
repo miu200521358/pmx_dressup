@@ -24,6 +24,7 @@ from mlib.vmd.vmd_collection import VmdMotion
 from mlib.vmd.vmd_part import VmdMorphFrame
 from mlib.pmx.pmx_part import BoneMorphOffset, GroupMorphOffset, MaterialMorphOffset, MorphType, UvMorphOffset
 from mlib.pmx.pmx_part import Morph, VertexMorphOffset
+from mlib.pmx.pmx_part import RigidBody
 
 logger = MLogger(os.path.basename(__file__), level=1)
 __ = logger.get_text
@@ -51,7 +52,7 @@ class SaveUsecase:
         motion.morphs[bmf.name].append(bmf)
 
         dress_model = PmxModel(output_path)
-        dress_model = model.name + "(" + dress.name + ")"
+        dress_model.model_name = model.name + "(" + dress.name + ")"
         dress_model.comment = (
             __("人物モデル")
             + "\r\n"
@@ -83,6 +84,7 @@ class SaveUsecase:
         logger.info("出力準備", decoration=MLogger.Decoration.LINE)
 
         # 変形結果
+        dress_original_matrixes = VmdMotion().animate_bone(0, dress)
         dress_matrixes = motion.animate_bone(0, dress)
 
         logger.info("人物材質選り分け")
@@ -409,6 +411,58 @@ class SaveUsecase:
 
             if not len(dress_model.morphs) % 50:
                 logger.info("-- モーフ出力: {s}", s=len(dress_model.morphs))
+
+        # ---------------------------------
+
+        logger.info("剛体出力", decoration=MLogger.Decoration.LINE)
+
+        # キー: 元々のINDEX、値: コピー先INDEX
+        model_rigidbody_map: dict[int, int] = {-1: -1}
+        dress_rigidbody_map: dict[int, int] = {-1: -1}
+
+        for rigidbody in model.rigidbodies:
+            if rigidbody.is_system or rigidbody.bone_index not in model_bone_map or rigidbody.name in dress.rigidbodies:
+                continue
+
+            model_copy_rigidbody = rigidbody.copy()
+            model_copy_rigidbody.index = len(dress_model.rigidbodies)
+            model_copy_rigidbody.bone_index = model_bone_map[rigidbody.bone_index]
+            model_rigidbody_map[rigidbody.bone_index] = len(dress_model.rigidbodies)
+            dress_model.rigidbodies.append(model_copy_rigidbody)
+
+            if not len(dress_model.rigidbodies) % 50:
+                logger.info("-- 剛体出力: {s}", s=len(dress_model.rigidbodies))
+
+        for rigidbody in dress.rigidbodies:
+            if rigidbody.is_system or rigidbody.bone_index not in dress_bone_map:
+                continue
+
+            dress_copy_rigidbody = rigidbody.copy()
+            dress_copy_rigidbody.index = len(dress_model.rigidbodies)
+            dress_copy_rigidbody.bone_index = dress_bone_map[rigidbody.bone_index]
+            dress_bone_name = dress.bones[rigidbody.bone_index].name
+
+            if rigidbody.name in model.rigidbodies:
+                dress_copy_rigidbody.shape_size = model.rigidbodies[rigidbody.name].shape_size.copy()
+                dress_copy_rigidbody.shape_position = model.rigidbodies[rigidbody.name].shape_position.copy()
+                dress_copy_rigidbody.shape_rotation = model.rigidbodies[rigidbody.name].shape_rotation.copy()
+            else:
+                # ボーンと剛体の位置関係から剛体位置を求め直す
+                rigidbody_local_position = dress_original_matrixes[0, dress_bone_name].matrix.inverse() * rigidbody.shape_position
+                rigidbody_copy_position = dress_matrixes[0, dress_bone_name].matrix * rigidbody_local_position
+                rigidbody_copy_scale = MVector3D(
+                    dress_matrixes[0, dress_bone_name].matrix[0, 0],
+                    dress_matrixes[0, dress_bone_name].matrix[1, 1],
+                    dress_matrixes[0, dress_bone_name].matrix[2, 2],
+                )
+
+                dress_copy_rigidbody.shape_position = rigidbody_copy_position
+                dress_copy_rigidbody.shape_size *= rigidbody_copy_scale
+            dress_rigidbody_map[rigidbody.bone_index] = len(dress_model.rigidbodies)
+            dress_model.rigidbodies.append(dress_copy_rigidbody)
+
+            if not len(dress_model.rigidbodies) % 50:
+                logger.info("-- 剛体出力: {s}", s=len(dress_model.rigidbodies))
 
         PmxWriter(dress_model, output_path).save()
 

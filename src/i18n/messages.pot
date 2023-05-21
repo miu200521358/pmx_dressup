@@ -745,3 +745,11 @@ msgstr ""
 msgid "-- モーフ出力: {s}"
 msgstr ""
 
+
+msgid "剛体出力"
+msgstr ""
+
+
+msgid "-- 剛体出力: {s}"
+msgstr ""
+
