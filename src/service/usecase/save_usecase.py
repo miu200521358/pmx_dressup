@@ -240,13 +240,17 @@ class SaveUsecase:
 
         for bone in dress_model.bones:
             bone_setting = bone_map[bone.index]
-            bone.parent_index = dress_model.bones[bone_setting["parent"][0]].index
-            bone.tail_index = dress_model.bones[bone_setting["tail"][0]].index
-            bone.effect_index = dress_model.bones[bone_setting["effect"][0]].index
+            bone.parent_index = dress_model.bones[bone_setting["parent"][0]].index if bone_setting["parent"][0] in dress_model.bones else -1
+            bone.tail_index = dress_model.bones[bone_setting["tail"][0]].index if bone_setting["tail"][0] in dress_model.bones else -1
+            bone.effect_index = dress_model.bones[bone_setting["effect"][0]].index if bone_setting["effect"][0] in dress_model.bones else -1
             if bone.is_ik and bone.ik:
-                bone.ik.bone_index = dress_model.bones[bone_setting["ik_target"][0]].index
+                bone.ik.bone_index = dress_model.bones[bone_setting["ik_target"][0]].index if bone_setting["ik_target"][0] in dress_model.bones else -1
+                if 0 <= bone.ik.bone_index and dress_matrixes.exists(0, bone_setting["ik_target"][0]):
+                    # IKターゲットとその位置を修正
+                    bone.position = dress_matrixes[0, bone_setting["ik_target"][0]].position.copy()
+                    dress_model.bones[bone.ik.bone_index].position = dress_matrixes[0, bone_setting["ik_target"][0]].position.copy()
                 for n in range(len(bone.ik.links)):
-                    bone.ik.links[n].bone_index = dress_model.bones[bone_setting["ik_link"][n]].index
+                    bone.ik.links[n].bone_index = dress_model.bones[bone_setting["ik_link"][n]].index if bone_setting["ik_link"][0] in dress_model.bones else -1
 
             if 0 < bone.index and not bone.index % 100:
                 logger.info("-- ボーン定義再設定: {s}", s=bone.index)

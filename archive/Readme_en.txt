@@ -21,7 +21,22 @@
 ■ Summary
 ----------------------------------------------------------------
 
-　This tool merges the specified model with the specified outfit according to the body shape.
+　This tool fits a specified costume to a specified model according to her body shape.
+　After some degree of automatic fitting, adjustments can be made to individual bones.
+
+　If the opacity of the material is set to less than 1, it will not be used as a changeable model.
+
+　The following bones will be created for the changeover model
+　　All parents, upper body 2, right arm twist, left arm twist, right hand twist, left hand twist, right leg D, left leg D, right knee D, left knee D, right ankle D, left ankle D, right toe EX, left toe EX
+
+　[Work required in advance]
+　　If there are vertices in the same material that you want to output and those that you do not want to output, please separate the materials.
+
+　[Manual adjustment after output]
+　　Set the rigid body group and non-collision group.
+　　　　→ If the costume is to be violent, set the rigid body at the base of the costume to be non-collision with the rigid body of the body it is in contact with.
+　　Delete lower vertex
+　　　　→ Delete vertices as long as they do not cause holes in the model, so that vertices do not penetrate the model and the model becomes lighter.
 
 
 ----------------------------------------------------------------
@@ -53,7 +68,7 @@ Startup
 
 Basically, you can start the exe as it is.
 
-The version with logging outputs a log file in the same location as the output VMD file path.
+The version with logging outputs a log file in the same location as the exe file path.
 
 The file history can be copied by placing "history.json" in the same hierarchy as the exe.
 
@@ -79,7 +94,7 @@ Community
 
 　　VMD sizing, motion supporter, and other homebrew tools.
 　　You can try out the beta version of the site as soon as possible.
-　　I hope to follow up with you if you have any problems with sizing.
+　　I would like to be able to follow up if the tool does not work properly.
 　　The site is closed, but it is auto-approved, so please feel free to join!
 
 ----------------------------------------------------------------
@@ -98,20 +113,20 @@ Terms of use, etc.
 
 　　- The following actions are permitted within the scope of the original model's terms and conditions.
 
-　　- Adjustment or modification of costumes
-　　　 - In the case of distributed models, please make sure that the terms of use allow for costume alterations.
+　　- Adjustment or modification of models
+　　　 - In the case of distributed models, please make sure that the terms of use allow for alterations.
 　　- Posting videos of models on video-sharing sites, SNS, etc.
 　　　 - Posting of models with costume settings created in progress is also acceptable.
 　　　 - However, if the original model's terms and conditions stipulate posting locations, age restrictions, etc., models created with physics settings using this tool will also be subject to those terms and conditions.
-　　- Distribution of models with costume settings to an unspecified number of people
-　　　 - Only models that you have made yourself or models that you are allowed to distribute to an unspecified number of people.
+　　- Distribution of models to an unspecified number of people
+　　　 - Only self-made models or models for which distribution to an unspecified number of people is permitted.
 
 　Prohibited items
 
 　　- Please refrain from the following acts regarding this tool and generated models
 
 　　- Actions that are outside the scope of the rules of the original model.
-　　- Any remarks that are completely self-made.
+　　- Complete self-made statement.
 　　- Actions that may cause inconvenience to the rights holders.
 　　- Actions that are intended to defame or slander others (regardless of whether they are two-dimensional or three-dimensional).
 

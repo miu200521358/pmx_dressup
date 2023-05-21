@@ -33,7 +33,7 @@ msgid "履歴"
 msgstr "History"
 
 msgid "これまでに指定された事のある{t}を再指定することができます。"
-msgstr "You can re-specify {t} that has been previously specified"
+msgstr "You can re-specify {t} if it has ever been specified before"
 
 msgid "VMDモーションデータ"
 msgstr "VMD motion data"
@@ -153,9 +153,6 @@ msgstr "The output file path of the model after the change of clothes. \You can 
 msgid "モーションを指定している場合、任意のキーフレの結果の表示や再生ができます"
 msgstr "If motion is specified, the results of any keyfre can be displayed or played back"
 
-msgid "モーションを指定している場合、任意のキーフレの結果を表示することができます"
-msgstr "If you have specified a motion, you can display the results of any keyfre"
-
 msgid "モーションを指定している場合、再生することができます"
 msgstr "If motion is specified, it can be played"
 
@@ -189,21 +186,6 @@ msgstr "You can move the material pull-down choices for costumes downward"
 msgid "追加縮尺"
 msgstr "Additional Scale"
 
-msgid "全体やボーンごとに追加でどの程度伸縮させるかを、XYZ別に設定することができます"
-msgstr "You can set how much to stretch or shrink the whole thing or each bone additionally, by XYZ"
-
-msgid "全体の追加縮尺をXYZ別に設定することができます"
-msgstr "Additional overall scale can be set by XYZ"
-
-msgid "全体X軸方向に追加でどの程度伸縮させるかを設定できます"
-msgstr "You can set how much to additionally stretch or shrink in the overall X-axis direction"
-
-msgid "全体Y軸方向に追加でどの程度伸縮させるかを設定できます"
-msgstr "You can set how much to additionally stretch or shrink in the overall Y-axis direction"
-
-msgid "全体Z軸方向に追加でどの程度伸縮させるかを設定できます"
-msgstr "You can set how much to additionally stretch or shrink in the overall Z-axis direction"
-
 msgid "-- 頂点データ読み取り [{i} ({p:.2f}%)]"
 msgstr "-- Vertex data read [{i} ({p:.2f}%)]"
 
@@ -235,7 +217,7 @@ msgid "ウェイトボーン分布"
 msgstr "Weight Bone Distribution"
 
 msgid "-- ウェイトボーン分布 [{i} ({p:.2f}%)]"
-msgstr "-- Weightborn distribution [{i} ({p:.2f}%)]"
+msgstr "-- Weight born distribution [{i} ({p:.2f}%)]"
 
 msgid "フィッティング用ウェイト別頂点取得（衣装:頭部装飾用）"
 msgstr "Acquisition of vertices by weight for fitting (costume: for head decoration)"
@@ -305,3 +287,276 @@ msgstr "-- -- People: semi-standard bone addition: {b}"
 
 msgid "-- 人物: 再セットアップ"
 msgstr "-- People: re-setup"
+
+msgid "人物モデル欄に有効なパスが設定されていない為、タブ遷移を中断します。"
+msgstr "The tab transition is aborted because no valid path is set in the person model field"
+
+msgid "衣装モデル欄に有効なパスが設定されていない為、タブ遷移を中断します。"
+msgstr "The tab transition is aborted because no valid path is set in the Costume Model column"
+
+msgid "調整:下半身"
+msgstr "Adjustment: lower body"
+
+msgid "調整:上半身"
+msgstr "Adjustment: upper body"
+
+msgid "調整:上半身2"
+msgstr "Adjustment: upper body 2"
+
+msgid "調整:首"
+msgstr "Adjustment: neck"
+
+msgid "調整:頭"
+msgstr "Adjustment: head"
+
+msgid "調整:頭部装飾"
+msgstr "Adjustment: head decoration"
+
+msgid "調整:肩"
+msgstr "Adjustment: shoulder"
+
+msgid "調整:腕"
+msgstr "Adjustment: arms"
+
+msgid "調整:ひじ"
+msgstr "Adjustment: elbow"
+
+msgid "調整:手のひら"
+msgstr "Adjustment: palm"
+
+msgid "調整:足"
+msgstr "Adjustment: feet"
+
+msgid "調整:ひざ"
+msgstr "Adjustment: knee"
+
+msgid "調整:足の甲"
+msgstr "Adjustment: instep"
+
+msgid "フィッティング用ウェイト別頂点取得（衣装:頭部装飾）"
+msgstr "Acquisition of vertices by weight for fitting (costume: head decoration)"
+
+msgid "衣装モデル追加セットアップ：個別調整ボーンモーフ追加"
+msgstr "Additional costume model set-up: additional individually adjusted bone morphs"
+
+msgid "-- 個別調整ボーンモーフ [{b}]"
+msgstr "-- Individually adjusted bone morph [{b}]"
+
+msgid "衣装:ボーン別調整"
+msgstr "Costume: Adjustment by Bone"
+
+msgid "ボーンプルダウンの選択肢を上方向に移動できます。"
+msgstr "You can move the choices in the bone pulldown upward"
+
+msgid "スライダーで調整対象となる衣装のボーンです。\n左右は一括で調整できます。"
+msgstr "These are the bones of the costume to be adjusted with the slider. \You can adjust the ᥉n left and right in one batch"
+
+msgid "ボーンプルダウンの選択肢を下方向に移動できます。"
+msgstr "You can move the choices in the bone pulldown downwards"
+
+msgid "-- 個別調整ボーンモーフ [{m}]"
+msgstr "-- individually adjusted bone morph [{m}]"
+
+msgid "縮尺X"
+msgstr "Scale X"
+
+msgid "縮尺Y"
+msgstr "Scale Y"
+
+msgid "縮尺Z"
+msgstr "Scale Z"
+
+msgid "回転X"
+msgstr "Rotating X"
+
+msgid "回転Y"
+msgstr "Rotation Y"
+
+msgid "回転Z"
+msgstr "Rotating Z"
+
+msgid "移動X"
+msgstr "Move X"
+
+msgid "移動Y"
+msgstr "Move Y"
+
+msgid "移動Z"
+msgstr "Move Z"
+
+msgid "ボーン調整値をすべて初期化します"
+msgstr "Initialize all bone adjustment values"
+
+msgid "チェックをONにすると、縮尺XとZを同時に操作することができます"
+msgstr "Check ON to operate scale X and Z at the same time"
+
+msgid "お着替えモデル出力"
+msgstr "Output of model for change of clothes"
+
+msgid "お着替えモデル出力中"
+msgstr "Model is being output for change of clothes"
+
+msgid "フィッティングさせた衣装と人物を合成して、PMXデータを出力します。\nフィッティング結果を設定タブで確認した後にクリックできるようになります。"
+msgstr "Composite the fitted costume and person and output PMX data. \You can click on it after checking the Јn fitting results in the settings tab"
+
+msgid "ボーン出力"
+msgstr "Bone Output"
+
+msgid "-- ボーン出力: {s}"
+msgstr "-- Bourne output: {s}"
+
+msgid "ボーン定義再設定"
+msgstr "Bone definition reconfiguration"
+
+msgid "-- ボーン定義再設定: {s}"
+msgstr "-- Bone definition re-set: {s}"
+
+msgid "材質出力"
+msgstr "Material output"
+
+msgid "-- 材質出力: {s}"
+msgstr "-- Material output: {s}"
+
+msgid "お着替えモデル読み込み開始"
+msgstr "Start loading change of clothes model"
+
+msgid "お着替えモデル読み込み完了"
+msgstr "Model loading complete"
+
+msgid "お着替えモデル出力開始"
+msgstr "Start output of changeable models"
+
+msgid "人物モデル読み込み開始"
+msgstr "Start loading person model"
+
+msgid "衣装モデル読み込み開始"
+msgstr "Start loading costume model"
+
+msgid "描画準備開始"
+msgstr "Prepare to draw"
+
+msgid "*** お着替えモデル出力成功 ***\n出力先: {f}"
+msgstr "*** Success in outputting changeover model ***\noutput: {f}"
+
+msgid "-- -- スケールオフセット [{b}][{s:.3f}]"
+msgstr "-- -- Scale offset [{b}][{s:.3f}]"
+
+msgid "-- -- スケールオフセット [{b}][{s:.3f}({o:.3f})]"
+msgstr "-- -- Scale offset [{b}][{s:.3f}({o:.3f})]"
+
+msgid "チェックをONにすると、縮尺YとZを同時に操作することができます"
+msgstr "Check ON to operate scale Y and Z at the same time"
+
+msgid "選択されたボーンのローカルX軸（ボーンの向き）方向の縮尺を調整できます"
+msgstr "Allows you to adjust the scale in the local X-axis (bone orientation) direction of the selected bone"
+
+msgid "選択されたボーンのローカルY軸（ボーンの縦方向の太さ）方向の縮尺を調整できます"
+msgstr "Allows you to adjust the scale of the selected bone in the direction of the local Y-axis (vertical thickness of the bone)"
+
+msgid "選択されたボーンのローカルZ軸（ボーンの奥行き方向の太さ）方向の縮尺を調整できます"
+msgstr "Allows you to adjust the scale of the selected bone in the direction of the local Z-axis (the thickness of the bone in the depth direction)"
+
+msgid "選択されたボーンのローカルX軸（ボーンの向き）方向の回転を調整できます"
+msgstr "Allows you to adjust the rotation of the selected bone in the local X-axis (bone orientation) direction"
+
+msgid "選択されたボーンのローカルY軸（ボーンの向きに直交する上向き）方向の回転を調整できます"
+msgstr "Allows you to adjust the rotation of the selected bone in the local Y-axis (upward, perpendicular to the orientation of the bone) direction"
+
+msgid "選択されたボーンのローカルZ軸（ボーンの向きに直交する奥向き）方向の回転を調整できます"
+msgstr "Allows you to adjust the rotation of the selected bone in the local Z-axis (backward direction perpendicular to the orientation of the bone) direction"
+
+msgid "選択されたボーンのローカルX軸（ボーンの向き）方向の移動を調整できます"
+msgstr "Allows you to adjust the movement of the selected bone in the local X-axis (bone orientation) direction"
+
+msgid "選択されたボーンのローカルY軸（ボーンの向きに直交する上向き）方向の移動を調整できます"
+msgstr "Allows you to adjust the movement of the selected bone in the local Y-axis (upward, perpendicular to the orientation of the bone) direction"
+
+msgid "選択されたボーンのローカルZ軸（ボーンの向きに直交する奥向き）方向の移動を調整できます"
+msgstr "Allows you to adjust the movement of the selected bone in the local Z-axis (backward direction perpendicular to the orientation of the bone) direction"
+
+msgid "衣装モデル首位置調整"
+msgstr "Costume model neck position adjustment"
+
+msgid "衣装モデル肩位置調整"
+msgstr "Adjustment of costume model shoulder position"
+
+msgid "体幹"
+msgstr "The trunk of the body"
+
+msgid "胸"
+msgstr "Breasts"
+
+msgid "お着替えモデル出力停止"
+msgstr "Stop output of changeable models"
+
+msgid "再フィット"
+msgstr "Refit"
+
+msgid "人物と衣装の選択されたボーンの位置が合う様に再度フィッティングします"
+msgstr "Re-fit the figure and the costume so that the selected bones are aligned"
+
+msgid "材質非透過度"
+msgstr "Material Impermeability"
+
+msgid "人物の材質プルダウンから選択した材質の非透過度を下のスライダーで調整できます。"
+msgstr "You can adjust the non-transparency of the material selected from the Person Material pull-down with the slider below"
+
+msgid "スライダーで調整対象となる人物の材質です。\n「ボーンライン」はボーンを表す線を示します。\n非透過度が1でない状態でエクスポートすると、お着替え結果には出力されません\n(ボーンラインは常に出力されません)"
+msgstr "Material of the person to be adjusted with the slider. \ዄn "Bone line" indicates the line that represents the bone. \If you export with the ɑn non-transparency not 1, it will not be output in the result of your dressing.ɑn(Bone lines are always not output)"
+
+msgid "衣装の材質プルダウンから選択した材質の非透過度を下のスライダーで調整できます。"
+msgstr "You can adjust the non-transparency of the material selected from the Costume Material pull-down with the slider below"
+
+msgid "スライダーで調整対象となる衣装の材質です。\n「ボーンライン」はボーンを表す線を示します。\n非透過度が1でない状態でエクスポートすると、お着替え結果には出力されません\n(ボーンラインは常に出力されません)"
+msgstr "Material of the costume to be adjusted with the slider. \ዄn "Bone line" indicates the line that represents the bone. \If you export with the ɑn non-transparency not 1, it will not be output in the result of the outfit.ɑn(Bone lines are always not output)"
+
+msgid "足首"
+msgstr "Ankle"
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}"
+msgstr "{b}: scale{s}, rotation{r}, translation{p}"
+
+msgid "つま先"
+msgstr "Toes"
+
+msgid "選択されたボーンのグローバルX軸方向の移動を調整できます"
+msgstr "Allows you to adjust the global X-axis shift of selected bones"
+
+msgid "選択されたボーンのグローバルY軸方向の移動を調整できます"
+msgstr "Allows you to adjust the global Y-axis shift of selected bones"
+
+msgid "選択されたボーンのグローバルZ軸方向の移動を調整できます"
+msgstr "Allows you to adjust the global Z-axis shift of selected bones"
+
+msgid "人物の材質の非透過度を0.5に設定します"
+msgstr "Set the non-transparency of the person material to 0.5"
+
+msgid "衣装の材質の非透過度を0.5に設定します"
+msgstr "Set the non-transparency of the costume material to 0.5"
+
+msgid "出力準備"
+msgstr "Prepare for output"
+
+msgid "人物材質選り分け"
+msgstr "Person material selection"
+
+msgid "衣装材質選り分け"
+msgstr "Costume Material Selection"
+
+msgid "モーフ出力"
+msgstr "Morph output"
+
+msgid "-- モーフ出力: {s}"
+msgstr "-- morph output: {s}"
+
+msgid "剛体出力"
+msgstr "Rigid output"
+
+msgid "-- 剛体出力: {s}"
+msgstr "-- Rigid output: {s}"
+
+msgid "ジョイント出力"
+msgstr "Joint output"
+
+msgid "-- ジョイント出力: {s}"
+msgstr "-- Joint output: {s}"

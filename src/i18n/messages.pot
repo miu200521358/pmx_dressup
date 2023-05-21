@@ -634,16 +634,6 @@ msgid "衣装モデル肩位置調整"
 msgstr ""
 
 
-msgid "人物モデル
-\n"
-msgstr ""
-
-
-msgid "衣装モデル
-\n"
-msgstr ""
-
-
 msgid "体幹"
 msgstr ""
 
@@ -685,16 +675,6 @@ msgstr ""
 
 
 msgid "足首"
-msgstr ""
-
-
-msgid "人物モデル
-\n"
-msgstr ""
-
-
-msgid "衣装モデル
-\n"
 msgstr ""
 
 
