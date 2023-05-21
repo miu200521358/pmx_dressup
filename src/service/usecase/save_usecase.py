@@ -4,10 +4,14 @@ import shutil
 import numpy as np
 
 from mlib.base.logger import MLogger
-from mlib.base.math import MVector3D, MMatrix4x4
+from mlib.base.math import MMatrix4x4, MVector3D
 from mlib.pmx.pmx_collection import PmxModel
 from mlib.pmx.pmx_part import (
+    STANDARD_BONE_NAMES,
     Bone,
+    DisplaySlot,
+    DisplaySlotReference,
+    DisplayType,
     Face,
     Material,
     SphereMode,
@@ -18,8 +22,6 @@ from mlib.pmx.pmx_part import (
 from mlib.pmx.pmx_writer import PmxWriter
 from mlib.vmd.vmd_collection import VmdMotion
 from mlib.vmd.vmd_part import VmdMorphFrame
-from mlib.pmx.pmx_part import DisplaySlotReference
-from mlib.pmx.pmx_part import DisplaySlot, DisplayType
 
 logger = MLogger(os.path.basename(__file__), level=1)
 __ = logger.get_text
@@ -75,8 +77,32 @@ class SaveUsecase:
                 motion.morphs[mf.name].append(mf)
             dress_model.comment += __("  {b}: 縮尺{s}, 回転{r}, 移動{p}", b=bone_type_name, s=scale, r=degree, p=position) + "\r\n"
 
+        logger.info("出力準備", decoration=MLogger.Decoration.LINE)
+
         # 変形結果
         dress_matrixes = motion.animate_bone(0, dress)
+
+        logger.info("人物材質選り分け")
+        model_vertices = model.get_vertices_by_bone()
+        active_model_vertices = set(
+            [
+                vertex_index
+                for material_index, vertices in model.get_vertices_by_material().items()
+                if 1 == model_material_alphas[model.materials[material_index].name]
+                for vertex_index in vertices
+            ]
+        )
+
+        logger.info("衣装材質選り分け")
+        dress_vertices = dress.get_vertices_by_bone()
+        active_dress_vertices = set(
+            [
+                vertex_index
+                for material_index, vertices in dress.get_vertices_by_material().items()
+                if 1 == dress_material_alphas[dress.materials[material_index].name]
+                for vertex_index in vertices
+            ]
+        )
 
         # ---------------------------------
 
@@ -104,6 +130,9 @@ class SaveUsecase:
 
         for bone in model.bones.writable():
             if bone.name in dress_model.bones:
+                continue
+            if bone.name not in STANDARD_BONE_NAMES and bone.index in model_vertices and not set(model_vertices[bone.index]) & active_model_vertices:
+                # 準標準ではなく、元々ウェイトを持っていて、かつ出力先にウェイトが乗ってる頂点が無い場合、スルー
                 continue
 
             for dress_bone in dress.bones.writable():
@@ -169,6 +198,10 @@ class SaveUsecase:
                 # 既に登録済みのボーンは追加しない
                 dress_bone_map[bone.index] = dress_model.bones[bone.name].index
                 continue
+            if bone.name not in STANDARD_BONE_NAMES and bone.index in dress_vertices and not set(dress_vertices[bone.index]) & active_dress_vertices:
+                # 準標準ではなく、元々ウェイトを持っていて、かつ出力先にウェイトが乗ってる頂点が無い場合、スルー
+                continue
+
             dress_copy_bone: Bone = bone.copy()
             dress_copy_bone.index = len(dress_model.bones.writable())
             # 変形後の位置にボーンを配置する

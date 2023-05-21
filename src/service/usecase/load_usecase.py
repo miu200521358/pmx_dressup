@@ -634,6 +634,9 @@ class LoadUsecase:
             dress_motion.bones.clear()
             dress_matrixes = dress_motion.bones.get_matrix_by_indexes([0], [dress_bone.name], dress, append_ik=False)
 
+            if not dress_matrixes.data:
+                continue
+
             if dress_bone.is_ik:
                 # IK系はFKの位置に合わせる
                 fk_dress_bone = dress.bones[dress_bone.ik.bone_index]

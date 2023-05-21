@@ -725,3 +725,15 @@ msgstr ""
 msgid "衣装の材質の非透過度を0.5に設定します"
 msgstr ""
 
+
+msgid "出力準備"
+msgstr ""
+
+
+msgid "人物材質選り分け"
+msgstr ""
+
+
+msgid "衣装材質選り分け"
+msgstr ""
+

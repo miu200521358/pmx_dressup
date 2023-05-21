@@ -1,6 +1,5 @@
 import logging
 import os
-import re
 from typing import Optional
 
 import wx
@@ -10,6 +9,7 @@ from mlib.pmx.pmx_collection import PmxModel
 from mlib.pmx.pmx_writer import PmxWriter
 from mlib.service.base_worker import BaseWorker
 from mlib.service.form.base_panel import BasePanel
+from mlib.utils.file_utils import get_root_dir
 from mlib.vmd.vmd_collection import VmdMotion
 from service.form.panel.file_panel import FilePanel
 from service.usecase.load_usecase import LoadUsecase
@@ -128,7 +128,6 @@ class LoadWorker(BaseWorker):
 
     def output_log(self):
         file_panel: FilePanel = self.panel
-        output_log_path = re.sub(r"\.pmx$", "_load.log", file_panel.output_pmx_ctrl.path)
-
+        output_log_path = os.path.join(get_root_dir(), f"{os.path.basename(file_panel.output_pmx_ctrl.path)}.log")
         # 出力されたメッセージを全部出力
         file_panel.console_ctrl.text_ctrl.SaveFile(filename=output_log_path)
