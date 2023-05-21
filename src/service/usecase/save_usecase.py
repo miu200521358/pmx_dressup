@@ -19,6 +19,7 @@ from mlib.pmx.pmx_writer import PmxWriter
 from mlib.vmd.vmd_collection import VmdMotion
 from mlib.vmd.vmd_part import VmdMorphFrame
 from mlib.pmx.pmx_part import DisplaySlotReference
+from mlib.pmx.pmx_part import DisplaySlot, DisplayType
 
 logger = MLogger(os.path.basename(__file__), level=1)
 __ = logger.get_text
@@ -108,36 +109,57 @@ class SaveUsecase:
             for dress_bone in dress.bones.writable():
                 if 0 <= dress_bone.tail_index and dress_bone.name not in model.bones and dress.bones[dress_bone.tail_index].name == bone.name:
                     # 衣装だけのボーンが表示先が人物のボーンに繋がってる場合、その前に追加しておく
-                    copy_bone = dress_bone.copy()
-                    copy_bone.index = len(dress_model.bones.writable())
-                    bone_map[copy_bone.index] = {
+                    dress_prev_copy_bone: Bone = dress_bone.copy()
+                    dress_prev_copy_bone.index = len(dress_model.bones.writable())
+                    bone_map[dress_prev_copy_bone.index] = {
                         "parent": [dress.bones[dress_bone.parent_index].name],
                         "tail": [dress.bones[dress_bone.tail_index].name],
                         "effect": [dress.bones[dress_bone.effect_index].name],
                         "ik_target": [dress.bones[dress_bone.ik.bone_index].name if dress_bone.ik else Bone.SYSTEM_ROOT_NAME],
                         "ik_link": [dress.bones[link.bone_index].name for link in dress_bone.ik.links] if dress_bone.ik else [],
                     }
-                    dress_model.bones.append(copy_bone, is_sort=False)
-                    dress_bone_map[bone.index] = copy_bone.index
+                    dress_model.bones.append(dress_prev_copy_bone, is_sort=False)
+                    dress_bone_map[dress_bone.index] = dress_prev_copy_bone.index
+
+                    # 表示枠
+                    for display_slot in dress.display_slots:
+                        for reference in display_slot.references:
+                            if reference.display_type == DisplayType.BONE and reference.display_index == bone.index:
+                                if display_slot.name not in dress_model.display_slots:
+                                    dress_model.display_slots.append(DisplaySlot(name=display_slot.name, english_name=display_slot.english_name))
+                                dress_model.display_slots[display_slot.name].references.append(
+                                    DisplaySlotReference(display_type=DisplayType.BONE, display_index=dress_prev_copy_bone.index)
+                                )
+                                break
 
                     if not len(dress_model.bones) % 100:
                         logger.info("-- ボーン出力: {s}", s=len(dress_model.bones))
 
-            copy_bone = bone.copy()
-            copy_bone.index = len(dress_model.bones.writable())
-            bone_map[copy_bone.index] = {
+            model_copy_bone: Bone = bone.copy()
+            model_copy_bone.index = len(dress_model.bones.writable())
+            bone_map[model_copy_bone.index] = {
                 "parent": [model.bones[bone.parent_index].name],
                 "tail": [model.bones[bone.tail_index].name],
                 "effect": [model.bones[bone.effect_index].name],
                 "ik_target": [model.bones[bone.ik.bone_index].name if bone.ik else Bone.SYSTEM_ROOT_NAME],
                 "ik_link": [model.bones[link.bone_index].name for link in bone.ik.links] if bone.ik else [],
             }
-            dress_model.bones.append(copy_bone, is_sort=False)
-            model_bone_map[bone.index] = copy_bone.index
+            dress_model.bones.append(model_copy_bone, is_sort=False)
+            model_bone_map[bone.index] = model_copy_bone.index
 
             # 表示枠
-            if 0 == copy_bone.index:
-                dress_model.display_slots["Root"].references.append(DisplaySlotReference(display_index=copy_bone.index))
+            if 0 == model_copy_bone.index:
+                dress_model.display_slots["Root"].references.append(DisplaySlotReference(display_index=model_copy_bone.index))
+            else:
+                for display_slot in model.display_slots:
+                    for reference in display_slot.references:
+                        if reference.display_type == DisplayType.BONE and reference.display_index == bone.index:
+                            if display_slot.name not in dress_model.display_slots:
+                                dress_model.display_slots.append(DisplaySlot(name=display_slot.name, english_name=display_slot.english_name))
+                            dress_model.display_slots[display_slot.name].references.append(
+                                DisplaySlotReference(display_type=DisplayType.BONE, display_index=model_copy_bone.index)
+                            )
+                            break
 
             if not len(dress_model.bones) % 100:
                 logger.info("-- ボーン出力: {s}", s=len(dress_model.bones))
@@ -147,19 +169,30 @@ class SaveUsecase:
                 # 既に登録済みのボーンは追加しない
                 dress_bone_map[bone.index] = dress_model.bones[bone.name].index
                 continue
-            copy_bone = bone.copy()
-            copy_bone.index = len(dress_model.bones.writable())
+            dress_copy_bone: Bone = bone.copy()
+            dress_copy_bone.index = len(dress_model.bones.writable())
             # 変形後の位置にボーンを配置する
-            copy_bone.position = dress_matrixes[0, bone.name].matrix * copy_bone.position
-            bone_map[copy_bone.index] = {
+            dress_copy_bone.position = dress_matrixes[0, bone.name].matrix * dress_copy_bone.position
+            bone_map[dress_copy_bone.index] = {
                 "parent": [dress.bones[bone.parent_index].name],
                 "tail": [dress.bones[bone.tail_index].name],
                 "effect": [dress.bones[bone.effect_index].name],
                 "ik_target": [dress.bones[bone.ik.bone_index].name if bone.ik else Bone.SYSTEM_ROOT_NAME],
                 "ik_link": [dress.bones[link.bone_index].name for link in bone.ik.links] if bone.ik else [],
             }
-            dress_model.bones.append(copy_bone, is_sort=False)
-            dress_bone_map[bone.index] = copy_bone.index
+            dress_model.bones.append(dress_copy_bone, is_sort=False)
+            dress_bone_map[bone.index] = dress_copy_bone.index
+
+            # 表示枠
+            for display_slot in dress.display_slots:
+                for reference in display_slot.references:
+                    if reference.display_type == DisplayType.BONE and reference.display_index == bone.index:
+                        if display_slot.name not in dress_model.display_slots:
+                            dress_model.display_slots.append(DisplaySlot(name=display_slot.name, english_name=display_slot.english_name))
+                        dress_model.display_slots[display_slot.name].references.append(
+                            DisplaySlotReference(display_type=DisplayType.BONE, display_index=dress_copy_bone.index)
+                        )
+                        break
 
             if not len(dress_model.bones) % 100:
                 logger.info("-- ボーン出力: {s}", s=len(dress_model.bones))
