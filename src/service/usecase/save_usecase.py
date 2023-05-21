@@ -22,6 +22,8 @@ from mlib.pmx.pmx_part import (
 from mlib.pmx.pmx_writer import PmxWriter
 from mlib.vmd.vmd_collection import VmdMotion
 from mlib.vmd.vmd_part import VmdMorphFrame
+from mlib.pmx.pmx_part import BoneMorphOffset, GroupMorphOffset, MaterialMorphOffset, MorphType, UvMorphOffset
+from mlib.pmx.pmx_part import Morph, VertexMorphOffset
 
 logger = MLogger(os.path.basename(__file__), level=1)
 __ = logger.get_text
@@ -49,6 +51,7 @@ class SaveUsecase:
         motion.morphs[bmf.name].append(bmf)
 
         dress_model = PmxModel(output_path)
+        dress_model = model.name + "(" + dress.name + ")"
         dress_model.comment = (
             __("人物モデル")
             + "\r\n"
@@ -247,6 +250,7 @@ class SaveUsecase:
 
         # ---------------------------------
 
+        # キー: 元々のINDEX、値: コピー先INDEX
         model_vertex_map: dict[int, int] = {-1: -1}
         dress_vertex_map: dict[int, int] = {-1: -1}
 
@@ -349,6 +353,63 @@ class SaveUsecase:
             if not len(dress_model.materials) % 10:
                 logger.info("-- 材質出力: {s}", s=len(dress_model.materials))
 
+        # ---------------------------------
+
+        logger.info("モーフ出力", decoration=MLogger.Decoration.LINE)
+
+        # キー: 元々のINDEX、値: コピー先INDEX
+        model_morph_map: dict[int, int] = {-1: -1}
+        dress_morph_map: dict[int, int] = {-1: -1}
+
+        for morph in model.morphs:
+            if morph.is_system:
+                continue
+
+            copy_morph, model_vertex_map = self.copy_morph(morph, model_bone_map, model_vertex_map, model_material_map, model_morph_map)
+
+            if copy_morph.offsets:
+                copy_morph.index = len(dress_model.morphs)
+                model_morph_map[morph.index] = len(dress_model.morphs)
+                dress_model.morphs.append(copy_morph)
+
+                for display_slot in model.display_slots:
+                    for reference in display_slot.references:
+                        if reference.display_type == DisplayType.MORPH and reference.display_index == morph.index:
+                            if display_slot.name not in dress_model.display_slots:
+                                dress_model.display_slots.append(DisplaySlot(name=display_slot.name, english_name=display_slot.english_name))
+                            dress_model.display_slots[display_slot.name].references.append(
+                                DisplaySlotReference(display_type=DisplayType.MORPH, display_index=copy_morph.index)
+                            )
+                            break
+
+            if not len(dress_model.morphs) % 50:
+                logger.info("-- モーフ出力: {s}", s=len(dress_model.morphs))
+
+        for morph in dress.morphs:
+            if morph.is_system:
+                continue
+
+            copy_morph, dress_vertex_map = self.copy_morph(morph, dress_bone_map, dress_vertex_map, dress_material_map, dress_morph_map)
+            copy_morph.name = f"Cos:{copy_morph.name}"
+
+            if copy_morph.offsets:
+                copy_morph.index = len(dress_model.morphs)
+                dress_morph_map[morph.index] = len(dress_model.morphs)
+                dress_model.morphs.append(copy_morph)
+
+                for display_slot in dress.display_slots:
+                    for reference in display_slot.references:
+                        if reference.display_type == DisplayType.MORPH and reference.display_index == morph.index:
+                            if display_slot.name not in dress_model.display_slots:
+                                dress_model.display_slots.append(DisplaySlot(name=display_slot.name, english_name=display_slot.english_name))
+                            dress_model.display_slots[display_slot.name].references.append(
+                                DisplaySlotReference(display_type=DisplayType.MORPH, display_index=copy_morph.index)
+                            )
+                            break
+
+            if not len(dress_model.morphs) % 50:
+                logger.info("-- モーフ出力: {s}", s=len(dress_model.morphs))
+
         PmxWriter(dress_model, output_path).save()
 
     def copy_texture(self, dest_model: PmxModel, texture: Texture, src_model_path: str) -> Texture:
@@ -363,3 +424,102 @@ class SaveUsecase:
         dest_model.textures.append(copy_texture, is_sort=False)
 
         return copy_texture
+
+    def copy_morph(
+        self,
+        morph: Morph,
+        model_bone_map: dict[int, int],
+        model_vertex_map: dict[int, int],
+        model_material_map: dict[int, int],
+        model_morph_map: dict[int, int],
+    ):
+        copy_morph = Morph(name=morph.name, english_name=morph.english_name)
+        if morph.morph_type == MorphType.VERTEX:
+            copy_morph.panel = morph.panel
+            copy_morph.morph_type = MorphType.VERTEX
+            for offset in morph.offsets:
+                vertex_offset: VertexMorphOffset = offset
+                if vertex_offset.vertex_index in model_vertex_map:
+                    copy_morph.offsets.append(VertexMorphOffset(model_vertex_map[vertex_offset.vertex_index], vertex_offset.position_offset.copy()))
+        elif morph.morph_type == MorphType.UV:
+            copy_morph.panel = morph.panel
+            copy_morph.morph_type = MorphType.UV
+            for offset in morph.offsets:
+                uv_offset: UvMorphOffset = offset
+                if uv_offset.vertex_index in model_vertex_map:
+                    copy_morph.offsets.append(UvMorphOffset(model_vertex_map[uv_offset.vertex_index], uv_offset.uv.copy()))
+        elif morph.morph_type == MorphType.EXTENDED_UV1:
+            copy_morph.panel = morph.panel
+            copy_morph.morph_type = MorphType.EXTENDED_UV1
+            for offset in morph.offsets:
+                extend_uv1_offset: UvMorphOffset = offset
+                if extend_uv1_offset.vertex_index in model_vertex_map:
+                    copy_morph.offsets.append(UvMorphOffset(model_vertex_map[extend_uv1_offset.vertex_index], extend_uv1_offset.uv.copy()))
+        elif morph.morph_type == MorphType.EXTENDED_UV2:
+            copy_morph.panel = morph.panel
+            copy_morph.morph_type = MorphType.EXTENDED_UV2
+            for offset in morph.offsets:
+                extend_uv2_offset: UvMorphOffset = offset
+                if extend_uv2_offset.vertex_index in model_vertex_map:
+                    copy_morph.offsets.append(UvMorphOffset(model_vertex_map[extend_uv2_offset.vertex_index], extend_uv2_offset.uv.copy()))
+        elif morph.morph_type == MorphType.EXTENDED_UV3:
+            copy_morph.panel = morph.panel
+            copy_morph.morph_type = MorphType.EXTENDED_UV3
+            for offset in morph.offsets:
+                extend_uv3_offset: UvMorphOffset = offset
+                if extend_uv3_offset.vertex_index in model_vertex_map:
+                    copy_morph.offsets.append(UvMorphOffset(model_vertex_map[extend_uv3_offset.vertex_index], extend_uv3_offset.uv.copy()))
+        elif morph.morph_type == MorphType.EXTENDED_UV4:
+            copy_morph.panel = morph.panel
+            copy_morph.morph_type = MorphType.EXTENDED_UV4
+            for offset in morph.offsets:
+                extend_uv4_offset: UvMorphOffset = offset
+                if extend_uv4_offset.vertex_index in model_vertex_map:
+                    copy_morph.offsets.append(UvMorphOffset(model_vertex_map[extend_uv4_offset.vertex_index], extend_uv4_offset.uv.copy()))
+        elif morph.morph_type == MorphType.MATERIAL:
+            copy_morph.panel = morph.panel
+            copy_morph.morph_type = MorphType.MATERIAL
+            for offset in morph.offsets:
+                material_offset: MaterialMorphOffset = offset
+                if material_offset.material_index in model_vertex_map:
+                    copy_morph.offsets.append(
+                        MaterialMorphOffset(
+                            model_material_map[material_offset.material_index],
+                            material_offset.calc_mode,
+                            material_offset.diffuse.copy(),
+                            material_offset.specular.copy(),
+                            material_offset.specular_factor,
+                            material_offset.ambient.copy(),
+                            material_offset.edge_color.copy(),
+                            material_offset.edge_size,
+                            material_offset.texture_factor.copy(),
+                            material_offset.sphere_texture_factor.copy(),
+                            material_offset.toon_texture_factor.copy(),
+                        )
+                    )
+        elif morph.morph_type == MorphType.BONE:
+            copy_morph.panel = morph.panel
+            copy_morph.morph_type = MorphType.BONE
+            for offset in morph.offsets:
+                bone_offset: BoneMorphOffset = offset
+                if bone_offset.bone_index in model_bone_map:
+                    copy_morph.offsets.append(
+                        BoneMorphOffset(
+                            model_bone_map[bone_offset.bone_index],
+                            bone_offset.position.copy(),
+                            bone_offset.rotation.qq.copy(),
+                            bone_offset.scale.copy(),
+                            bone_offset.local_position.copy(),
+                            bone_offset.local_rotation.qq.copy(),
+                            bone_offset.local_scale.copy(),
+                        )
+                    )
+        elif morph.morph_type == MorphType.GROUP:
+            copy_morph.panel = morph.panel
+            copy_morph.morph_type = MorphType.GROUP
+            for offset in morph.offsets:
+                group_offset: GroupMorphOffset = offset
+                if group_offset.morph_index in model_morph_map:
+                    copy_morph.offsets.append(GroupMorphOffset(model_morph_map[group_offset.morph_index], group_offset.morph_factor))
+
+        return copy_morph, model_vertex_map

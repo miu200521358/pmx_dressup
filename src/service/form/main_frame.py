@@ -86,6 +86,8 @@ class MainFrame(BaseFrame):
         self.file_panel.console_ctrl.write(f"\n----------------\n{elapsed_time}")
 
         if not (result and data):
+            self.file_panel.Enable(True)
+            self.file_panel.exec_btn_ctrl.Enable(False)
             self.on_sound()
             return
 
@@ -137,6 +139,8 @@ class MainFrame(BaseFrame):
         self.file_panel.console_ctrl.write(f"\n----------------\n{elapsed_time}")
 
         if not (result and data):
+            self.file_panel.Enable(True)
+            self.file_panel.exec_btn_ctrl.Enable(False)
             self.on_sound()
             return
 
@@ -177,6 +181,7 @@ class MainFrame(BaseFrame):
         self.save_worker.start()
 
     def on_save_result(self, result: bool, data: Optional[Any], elapsed_time: str):
+        self.file_panel.Enable(True)
         self.on_sound()
 
     def set_model_motion_morphs(self, material_alphas: dict[str, float] = {}):

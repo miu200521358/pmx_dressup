@@ -737,3 +737,11 @@ msgstr ""
 msgid "衣装材質選り分け"
 msgstr ""
 
+
+msgid "モーフ出力"
+msgstr ""
+
+
+msgid "-- モーフ出力: {s}"
+msgstr ""
+
