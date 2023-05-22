@@ -605,3 +605,6 @@ msgstr "Processing has been stopped"
 
 msgid "*** 処理を停止します ***"
 msgstr "*** Stop processing ***"
+
+msgid "人物モデル: {m} ({p})\n衣装モデル: {d} ({q})\n個別フィッティング:\n{f}"
+msgstr "Person model: {m} ({p})\nCostume model: {d} ({q})\nIndividual fitting:\n{f}"
