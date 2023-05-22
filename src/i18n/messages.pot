@@ -805,3 +805,35 @@ msgstr ""
 msgid "人物モデル: {m} ({p})\n衣装モデル: {d} ({q})\n個別フィッティング:\n{f}"
 msgstr ""
 
+
+msgid "モデル出力"
+msgstr ""
+
+
+msgid "人物:ルート調整"
+msgstr ""
+
+
+msgid "人物全体のグローバルY軸方向の移動を調整できます"
+msgstr ""
+
+
+msgid "接地"
+msgstr ""
+
+
+msgid "衣装の靴底が接地するように全体のY位置を調整します"
+msgstr ""
+
+
+msgid "モーション読み込み開始"
+msgstr ""
+
+
+msgid "再生"
+msgstr ""
+
+
+msgid "停止"
+msgstr ""
+

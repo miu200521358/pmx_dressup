@@ -608,3 +608,27 @@ msgstr "*** Stop processing ***"
 
 msgid "人物モデル: {m} ({p})\n衣装モデル: {d} ({q})\n個別フィッティング:\n{f}"
 msgstr "Person model: {m} ({p})\nCostume model: {d} ({q})\nIndividual fitting:\n{f}"
+
+msgid "モデル出力"
+msgstr "Model Output"
+
+msgid "人物:ルート調整"
+msgstr "Person: route coordination"
+
+msgid "人物全体のグローバルY軸方向の移動を調整できます"
+msgstr "You can adjust the global Y-axis shift of the entire person"
+
+msgid "接地"
+msgstr "Grounded"
+
+msgid "衣装の靴底が接地するように全体のY位置を調整します"
+msgstr "Adjust the overall Y position so that the soles of the costume are grounded"
+
+msgid "モーション読み込み開始"
+msgstr "Motion loading started"
+
+msgid "再生"
+msgstr "Play"
+
+msgid "停止"
+msgstr "Stop"

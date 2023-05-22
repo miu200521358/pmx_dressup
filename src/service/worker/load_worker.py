@@ -92,7 +92,7 @@ class LoadWorker(BaseWorker):
 
             # 衣装にフィッティングボーンモーフを入れる
             logger.info("衣装モデル追加セットアップ：フィッティングボーンモーフ追加", decoration=MLogger.Decoration.BOX)
-            dress = usecase.create_dress_fit_bone_morphs(model, dress)
+            model, dress = usecase.create_dress_fit_bone_morphs(model, dress)
 
             # 個別調整用モーフ追加
             logger.info("衣装モデル追加セットアップ：個別調整ボーンモーフ追加", decoration=MLogger.Decoration.BOX)
@@ -103,6 +103,9 @@ class LoadWorker(BaseWorker):
             dress = file_panel.dress_ctrl.original_data
         else:
             dress = PmxModel()
+
+        # ボーンINDEX別頂点INDEXリスト
+        dress_vertices = dress.get_vertices_by_bone()
 
         if file_panel.motion_ctrl.valid() and (not file_panel.motion_ctrl.data or is_model_change or is_dress_change):
             logger.info("モーション読み込み開始", decoration=MLogger.Decoration.BOX)
@@ -122,7 +125,7 @@ class LoadWorker(BaseWorker):
             PmxWriter(dress, out_path, include_system=True).save()
             logger.debug(f"変形モーフ付き衣装モデル出力: {out_path}")
 
-        self.result_data = (model, dress, motion)
+        self.result_data = (model, dress, motion, dress_vertices)
 
         logger.info("お着替えモデル読み込み完了", decoration=MLogger.Decoration.BOX)
 

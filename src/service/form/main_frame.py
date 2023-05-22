@@ -96,10 +96,13 @@ class MainFrame(BaseFrame):
 
         logger.info("描画準備開始", decoration=MLogger.Decoration.BOX)
 
-        data1, data2, data3 = data
+        data1, data2, data3, data4 = data
         model: PmxModel = data1
         dress: PmxModel = data2
         motion: VmdMotion = data3
+        dress_vertices: dict[int, list[int]] = data4
+        self.dress_vertices = dress_vertices
+
         self.file_panel.model_ctrl.set_data(model)
         self.file_panel.dress_ctrl.set_data(dress)
         self.file_panel.motion_ctrl.set_data(motion)
@@ -261,14 +264,30 @@ class MainFrame(BaseFrame):
         self.config_panel.canvas.model_sets[1].bone_alpha = bone_alpha
         self.config_panel.canvas.change_motion(wx.SpinEvent(), is_bone_deform, 1)
 
-    def refit(self, refit_bone_name: str):
-        # 再フィットしたモデルデータを設定する
-        self.file_panel.dress_ctrl.data = LoadUsecase().refit_dress_morphs(
-            self.file_panel.model_ctrl.data,
+    def fit_ground(self) -> bool:
+        """接地位置を求めてモーフに設定。接地位置を求められたか返す"""
+        if not self.model_motion or not self.dress_motion:
+            return False
+
+        dress_morph_motion = VmdMotion("dress morph motion")
+        dress_morph_motion.morphs = self.dress_motion.morphs
+
+        # 接地させる場合のYを取得する
+        root_ground_y = LoadUsecase().get_dress_ground(
             self.file_panel.dress_ctrl.data,
-            self.dress_motion,
-            refit_bone_name,
+            dress_morph_motion,
+            self.dress_vertices,
         )
+
+        mf = VmdMorphFrame(0, "Root:Adjust")
+        mf.ratio = root_ground_y
+        self.model_motion.morphs[mf.name].append(mf)
+
+        mf = VmdMorphFrame(0, "Root:Adjust")
+        mf.ratio = root_ground_y
+        self.dress_motion.morphs[mf.name].append(mf)
+
+        return True
 
     def clear_refit(self):
         dress: PmxModel = self.file_panel.dress_ctrl.data

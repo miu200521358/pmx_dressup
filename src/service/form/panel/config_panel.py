@@ -43,7 +43,7 @@ class ConfigPanel(CanvasPanel):
         self.frame_ctrl.SetToolTip(frame_tooltip)
         self.play_sizer.Add(self.frame_ctrl, 0, wx.ALL, 3)
 
-        self.play_ctrl = wx.Button(self, wx.ID_ANY, "Play", wx.DefaultPosition, wx.Size(80, -1))
+        self.play_ctrl = wx.Button(self, wx.ID_ANY, __("再生"), wx.DefaultPosition, wx.Size(80, -1))
         self.play_ctrl.SetToolTip(__("モーションを指定している場合、再生することができます"))
         self.play_sizer.Add(self.play_ctrl, 0, wx.ALL, 3)
 
@@ -57,7 +57,7 @@ class ConfigPanel(CanvasPanel):
             wx.ID_ANY,
             wx.DefaultPosition,
             wx.DefaultSize,
-            wx.FULL_REPAINT_ON_RESIZE | wx.VSCROLL | wx.ALWAYS_SHOW_SB,
+            wx.FULL_REPAINT_ON_RESIZE | wx.VSCROLL,
         )
         self.scrolled_window.SetScrollRate(5, 5)
 
@@ -71,16 +71,24 @@ class ConfigPanel(CanvasPanel):
         self.model_material_ctrl = MaterialCtrlSet(self, self.scrolled_window, self.material_sizer, "人物")
         self.dress_material_ctrl = MaterialCtrlSet(self, self.scrolled_window, self.material_sizer, "衣装")
 
+        self.material_sizer.SetMinSize((self.scrolled_window.GetSize()[0], -1))
+        self.material_sizer.Fit(self.scrolled_window)
+        self.material_sizer.SetSizeHints(self.scrolled_window)
+
         self.window_sizer.Add(self.material_sizer, 0, wx.ALL, 3)
 
         # --------------
         # ボーン調整
 
-        self.bone_sizer = wx.StaticBoxSizer(wx.StaticBox(self.scrolled_window, wx.ID_ANY, __("衣装:ボーン別調整")), orient=wx.VERTICAL)
+        self.dress_bone_sizer = wx.StaticBoxSizer(wx.StaticBox(self.scrolled_window, wx.ID_ANY, __("衣装:ボーン別調整")), orient=wx.VERTICAL)
 
-        self.dress_bone_ctrl = BoneCtrlSet(self, self.scrolled_window, self.bone_sizer)
+        self.dress_bone_ctrl = BoneCtrlSet(self, self.scrolled_window, self.dress_bone_sizer)
 
-        self.window_sizer.Add(self.bone_sizer, 0, wx.ALL, 3)
+        self.window_sizer.Add(self.dress_bone_sizer, 1, wx.ALL, 3)
+
+        self.dress_bone_sizer.SetMinSize((self.scrolled_window.GetSize()[0], -1))
+        self.dress_bone_sizer.Fit(self.scrolled_window)
+        self.dress_bone_sizer.SetSizeHints(self.scrolled_window)
 
         # --------------
 
@@ -103,8 +111,11 @@ class ConfigPanel(CanvasPanel):
         # self.dress_material_choice_ctrl.Bind(wx.EVT_LISTBOX, self.on_change)
 
     def on_play(self, event: wx.Event):
+        if self.canvas.playing:
+            self.stop_play()
+        else:
+            self.start_play()
         self.canvas.on_play(event)
-        self.play_ctrl.SetLabelText("Stop" if self.canvas.playing else "Play")
 
     @property
     def fno(self):
@@ -121,6 +132,8 @@ class ConfigPanel(CanvasPanel):
     def start_play(self):
         self.play_ctrl.SetLabelText(__("停止"))
         self.Enable(False)
+        # 停止ボタンだけは有効
+        self.play_ctrl.Enable(True)
 
     def Enable(self, enable: bool):
         self.frame_ctrl.Enable(enable)
@@ -141,6 +154,9 @@ class ConfigPanel(CanvasPanel):
             self.frame.clear_refit()
         self.change_motion(True, target_bone_name)
 
+    def on_fit_ground(self) -> bool:
+        return self.frame.fit_ground()
+
     def change_motion(self, is_bone_deform: bool, target_bone_name: Optional[str] = None):
         self.frame.set_model_motion_morphs(self.model_material_ctrl.alphas)
         self.frame.fit_model_motion(self.model_material_ctrl.alphas.get(__("ボーンライン"), 0.5), is_bone_deform)
@@ -155,12 +171,3 @@ class ConfigPanel(CanvasPanel):
         if target_bone_name:
             self.frame.refit(target_bone_name)
         self.frame.fit_dress_motion(self.dress_material_ctrl.alphas.get(__("ボーンライン"), 0.5), is_bone_deform)
-
-    # def refit(self, refit_bone_name: str):
-    #     self.frame.set_dress_motion_morphs(
-    #         self.dress_material_ctrl.alphas,
-    #         self.dress_bone_ctrl.scales,
-    #         self.dress_bone_ctrl.degrees,
-    #         self.dress_bone_ctrl.positions,
-    #     )
-    #     self.frame.refit(refit_bone_name)

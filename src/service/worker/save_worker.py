@@ -44,6 +44,8 @@ class SaveWorker(BaseWorker):
         SaveUsecase().save(
             file_panel.model_ctrl.data,
             file_panel.dress_ctrl.data,
+            self.frame.model_motion,
+            self.frame.dress_motion,
             file_panel.output_pmx_ctrl.path,
             config_panel.model_material_ctrl.alphas,
             config_panel.dress_material_ctrl.alphas,
