@@ -4,6 +4,8 @@ cd /d %~dp0
 
 cls
 
+call translate.bat
+
 del dist\*.zip
 del dist\*.bat
 move /y dist\*.exe dist\past

@@ -182,27 +182,27 @@ class SaveUsecase:
                     dress_prev_copy_bone.index = len(dress_model.bones.writable())
                     bone_map[dress_prev_copy_bone.index] = {
                         "parent": [
-                            dress.bones[bone.parent_index].name
-                            if dress.bones[bone.parent_index].is_standard or dress.bones[bone.parent_index].is_system
-                            else f"Cos:{dress.bones[bone.parent_index].name}"
+                            dress.bones[dress_bone.parent_index].name
+                            if dress.bones[dress_bone.parent_index].is_standard or dress.bones[dress_bone.parent_index].is_system
+                            else f"Cos:{dress.bones[dress_bone.parent_index].name}"
                         ],
                         "tail": [
-                            dress.bones[bone.tail_index].name
-                            if dress.bones[bone.tail_index].is_standard or dress.bones[bone.tail_index].is_system
-                            else f"Cos:{dress.bones[bone.tail_index].name}"
+                            dress.bones[dress_bone.tail_index].name
+                            if dress.bones[dress_bone.tail_index].is_standard or dress.bones[dress_bone.tail_index].is_system
+                            else f"Cos:{dress.bones[dress_bone.tail_index].name}"
                         ],
                         "effect": [
-                            dress.bones[bone.effect_index].name
-                            if dress.bones[bone.effect_index].is_standard or dress.bones[bone.effect_index].is_system
-                            else f"Cos:{dress.bones[bone.effect_index].name}"
+                            dress.bones[dress_bone.effect_index].name
+                            if dress.bones[dress_bone.effect_index].is_standard or dress.bones[dress_bone.effect_index].is_system
+                            else f"Cos:{dress.bones[dress_bone.effect_index].name}"
                         ],
                         "ik_target": [
                             (
-                                dress.bones[bone.ik.bone_index].name
-                                if dress.bones[bone.ik.bone_index].is_standard or dress.bones[bone.ik.bone_index].is_system
-                                else f"Cos:{dress.bones[bone.ik.bone_index].name}"
+                                dress.bones[dress_bone.ik.bone_index].name
+                                if dress.bones[dress_bone.ik.bone_index].is_standard or dress.bones[dress_bone.ik.bone_index].is_system
+                                else f"Cos:{dress.bones[dress_bone.ik.bone_index].name}"
                             )
-                            if bone.ik
+                            if dress_bone.ik
                             else Bone.SYSTEM_ROOT_NAME
                         ],
                         "ik_link": [
@@ -211,9 +211,9 @@ class SaveUsecase:
                                 if dress.bones[link.bone_index].is_standard or dress.bones[link.bone_index].is_system
                                 else f"Cos:{dress.bones[link.bone_index].name}"
                             )
-                            for link in bone.ik.links
+                            for link in dress_bone.ik.links
                         ]
-                        if bone.ik
+                        if dress_bone.ik
                         else [],
                     }
 
@@ -223,7 +223,7 @@ class SaveUsecase:
                     # 表示枠
                     for display_slot in dress.display_slots:
                         for reference in display_slot.references:
-                            if reference.display_type == DisplayType.BONE and reference.display_index == bone.index:
+                            if reference.display_type == DisplayType.BONE and reference.display_index == dress_bone.index:
                                 if display_slot.name not in dress_model.display_slots:
                                     dress_model.display_slots.append(DisplaySlot(name=display_slot.name, english_name=display_slot.english_name))
                                 dress_model.display_slots[display_slot.name].references.append(
