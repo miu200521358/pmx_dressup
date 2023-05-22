@@ -1,5 +1,6 @@
 import os
 import shutil
+from typing import Optional
 
 import numpy as np
 
@@ -54,6 +55,8 @@ class SaveUsecase:
 
         dress_model = PmxModel(output_path)
         dress_model.model_name = model.name + "(" + dress.name + ")"
+        dress_model.english_name = model.english_name + "(" + dress.english_name + ")"
+        dress_model.extended_uv_count = max(model.extended_uv_count, dress.extended_uv_count)
         dress_model.comment = (
             __("人物モデル")
             + "\r\n"
@@ -64,7 +67,18 @@ class SaveUsecase:
             + dress.comment
             + "\r\n\r\n------------------\r\n\r\n"
         )
+        dress_model.english_name = (
+            __("人物モデル")
+            + "\r\n"
+            + model.english_comment
+            + "\r\n\r\n------------------\r\n\r\n"
+            + __("衣装モデル")
+            + "\r\n"
+            + dress.english_comment
+            + "\r\n\r\n------------------\r\n\r\n"
+        )
 
+        fitting_messages = []
         for bone_type_name, scale, degree, position in zip(dress_scales.keys(), dress_scales.values(), dress_degrees.values(), dress_positions.values()):
             for ratio, axis_name, origin in (
                 (scale.x, "SX", 1),
@@ -80,7 +94,18 @@ class SaveUsecase:
                 mf = VmdMorphFrame(0, f"{__('調整')}:{__(bone_type_name)}:{axis_name}")
                 mf.ratio = ratio - origin
                 motion.morphs[mf.name].append(mf)
-            dress_model.comment += __("  {b}: 縮尺{s}, 回転{r}, 移動{p}", b=bone_type_name, s=scale, r=degree, p=position) + "\r\n"
+            message = __("  {b}: 縮尺{s}, 回転{r}, 移動{p}", b=bone_type_name, s=scale, r=degree, p=position)
+            dress_model.comment += message + "\r\n"
+            fitting_messages.append(message)
+
+        logger.info(
+            "人物モデル: {m} ({p})\n衣装モデル: {d} ({q})\n個別フィッティング:\n{f}",
+            m=model.name,
+            p=os.path.basename(model.path),
+            d=dress.name,
+            q=os.path.basename(dress.path),
+            f="\n".join(fitting_messages),
+        )
 
         logger.info("出力準備", decoration=MLogger.Decoration.LINE)
 
@@ -354,21 +379,21 @@ class SaveUsecase:
             copy_material.index = len(dress_model.materials)
 
             if 0 <= material.texture_index:
-                copy_texture = self.copy_texture(dress_model, model.textures[material.texture_index], model.path)
-                copy_material.texture_index = copy_texture.index
+                copy_texture = self.copy_texture(dress_model, model.textures[material.texture_index], model.path, is_dress=False)
+                copy_material.texture_index = copy_texture.index if copy_texture else -1
 
             if material.toon_sharing_flg == ToonSharing.INDIVIDUAL and 0 <= material.toon_texture_index:
-                copy_texture = self.copy_texture(dress_model, model.textures[material.toon_texture_index], model.path)
-                copy_material.toon_texture_index = copy_texture.index
+                copy_texture = self.copy_texture(dress_model, model.textures[material.toon_texture_index], model.path, is_dress=False)
+                copy_material.toon_texture_index = copy_texture.index if copy_texture else -1
 
-            if material.sphere_mode != SphereMode.INVALID and 0 < material.sphere_texture_index:
-                copy_texture = self.copy_texture(dress_model, model.textures[material.sphere_texture_index], model.path)
-                copy_material.sphere_texture_index = copy_texture.index
+            if material.sphere_mode != SphereMode.INVALID and 0 <= material.sphere_texture_index:
+                copy_texture = self.copy_texture(dress_model, model.textures[material.sphere_texture_index], model.path, is_dress=False)
+                copy_material.sphere_texture_index = copy_texture.index if copy_texture else -1
 
             dress_model.materials.append(copy_material, is_sort=False)
             model_material_map[material.index] = copy_material.index
 
-            for face_index in range(prev_faces_count, prev_faces_count + copy_material.vertices_count // 3):
+            for face_index in range(prev_faces_count, prev_faces_count + material.vertices_count // 3):
                 faces = []
                 for vertex_index in model.faces[face_index].vertices:
                     if vertex_index not in model_vertex_map:
@@ -397,16 +422,16 @@ class SaveUsecase:
             copy_material.index = len(dress_model.materials)
 
             if 0 <= material.texture_index:
-                copy_texture = self.copy_texture(dress_model, dress.textures[material.texture_index], dress.path)
-                copy_material.texture_index = copy_texture.index
+                copy_texture = self.copy_texture(dress_model, dress.textures[material.texture_index], dress.path, is_dress=True)
+                copy_material.texture_index = copy_texture.index if copy_texture else -1
 
             if material.toon_sharing_flg == ToonSharing.INDIVIDUAL and 0 <= material.toon_texture_index:
-                copy_texture = self.copy_texture(dress_model, dress.textures[material.toon_texture_index], dress.path)
-                copy_material.toon_texture_index = copy_texture.index
+                copy_texture = self.copy_texture(dress_model, dress.textures[material.toon_texture_index], dress.path, is_dress=True)
+                copy_material.toon_texture_index = copy_texture.index if copy_texture else -1
 
             if material.sphere_mode != SphereMode.INVALID and 0 < material.sphere_texture_index:
-                copy_texture = self.copy_texture(dress_model, dress.textures[material.sphere_texture_index], dress.path)
-                copy_material.sphere_texture_index = copy_texture.index
+                copy_texture = self.copy_texture(dress_model, dress.textures[material.sphere_texture_index], dress.path, is_dress=True)
+                copy_material.sphere_texture_index = copy_texture.index if copy_texture else -1
 
             dress_model.materials.append(copy_material, is_sort=False)
             dress_material_map[material.index] = copy_material.index
@@ -610,14 +635,26 @@ class SaveUsecase:
 
         PmxWriter(dress_model, output_path).save()
 
-    def copy_texture(self, dest_model: PmxModel, texture: Texture, src_model_path: str) -> Texture:
+    def copy_texture(self, dest_model: PmxModel, texture: Texture, src_model_path: str, is_dress: bool) -> Optional[Texture]:
+        copy_texture_name = os.path.join("Costume", texture.name) if is_dress else texture.name
+
+        if copy_texture_name in dest_model.textures:
+            # 既に同じテクスチャが定義されている場合、そのINDEXを返す
+            return dest_model.textures[copy_texture_name]
+
         copy_texture: Texture = texture.copy()
         copy_texture.index = len(dest_model.textures)
         texture_path = os.path.abspath(os.path.join(os.path.dirname(src_model_path), copy_texture.name))
         if copy_texture.name and os.path.exists(texture_path) and os.path.isfile(texture_path):
-            new_texture_path = os.path.join(os.path.dirname(dest_model.path), copy_texture.name)
+            if is_dress:
+                copy_texture.name = copy_texture_name
+                new_texture_path = os.path.join(os.path.dirname(dest_model.path), copy_texture_name)
+            else:
+                new_texture_path = os.path.join(os.path.dirname(dest_model.path), texture.name)
             os.makedirs(os.path.dirname(new_texture_path), exist_ok=True)
             shutil.copyfile(texture_path, new_texture_path)
+        else:
+            return None
         copy_texture.index = len(dest_model.textures)
         dest_model.textures.append(copy_texture, is_sort=False)
 
