@@ -837,3 +837,11 @@ msgstr ""
 msgid "停止"
 msgstr ""
 
+
+msgid "-- 人物: 初期姿勢計算"
+msgstr ""
+
+
+msgid "-- 衣装: 初期姿勢計算"
+msgstr ""
+

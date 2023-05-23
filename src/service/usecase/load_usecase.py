@@ -40,7 +40,7 @@ class LoadUsecase:
         short_dress_bone_names = set(list(STANDARD_BONE_NAMES.keys())) - set({"右目", "左目", "両目"}) - set(dress.bones.names)
 
         # 両方の片方にしかないボーン名を抽出
-        mismatch_bone_names = short_model_bone_names ^ short_dress_bone_names | add_bone_names
+        mismatch_bone_names = (short_model_bone_names ^ short_dress_bone_names) | add_bone_names
 
         # ミスマッチボーンで追加する必要のあるボーン名を抽出(ログ用にソートする)
         short_mismatch_model_bone_names = sorted(list(mismatch_bone_names - set(model.bones.names)))
@@ -55,8 +55,10 @@ class LoadUsecase:
             b=", ".join(short_mismatch_dress_bone_names),
         )
 
+        logger.info("-- 人物: 初期姿勢計算")
+
         # 人物の初期姿勢を求める
-        model_matrixes = VmdMotion().bones.get_matrix_by_indexes([0], model.bones.tail_bone_names, model)
+        model_matrixes = VmdMotion().animate_bone(0, model)
 
         model_inserted_bone_names = []
         for bone_name in STANDARD_BONE_NAMES.keys():
@@ -70,8 +72,10 @@ class LoadUsecase:
             model.replace_standard_weights(model_inserted_bone_names)
             logger.info("-- 人物: 再セットアップ")
 
+        logger.info("-- 衣装: 初期姿勢計算")
+
         # 衣装の初期姿勢を求める
-        dress_matrixes = VmdMotion().bones.get_matrix_by_indexes([0], dress.bones.tail_bone_names, dress)
+        dress_matrixes = VmdMotion().animate_bone(0, dress)
 
         dress_inserted_bone_names = []
         for bone_name in STANDARD_BONE_NAMES.keys():
@@ -80,30 +84,11 @@ class LoadUsecase:
                     dress_inserted_bone_names.append(bone_name)
                     logger.info("-- -- 衣装: 準標準ボーン追加: {b}", b=bone_name)
 
-        # if "頭" in dress.bones:
-        #     # 頭ボーンがある場合、頭部装飾ボーンを追加する
-        #     head_accessory_bone = Bone(name="頭部装飾", index=dress.bones["頭"].index + 1)
-        #     head_accessory_bone.parent_index = dress.bones["頭"].index
-        #     head_accessory_bone.position = dress.bones["頭"].position
-        #     head_accessory_bone.bone_flg = BoneFlg.CAN_MANIPULATE | BoneFlg.CAN_ROTATE | BoneFlg.CAN_TRANSLATE | BoneFlg.IS_VISIBLE
-        #     dress.insert_bone(head_accessory_bone)
-        #     dress_inserted_bone_names.append("頭部装飾")
-        #     dress.setup_bone(dress.bones["頭"])
-        #     dress.setup_bone(head_accessory_bone)
+        if dress_inserted_bone_names:
+            dress.setup()
+            dress.replace_standard_weights(dress_inserted_bone_names)
 
-        # if dress_inserted_bone_names:
-        #     dress.setup()
-        #     dress.replace_standard_weights(dress_inserted_bone_names)
-        #     if "頭部装飾" in dress_inserted_bone_names:
-        #         logger.info("フィッティング用ウェイト別頂点取得（衣装:頭部装飾）")
-        #         dress_vertices_by_bones = dress.get_vertices_by_bone()
-        #         replaced_bone_map = dict([(b.index, b.index) for b in dress.bones])
-        #         replaced_bone_map[dress.bones["頭"].index] = dress.bones["頭部装飾"].index
-        #         for vidx in dress_vertices_by_bones.get("頭", []):
-        #             v = dress.vertices[vidx]
-        #             v.deform.indexes = np.vectorize(replaced_bone_map.get)(v.deform.indexes)
-
-        #     logger.info("-- 衣装: 再セットアップ")
+            logger.info("-- 衣装: 再セットアップ")
 
         return model, dress
 
@@ -414,6 +399,13 @@ class LoadUsecase:
                 morph = Morph(name=f"調整:{morph_name}:{axis_name}")
                 morph.is_system = True
                 morph.morph_type = MorphType.BONE
+
+                scale = MVector3D()
+                if morph_name in ("足首", "頭", "胸"):
+                    # 末端系はグローバルスケールで動かす
+                    scale = local_scale.copy()
+                    local_scale = MVector3D()
+
                 for bone_name in target_bone_names:
                     if bone_name in dress.bones:
                         if axis_name in ["MX", "RX", "RZ"]:
@@ -422,11 +414,6 @@ class LoadUsecase:
                         else:
                             offset_position = position
                             offset_qq = qq
-                        scale = MVector3D()
-                        if morph_name in ("足首", "頭", "胸"):
-                            # 末端系はグローバルスケールで動かす
-                            scale = local_scale.copy()
-                            local_scale = MVector3D()
                         morph.offsets.append(
                             BoneMorphOffset(
                                 dress.bones[bone_name].index,
@@ -575,13 +562,9 @@ class LoadUsecase:
             dress_min_scale = np.min(dress_extremities_fit_scales)
             dress_fit_scale = MVector3D(dress_min_scale, dress_min_scale, dress_min_scale)
 
-            for from_name, to_name in measure_bone_names:
-                if not (from_name in dress.bones and to_name in dress.bones and from_name in model.bones and to_name in model.bones):
-                    continue
-
             # 親をキャンセルしていく
             dress_offset_scale = dress_fit_scale.copy()
-            for parent_index in dress.bone_trees[to_name].indexes[:-1]:
+            for parent_index in dress.bone_trees[scale_bone_name].indexes[:-1]:
                 if parent_index in dress_offset_scales:
                     dress_offset_scale *= MVector3D(1, 1, 1) / dress_offset_scales[parent_index]
 
@@ -753,6 +736,33 @@ class LoadUsecase:
 
         return dress, dress_offset_positions, dress_offset_qqs, dress_offset_scales
 
+    def refit_dress_morphs(
+        self,
+        model: PmxModel,
+        dress: PmxModel,
+        dress_morph_motion: VmdMotion,
+        refit_bone_name: str,
+    ) -> PmxModel:
+        morph = dress.morphs[f"調整:{refit_bone_name}:Refit"]
+
+        # モデルの初期姿勢を求める
+        model_matrixes = VmdMotion().animate_bone(0, model)
+        # 衣装は変形を加味する
+        dress_matrixes = dress_morph_motion.animate_bone(0, dress)
+
+        for offset in morph.offsets:
+            bone_offset: BoneMorphOffset = offset
+            dress_bone = dress.bones[bone_offset.bone_index]
+            if dress_bone.is_ik:
+                # IK系はFKの位置に合わせる
+                fk_dress_bone = dress.bones[dress_bone.ik.bone_index]
+                if dress_matrixes.exists(0, fk_dress_bone.name):
+                    bone_offset.position2 = dress_matrixes[0, fk_dress_bone.name].position - dress_matrixes[0, dress_bone.name].position
+            else:
+                if model_matrixes.exists(0, dress_bone.name) and dress_matrixes.exists(0, dress_bone.name):
+                    bone_offset.position2 = model_matrixes[0, dress_bone.name].position - dress_matrixes[0, dress_bone.name].position
+        return dress
+
     def get_dress_ground(
         self,
         dress: PmxModel,
@@ -834,5 +844,5 @@ FIT_INDIVIDUAL_BONE_NAMES = [
     (__("手のひら"), ("右手首", "左手首"), []),
     (__("足"), ("右足", "左足", "右足D", "左足D"), ("右ひざ", "左ひざ", "右ひざD", "左ひざD")),
     (__("ひざ"), ("右ひざ", "左ひざ", "右ひざD", "左ひざD"), ("右足首", "左足首", "右足首D", "左足首D")),
-    (__("足首"), ("右足首", "左足首", "右足首D", "左足首D", "右つま先EX", "左つま先EX", "右つま先", "左つま先"), ("右足ＩＫ", "右つま先ＩＫ", "左足ＩＫ", "左つま先ＩＫ", "右足IK親", "左足IK親")),
+    (__("足首"), ("右足首", "左足首", "右足首D", "左足首D"), ("右足ＩＫ", "右つま先ＩＫ", "左足ＩＫ", "左つま先ＩＫ", "右足IK親", "左足IK親")),
 ]

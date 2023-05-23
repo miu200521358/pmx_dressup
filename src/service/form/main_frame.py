@@ -289,6 +289,15 @@ class MainFrame(BaseFrame):
 
         return True
 
+    def refit(self, refit_bone_name: str):
+        # 再フィットしたモデルデータを設定する
+        self.file_panel.dress_ctrl.data = LoadUsecase().refit_dress_morphs(
+            self.file_panel.model_ctrl.data,
+            self.file_panel.dress_ctrl.data,
+            self.dress_motion,
+            refit_bone_name,
+        )
+
     def clear_refit(self):
         dress: PmxModel = self.file_panel.dress_ctrl.data
         for bone_morph in dress.morphs.filter_by_type(MorphType.BONE):
