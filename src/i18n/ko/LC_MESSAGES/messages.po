@@ -632,3 +632,9 @@ msgstr "재생"
 
 msgid "停止"
 msgstr "정지"
+
+msgid "-- 人物: 初期姿勢計算"
+msgstr "-- 인물: 초기 자세 계산"
+
+msgid "-- 衣装: 初期姿勢計算"
+msgstr "-- 의상: 초기 자세 계산"

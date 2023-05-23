@@ -632,3 +632,9 @@ msgstr "Play"
 
 msgid "停止"
 msgstr "Stop"
+
+msgid "-- 人物: 初期姿勢計算"
+msgstr "-- Person: initial posture calculation"
+
+msgid "-- 衣装: 初期姿勢計算"
+msgstr "-- Costume: Initial Attitude Calculation"

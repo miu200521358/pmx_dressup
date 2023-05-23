@@ -632,3 +632,9 @@ msgstr "再生"
 
 msgid "停止"
 msgstr "停止"
+
+msgid "-- 人物: 初期姿勢計算"
+msgstr "-- 人物: 初期姿勢計算"
+
+msgid "-- 衣装: 初期姿勢計算"
+msgstr "-- 衣装: 初期姿勢計算"
