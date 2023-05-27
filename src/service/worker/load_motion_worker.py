@@ -5,10 +5,10 @@ import wx
 
 from mlib.base.logger import MLogger
 from mlib.service.base_worker import BaseWorker
+from mlib.service.form.base_frame import BaseFrame
 from mlib.utils.file_utils import get_root_dir
 from mlib.vmd.vmd_collection import VmdMotion
 from service.form.panel.file_panel import FilePanel
-from mlib.service.form.base_frame import BaseFrame
 
 logger = MLogger(os.path.basename(__file__))
 __ = logger.get_text
@@ -18,7 +18,7 @@ class LoadMotionWorker(BaseWorker):
     def __init__(self, frame: BaseFrame, result_event: wx.Event) -> None:
         super().__init__(frame, result_event)
 
-    def thread_execute(self):
+    def thread_execute(self) -> None:
         file_panel: FilePanel = self.frame.file_panel
         motion: Optional[VmdMotion] = None
 
@@ -31,7 +31,7 @@ class LoadMotionWorker(BaseWorker):
 
         self.result_data = motion
 
-    def output_log(self):
+    def output_log(self) -> None:
         file_panel: FilePanel = self.frame.file_panel
         output_log_path = os.path.join(get_root_dir(), f"{os.path.basename(file_panel.output_pmx_ctrl.path)}.log")
 

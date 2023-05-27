@@ -23,7 +23,7 @@ __ = logger.get_text
 
 
 class MainFrame(BaseFrame):
-    def __init__(self, app: wx.App, title: str, size: wx.Size, *args, **kw):
+    def __init__(self, app: wx.App, title: str, size: wx.Size, *args, **kw) -> None:
         super().__init__(
             app,
             history_keys=["model_pmx", "dress_pmx", "motion_vmd"],
@@ -47,7 +47,7 @@ class MainFrame(BaseFrame):
 
         self.file_panel.exec_btn_ctrl.exec_worker = self.save_worker
 
-    def on_change_tab(self, event: wx.Event):
+    def on_change_tab(self, event: wx.Event) -> None:
         if self.notebook.GetSelection() == self.config_panel.tab_idx:
             self.notebook.ChangeSelection(self.file_panel.tab_idx)
             if not self.load_worker.started:
@@ -78,14 +78,19 @@ class MainFrame(BaseFrame):
                     # 既に読み取りが完了していたらそのまま表示
                     self.notebook.ChangeSelection(self.config_panel.tab_idx)
 
-    def save_histories(self):
+    def save_histories(self) -> None:
         self.file_panel.model_ctrl.save_path()
         self.file_panel.dress_ctrl.save_path()
         self.file_panel.motion_ctrl.save_path()
 
         save_histories(self.histories)
 
-    def on_result(self, result: bool, data: Optional[Any], elapsed_time: str):
+    def on_result(
+        self,
+        result: bool,
+        data: Optional[tuple[PmxModel, PmxModel, PmxModel, PmxModel, VmdMotion, dict[int, list[int]]]],
+        elapsed_time: str,
+    ) -> None:
         self.file_panel.console_ctrl.write(f"\n----------------\n{elapsed_time}")
 
         if not (result and data):
@@ -96,15 +101,13 @@ class MainFrame(BaseFrame):
 
         logger.info("描画準備開始", decoration=MLogger.Decoration.BOX)
 
-        data1, data2, data3, data4 = data
-        model: PmxModel = data1
-        dress: PmxModel = data2
-        motion: VmdMotion = data3
-        dress_vertices: dict[int, list[int]] = data4
+        original_model, model, original_dress, dress, motion, dress_vertices = data
         self.dress_vertices = dress_vertices
 
-        self.file_panel.model_ctrl.set_data(model)
-        self.file_panel.dress_ctrl.set_data(dress)
+        self.file_panel.model_ctrl.original_data = original_model
+        self.file_panel.model_ctrl.data = model
+        self.file_panel.dress_ctrl.original_data = original_dress
+        self.file_panel.dress_ctrl.data = dress
         self.file_panel.motion_ctrl.set_data(motion)
         self.file_panel.exec_btn_ctrl.Enable(True)
 
@@ -141,7 +144,7 @@ class MainFrame(BaseFrame):
         self.file_panel.Enable(True)
         self.on_sound()
 
-    def on_motion_result(self, result: bool, data: Optional[Any], elapsed_time: str):
+    def on_motion_result(self, result: bool, data: Optional[VmdMotion], elapsed_time: str) -> None:
         self.file_panel.console_ctrl.write(f"\n----------------\n{elapsed_time}")
 
         if not (result and data):
@@ -183,14 +186,14 @@ class MainFrame(BaseFrame):
         self.file_panel.Enable(True)
         self.on_sound()
 
-    def on_exec(self):
+    def on_exec(self) -> None:
         self.save_worker.start()
 
-    def on_save_result(self, result: bool, data: Optional[Any], elapsed_time: str):
+    def on_save_result(self, result: bool, data: Optional[Any], elapsed_time: str) -> None:
         self.file_panel.Enable(True)
         self.on_sound()
 
-    def set_model_motion_morphs(self, material_alphas: dict[str, float] = {}):
+    def set_model_motion_morphs(self, material_alphas: dict[str, float] = {}) -> None:
         if self.model_motion is None:
             return
 
@@ -211,7 +214,7 @@ class MainFrame(BaseFrame):
         bone_scales: dict[str, MVector3D] = {},
         bone_degrees: dict[str, MVector3D] = {},
         bone_positions: dict[str, MVector3D] = {},
-    ):
+    ) -> None:
         if self.dress_motion is None:
             return
 
@@ -234,7 +237,9 @@ class MainFrame(BaseFrame):
         mf.ratio = abs(material_alphas.get(__("全材質"), 1.0) - 1)
         self.dress_motion.morphs[mf.name].append(mf)
 
-        for bone_type_name, scale, degree, position in zip(bone_scales.keys(), bone_scales.values(), bone_degrees.values(), bone_positions.values()):
+        for bone_type_name, scale, degree, position in zip(
+            bone_scales.keys(), bone_scales.values(), bone_degrees.values(), bone_positions.values()
+        ):
             # 再フィットは倍率は常に1（実際に与える値の方で調整する）
             mf = VmdMorphFrame(0, f"{__('調整')}:{__(bone_type_name)}:Refit")
             mf.ratio = 1
@@ -254,12 +259,12 @@ class MainFrame(BaseFrame):
                 mf.ratio = ratio - origin
                 self.dress_motion.morphs[mf.name].append(mf)
 
-    def fit_model_motion(self, bone_alpha: float = 1.0, is_bone_deform: bool = True):
+    def fit_model_motion(self, bone_alpha: float = 1.0, is_bone_deform: bool = True) -> None:
         self.config_panel.canvas.model_sets[0].motion = self.model_motion
         self.config_panel.canvas.model_sets[0].bone_alpha = bone_alpha
         self.config_panel.canvas.change_motion(wx.SpinEvent(), is_bone_deform, 0)
 
-    def fit_dress_motion(self, bone_alpha: float = 1.0, is_bone_deform: bool = True):
+    def fit_dress_motion(self, bone_alpha: float = 1.0, is_bone_deform: bool = True) -> None:
         self.config_panel.canvas.model_sets[1].motion = self.dress_motion
         self.config_panel.canvas.model_sets[1].bone_alpha = bone_alpha
         self.config_panel.canvas.change_motion(wx.SpinEvent(), is_bone_deform, 1)
@@ -289,7 +294,7 @@ class MainFrame(BaseFrame):
 
         return True
 
-    def refit(self, refit_bone_name: str):
+    def refit(self, refit_bone_name: str) -> None:
         # 再フィットしたモデルデータを設定する
         self.file_panel.dress_ctrl.data = LoadUsecase().refit_dress_morphs(
             self.file_panel.model_ctrl.data,
@@ -298,7 +303,7 @@ class MainFrame(BaseFrame):
             refit_bone_name,
         )
 
-    def clear_refit(self):
+    def clear_refit(self) -> None:
         dress: PmxModel = self.file_panel.dress_ctrl.data
         for bone_morph in dress.morphs.filter_by_type(MorphType.BONE):
             if "Refit" not in bone_morph.name:

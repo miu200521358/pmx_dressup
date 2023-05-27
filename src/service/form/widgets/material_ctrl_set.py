@@ -85,7 +85,7 @@ class MaterialCtrlSet:
         )
         self.sizer.Add(self.slider.sizer, 0, wx.ALL, 3)
 
-    def initialize(self, material_names: list[str]):
+    def initialize(self, material_names: list[str]) -> None:
         self.material_choice_ctrl.Clear()
         for material_name in material_names:
             self.material_choice_ctrl.Append(material_name)
@@ -101,11 +101,11 @@ class MaterialCtrlSet:
         self.material_choice_ctrl.SetSelection(0)
         self.slider.ChangeValue(1.0)
 
-    def on_change_material(self, event: wx.Event):
+    def on_change_material(self, event: wx.Event) -> None:
         material_name = self.material_choice_ctrl.GetStringSelection()
         self.slider.ChangeValue(self.alphas[material_name])
 
-    def on_change_morph(self, event: wx.Event):
+    def on_change_morph(self, event: wx.Event) -> None:
         alpha = self.slider.GetValue()
         material_name = self.material_choice_ctrl.GetStringSelection()
         self.alphas[material_name] = float(alpha)
@@ -114,25 +114,25 @@ class MaterialCtrlSet:
         self.parent.on_change_morph()
         self.parent.Enable(True)
 
-    def on_change_material_half(self, event: wx.Event):
+    def on_change_material_half(self, event: wx.Event) -> None:
         self.slider.SetValue(0.5)
         self.on_change_morph(event)
 
-    def on_change_material_right(self, event: wx.Event):
+    def on_change_material_right(self, event: wx.Event) -> None:
         selection = self.material_choice_ctrl.GetSelection()
         if selection == len(self.alphas) - 1:
             selection = -1
         self.material_choice_ctrl.SetSelection(selection + 1)
         self.on_change_material(event)
 
-    def on_change_material_left(self, event: wx.Event):
+    def on_change_material_left(self, event: wx.Event) -> None:
         selection = self.material_choice_ctrl.GetSelection()
         if selection == 0:
             selection = len(self.alphas)
         self.material_choice_ctrl.SetSelection(selection - 1)
         self.on_change_material(event)
 
-    def Enable(self, enable: bool):
+    def Enable(self, enable: bool) -> None:
         self.material_choice_ctrl.Enable(enable)
         self.left_btn_ctrl.Enable(enable)
         self.right_btn_ctrl.Enable(enable)

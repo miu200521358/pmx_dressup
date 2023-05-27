@@ -266,7 +266,7 @@ class BoneCtrlSet:
 
         self.sizer.Add(self.btn_sizer, 1, wx.EXPAND, 0)
 
-    def initialize(self):
+    def initialize(self) -> None:
         self.bone_choice_ctrl.Clear()
         for bone_name in FIT_BONE_NAMES:
             self.bone_choice_ctrl.Append(__(bone_name))
@@ -285,7 +285,7 @@ class BoneCtrlSet:
         self.position_z_slider.ChangeValue(0.0)
         self.scale_link_check_ctrl.SetValue(1)
 
-    def on_change_bone(self, event: wx.Event):
+    def on_change_bone(self, event: wx.Event) -> None:
         bone_name = self.bone_choice_ctrl.GetStringSelection()
         self.scale_x_slider.ChangeValue(self.scales[bone_name].x)
         self.scale_y_slider.ChangeValue(self.scales[bone_name].y)
@@ -297,7 +297,7 @@ class BoneCtrlSet:
         self.position_y_slider.ChangeValue(self.positions[bone_name].y)
         self.position_z_slider.ChangeValue(self.positions[bone_name].z)
 
-    def on_change_scale_x_slider(self, event: wx.Event):
+    def on_change_scale_x_slider(self, event: wx.Event) -> None:
         bone_name = self.bone_choice_ctrl.GetStringSelection()
         self.scales[bone_name].x = self.scale_x_slider.GetValue()
 
@@ -305,7 +305,7 @@ class BoneCtrlSet:
         self.parent.on_change(bone_name)
         self.parent.Enable(True)
 
-    def on_change_scale_y_slider(self, event: wx.Event):
+    def on_change_scale_y_slider(self, event: wx.Event) -> None:
         bone_name = self.bone_choice_ctrl.GetStringSelection()
         self.scales[bone_name].y = self.scale_y_slider.GetValue()
 
@@ -317,7 +317,7 @@ class BoneCtrlSet:
         self.parent.on_change(bone_name)
         self.parent.Enable(True)
 
-    def on_change_scale_z_slider(self, event: wx.Event):
+    def on_change_scale_z_slider(self, event: wx.Event) -> None:
         bone_name = self.bone_choice_ctrl.GetStringSelection()
         self.scales[bone_name].z = self.scale_z_slider.GetValue()
 
@@ -329,7 +329,7 @@ class BoneCtrlSet:
         self.parent.on_change(bone_name)
         self.parent.Enable(True)
 
-    def on_change_degree_x_slider(self, event: wx.Event):
+    def on_change_degree_x_slider(self, event: wx.Event) -> None:
         bone_name = self.bone_choice_ctrl.GetStringSelection()
         self.degrees[bone_name].x = self.degree_x_slider.GetValue()
 
@@ -337,7 +337,7 @@ class BoneCtrlSet:
         self.parent.on_change(bone_name)
         self.parent.Enable(True)
 
-    def on_change_degree_y_slider(self, event: wx.Event):
+    def on_change_degree_y_slider(self, event: wx.Event) -> None:
         bone_name = self.bone_choice_ctrl.GetStringSelection()
         self.degrees[bone_name].y = self.degree_y_slider.GetValue()
 
@@ -345,7 +345,7 @@ class BoneCtrlSet:
         self.parent.on_change(bone_name)
         self.parent.Enable(True)
 
-    def on_change_degree_z_slider(self, event: wx.Event):
+    def on_change_degree_z_slider(self, event: wx.Event) -> None:
         bone_name = self.bone_choice_ctrl.GetStringSelection()
         self.degrees[bone_name].z = self.degree_z_slider.GetValue()
 
@@ -353,7 +353,7 @@ class BoneCtrlSet:
         self.parent.on_change(bone_name)
         self.parent.Enable(True)
 
-    def on_change_position_x_slider(self, event: wx.Event):
+    def on_change_position_x_slider(self, event: wx.Event) -> None:
         bone_name = self.bone_choice_ctrl.GetStringSelection()
         self.positions[bone_name].x = self.position_x_slider.GetValue()
 
@@ -361,7 +361,7 @@ class BoneCtrlSet:
         self.parent.on_change(bone_name)
         self.parent.Enable(True)
 
-    def on_change_position_y_slider(self, event: wx.Event):
+    def on_change_position_y_slider(self, event: wx.Event) -> None:
         bone_name = self.bone_choice_ctrl.GetStringSelection()
         self.positions[bone_name].y = self.position_y_slider.GetValue()
 
@@ -369,7 +369,7 @@ class BoneCtrlSet:
         self.parent.on_change(bone_name)
         self.parent.Enable(True)
 
-    def on_change_position_z_slider(self, event: wx.Event):
+    def on_change_position_z_slider(self, event: wx.Event) -> None:
         bone_name = self.bone_choice_ctrl.GetStringSelection()
         self.positions[bone_name].z = self.position_z_slider.GetValue()
 
@@ -377,21 +377,21 @@ class BoneCtrlSet:
         self.parent.on_change(bone_name)
         self.parent.Enable(True)
 
-    def on_change_bone_right(self, event: wx.Event):
+    def on_change_bone_right(self, event: wx.Event) -> None:
         selection = self.bone_choice_ctrl.GetSelection()
         if selection == len(self.scales) - 1:
             selection = -1
         self.bone_choice_ctrl.SetSelection(selection + 1)
         self.on_change_bone(event)
 
-    def on_change_bone_left(self, event: wx.Event):
+    def on_change_bone_left(self, event: wx.Event) -> None:
         selection = self.bone_choice_ctrl.GetSelection()
         if selection == 0:
             selection = len(self.scales)
         self.bone_choice_ctrl.SetSelection(selection - 1)
         self.on_change_bone(event)
 
-    def on_change_clear(self, event: wx.Event):
+    def on_change_clear(self, event: wx.Event) -> None:
         for bone_name in FIT_BONE_NAMES:
             self.scales[__(bone_name)] = MVector3D(1, 1, 1)
             self.degrees[__(bone_name)] = MVector3D()
@@ -412,14 +412,14 @@ class BoneCtrlSet:
         self.parent.on_change(is_clear=True)
         self.parent.Enable(True)
 
-    def on_fit_ground(self, event: wx.Event):
+    def on_fit_ground(self, event: wx.Event) -> None:
         self.parent.Enable(False)
         if self.parent.on_fit_ground():
             # 接地位置が求められたらモーション適用
             self.parent.on_change()
         self.parent.Enable(True)
 
-    def Enable(self, enable: bool):
+    def Enable(self, enable: bool) -> None:
         self.bone_choice_ctrl.Enable(enable)
         self.left_btn_ctrl.Enable(enable)
         self.right_btn_ctrl.Enable(enable)

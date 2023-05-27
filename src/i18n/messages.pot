@@ -845,3 +845,7 @@ msgstr ""
 msgid "-- 衣装: 初期姿勢計算"
 msgstr ""
 
+
+msgid "-- 面データ読み取り [{i} ({p:.2f}%)]"
+msgstr ""
+

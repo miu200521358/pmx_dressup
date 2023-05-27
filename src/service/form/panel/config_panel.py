@@ -15,13 +15,13 @@ __ = logger.get_text
 
 
 class ConfigPanel(CanvasPanel):
-    def __init__(self, frame: BaseFrame, tab_idx: int, *args, **kw):
+    def __init__(self, frame: BaseFrame, tab_idx: int, *args, **kw) -> None:
         super().__init__(frame, tab_idx, 630, 800, *args, **kw)
 
         self._initialize_ui()
         self._initialize_event()
 
-    def _initialize_ui(self):
+    def _initialize_ui(self) -> None:
         self.config_sizer = wx.BoxSizer(wx.HORIZONTAL)
         # 左にビューワー
         self.config_sizer.Add(self.canvas, 1, wx.EXPAND | wx.ALL, 0)
@@ -100,17 +100,17 @@ class ConfigPanel(CanvasPanel):
 
         self.fit()
 
-    def fit(self):
+    def fit(self) -> None:
         self.scrolled_window.Layout()
         self.SetSizer(self.root_sizer)
         self.Layout()
 
-    def _initialize_event(self):
+    def _initialize_event(self) -> None:
         self.play_ctrl.Bind(wx.EVT_BUTTON, self.on_play)
         # self.model_material_choice_ctrl.Bind(wx.EVT_LISTBOX, self.on_change)
         # self.dress_material_choice_ctrl.Bind(wx.EVT_LISTBOX, self.on_change)
 
-    def on_play(self, event: wx.Event):
+    def on_play(self, event: wx.Event) -> None:
         if self.canvas.playing:
             self.stop_play()
         else:
@@ -118,18 +118,18 @@ class ConfigPanel(CanvasPanel):
         self.canvas.on_play(event)
 
     @property
-    def fno(self):
+    def fno(self) -> int:
         return self.frame_ctrl.GetValue()
 
     @fno.setter
-    def fno(self, v: int):
+    def fno(self, v: int) -> None:
         self.frame_ctrl.SetValue(v)
 
-    def stop_play(self):
+    def stop_play(self) -> None:
         self.play_ctrl.SetLabelText(__("再生"))
         self.Enable(True)
 
-    def start_play(self):
+    def start_play(self) -> None:
         self.play_ctrl.SetLabelText(__("停止"))
         self.Enable(False)
         # 停止ボタンだけは有効
@@ -142,14 +142,14 @@ class ConfigPanel(CanvasPanel):
         self.dress_material_ctrl.Enable(enable)
         self.dress_bone_ctrl.Enable(enable)
 
-    def on_frame_change(self, event: wx.Event):
+    def on_frame_change(self, event: wx.Event) -> None:
         self.frame.fit_model_motion(self.model_material_ctrl.alphas.get(__("ボーンライン"), 0.5))
         self.frame.fit_dress_motion(self.dress_material_ctrl.alphas.get(__("ボーンライン"), 0.5))
 
-    def on_change_morph(self, target_bone_name: Optional[str] = None):
+    def on_change_morph(self, target_bone_name: Optional[str] = None) -> None:
         self.change_motion(False, target_bone_name)
 
-    def on_change(self, target_bone_name: Optional[str] = None, is_clear: bool = False):
+    def on_change(self, target_bone_name: Optional[str] = None, is_clear: bool = False) -> None:
         if is_clear:
             self.frame.clear_refit()
         self.change_motion(True, target_bone_name)
@@ -157,7 +157,7 @@ class ConfigPanel(CanvasPanel):
     def on_fit_ground(self) -> bool:
         return self.frame.fit_ground()
 
-    def change_motion(self, is_bone_deform: bool, target_bone_name: Optional[str] = None):
+    def change_motion(self, is_bone_deform: bool, target_bone_name: Optional[str] = None) -> None:
         self.frame.set_model_motion_morphs(self.model_material_ctrl.alphas)
         self.frame.fit_model_motion(self.model_material_ctrl.alphas.get(__("ボーンライン"), 0.5), is_bone_deform)
 
