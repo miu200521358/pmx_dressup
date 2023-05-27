@@ -101,10 +101,10 @@ class SaveUsecase:
         logger.info("出力準備", decoration=MLogger.Decoration.LINE)
 
         # 変形結果
-        model_original_matrixes = VmdMotion().animate_bone(0, model)
-        model_matrixes = model_motion.animate_bone(0, model)
-        dress_original_matrixes = VmdMotion().animate_bone(0, dress)
-        dress_matrixes = dress_motion.animate_bone(0, dress)
+        model_original_matrixes = VmdMotion().animate_bone([0], model)
+        model_matrixes = model_motion.animate_bone([0], model)
+        dress_original_matrixes = VmdMotion().animate_bone([0], dress)
+        dress_matrixes = dress_motion.animate_bone([0], dress)
 
         logger.info("人物材質選り分け")
         model_vertices = model.get_vertices_by_bone()
