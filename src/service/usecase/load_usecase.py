@@ -489,10 +489,8 @@ class LoadUsecase:
             dress_bone_fitting_morph.offsets.append(
                 BoneMorphOffset(
                     dress_bone.index,
-                    position=MVector3D(),
-                    qq=MQuaternion(),
-                    local_position=dress_offset_position,
-                    local_qq=dress_offset_local_qq,
+                    position=dress_offset_position,
+                    qq=dress_offset_local_qq,
                     local_scale=(dress_offset_local_scale - 1),
                 )
             )
@@ -647,7 +645,7 @@ class LoadUsecase:
 
             # キーフレとして追加
             mbf = dress_motion.bones[dress_bone.name][0]
-            mbf.local_position = dress_offset_position
+            mbf.position = dress_offset_position
             dress_motion.bones[dress_bone.name].append(mbf)
 
             dress_offset_positions[dress_bone.index] = dress_offset_position
