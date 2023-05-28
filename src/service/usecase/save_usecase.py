@@ -107,22 +107,26 @@ class SaveUsecase:
         dress_matrixes = dress_motion.animate_bone([0], dress)
 
         logger.info("人物材質選り分け")
-        model_vertices = model.get_vertices_by_bone()
+        model.update_vertices_by_bone()
+        model.update_vertices_by_material()
+
         active_model_vertices = set(
             [
                 vertex_index
-                for material_index, vertices in model.get_vertices_by_material().items()
+                for material_index, vertices in model.vertices_by_materials.items()
                 if 1 == model_material_alphas[model.materials[material_index].name]
                 for vertex_index in vertices
             ]
         )
 
         logger.info("衣装材質選り分け")
-        dress_vertices = dress.get_vertices_by_bone()
+        dress.update_vertices_by_bone()
+        dress.update_vertices_by_material()
+
         active_dress_vertices = set(
             [
                 vertex_index
-                for material_index, vertices in dress.get_vertices_by_material().items()
+                for material_index, vertices in dress.vertices_by_materials.items()
                 if 1 == dress_material_alphas[dress.materials[material_index].name]
                 for vertex_index in vertices
             ]
@@ -158,16 +162,16 @@ class SaveUsecase:
                 continue
             if (
                 bone.name not in STANDARD_BONE_NAMES
-                and bone.index in model_vertices
-                and not set(model_vertices[bone.index]) & active_model_vertices
+                and bone.index in model.vertices_by_bones
+                and not set(model.vertices_by_bones[bone.index]) & active_model_vertices
             ):
                 # 準標準ではなく、元々ウェイトを持っていて、かつ出力先にウェイトが乗ってる頂点が無い場合、スルー
                 continue
             if (
                 bone.name not in STANDARD_BONE_NAMES
                 and not bone.is_visible
-                and bone.parent_index in model_vertices
-                and not set(model_vertices[bone.parent_index]) & active_model_vertices
+                and bone.parent_index in model.vertices_by_bones
+                and not set(model.vertices_by_bones[bone.parent_index]) & active_model_vertices
             ):
                 # 準標準ではなく、非表示ボーンで、親ボーンが元々ウェイトを持っていて、かつ出力先にウェイトが乗ってる頂点が無い場合、スルー
                 continue
@@ -277,16 +281,16 @@ class SaveUsecase:
                 continue
             if (
                 bone.name not in STANDARD_BONE_NAMES
-                and bone.index in dress_vertices
-                and not set(dress_vertices[bone.index]) & active_dress_vertices
+                and bone.index in dress.vertices_by_bones
+                and not set(dress.vertices_by_bones[bone.index]) & active_dress_vertices
             ):
                 # 準標準ではなく、元々ウェイトを持っていて、かつ出力先にウェイトが乗ってる頂点が無い場合、スルー
                 continue
             if (
                 bone.name not in STANDARD_BONE_NAMES
                 and not bone.is_visible
-                and bone.parent_index in dress_vertices
-                and not set(dress_vertices[bone.parent_index]) & active_dress_vertices
+                and bone.parent_index in dress.vertices_by_bones
+                and not set(dress.vertices_by_bones[bone.parent_index]) & active_dress_vertices
             ):
                 # 準標準ではなく、非表示ボーンで、親ボーンが元々ウェイトを持っていて、かつ出力先にウェイトが乗ってる頂点が無い場合、スルー
                 continue

@@ -88,7 +88,7 @@ class MainFrame(BaseFrame):
     def on_result(
         self,
         result: bool,
-        data: Optional[tuple[PmxModel, PmxModel, PmxModel, PmxModel, VmdMotion, dict[int, list[int]]]],
+        data: Optional[tuple[PmxModel, PmxModel, PmxModel, PmxModel, VmdMotion]],
         elapsed_time: str,
     ) -> None:
         self.file_panel.console_ctrl.write(f"\n----------------\n{elapsed_time}")
@@ -101,8 +101,7 @@ class MainFrame(BaseFrame):
 
         logger.info("描画準備開始", decoration=MLogger.Decoration.BOX)
 
-        original_model, model, original_dress, dress, motion, dress_vertices = data
-        self.dress_vertices = dress_vertices
+        original_model, model, original_dress, dress, motion = data
 
         self.file_panel.model_ctrl.original_data = original_model
         self.file_panel.model_ctrl.data = model
@@ -281,7 +280,6 @@ class MainFrame(BaseFrame):
         root_ground_y = LoadUsecase().get_dress_ground(
             self.file_panel.dress_ctrl.data,
             dress_morph_motion,
-            self.dress_vertices,
         )
 
         mf = VmdMorphFrame(0, "Root:Adjust")
