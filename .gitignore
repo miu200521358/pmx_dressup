@@ -130,3 +130,6 @@ dmypy.json
 translate.bat
 jsconfig.json
 archive/rivision.txt
+
+.vscode/
+.env

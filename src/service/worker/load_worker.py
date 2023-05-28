@@ -101,6 +101,10 @@ class LoadWorker(BaseWorker):
             logger.info("衣装モデル追加セットアップ：フィッティングボーンモーフ追加", decoration=MLogger.Decoration.BOX)
             usecase.create_dress_fit_bone_morphs(model, dress)
 
+            # 衣装にフィッティングボーンモーフを入れる
+            logger.info("衣装モデル追加セットアップ：フィッティングローカルボーンモーフ追加", decoration=MLogger.Decoration.BOX)
+            usecase.create_dress_fit_local_bone_morphs(model, dress)
+
             # 個別調整用モーフ追加
             logger.info("衣装モデル追加セットアップ：個別調整ボーンモーフ追加", decoration=MLogger.Decoration.BOX)
             usecase.create_dress_individual_bone_morphs(model, dress)

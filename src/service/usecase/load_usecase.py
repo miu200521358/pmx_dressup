@@ -9,6 +9,7 @@ from mlib.base.math import MQuaternion, MVector3D, MVector4D, intersect_line_pla
 from mlib.pmx.pmx_collection import PmxModel
 from mlib.pmx.pmx_part import STANDARD_BONE_NAMES, BoneMorphOffset, MaterialMorphCalcMode, MaterialMorphOffset, Morph, MorphType
 from mlib.vmd.vmd_collection import VmdMotion
+from mlib.vmd.vmd_part import VmdMorphFrame
 from mlib.vmd.vmd_tree import VmdBoneFrameTrees
 
 logger = MLogger(os.path.basename(__file__), level=1)
@@ -455,7 +456,7 @@ class LoadUsecase:
         # dress_fit_scales: dict[int, MVector3D] = {}
 
         logger.info("フィッティングオフセット計算", decoration=MLogger.Decoration.LINE)
-        dress_offset_positions, dress_offset_qqs, dress_offset_scales = self.get_dress_offsets(
+        dress_offset_positions, dress_offset_qqs = self.get_dress_offsets(
             model, dress, model_matrixes, dress_fit_scales, dress_offset_scales
         )
 
@@ -499,6 +500,14 @@ class LoadUsecase:
 
         dress_bone_fitting_morph.offsets = list(bone_fitting_offsets.values())
         dress.morphs.append(dress_bone_fitting_morph)
+
+    def create_dress_fit_local_bone_morphs(self, model: PmxModel, dress: PmxModel):
+        """衣装フィッティング用ボーンモーフを作成"""
+
+        # フィッティングモーフは常に適用
+        bmf = VmdMorphFrame(0, "BoneFitting")
+        bmf.ratio = 1
+        motion.morphs[bmf.name].append(bmf)
 
     def get_dress_offset_scales(
         self, model: PmxModel, dress: PmxModel, model_matrixes: VmdBoneFrameTrees
@@ -610,7 +619,7 @@ class LoadUsecase:
         model_matrixes: VmdBoneFrameTrees,
         dress_fit_scales: dict[int, MVector3D],
         dress_offset_scales: dict[int, MVector3D],
-    ) -> tuple[dict[int, MVector3D], dict[int, MQuaternion], dict[int, MVector3D]]:
+    ) -> tuple[dict[int, MVector3D], dict[int, MQuaternion]]:
         dress_standard_count = len(STANDARD_BONE_NAMES)
 
         dress_motion = VmdMotion()
@@ -756,7 +765,7 @@ class LoadUsecase:
 
                         logger.debug(f"-- -- 回転オフセット(順標準外)[{dress_other_bone.name}][{dress_fit_qq.to_euler_degrees()}]")
 
-        return dress_offset_positions, dress_offset_qqs, dress_offset_scales
+        return dress_offset_positions, dress_offset_qqs
 
     def refit_dress_morphs(
         self,
