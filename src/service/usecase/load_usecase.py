@@ -489,8 +489,10 @@ class LoadUsecase:
             dress_bone_fitting_morph.offsets.append(
                 BoneMorphOffset(
                     dress_bone.index,
-                    position=dress_offset_position,
-                    qq=dress_offset_local_qq,
+                    position=MVector3D(),
+                    qq=MQuaternion(),
+                    local_position=dress_offset_position,
+                    local_qq=dress_offset_local_qq,
                     local_scale=(dress_offset_local_scale - 1),
                 )
             )
@@ -621,7 +623,6 @@ class LoadUsecase:
         dress_offset_local_qqs: dict[int, MQuaternion] = {}
         dress_offset_local_scales: dict[int, MVector3D] = {}
 
-        dress_bone_names = list(set(STANDARD_BONE_NAMES.keys()) & set(dress.bones.names))
         for i, (bone_name, bone_setting) in enumerate(list(STANDARD_BONE_NAMES.items())):
             if not (bone_name in dress.bones and bone_name in model.bones):
                 # 人物と衣装の両方にボーンがなければスルー
@@ -641,12 +642,12 @@ class LoadUsecase:
             )
 
             # 移動計算 ------------------
-            dress_matrixes = dress_motion.animate_bone([0], dress, dress_bone_names, append_ik=False)
-            dress_offset_position = model_matrixes[0, dress_bone.name].position - dress_matrixes[0, dress_bone.name].position
+            dress_matrixes = dress_motion.animate_bone([0], dress, [dress_bone.name], append_ik=False)
+            dress_offset_position = dress_matrixes[0, dress_bone.name].global_matrix.inverse() * model_matrixes[0, dress_bone.name].position
 
             # キーフレとして追加
             mbf = dress_motion.bones[dress_bone.name][0]
-            mbf.position = dress_offset_position
+            mbf.local_position = dress_offset_position
             dress_motion.bones[dress_bone.name].append(mbf)
 
             dress_offset_positions[dress_bone.index] = dress_offset_position
