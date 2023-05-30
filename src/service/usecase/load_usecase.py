@@ -655,6 +655,37 @@ class LoadUsecase:
                 + f"[m={model_matrixes[0, dress_bone.name].position}][d={dress_matrixes[0, dress_bone.name].position}]"
             )
 
+            if not (dress_bone.can_translate or dress_bone.is_shoulder_p or dress_bone.is_ankle):
+                model_tail_bone_names = [bname for bname in bone_setting.tails if bname in model.bones]
+                model_tail_bone_name = model_tail_bone_names[0] if model_tail_bone_names else None
+
+                dress_tail_bone_names = [bname for bname in bone_setting.tails if bname in dress.bones]
+                dress_tail_bone_name = dress_tail_bone_names[0] if dress_tail_bone_names else None
+
+                if model_tail_bone_name and dress_tail_bone_name:
+                    # 回転計算 ------------------
+
+                    dress_matrixes = dress_motion.animate_bone([0], dress, [dress_tail_bone_name], append_ik=False)
+
+                    model_local_matrix = (
+                        model_matrixes[0, model_tail_bone_name].position - model_matrixes[0, model_bone.name].position
+                    ).to_local_matrix4x4()
+                    dress_local_matrix = (
+                        dress_matrixes[0, dress_tail_bone_name].position - dress_matrixes[0, dress_bone.name].position
+                    ).to_local_matrix4x4()
+
+                    # モデルのボーンの向きに衣装を合わせる
+                    dress_offset_local_qq = (model_local_matrix @ dress_local_matrix.inverse()).to_quaternion()
+
+                    dress_offset_local_qqs[dress_bone.index] = dress_offset_local_qq
+
+                    # キーフレとして追加
+                    bf = dress_motion.bones[dress_bone.name][0]
+                    bf.rotation = dress_offset_local_qq
+                    dress_motion.bones[dress_bone.name].append(bf)
+
+                    logger.debug(f"-- -- 回転オフセット[{dress_bone.name}][{dress_offset_local_qq.to_euler_degrees()}]")
+
             # dress_offset_position = MVector3D()
             # if dress_bone.ik_link_indexes or dress_bone.ik_target_indexes:
             #     for dress_ik_index in dress_bone.ik_link_indexes + dress_bone.ik_target_indexes:
@@ -733,37 +764,6 @@ class LoadUsecase:
             #             + f"[off={dress_ik_off_matrixes[0, dress_ik_bone.name].position}]"
             #             + f"[on={model_matrixes[0, dress_ik_bone.name].position}]"
             #         )
-
-            # if not (dress_bone.can_translate or dress_bone.is_shoulder_p or dress_bone.is_ankle):
-            #     model_tail_bone_names = [bname for bname in bone_setting.tails if bname in model.bones]
-            #     model_tail_bone_name = model_tail_bone_names[0] if model_tail_bone_names else None
-
-            #     dress_tail_bone_names = [bname for bname in bone_setting.tails if bname in dress.bones]
-            #     dress_tail_bone_name = dress_tail_bone_names[0] if dress_tail_bone_names else None
-
-            #     if model_tail_bone_name and dress_tail_bone_name:
-            #         # 回転計算 ------------------
-
-            #         dress_matrixes = dress_motion.animate_bone([0], dress, [dress_tail_bone_name])
-
-            #         model_local_matrix = (
-            #             model_matrixes[0, model_tail_bone_name].position - model_matrixes[0, model_bone.name].position
-            #         ).to_local_matrix4x4()
-            #         dress_local_matrix = (
-            #             dress_matrixes[0, dress_tail_bone_name].position - dress_matrixes[0, dress_bone.name].position
-            #         ).to_local_matrix4x4()
-
-            #         # モデルのボーンの向きに衣装を合わせる
-            #         dress_offset_local_qq = (model_local_matrix @ dress_local_matrix.inverse()).to_quaternion()
-
-            #         dress_offset_local_qqs[dress_bone.index] = dress_offset_local_qq
-
-            #         # キーフレとして追加
-            #         bf = dress_motion.bones[dress_bone.name][0]
-            #         bf.rotation = dress_offset_local_qq
-            #         dress_motion.bones[dress_bone.name].append(bf)
-
-            #         logger.debug(f"-- -- 回転オフセット[{dress_bone.name}][{dress_offset_local_qq.to_euler_degrees()}]")
 
         #     dress_vertices: set[int] = set([])
         #     model_vertices: set[int] = set([])
