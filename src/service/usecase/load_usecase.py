@@ -418,22 +418,6 @@ class LoadUsecase:
 
             logger.debug("-- -- グローバルスケール [{b}][{f:.3f}({o:.3f})]", b=bone_name, f=dress_fit_scale.x, o=dress_offset_scale.x)
 
-        # for dress_bone in dress.bones:
-        #     if not (dress_bone.is_ik or dress_bone.can_translate):
-        #         continue
-
-        #     # 移動系とIK系は親のスケールをキャンセルしておく
-        #     dress_fit_scale = MVector3D(1, 1, 1)
-        #     dress_offset_scale = dress_fit_scale.copy()
-        #     for parent_index in dress.bone_trees[bone_name].indexes[:-1]:
-        #         if parent_index in dress_offset_scales:
-        #             dress_offset_scale *= MVector3D(1, 1, 1) / dress_offset_scales.get(parent_index, MVector3D(1, 1, 1))
-
-        #     dress_fit_scales[dress_bone.index] = dress_fit_scale
-        #     dress_offset_scales[dress_bone.index] = dress_offset_scale
-
-        #     logger.debug("-- -- グローバルスケールキャンセル [{b}][{f:.3f}({o:.3f})]", b=dress_bone.name, f=dress_fit_scale.x, o=dress_offset_scale.x)
-
         return dress_offset_scales, dress_fit_scales
 
     def get_dress_global_offsets(
