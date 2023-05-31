@@ -88,11 +88,11 @@ class LoadWorker(BaseWorker):
             # logger.info("衣装モデル捩り位置調整", decoration=MLogger.Decoration.BOX)
             # replaced_bone_names += usecase.replace_twist(model, dress, replaced_bone_names)
 
-            # if replaced_bone_names:
-            #     # 置換ボーンがある場合、ウェイト置き換え
-            #     logger.info("衣装モデルウェイト調整", decoration=MLogger.Decoration.BOX)
-            #     dress.replace_standard_weights(replaced_bone_names)
-            #     dress.update_vertices_by_bone()
+            if replaced_bone_names:
+                # 置換ボーンがある場合、ウェイト置き換え
+                logger.info("衣装モデルウェイト調整", decoration=MLogger.Decoration.BOX)
+                dress.replace_standard_weights(replaced_bone_names)
+                dress.update_vertices_by_bone()
 
             # 衣装に材質透明モーフを入れる
             logger.info("衣装モデル追加セットアップ：材質透過モーフ追加", decoration=MLogger.Decoration.BOX)
