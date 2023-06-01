@@ -310,7 +310,7 @@ class LoadUsecase:
         logger.info("フィッティングオフセット計算", decoration=MLogger.Decoration.LINE)
         dress_offset_positions, dress_offset_qqs = self.get_dress_global_offsets(model, dress, dress_offset_scales, model_matrixes)
 
-        logger.info("フィッティングローカルスケール計算", decoration=MLogger.Decoration.LINE)
+        # logger.info("フィッティングローカルスケール計算", decoration=MLogger.Decoration.LINE)
         # dress_offset_local_scales = self.get_dress_local_scale_offsets(
         #     model, dress, dress_offset_positions, dress_offset_qqs, dress_offset_scales, model_matrixes
         # )
@@ -409,9 +409,8 @@ class LoadUsecase:
 
             # 親をキャンセルしていく
             dress_offset_scale = dress_fit_scale.copy()
-            for parent_index in dress.bone_trees[bone_name].indexes[:-1]:
-                if parent_index in dress_offset_scales:
-                    dress_offset_scale *= MVector3D(1, 1, 1) / dress_offset_scales.get(parent_index, MVector3D(1, 1, 1))
+            for tree_bone_index in reversed(dress.bone_trees[bone_name].indexes[:-1]):
+                dress_offset_scale *= MVector3D(1, 1, 1) / dress_offset_scales.get(tree_bone_index, MVector3D(1, 1, 1))
 
             dress_fit_scales[dress_bone.index] = dress_fit_scale
             dress_offset_scales[dress_bone.index] = dress_offset_scale
@@ -433,6 +432,7 @@ class LoadUsecase:
         dress_offset_positions: dict[int, MVector3D] = {}
         dress_offset_qqs: dict[int, MQuaternion] = {}
 
+        z_direction = MVector3D(0, 0, -1)
         for i, (bone_name, bone_setting) in enumerate(list(STANDARD_BONE_NAMES.items())):
             if not (bone_name in dress.bones and bone_name in model.bones):
                 # 人物と衣装の両方にボーンがなければスルー
@@ -472,7 +472,7 @@ class LoadUsecase:
                 f"-- -- 移動オフセット[{dress_bone.name}][{dress_offset_position}][model={model_bone_position}][dress={dress_bone_position}]"
             )
 
-            if not (dress_bone.can_translate or dress_bone.is_ankle):
+            if dress_bone.is_rotatable_standard:
                 # 回転計算 ------------------
 
                 model_bone_matrix, model_bone_position, model_tail_position = self.get_tail_position(
@@ -482,11 +482,22 @@ class LoadUsecase:
                     dress, dress_bone, bone_setting, motion=dress_motion, append_ik=False
                 )
 
-                model_local_matrix = (model_tail_position - model_bone_position).to_local_matrix4x4()
-                dress_local_matrix = (dress_tail_position - dress_bone_position).to_local_matrix4x4()
+                # 衣装：自分の方向
+                dress_x_direction = (dress_bone_matrix.inverse() * dress_tail_position).normalized()
+                dress_y_direction = dress_x_direction.cross(z_direction)
+                dress_slope_qq = MQuaternion.from_direction(dress_x_direction, dress_y_direction)
+
+                # 人物：自分の方向
+                model_x_direction = (model_bone_matrix.inverse() * model_tail_position).normalized()
+                model_y_direction = model_x_direction.cross(z_direction)
+                model_slope_qq = MQuaternion.from_direction(model_x_direction, model_y_direction)
 
                 # モデルのボーンの向きに衣装を合わせる
-                dress_offset_qq = (model_local_matrix @ dress_local_matrix.inverse()).to_quaternion()
+                dress_offset_qq = model_slope_qq * dress_slope_qq.inverse()
+
+                for tree_bone_index in reversed(dress.bone_trees[bone_name].indexes[:-1]):
+                    # 自分より親は逆回転させる
+                    dress_offset_qq *= dress_offset_qqs.get(tree_bone_index, MQuaternion()).inverse()
 
                 dress_offset_qqs[dress_bone.index] = dress_offset_qq
 
@@ -576,9 +587,9 @@ class LoadUsecase:
             model_local_positions = MVector3D(*np.max(np.abs(model_deformed_local_positions), axis=0))
             dress_local_positions = MVector3D(*np.max(np.abs(dress_deformed_local_positions), axis=0))
 
-            dress_offset_local_scale = (model_local_positions / dress_local_positions).one()
+            dress_local_scale = (model_local_positions / dress_local_positions).one()
             # ローカルX軸方向はローカルスケール対象外
-            dress_offset_local_scale.x = 1
+            dress_offset_local_scale = MVector3D(1.0, dress_local_scale.z, dress_local_scale.x)
 
             dress_offset_local_scales[dress_bone.index] = dress_offset_local_scale
 
