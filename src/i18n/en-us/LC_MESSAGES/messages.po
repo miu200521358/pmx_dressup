@@ -641,3 +641,27 @@ msgstr "-- Costume: Initial Attitude Calculation"
 
 msgid "-- 面データ読み取り [{i} ({p:.2f}%)]"
 msgstr "-- Surface data read [{i} ({p:.2f}%)]"
+
+msgid "モデルセットアップ：関連ボーン"
+msgstr "Model Setup: related bones"
+
+msgid "-- モデルセットアップ：関連ボーン [{i} ({p:.2f}%)]"
+msgstr "-- Model setup: related bones [{i} ({p:.2f}%)]"
+
+msgid "衣装モデル追加セットアップ：フィッティングローカルボーンモーフ追加"
+msgstr "Additional costume model setup: fitting local bone morphs added"
+
+msgid "-- ボーンモーフ [{b}][移動={p}][回転={q}][縮尺:{o:.3f}({f:.3f})][ローカル縮尺:{l}]"
+msgstr "-- Bone Morph [{b}][move={p}][rotate={q}][scale:{o:.3f}({f:.3f})][local scale:{l}]"
+
+msgid "-- ボーンモーフ [{b}][移動={p}][回転={q}][縮尺:{s}]"
+msgstr "-- Bone Morph [{b}][move={p}][rotate={q}][scale:{s}]"
+
+msgid "-- ボーンモーフ [{b}][移動={p}][回転={q}][縮尺:{s}][ローカル縮尺:{l}]"
+msgstr "-- Bone Morph [{b}][move={p}][rotate={q}][scale:{s}][local scale:{l}]"
+
+msgid "フィッティンググローバルスケール計算"
+msgstr "Fitting Global Scale Calculations"
+
+msgid "フィッティングローカルスケール計算"
+msgstr "Fitting Local Scale Calculations"

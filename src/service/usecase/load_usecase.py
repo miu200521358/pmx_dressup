@@ -98,8 +98,8 @@ class LoadUsecase:
 
         if dress_inserted_bone_names:
             dress.setup()
-            dress.update_vertices_by_bone()
             dress.replace_standard_weights(dress_inserted_bone_names)
+            dress.update_vertices_by_bone()
 
             logger.info("衣装: 再セットアップ")
         else:
@@ -310,11 +310,11 @@ class LoadUsecase:
         logger.info("フィッティングオフセット計算", decoration=MLogger.Decoration.LINE)
         dress_offset_positions, dress_offset_qqs = self.get_dress_global_offsets(model, dress, dress_offset_scales, model_matrixes)
 
-        # logger.info("フィッティングローカルスケール計算", decoration=MLogger.Decoration.LINE)
-        # dress_offset_local_scales = self.get_dress_local_scale_offsets(
-        #     model, dress, dress_offset_positions, dress_offset_qqs, dress_offset_scales, model_matrixes
-        # )
-        dress_offset_local_scales = {}
+        logger.info("フィッティングローカルスケール計算", decoration=MLogger.Decoration.LINE)
+        dress_offset_local_scales = self.get_dress_local_scale_offsets(
+            model, dress, dress_offset_positions, dress_offset_qqs, dress_offset_scales, model_matrixes
+        )
+        # dress_offset_local_scales = {}
 
         logger.info("フィッティングボーンモーフ追加", decoration=MLogger.Decoration.LINE)
 
@@ -556,11 +556,22 @@ class LoadUsecase:
         # 衣装の初期姿勢を求める
         dress_matrixes = dress_motion.animate_bone([0], dress)
 
-        for bone_name, parent_bone_names in (
-            ("右手首", ("右腕", "右ひじ")),
-            ("左手首", ("左腕", "左ひじ")),
-            ("右足首", ("右足", "右ひざ")),
-            ("左足首", ("左足", "左ひざ")),
+        for bone_name, weight_bone_names, scale_bone_names in (
+            ("上半身", ("上半身", "上半身2", "上半身3", "下半身"), ("上半身", "上半身2", "上半身3", "下半身")),
+            (
+                "右腕",
+                ("右腕", "右腕捩", "右腕捩1", "右腕捩2", "右腕捩3", "右ひじ", "右手捩", "右手捩1", "右手捩2", "右手捩3", "右手首"),
+                ("右腕", "右ひじ", "右手首"),
+            ),
+            (
+                "左腕",
+                ("左腕", "左腕捩", "左腕捩1", "左腕捩2", "左腕捩3", "左ひじ", "左手捩", "左手捩1", "左手捩2", "左手捩3", "左手首"),
+                ("左腕", "左ひじ", "左手首"),
+            ),
+            ("右足", ("右足", "右足D", "右ひざ", "右ひざD"), ("右足", "右足D", "右ひざ", "右ひざD")),
+            ("左足", ("左足", "左足D", "左ひざ", "左ひざD"), ("左足", "左足D", "左ひざ", "左ひざD")),
+            ("右足首", ("右足首", "右足首D", "右足先EX"), ("右足首", "右足首D", "右足先EX")),
+            ("左足首", ("左足首", "左足首D", "左足先EX"), ("左足首", "左足首D", "左足先EX")),
         ):
             if not (bone_name in dress.bones and bone_name in model.bones):
                 # 人物と衣装の両方にボーンがなければスルー
@@ -572,7 +583,7 @@ class LoadUsecase:
             dress_vertices: set[int] = set([])
             model_vertices: set[int] = set([])
 
-            for weight_bone_name in bone_setting.weight_names:
+            for weight_bone_name in weight_bone_names:
                 if weight_bone_name in dress.bones:
                     dress_vertices |= set(dress.vertices_by_bones.get(dress.bones[weight_bone_name].index, []))
                 if weight_bone_name in model.bones:
@@ -588,15 +599,14 @@ class LoadUsecase:
             dress_local_positions = MVector3D(*np.max(np.abs(dress_deformed_local_positions), axis=0))
 
             dress_local_scale = (model_local_positions / dress_local_positions).one()
+            dress_local_length_scale = np.max(dress_local_scale.vector)
             # ローカルX軸方向はローカルスケール対象外
-            dress_offset_local_scale = MVector3D(1.0, dress_local_scale.z, dress_local_scale.x)
-
-            dress_offset_local_scales[dress_bone.index] = dress_offset_local_scale
+            dress_offset_local_scale = MVector3D(1.0, dress_local_length_scale, dress_local_length_scale)
 
             # 親ボーンにも同じローカルスケールをかける（手首と足首の太さで腕と足の太さを決める）
-            for parent_bone_name in parent_bone_names:
-                if parent_bone_name in dress.bones:
-                    dress_offset_local_scales[dress.bones[parent_bone_name].index] = dress_offset_local_scale.copy()
+            for scale_bone_name in scale_bone_names:
+                if scale_bone_name in dress.bones:
+                    dress_offset_local_scales[dress.bones[scale_bone_name].index] = dress_offset_local_scale.copy()
 
             logger.debug(
                 f"-- -- ローカルスケール[{dress_bone.name}][{dress_offset_local_scale}]"
@@ -638,17 +648,17 @@ class LoadUsecase:
             model_tail_position,
         )
 
-        # 中央値と標準偏差を計算
-        median_standard_values = np.median(model_local_positions, axis=0)
-        std_standard_values = np.std(model_local_positions, axis=0)
+        # # 中央値と標準偏差を計算
+        # median_standard_values = np.median(model_local_positions, axis=0)
+        # std_standard_values = np.std(model_local_positions, axis=0)
 
-        # 中央値から標準偏差の一定範囲までの値を取得
-        filtered_standard_values = model_local_positions[
-            (np.all(model_local_positions >= median_standard_values - (std_standard_values * 2), axis=1))
-            & (np.all(model_local_positions <= median_standard_values + (std_standard_values * 2), axis=1))
-        ]
+        # # 中央値から標準偏差の一定範囲までの値を取得
+        # filtered_standard_values = model_local_positions[
+        #     (np.all(model_local_positions >= median_standard_values - (std_standard_values * 2), axis=1))
+        #     & (np.all(model_local_positions <= median_standard_values + (std_standard_values * 2), axis=1))
+        # ]
 
-        return filtered_standard_values
+        return model_local_positions
 
     def get_tail_position(
         self,
