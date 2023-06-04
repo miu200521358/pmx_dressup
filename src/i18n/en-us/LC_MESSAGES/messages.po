@@ -665,3 +665,30 @@ msgstr "Fitting Global Scale Calculations"
 
 msgid "フィッティングローカルスケール計算"
 msgstr "Fitting Local Scale Calculations"
+
+msgid "衣装モデル追加セットアップ：フィッティングモーフ追加"
+msgstr "Additional costume model setup: fitting morphs added"
+
+msgid "フィッティングボーンモーフ：グローバルスケール計算"
+msgstr "Fitting Bone Morphs: Global Scale Calculations"
+
+msgid "フィッティングボーンモーフ：オフセット計算"
+msgstr "Fitting Bone Morph: Offset Calculation"
+
+msgid "フィッティングボーンモーフ：ローカルスケール計算"
+msgstr "Fitting Bone Morph: Local Scale Calculations"
+
+msgid "フィッティング頂点オフセット計算"
+msgstr "Fitting vertex offset calculation"
+
+msgid "フィッティング頂点モーフ追加"
+msgstr "Fitting vertex morph added"
+
+msgid "-- 頂点モーフ [{v}][移動={p}]"
+msgstr "-- vertex morph [{v}][move={p}]"
+
+msgid "-- 頂点オフセット"
+msgstr "-- vertex offset"
+
+msgid "-- -- 頂点オフセット [{i} ({p:.2f}%)]"
+msgstr "-- -- Vertex offset [{i} ({p:.2f}%)]"

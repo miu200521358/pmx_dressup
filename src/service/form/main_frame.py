@@ -227,6 +227,10 @@ class MainFrame(BaseFrame):
         bmf.ratio = 1
         self.dress_motion.morphs[bmf.name].append(bmf)
 
+        vmf = VmdMorphFrame(0, "VertexFitting")
+        vmf.ratio = 1
+        self.dress_motion.morphs[vmf.name].append(vmf)
+
         for material in dress.materials:
             mf = VmdMorphFrame(0, f"{material.name}TR")
             mf.ratio = abs(material_alphas.get(material.name, 1.0) - 1)

@@ -62,6 +62,33 @@ class LoadWorker(BaseWorker):
             usecase.valid_model(original_dress, "衣装")
 
             dress = original_dress.copy()
+            replaced_bone_names: list[str] = []
+
+            # # 上半身2の再設定
+            # logger.info("衣装モデル上半身2位置調整", decoration=MLogger.Decoration.BOX)
+            # replaced_bone_names += usecase.replace_upper2(model, dress)
+
+            # # 首の再設定
+            # logger.info("衣装モデル首位置調整", decoration=MLogger.Decoration.BOX)
+            # replaced_bone_names += usecase.replace_neck(model, dress)
+
+            # # 左肩の再設定
+            # logger.info("衣装モデル肩位置調整", decoration=MLogger.Decoration.BOX)
+            # replaced_bone_names += usecase.replace_shoulder(model, dress, "左")
+
+            # # 右肩の再設定
+            # logger.info("衣装モデル肩位置調整", decoration=MLogger.Decoration.BOX)
+            # replaced_bone_names += usecase.replace_shoulder(model, dress, "右")
+
+            # # 捩りの再設定
+            # logger.info("衣装モデル捩り位置調整", decoration=MLogger.Decoration.BOX)
+            # replaced_bone_names += usecase.replace_twist(model, dress, replaced_bone_names)
+
+            if replaced_bone_names:
+                # 置換ボーンがある場合、ウェイト置き換え
+                logger.info("衣装モデルウェイト調整", decoration=MLogger.Decoration.BOX)
+                dress.replace_standard_weights(replaced_bone_names)
+                dress.update_vertices_by_bone()
 
             # 不足ボーン追加
             logger.info("不足ボーン調整", decoration=MLogger.Decoration.BOX)
@@ -72,8 +99,8 @@ class LoadWorker(BaseWorker):
             usecase.create_material_transparent_morphs(dress)
 
             # 衣装にフィッティングボーンモーフを入れる
-            logger.info("衣装モデル追加セットアップ：フィッティングボーンモーフ追加", decoration=MLogger.Decoration.BOX)
-            usecase.create_dress_fit_bone_morphs(model, dress)
+            logger.info("衣装モデル追加セットアップ：フィッティングモーフ追加", decoration=MLogger.Decoration.BOX)
+            usecase.create_dress_fit_morphs(model, dress)
 
             # 個別調整用モーフ追加
             logger.info("衣装モデル追加セットアップ：個別調整ボーンモーフ追加", decoration=MLogger.Decoration.BOX)
