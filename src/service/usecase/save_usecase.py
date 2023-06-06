@@ -741,7 +741,7 @@ class SaveUsecase:
                 vertex_offset: VertexMorphOffset = offset
                 if vertex_offset.vertex_index in model_vertex_map:
                     copy_morph.offsets.append(
-                        VertexMorphOffset(model_vertex_map[vertex_offset.vertex_index], vertex_offset.position_offset.copy())
+                        VertexMorphOffset(model_vertex_map[vertex_offset.vertex_index], vertex_offset.position.copy())
                     )
         elif morph.morph_type == MorphType.UV:
             copy_morph.panel = morph.panel

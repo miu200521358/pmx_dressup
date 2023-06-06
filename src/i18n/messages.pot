@@ -917,3 +917,11 @@ msgstr ""
 msgid "-- -- 頂点オフセット [{i} ({p:.2f}%)]"
 msgstr ""
 
+
+msgid "衣装モデル上半身3位置調整"
+msgstr ""
+
+
+msgid "衣装モデル腕位置調整"
+msgstr ""
+
