@@ -70,7 +70,7 @@ class BoneCtrlSet:
             min_value=0.01,
             max_value=5,
             increment=0.01,
-            spin_increment=0.1,
+            spin_increment=0.05,
             border=3,
             size=wx.Size(210, -1),
             change_event=self.on_change_scale_x_slider,
@@ -89,7 +89,7 @@ class BoneCtrlSet:
             min_value=0.01,
             max_value=5,
             increment=0.01,
-            spin_increment=0.1,
+            spin_increment=0.05,
             border=3,
             size=wx.Size(210, -1),
             change_event=self.on_change_scale_y_slider,
@@ -115,7 +115,7 @@ class BoneCtrlSet:
             min_value=0.01,
             max_value=5,
             increment=0.01,
-            spin_increment=0.1,
+            spin_increment=0.05,
             border=3,
             size=wx.Size(210, -1),
             change_event=self.on_change_scale_z_slider,
@@ -134,7 +134,7 @@ class BoneCtrlSet:
             min_value=-45,
             max_value=45,
             increment=0.01,
-            spin_increment=0.1,
+            spin_increment=1,
             border=3,
             size=wx.Size(210, -1),
             change_event=self.on_change_degree_x_slider,
@@ -153,7 +153,7 @@ class BoneCtrlSet:
             min_value=-45,
             max_value=45,
             increment=0.01,
-            spin_increment=0.1,
+            spin_increment=1,
             border=3,
             size=wx.Size(210, -1),
             change_event=self.on_change_degree_y_slider,
@@ -172,7 +172,7 @@ class BoneCtrlSet:
             min_value=-45,
             max_value=45,
             increment=0.01,
-            spin_increment=0.1,
+            spin_increment=1,
             border=3,
             size=wx.Size(210, -1),
             change_event=self.on_change_degree_z_slider,
@@ -191,7 +191,7 @@ class BoneCtrlSet:
             min_value=-2,
             max_value=4,
             increment=0.01,
-            spin_increment=0.1,
+            spin_increment=0.2,
             border=3,
             size=wx.Size(210, -1),
             change_event=self.on_change_position_x_slider,
@@ -210,7 +210,7 @@ class BoneCtrlSet:
             min_value=-2,
             max_value=4,
             increment=0.01,
-            spin_increment=0.1,
+            spin_increment=0.2,
             border=3,
             size=wx.Size(210, -1),
             change_event=self.on_change_position_y_slider,
@@ -229,7 +229,7 @@ class BoneCtrlSet:
             min_value=-2,
             max_value=4,
             increment=0.01,
-            spin_increment=0.1,
+            spin_increment=0.2,
             border=3,
             size=wx.Size(210, -1),
             change_event=self.on_change_position_z_slider,
@@ -241,17 +241,17 @@ class BoneCtrlSet:
 
         self.btn_sizer = wx.BoxSizer(wx.HORIZONTAL)
 
-        self.ground_btn_ctrl = wx.Button(
-            self.window,
-            wx.ID_ANY,
-            __("接地"),
-            wx.DefaultPosition,
-            wx.Size(80, -1),
-        )
-        self.ground_btn_ctrl.SetToolTip(__("衣装の靴底が接地するように全体のY位置を調整します"))
-        self.ground_btn_ctrl.Bind(wx.EVT_BUTTON, self.on_fit_ground)
-        self.btn_sizer.Add(self.ground_btn_ctrl, 0, wx.ALL, 3)
-        self.btn_sizer.AddStretchSpacer()
+        # self.ground_btn_ctrl = wx.Button(
+        #     self.window,
+        #     wx.ID_ANY,
+        #     __("接地"),
+        #     wx.DefaultPosition,
+        #     wx.Size(80, -1),
+        # )
+        # self.ground_btn_ctrl.SetToolTip(__("衣装の靴底が接地するように全体のY位置を調整します"))
+        # self.ground_btn_ctrl.Bind(wx.EVT_BUTTON, self.on_fit_ground)
+        # self.btn_sizer.Add(self.ground_btn_ctrl, 0, wx.ALL, 3)
+        # self.btn_sizer.AddStretchSpacer()
 
         self.clear_btn_ctrl = wx.Button(
             self.window,
@@ -412,12 +412,12 @@ class BoneCtrlSet:
         self.parent.on_change(is_clear=True)
         self.parent.Enable(True)
 
-    def on_fit_ground(self, event: wx.Event) -> None:
-        self.parent.Enable(False)
-        if self.parent.on_fit_ground():
-            # 接地位置が求められたらモーション適用
-            self.parent.on_change()
-        self.parent.Enable(True)
+    # def on_fit_ground(self, event: wx.Event) -> None:
+    #     self.parent.Enable(False)
+    #     if self.parent.on_fit_ground():
+    #         # 接地位置が求められたらモーション適用
+    #         self.parent.on_change()
+    #     self.parent.Enable(True)
 
     def Enable(self, enable: bool) -> None:
         self.bone_choice_ctrl.Enable(enable)
@@ -433,7 +433,7 @@ class BoneCtrlSet:
         self.position_y_slider.Enable(enable)
         self.position_z_slider.Enable(enable)
         self.clear_btn_ctrl.Enable(enable)
-        self.ground_btn_ctrl.Enable(enable)
+        # self.ground_btn_ctrl.Enable(enable)
         self.scale_link_check_ctrl.Enable(enable)
 
 

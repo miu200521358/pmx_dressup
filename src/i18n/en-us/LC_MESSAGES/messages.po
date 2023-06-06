@@ -692,3 +692,9 @@ msgstr "-- vertex offset"
 
 msgid "-- -- 頂点オフセット [{i} ({p:.2f}%)]"
 msgstr "-- -- Vertex offset [{i} ({p:.2f}%)]"
+
+msgid "衣装モデル上半身3位置調整"
+msgstr "Costume model upper body 3-position adjustment"
+
+msgid "衣装モデル腕位置調整"
+msgstr "Costume model arm position adjustment"

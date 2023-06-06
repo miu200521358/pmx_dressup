@@ -27,6 +27,7 @@ from mlib.pmx.pmx_part import (
 )
 from mlib.pmx.pmx_writer import PmxWriter
 from mlib.vmd.vmd_collection import VmdMotion
+from mlib.vmd.vmd_part import VmdMorphFrame
 
 logger = MLogger(os.path.basename(__file__), level=1)
 __ = logger.get_text
@@ -55,6 +56,20 @@ class SaveUsecase:
         dress_motion = VmdMotion("dress fit motion")
         if dress_config_motion:
             dress_motion.morphs = dress_config_motion.morphs.copy()
+
+        # 接地Yを取得する
+        root_ground_y = self.get_dress_ground(
+            dress,
+            dress_motion,
+        )
+
+        mmf = VmdMorphFrame(0, "Root:Adjust")
+        mmf.ratio = root_ground_y
+        model_motion.morphs[mmf.name].append(mmf)
+
+        dmf = VmdMorphFrame(0, "Root:Adjust")
+        dmf.ratio = root_ground_y
+        dress_motion.morphs[dmf.name].append(dmf)
 
         dress_model = PmxModel(output_path)
         dress_model.model_name = model.name + "(" + dress.name + ")"
@@ -169,11 +184,36 @@ class SaveUsecase:
                 continue
             if (
                 bone.name not in STANDARD_BONE_NAMES
-                and not bone.is_visible
+                and bone.index not in model.vertices_by_bones
                 and bone.parent_index in model.vertices_by_bones
                 and not set(model.vertices_by_bones[bone.parent_index]) & active_model_vertices
             ):
-                # 準標準ではなく、非表示ボーンで、親ボーンが元々ウェイトを持っていて、かつ出力先にウェイトが乗ってる頂点が無い場合、スルー
+                # 準標準ではなく、自身はウェイトを持っておらず、親ボーンが元々ウェイトを持っていて、かつ出力先にウェイトが乗ってる頂点が無い場合、スルー
+                continue
+            if (
+                bone.name not in STANDARD_BONE_NAMES
+                and bone.is_ik
+                and not (
+                    set(model.vertices_by_bones.get(bone.ik.bone_index, [])) & active_model_vertices
+                    or [
+                        vertex_index
+                        for link in bone.ik.links
+                        for vertex_index in set(model.vertices_by_bones.get(link.bone_index, [])) & active_model_vertices
+                    ]
+                )
+            ):
+                # 準標準ではなく、IKボーンで、かつ出力先にリンクやターゲットボーンのウェイトが乗ってる頂点が無い場合、スルー
+                continue
+            if (
+                bone.name not in STANDARD_BONE_NAMES
+                and (bone.is_external_translation or bone.is_external_rotation)
+                and bone.effect_index in model.vertices_by_bones
+                and not set(model.vertices_by_bones[bone.effect_index]) & active_model_vertices
+            ):
+                # 準標準ではなく、自身はウェイトを持っておらず、付与親ボーンが元々ウェイトを持っていて、かつ出力先にウェイトが乗ってる頂点が無い場合、スルー
+                continue
+            if bone.parent_index not in model_bone_map:
+                # 親ボーンが登録されていない場合、子ボーンも登録しない
                 continue
 
             for dress_bone in dress.bones.writable():
@@ -181,23 +221,30 @@ class SaveUsecase:
                     0 <= dress_bone.tail_index
                     and dress_bone.name not in model.bones
                     and dress.bones[dress_bone.tail_index].name == bone.name
+                    and dress_bone.index in dress.vertices_by_bones
                 ):
-                    # 衣装だけのボーンが表示先が人物のボーンに繋がってる場合、その前に追加しておく
+                    # ウェイトを持っている衣装だけのボーンが表示先が人物のボーンに繋がってる場合、その前に追加しておく
                     dress_prev_copy_bone = dress_bone.copy()
                     dress_prev_copy_bone.index = len(dress_model.bones.writable())
                     bone_map[dress_prev_copy_bone.index] = {
                         "parent": [
-                            dress.bones[dress_bone.parent_index].name
+                            ""
+                            if 0 > dress_bone.parent_index
+                            else dress.bones[dress_bone.parent_index].name
                             if dress.bones[dress_bone.parent_index].is_standard or dress.bones[dress_bone.parent_index].is_system
                             else f"Cos:{dress.bones[dress_bone.parent_index].name}"
                         ],
                         "tail": [
-                            dress.bones[dress_bone.tail_index].name
+                            ""
+                            if 0 > dress_bone.tail_index
+                            else dress.bones[dress_bone.tail_index].name
                             if dress.bones[dress_bone.tail_index].is_standard or dress.bones[dress_bone.tail_index].is_system
                             else f"Cos:{dress.bones[dress_bone.tail_index].name}"
                         ],
                         "effect": [
-                            dress.bones[dress_bone.effect_index].name
+                            ""
+                            if 0 > dress_bone.effect_index
+                            else dress.bones[dress_bone.effect_index].name
                             if dress.bones[dress_bone.effect_index].is_standard or dress.bones[dress_bone.effect_index].is_system
                             else f"Cos:{dress.bones[dress_bone.effect_index].name}"
                         ],
@@ -246,9 +293,9 @@ class SaveUsecase:
             # 変形後の位置にボーンを配置する
             model_copy_bone.position = model_matrixes[0, bone.name].local_matrix * model_copy_bone.position
             bone_map[model_copy_bone.index] = {
-                "parent": [model.bones[bone.parent_index].name],
-                "tail": [model.bones[bone.tail_index].name],
-                "effect": [model.bones[bone.effect_index].name],
+                "parent": ["" if 0 > bone.parent_index else model.bones[bone.parent_index].name],
+                "tail": ["" if 0 > bone.tail_index else model.bones[bone.tail_index].name],
+                "effect": ["" if 0 > bone.effect_index else model.bones[bone.effect_index].name],
                 "ik_target": [model.bones[bone.ik.bone_index].name if bone.ik else Bone.SYSTEM_ROOT_NAME],
                 "ik_link": [model.bones[link.bone_index].name for link in bone.ik.links] if bone.ik else [],
             }
@@ -288,11 +335,36 @@ class SaveUsecase:
                 continue
             if (
                 bone.name not in STANDARD_BONE_NAMES
-                and not bone.is_visible
+                and bone.index not in dress.vertices_by_bones
                 and bone.parent_index in dress.vertices_by_bones
                 and not set(dress.vertices_by_bones[bone.parent_index]) & active_dress_vertices
             ):
                 # 準標準ではなく、非表示ボーンで、親ボーンが元々ウェイトを持っていて、かつ出力先にウェイトが乗ってる頂点が無い場合、スルー
+                continue
+            if (
+                bone.name not in STANDARD_BONE_NAMES
+                and bone.is_ik
+                and not (
+                    set(dress.vertices_by_bones.get(bone.ik.bone_index, [])) & active_dress_vertices
+                    or [
+                        vertex_index
+                        for link in bone.ik.links
+                        for vertex_index in set(dress.vertices_by_bones.get(link.bone_index, [])) & active_dress_vertices
+                    ]
+                )
+            ):
+                # 準標準ではなく、IKボーンで、かつ出力先にリンクやターゲットボーンのウェイトが乗ってる頂点が無い場合、スルー
+                continue
+            if (
+                bone.name not in STANDARD_BONE_NAMES
+                and (bone.is_external_translation or bone.is_external_rotation)
+                and bone.effect_index in dress.vertices_by_bones
+                and not set(dress.vertices_by_bones[bone.effect_index]) & active_dress_vertices
+            ):
+                # 準標準ではなく、自身はウェイトを持っておらず、付与親ボーンが元々ウェイトを持っていて、かつ出力先にウェイトが乗ってる頂点が無い場合、スルー
+                continue
+            if bone.parent_index not in dress_bone_map:
+                # 親ボーンが登録されていない場合、子ボーンも登録しない
                 continue
 
             dress_copy_bone = bone.copy()
@@ -304,17 +376,23 @@ class SaveUsecase:
             dress_copy_bone.position = dress_matrixes[0, bone.name].local_matrix * dress_copy_bone.position
             bone_map[dress_copy_bone.index] = {
                 "parent": [
-                    dress.bones[bone.parent_index].name
+                    ""
+                    if 0 > bone.parent_index
+                    else dress.bones[bone.parent_index].name
                     if dress.bones[bone.parent_index].is_standard or dress.bones[bone.parent_index].is_system
                     else f"Cos:{dress.bones[bone.parent_index].name}"
                 ],
                 "tail": [
-                    dress.bones[bone.tail_index].name
+                    ""
+                    if 0 > bone.tail_index
+                    else dress.bones[bone.tail_index].name
                     if dress.bones[bone.tail_index].is_standard or dress.bones[bone.tail_index].is_system
                     else f"Cos:{dress.bones[bone.tail_index].name}"
                 ],
                 "effect": [
-                    dress.bones[bone.effect_index].name
+                    ""
+                    if 0 > bone.effect_index
+                    else dress.bones[bone.effect_index].name
                     if dress.bones[bone.effect_index].is_standard or dress.bones[bone.effect_index].is_system
                     else f"Cos:{dress.bones[bone.effect_index].name}"
                 ],
@@ -359,9 +437,9 @@ class SaveUsecase:
 
         for bone in dress_model.bones:
             bone_setting = bone_map[bone.index]
-            bone.parent_index = dress_model.bones[bone_setting["parent"][0]].index
-            bone.tail_index = dress_model.bones[bone_setting["tail"][0]].index
-            bone.effect_index = dress_model.bones[bone_setting["effect"][0]].index
+            bone.parent_index = dress_model.bones[bone_setting["parent"][0]].index if bone_setting["parent"][0] else -1
+            bone.tail_index = dress_model.bones[bone_setting["tail"][0]].index if bone_setting["tail"][0] else -1
+            bone.effect_index = dress_model.bones[bone_setting["effect"][0]].index if bone_setting["effect"][0] else -1
             if bone.is_ik and bone.ik:
                 bone.ik.bone_index = dress_model.bones[bone_setting["ik_target"][0]].index
                 if 0 <= bone.ik.bone_index and dress_matrixes.exists(0, bone_setting["ik_target"][0]):
@@ -783,7 +861,7 @@ class SaveUsecase:
             copy_morph.morph_type = MorphType.MATERIAL
             for offset in morph.offsets:
                 material_offset: MaterialMorphOffset = offset
-                if material_offset.material_index in model_vertex_map:
+                if material_offset.material_index in model_material_map:
                     copy_morph.offsets.append(
                         MaterialMorphOffset(
                             model_material_map[material_offset.material_index],
@@ -825,3 +903,48 @@ class SaveUsecase:
                     copy_morph.offsets.append(GroupMorphOffset(model_morph_map[group_offset.morph_index], group_offset.morph_factor))
 
         return copy_morph, model_vertex_map
+
+    def get_dress_ground(
+        self,
+        dress: PmxModel,
+        dress_morph_motion: VmdMotion,
+    ) -> float:
+        """接地処理"""
+        ankle_under_bone_names: list[str] = []
+        # 足首より下のボーンから頂点位置を取得する
+        for bone_tree in dress.bone_trees:
+            for ankle_bone_name in ("右足首", "左足首", "右足首D", "左足首D"):
+                if ankle_bone_name in bone_tree.names:
+                    for bone in bone_tree.filter(ankle_bone_name):
+                        ankle_under_bone_names.append(bone.name)
+
+        # モーフだけを引き継いで行列位置を取得する
+        dress_matrixes = dress_morph_motion.animate_bone([0], dress)
+
+        ankle_under_vertex_indexes = set(
+            [
+                vertex_index
+                for bone_name in ankle_under_bone_names
+                for vertex_index in dress.vertices_by_bones.get(dress.bones[bone_name].index, [])
+            ]
+        )
+
+        if not ankle_under_vertex_indexes:
+            # 足首から下の頂点が無い場合、スルー
+            return 0.0
+
+        ankle_vertex_positions: list[np.ndarray] = []
+        for vertex_index in ankle_under_vertex_indexes:
+            vertex = dress.vertices[vertex_index]
+            # 変形後の位置
+            mat = np.zeros((4, 4))
+            for n in range(vertex.deform.count):
+                bone_index = vertex.deform.indexes[n]
+                bone_weight = vertex.deform.weights[n]
+                mat += dress_matrixes[0, dress.bones[bone_index].name].local_matrix.vector * bone_weight
+            ankle_vertex_positions.append(mat @ np.append(vertex.position.vector, 1))
+
+        # 最も地面に近い頂点を基準に接地位置を求める
+        min_position = np.min(ankle_vertex_positions, axis=0)
+
+        return -min_position[1]

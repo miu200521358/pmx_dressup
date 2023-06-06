@@ -272,29 +272,29 @@ class MainFrame(BaseFrame):
         self.config_panel.canvas.model_sets[1].bone_alpha = bone_alpha
         self.config_panel.canvas.change_motion(wx.SpinEvent(), is_bone_deform, 1)
 
-    def fit_ground(self) -> bool:
-        """接地位置を求めてモーフに設定。接地位置を求められたか返す"""
-        if not self.model_motion or not self.dress_motion:
-            return False
+    # def fit_ground(self) -> bool:
+    #     """接地位置を求めてモーフに設定。接地位置を求められたか返す"""
+    #     if not self.model_motion or not self.dress_motion:
+    #         return False
 
-        dress_morph_motion = VmdMotion("dress morph motion")
-        dress_morph_motion.morphs = self.dress_motion.morphs
+    #     dress_morph_motion = VmdMotion("dress morph motion")
+    #     dress_morph_motion.morphs = self.dress_motion.morphs
 
-        # 接地させる場合のYを取得する
-        root_ground_y = LoadUsecase().get_dress_ground(
-            self.file_panel.dress_ctrl.data,
-            dress_morph_motion,
-        )
+    #     # 接地させる場合のYを取得する
+    #     root_ground_y = LoadUsecase().get_dress_ground(
+    #         self.file_panel.dress_ctrl.data,
+    #         dress_morph_motion,
+    #     )
 
-        mf = VmdMorphFrame(0, "Root:Adjust")
-        mf.ratio = root_ground_y
-        self.model_motion.morphs[mf.name].append(mf)
+    #     mf = VmdMorphFrame(0, "Root:Adjust")
+    #     mf.ratio = root_ground_y
+    #     self.model_motion.morphs[mf.name].append(mf)
 
-        mf = VmdMorphFrame(0, "Root:Adjust")
-        mf.ratio = root_ground_y
-        self.dress_motion.morphs[mf.name].append(mf)
+    #     mf = VmdMorphFrame(0, "Root:Adjust")
+    #     mf.ratio = root_ground_y
+    #     self.dress_motion.morphs[mf.name].append(mf)
 
-        return True
+    #     return True
 
     def refit(self, refit_bone_name: str) -> None:
         # 再フィットしたモデルデータを設定する
