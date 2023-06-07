@@ -698,3 +698,21 @@ msgstr "Costume model upper body 3-position adjustment"
 
 msgid "衣装モデル腕位置調整"
 msgstr "Costume model arm position adjustment"
+
+msgid "出力ファイルパスが有効なパスではないため、デフォルトの出力ファイルパスを再設定します。"
+msgstr "The output file path is not a valid path, reset the default output file path"
+
+msgid "衣装: 衣装モデルウェイト調整"
+msgstr "Costume: Costume Model Weight Adjustment"
+
+msgid "-- 個別調整ボーンモーフ追加"
+msgstr "-- Individual adjustment bone morphs added"
+
+msgid "-- 再調整ボーンモーフ追加"
+msgstr "-- reconditioned bone morphs added"
+
+msgid "-- グローバルスケール計算"
+msgstr "-- Global scale calculation"
+
+msgid "-- -- グローバルスケール計算 [{i} ({p:.2f}%)]"
+msgstr "-- -- Global scale calculation [{i} ({p:.2f}%)]"
