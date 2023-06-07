@@ -427,6 +427,11 @@ class SaveUsecase:
             bone.parent_index = dress_model.bones[bone_setting["parent"][0]].index if bone_setting["parent"][0] else -1
             bone.tail_index = dress_model.bones[bone_setting["tail"][0]].index if bone_setting["tail"][0] else -1
             bone.effect_index = dress_model.bones[bone_setting["effect"][0]].index if bone_setting["effect"][0] else -1
+            bone.layer = max(
+                bone.layer,
+                dress_model.bones[bone.parent_index].layer,
+                (dress_model.bones[bone.effect_index].layer if 0 <= bone.effect_index else 0),
+            )
             if bone.is_ik and bone.ik:
                 bone.ik.bone_index = dress_model.bones[bone_setting["ik_target"][0]].index
                 if 0 <= bone.ik.bone_index and dress_matrixes.exists(0, bone_setting["ik_target"][0]):
