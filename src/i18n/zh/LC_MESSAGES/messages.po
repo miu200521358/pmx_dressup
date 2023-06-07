@@ -514,7 +514,7 @@ msgid "スライダーで調整対象となる衣装の材質です。\n「ボ�
 msgstr "材料 "表示要用滑块调整的服装的材料。\Јn "Bone line "表示代表骨头的线。\当导出时，如果Јn非透明度不是1，它将不会在服装结果中输出，（骨线总是不输出）"
 
 msgid "足首"
-msgstr "Ankle"
+msgstr "踝关节"
 
 msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}"
 msgstr "{b}：比例{s}，旋转{r}，移动{p}"
@@ -583,7 +583,7 @@ msgid "フィッティングボーンモーフ追加"
 msgstr "增加了合适的骨骼形态"
 
 msgid "縮尺YZリンク"
-msgstr "Scale YZ Link"
+msgstr "缩小规模 YZ 链接"
 
 msgid "初期化"
 msgstr "初始化"
@@ -716,3 +716,6 @@ msgstr "- 全球规模计算"
 
 msgid "-- -- グローバルスケール計算 [{i} ({p:.2f}%)]"
 msgstr "------全局比例计算[{i}（{p:.2f}%）]"
+
+msgid "-- ボーンデータ読み取り [{i} ({p:.2f}%)]"
+msgstr "--Bourne数据读取[{i}（{p:.2f}%）]"

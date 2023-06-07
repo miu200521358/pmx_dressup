@@ -174,33 +174,36 @@ class SaveUsecase:
         for bone in model.bones.writable():
             if bone.name in dress_model.bones:
                 continue
-            if bone.index in model.vertices_by_bones and not set(model.vertices_by_bones[bone.index]) & active_model_vertices:
-                # 元々ウェイトを持っていて、かつ出力先にウェイトが乗ってる頂点が無い場合、スルー
-                continue
-            if (
-                bone.index not in model.vertices_by_bones
-                and bone.parent_index in model.vertices_by_bones
-                and not set(model.vertices_by_bones[bone.parent_index]) & active_model_vertices
-            ):
-                # 自身はウェイトを持っておらず、親ボーンが元々ウェイトを持っていて、かつ出力先にウェイトが乗ってる頂点が無い場合、スルー
-                continue
-            if bone.is_ik and not (
-                set(model.vertices_by_bones.get(bone.ik.bone_index, [])) & active_model_vertices
-                or [
-                    vertex_index
-                    for link in bone.ik.links
-                    for vertex_index in set(model.vertices_by_bones.get(link.bone_index, [])) & active_model_vertices
-                ]
-            ):
-                # IKボーンで、かつ出力先にリンクやターゲットボーンのウェイトが乗ってる頂点が無い場合、スルー
-                continue
-            if (
-                (bone.is_external_translation or bone.is_external_rotation)
-                and bone.effect_index in model.vertices_by_bones
-                and not set(model.vertices_by_bones[bone.effect_index]) & active_model_vertices
-            ):
-                # 自身はウェイトを持っておらず、付与親ボーンが元々ウェイトを持っていて、かつ出力先にウェイトが乗ってる頂点が無い場合、スルー
-                continue
+            if not bone.is_standard:
+                # 準標準ではない場合、登録可否チェック
+
+                if bone.index in model.vertices_by_bones and not set(model.vertices_by_bones[bone.index]) & active_model_vertices:
+                    # 元々ウェイトを持っていて、かつ出力先にウェイトが乗ってる頂点が無い場合、スルー
+                    continue
+                if (
+                    bone.index not in model.vertices_by_bones
+                    and bone.parent_index in model.vertices_by_bones
+                    and not set(model.vertices_by_bones[bone.parent_index]) & active_model_vertices
+                ):
+                    # 自身はウェイトを持っておらず、親ボーンが元々ウェイトを持っていて、かつ出力先にウェイトが乗ってる頂点が無い場合、スルー
+                    continue
+                if bone.is_ik and not (
+                    set(model.vertices_by_bones.get(bone.ik.bone_index, [])) & active_model_vertices
+                    or [
+                        vertex_index
+                        for link in bone.ik.links
+                        for vertex_index in set(model.vertices_by_bones.get(link.bone_index, [])) & active_model_vertices
+                    ]
+                ):
+                    # IKボーンで、かつ出力先にリンクやターゲットボーンのウェイトが乗ってる頂点が無い場合、スルー
+                    continue
+                if (
+                    (bone.is_external_translation or bone.is_external_rotation)
+                    and bone.effect_index in model.vertices_by_bones
+                    and not set(model.vertices_by_bones[bone.effect_index]) & active_model_vertices
+                ):
+                    # 自身はウェイトを持っておらず、付与親ボーンが元々ウェイトを持っていて、かつ出力先にウェイトが乗ってる頂点が無い場合、スルー
+                    continue
             if bone.parent_index not in model_bone_map:
                 # 親ボーンが登録されていない場合、子ボーンも登録しない
                 continue
@@ -314,34 +317,39 @@ class SaveUsecase:
             if bone.is_standard and bone.name in dress_model.bones:
                 # 既に登録済みの準標準ボーンは追加しない
                 dress_bone_map[bone.index] = dress_model.bones[bone.name].index
+                # 位置は衣装側に合わせる
+                dress_model.bones[bone.name].position = dress_matrixes[0, bone.name].position.copy()
                 continue
-            if bone.index in dress.vertices_by_bones and not set(dress.vertices_by_bones[bone.index]) & active_dress_vertices:
-                # 元々ウェイトを持っていて、かつ出力先にウェイトが乗ってる頂点が無い場合、スルー
-                continue
-            if (
-                bone.index not in dress.vertices_by_bones
-                and bone.parent_index in dress.vertices_by_bones
-                and not set(dress.vertices_by_bones[bone.parent_index]) & active_dress_vertices
-            ):
-                # 非表示ボーンで、親ボーンが元々ウェイトを持っていて、かつ出力先にウェイトが乗ってる頂点が無い場合、スルー
-                continue
-            if bone.is_ik and not (
-                set(dress.vertices_by_bones.get(bone.ik.bone_index, [])) & active_dress_vertices
-                or [
-                    vertex_index
-                    for link in bone.ik.links
-                    for vertex_index in set(dress.vertices_by_bones.get(link.bone_index, [])) & active_dress_vertices
-                ]
-            ):
-                # IKボーンで、かつ出力先にリンクやターゲットボーンのウェイトが乗ってる頂点が無い場合、スルー
-                continue
-            if (
-                (bone.is_external_translation or bone.is_external_rotation)
-                and bone.effect_index in dress.vertices_by_bones
-                and not set(dress.vertices_by_bones[bone.effect_index]) & active_dress_vertices
-            ):
-                # 自身はウェイトを持っておらず、付与親ボーンが元々ウェイトを持っていて、かつ出力先にウェイトが乗ってる頂点が無い場合、スルー
-                continue
+            if not bone.is_standard:
+                # 準標準ではない場合、登録可否チェック
+
+                if bone.index in dress.vertices_by_bones and not set(dress.vertices_by_bones[bone.index]) & active_dress_vertices:
+                    # 元々ウェイトを持っていて、かつ出力先にウェイトが乗ってる頂点が無い場合、スルー
+                    continue
+                if (
+                    bone.index not in dress.vertices_by_bones
+                    and bone.parent_index in dress.vertices_by_bones
+                    and not set(dress.vertices_by_bones[bone.parent_index]) & active_dress_vertices
+                ):
+                    # 自身はウェイトを持っておらず、親ボーンが元々ウェイトを持っていて、かつ出力先にウェイトが乗ってる頂点が無い場合、スルー
+                    continue
+                if bone.is_ik and not (
+                    set(dress.vertices_by_bones.get(bone.ik.bone_index, [])) & active_dress_vertices
+                    or [
+                        vertex_index
+                        for link in bone.ik.links
+                        for vertex_index in set(dress.vertices_by_bones.get(link.bone_index, [])) & active_dress_vertices
+                    ]
+                ):
+                    # IKボーンで、かつ出力先にリンクやターゲットボーンのウェイトが乗ってる頂点が無い場合、スルー
+                    continue
+                if (
+                    (bone.is_external_translation or bone.is_external_rotation)
+                    and bone.effect_index in dress.vertices_by_bones
+                    and not set(dress.vertices_by_bones[bone.effect_index]) & active_dress_vertices
+                ):
+                    # 自身はウェイトを持っておらず、付与親ボーンが元々ウェイトを持っていて、かつ出力先にウェイトが乗ってる頂点が無い場合、スルー
+                    continue
             if bone.parent_index not in dress_bone_map:
                 # 親ボーンが登録されていない場合、子ボーンも登録しない
                 continue

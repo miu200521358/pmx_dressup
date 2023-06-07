@@ -286,10 +286,10 @@ msgid "モデル描画"
 msgstr "Model Drawing"
 
 msgid "-- -- 人物: 準標準ボーン追加: {b}"
-msgstr "-- -- People: semi-standard bone addition: {b}"
+msgstr "-- -- Person: semi-standard bone addition: {b}"
 
 msgid "-- 人物: 再セットアップ"
-msgstr "-- People: re-setup"
+msgstr "-- Person: re-setup"
 
 msgid "人物モデル欄に有効なパスが設定されていない為、タブ遷移を中断します。"
 msgstr "The tab transition is aborted because no valid path is set in the person model field"
@@ -571,7 +571,7 @@ msgid "設定"
 msgstr "Settings"
 
 msgid "人物モデル"
-msgstr "People Models"
+msgstr "Person Models"
 
 msgid "モデルセットアップ：ボーンツリー"
 msgstr "Model Setup: Bone Tree"
@@ -716,3 +716,6 @@ msgstr "-- Global scale calculation"
 
 msgid "-- -- グローバルスケール計算 [{i} ({p:.2f}%)]"
 msgstr "-- -- Global scale calculation [{i} ({p:.2f}%)]"
+
+msgid "-- ボーンデータ読み取り [{i} ({p:.2f}%)]"
+msgstr "-- Bone data read [{i} ({p:.2f}%)]"
