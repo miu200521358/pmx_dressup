@@ -191,7 +191,7 @@ class BoneCtrlSet:
             min_value=-2,
             max_value=4,
             increment=0.01,
-            spin_increment=0.2,
+            spin_increment=0.1,
             border=3,
             size=wx.Size(210, -1),
             change_event=self.on_change_position_x_slider,
@@ -210,7 +210,7 @@ class BoneCtrlSet:
             min_value=-2,
             max_value=4,
             increment=0.01,
-            spin_increment=0.2,
+            spin_increment=0.1,
             border=3,
             size=wx.Size(210, -1),
             change_event=self.on_change_position_y_slider,
@@ -229,7 +229,7 @@ class BoneCtrlSet:
             min_value=-2,
             max_value=4,
             increment=0.01,
-            spin_increment=0.2,
+            spin_increment=0.1,
             border=3,
             size=wx.Size(210, -1),
             change_event=self.on_change_position_z_slider,
@@ -251,7 +251,7 @@ class BoneCtrlSet:
         # self.ground_btn_ctrl.SetToolTip(__("衣装の靴底が接地するように全体のY位置を調整します"))
         # self.ground_btn_ctrl.Bind(wx.EVT_BUTTON, self.on_fit_ground)
         # self.btn_sizer.Add(self.ground_btn_ctrl, 0, wx.ALL, 3)
-        # self.btn_sizer.AddStretchSpacer()
+        self.btn_sizer.AddStretchSpacer()
 
         self.clear_btn_ctrl = wx.Button(
             self.window,

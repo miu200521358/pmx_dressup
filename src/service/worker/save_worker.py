@@ -31,7 +31,7 @@ class SaveWorker(BaseWorker):
             raise MApplicationException("衣装モデルデータが読み込まれていません")
 
         if not file_panel.output_pmx_ctrl.path or not os.path.exists(os.path.dirname(file_panel.output_pmx_ctrl.path)):
-            logger.warning("出力ファイルパスが有効なパスではないため、デフォルトの出力ファイルパスを再設定します。")
+            logger.warning(__("出力ファイルパスが有効なパスではないため、デフォルトの出力ファイルパスを再設定します。"))
             model_dir_path, model_file_name, model_file_ext = separate_path(file_panel.model_ctrl.path)
             dress_dir_path, dress_file_name, dress_file_ext = separate_path(file_panel.dress_ctrl.path)
             file_panel.output_pmx_ctrl.path = os.path.join(

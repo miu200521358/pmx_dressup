@@ -243,10 +243,6 @@ class MainFrame(BaseFrame):
         for bone_type_name, scale, degree, position in zip(
             bone_scales.keys(), bone_scales.values(), bone_degrees.values(), bone_positions.values()
         ):
-            # 再フィットは倍率は常に1（実際に与える値の方で調整する）
-            mf = VmdMorphFrame(0, f"{__('調整')}:{__(bone_type_name)}:Refit")
-            mf.ratio = 1
-            self.dress_motion.morphs[mf.name].append(mf)
             for ratio, axis_name, origin in (
                 (scale.x, "SX", 1),
                 (scale.y, "SY", 1),
@@ -258,9 +254,14 @@ class MainFrame(BaseFrame):
                 (position.y, "MY", 0),
                 (position.z, "MZ", 0),
             ):
-                mf = VmdMorphFrame(0, f"{__('調整')}:{__(bone_type_name)}:{axis_name}")
+                mf = VmdMorphFrame(0, f"調整:{__(bone_type_name)}:{axis_name}")
                 mf.ratio = ratio - origin
                 self.dress_motion.morphs[mf.name].append(mf)
+
+            # 再フィットは倍率は常に1（実際に与える値の方で調整する）
+            mf = VmdMorphFrame(0, f"調整:{__(bone_type_name)}:Refit")
+            mf.ratio = 1
+            self.dress_motion.morphs[mf.name].append(mf)
 
     def fit_model_motion(self, bone_alpha: float = 1.0, is_bone_deform: bool = True) -> None:
         self.config_panel.canvas.model_sets[0].motion = self.model_motion
@@ -296,13 +297,14 @@ class MainFrame(BaseFrame):
 
     #     return True
 
-    def refit(self, refit_bone_name: str) -> None:
+    def refit(self, morph_bone_name: str) -> None:
         # 再フィットしたモデルデータを設定する
         self.file_panel.dress_ctrl.data = LoadUsecase().refit_dress_morphs(
             self.file_panel.model_ctrl.data,
             self.file_panel.dress_ctrl.data,
+            self.model_motion,
             self.dress_motion,
-            refit_bone_name,
+            morph_bone_name,
         )
 
     def clear_refit(self) -> None:

@@ -62,6 +62,7 @@ class LoadWorker(BaseWorker):
             usecase.valid_model(original_dress, "衣装")
 
             dress = original_dress.copy()
+            dress.update_vertices_by_bone()
 
             # 不足ボーン追加
             logger.info("不足ボーン調整", decoration=MLogger.Decoration.BOX)
@@ -73,9 +74,10 @@ class LoadWorker(BaseWorker):
             logger.info("衣装モデル上半身2位置調整", decoration=MLogger.Decoration.BOX)
             replaced_bone_names += usecase.replace_upper2(model, dress)
 
-            # 上半身3の再設定
-            logger.info("衣装モデル上半身3位置調整", decoration=MLogger.Decoration.BOX)
-            replaced_bone_names += usecase.replace_upper3(model, dress)
+            if "上半身3" in dress.bones:
+                # 上半身3の再設定
+                logger.info("衣装モデル上半身3位置調整", decoration=MLogger.Decoration.BOX)
+                replaced_bone_names += usecase.replace_upper3(model, dress)
 
             # 首の再設定
             logger.info("衣装モデル首位置調整", decoration=MLogger.Decoration.BOX)
@@ -97,22 +99,25 @@ class LoadWorker(BaseWorker):
             replaced_bone_names += usecase.replace_twist(model, dress, replaced_bone_names)
 
             if replaced_bone_names:
-                # 置換ボーンがある場合、ウェイト置き換え
-                logger.info("衣装モデルウェイト調整", decoration=MLogger.Decoration.BOX)
+                dress.setup()
                 dress.replace_standard_weights(replaced_bone_names)
+                dress.update_vertices_by_bone()
+
+                logger.info("衣装: 衣装モデルウェイト調整")
+            else:
                 dress.update_vertices_by_bone()
 
             # 衣装に材質透明モーフを入れる
             logger.info("衣装モデル追加セットアップ：材質透過モーフ追加", decoration=MLogger.Decoration.BOX)
             usecase.create_material_transparent_morphs(dress)
 
-            # 衣装にフィッティングボーンモーフを入れる
-            logger.info("衣装モデル追加セットアップ：フィッティングモーフ追加", decoration=MLogger.Decoration.BOX)
-            usecase.create_dress_fit_morphs(model, dress)
-
             # 個別調整用モーフ追加
             logger.info("衣装モデル追加セットアップ：個別調整ボーンモーフ追加", decoration=MLogger.Decoration.BOX)
             usecase.create_dress_individual_bone_morphs(model, dress)
+
+            # 衣装にフィッティングボーンモーフを入れる
+            logger.info("衣装モデル追加セットアップ：フィッティングモーフ追加", decoration=MLogger.Decoration.BOX)
+            usecase.create_dress_fit_morphs(model, dress)
 
             is_dress_change = True
         elif file_panel.dress_ctrl.original_data:
