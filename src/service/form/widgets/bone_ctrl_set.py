@@ -437,4 +437,4 @@ class BoneCtrlSet:
         self.scale_link_check_ctrl.Enable(enable)
 
 
-FIT_BONE_NAMES = ("上半身", "上半身2", "胸", "肩", "腕", "ひじ", "手のひら", "首", "頭", "下半身", "足", "ひざ", "足首")
+FIT_BONE_NAMES = ("上半身", "上半身2", "肩", "腕", "ひじ", "手のひら", "首", "頭", "下半身", "足", "ひざ", "足首")
