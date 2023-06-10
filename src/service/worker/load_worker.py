@@ -94,9 +94,9 @@ class LoadWorker(BaseWorker):
             if dress.bones.exists(("首根元", "左腕", "右腕")):
                 dress.bones["首根元"].position = (dress.bones["左腕"].position + dress.bones["右腕"].position) / 2
 
-            # # 捩りの再設定
-            # logger.info("衣装モデル捩り位置調整", decoration=MLogger.Decoration.BOX)
-            # replaced_bone_names += usecase.replace_twist(model, dress, replaced_bone_names)
+            # 捩りの再設定
+            logger.info("衣装モデル捩り位置調整", decoration=MLogger.Decoration.BOX)
+            replaced_bone_names += usecase.replace_twist(model, dress, replaced_bone_names)
 
             if replaced_bone_names:
                 dress.setup()

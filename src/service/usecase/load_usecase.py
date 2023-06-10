@@ -209,7 +209,13 @@ class LoadUsecase:
         dress_replace_new_pos = align_triangle(model_from_pos, model_to_pos, model_replace_pos, dress_from_pos, dress_to_pos)
 
         dress.bones[replace_name].position = dress_replace_new_pos
-        logger.info("衣装: {r}: 位置再計算: {u} → {p}", r=replace_name, u=dress_replace_pos, p=dress_replace_new_pos)
+        logger.info(
+            "衣装: {r}: 位置再計算: {u} → {p} ({d})",
+            r=replace_name,
+            u=dress_replace_pos,
+            p=dress_replace_new_pos,
+            d=(dress_replace_new_pos - dress_replace_pos),
+        )
 
         return True, dress_replace_new_pos - dress_replace_pos
 
@@ -292,48 +298,55 @@ class LoadUsecase:
 
         for from_name, to_name, replace_name in replace_bone_set:
             # 捩りボーンそのもの
-            is_add = self.replace_bone_position(model, dress, from_name, to_name, replace_name)
+            is_add = self.replace_bone_position_twist(model, dress, from_name, to_name, replace_name)
             if is_add:
                 replaced_bone_names.append(replace_name)
 
             # 分散の付与ボーン
             for no in range(1, 5):
-                is_add = self.replace_bone_position(model, dress, from_name, to_name, f"{replace_name}{no}")
+                is_add = self.replace_bone_position_twist(model, dress, from_name, to_name, f"{replace_name}{no}")
                 if is_add:
                     replaced_bone_names.append(replace_name)
 
         return replaced_bone_names
 
-    # def replace_bone_position_twist(self, model: PmxModel, dress: PmxModel, from_name: str, to_name: str, replace_name: str) -> bool:
-    #     """
-    #     衣装のボーン位置を人物ボーン位置に合わせて配置を変える(斜め)
-    #     """
-    #     if not (model.bones.exists([from_name, to_name, replace_name]) and dress.bones.exists([from_name, to_name, replace_name])):
-    #         # ボーンが足りなかったら追加しない
-    #         return False
+    def replace_bone_position_twist(self, model: PmxModel, dress: PmxModel, from_name: str, to_name: str, replace_name: str) -> bool:
+        """
+        衣装のボーン位置を人物ボーン位置に合わせて配置を変える(斜め)
+        """
+        if not (model.bones.exists([from_name, to_name, replace_name]) and dress.bones.exists([from_name, to_name, replace_name])):
+            # ボーンが足りなかったら追加しない
+            return False
 
-    #     model_from_pos = model.bones[from_name].position
-    #     model_replace_pos = model.bones[replace_name].position
-    #     model_to_pos = model.bones[to_name].position
-    #     dress_from_pos = dress.bones[from_name].position
-    #     dress_replace_pos = dress.bones[replace_name].position
-    #     dress_to_pos = dress.bones[to_name].position
+        model_from_pos = model.bones[from_name].position
+        model_replace_pos = model.bones[replace_name].position
+        model_to_pos = model.bones[to_name].position
+        dress_from_pos = dress.bones[from_name].position
+        dress_replace_pos = dress.bones[replace_name].position
+        dress_to_pos = dress.bones[to_name].position
 
-    #     # 元ボーン-置換ボーン ベースで求めた時の位置 ---------------
+        # 元ボーン-置換ボーン ベースで求めた時の位置 ---------------
 
-    #     # 元ボーン-置換ボーン:縮尺
-    #     from_replace_scale = ((model_replace_pos - model_from_pos) / (model_to_pos - model_from_pos)) / (
-    #         (dress_replace_pos - dress_from_pos) / (dress_to_pos - dress_from_pos)
-    #     )
+        # 元ボーン-置換ボーン:縮尺
+        from_replace_scale = ((model_replace_pos - model_from_pos) / (model_to_pos - model_from_pos)) / (
+            (dress_replace_pos - dress_from_pos) / (dress_to_pos - dress_from_pos)
+        )
 
-    #     # 縮尺に合わせた位置
-    #     dress_new_twist_pos = dress_from_pos + ((dress_replace_pos - dress_from_pos) * from_replace_scale)
+        # 縮尺に合わせた位置
+        dress_replace_new_pos = dress_from_pos + ((dress_replace_pos - dress_from_pos) * from_replace_scale)
 
-    #     # 最終的な置換ボーンは元ボーン-置換ボーン,先ボーン-置換ボーンの中間とする
-    #     dress.bones[replace_name].position = dress_new_twist_pos
-    #     logger.info("衣装: {r}: 位置再計算: {u} → {p}", r=replace_name, u=dress_replace_pos, p=dress_new_twist_pos)
+        # 最終的な置換ボーンは元ボーン-置換ボーン,先ボーン-置換ボーンの中間とする
+        dress.bones[replace_name].position = dress_replace_new_pos
 
-    #     return True
+        logger.info(
+            "衣装: {r}: 位置再計算: {u} → {p} ({d})",
+            r=replace_name,
+            u=dress_replace_pos,
+            p=dress_replace_new_pos,
+            d=(dress_replace_new_pos - dress_replace_pos),
+        )
+
+        return True
 
     def create_material_transparent_morphs(self, model: PmxModel) -> None:
         """材質OFFモーフ追加"""
@@ -816,17 +829,19 @@ class LoadUsecase:
                         )
 
                         offset_link_position = deformed_refit_link_position - deformed_link_position
-                        dress_offset_positions[dress_ik_link_bone.index].z += offset_link_position.z / 4
+                        if 0 > offset_link_position.z:
+                            # ひざが前に出る方向の補正のみ行う
+                            dress_offset_positions[dress_ik_link_bone.index].z += offset_link_position.z / 4
 
-                        # キーフレ更新
-                        mbf = dress_motion.bones[dress_ik_link_bone.name][0]
-                        mbf.position = dress_offset_positions[dress_ik_link_bone.index].copy()
-                        dress_motion.bones[dress_ik_link_bone.name].append(mbf)
+                            # キーフレ更新
+                            mbf = dress_motion.bones[dress_ik_link_bone.name][0]
+                            mbf.position = dress_offset_positions[dress_ik_link_bone.index].copy()
+                            dress_motion.bones[dress_ik_link_bone.name].append(mbf)
 
-                        logger.debug(
-                            f"-- -- 移動追加オフセット[{dress_ik_link_bone.name}][{offset_link_position}]"
-                            + f"[original={deformed_refit_link_position}][deform={deformed_link_position}]"
-                        )
+                            logger.debug(
+                                f"-- -- 移動追加オフセット[{dress_ik_link_bone.name}][{offset_link_position}]"
+                                + f"[original={deformed_refit_link_position}][deform={deformed_link_position}]"
+                            )
                 # matrixes = dress_motion.animate_bone([0], model, [bone_name], append_ik=False)
                 # deformed_ik_position = matrixes[0, dress_ik_bone.name].position
                 # deformed_target_position = matrixes[0, dress_ik_target_bone.name].position

@@ -719,3 +719,6 @@ msgstr "-- -- Global scale calculation [{i} ({p:.2f}%)]"
 
 msgid "-- ボーンデータ読み取り [{i} ({p:.2f}%)]"
 msgstr "-- Bone data read [{i} ({p:.2f}%)]"
+
+msgid "衣装: {r}: 位置再計算: {u} → {p} ({d})"
+msgstr "Costume: {r}: position recalculation: {u} → {p} ({d})"

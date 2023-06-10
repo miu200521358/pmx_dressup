@@ -953,3 +953,7 @@ msgstr ""
 msgid "-- ボーンデータ読み取り [{i} ({p:.2f}%)]"
 msgstr ""
 
+
+msgid "衣装: {r}: 位置再計算: {u} → {p} ({d})"
+msgstr ""
+
