@@ -789,7 +789,7 @@ class LoadUsecase:
             dress_motion.bones[dress_bone.name].append(sbf)
 
             if dress_bone.ik_target_indexes:
-                # IK変形をマシにするため、IKリンクボーンの位置を補正する
+                # IKリンクボーンの位置を補正する
                 dress_ik_bone = dress.bones[dress_bone.ik_target_indexes[0]]
                 dress_ik_link_start_bone = dress.bones[dress_ik_bone.ik.links[-1].bone_index]
                 dress_ik_target_bone = dress.bones[dress_ik_bone.ik.bone_index]
@@ -819,7 +819,7 @@ class LoadUsecase:
 
                     # キーフレ更新
                     mbf = dress_motion.bones[dress_ik_link_bone.name][0]
-                    mbf.position = dress_offset_positions[dress_ik_link_bone.index]
+                    mbf.position = dress_offset_positions[dress_ik_link_bone.index].copy()
                     dress_motion.bones[dress_ik_link_bone.name].append(mbf)
 
                     logger.debug(
@@ -827,45 +827,45 @@ class LoadUsecase:
                         + f"[original={deformed_refit_link_position}][deform={deformed_link_position}]"
                     )
 
-                matrixes = dress_motion.animate_bone([0], model, [bone_name], append_ik=False)
-                deformed_ik_position = matrixes[0, dress_ik_bone.name].position
-                deformed_target_position = matrixes[0, dress_ik_target_bone.name].position
+                # matrixes = dress_motion.animate_bone([0], model, [bone_name], append_ik=False)
+                # deformed_ik_position = matrixes[0, dress_ik_bone.name].position
+                # deformed_target_position = matrixes[0, dress_ik_target_bone.name].position
 
-                # offset_target_position = deformed_ik_position - deformed_target_position
-                # dress_offset_position += offset_target_position
+                # # offset_target_position = deformed_ik_position - deformed_target_position
+                # # dress_offset_position += offset_target_position
+
+                # # logger.debug(
+                # #     f"-- -- 移動追加オフセット[{dress_ik_target_bone.name}][{offset_link_position}]"
+                # #     + f"[ik={deformed_ik_position}][fk={deformed_target_position}]"
+                # # )
+
+                # # FKボーンの位置：自分の方向
+                # dress_x_direction = (matrixes[0, dress_ik_link_bone.name].global_matrix.inverse() * deformed_target_position).normalized()
+                # dress_y_direction = dress_x_direction.cross(z_direction)
+                # dress_slope_qq = MQuaternion.from_direction(dress_x_direction, dress_y_direction)
+
+                # # IKボーンの位置：自分の方向
+                # model_x_direction = (matrixes[0, dress_ik_link_bone.name].global_matrix.inverse() * deformed_ik_position).normalized()
+                # model_y_direction = model_x_direction.cross(z_direction)
+                # model_slope_qq = MQuaternion.from_direction(model_x_direction, model_y_direction)
+
+                # dress_offset_qq = model_slope_qq * dress_slope_qq.inverse()
+
+                # for tree_bone_index in reversed(dress.bone_trees[dress_ik_link_bone.name].indexes[:-1]):
+                #     # 自分より親は逆回転させる
+                #     dress_offset_qq *= dress_offset_qqs.get(tree_bone_index, MQuaternion()).inverse()
+
+                # dress_offset_qqs[dress_ik_link_bone.index] *= dress_offset_qq
+
+                # # キーフレとして追加
+                # qbf = dress_motion.bones[dress_ik_link_bone.name][0]
+                # qbf.rotation = dress_offset_qqs[dress_ik_link_bone.index].copy()
+                # dress_motion.bones[dress_ik_link_bone.name].append(qbf)
 
                 # logger.debug(
-                #     f"-- -- 移動追加オフセット[{dress_ik_target_bone.name}][{offset_link_position}]"
+                #     f"-- -- 回転補正オフセット[{dress_ik_link_bone.name}][{dress_offset_qqs[dress_ik_link_bone.index].to_euler_degrees()}]"
                 #     + f"[ik={deformed_ik_position}][fk={deformed_target_position}]"
                 # )
-
-                # FKボーンの位置：自分の方向
-                dress_x_direction = (matrixes[0, dress_ik_link_bone.name].global_matrix.inverse() * deformed_target_position).normalized()
-                dress_y_direction = dress_x_direction.cross(z_direction)
-                dress_slope_qq = MQuaternion.from_direction(dress_x_direction, dress_y_direction)
-
-                # IKボーンの位置：自分の方向
-                model_x_direction = (matrixes[0, dress_ik_link_bone.name].global_matrix.inverse() * deformed_ik_position).normalized()
-                model_y_direction = model_x_direction.cross(z_direction)
-                model_slope_qq = MQuaternion.from_direction(model_x_direction, model_y_direction)
-
-                dress_offset_qq = model_slope_qq * dress_slope_qq.inverse()
-
-                for tree_bone_index in reversed(dress.bone_trees[dress_ik_link_bone.name].indexes[:-1]):
-                    # 自分より親は逆回転させる
-                    dress_offset_qq *= dress_offset_qqs.get(tree_bone_index, MQuaternion()).inverse()
-
-                dress_offset_qqs[dress_ik_link_bone.index] *= dress_offset_qq
-
-                # キーフレとして追加
-                qbf = dress_motion.bones[dress_ik_link_bone.name][0]
-                qbf.rotation = dress_offset_qqs[dress_ik_link_bone.index].copy()
-                dress_motion.bones[dress_ik_link_bone.name].append(qbf)
-
-                logger.debug(
-                    f"-- -- 回転補正オフセット[{dress_ik_link_bone.name}][{dress_offset_qqs[dress_ik_link_bone.index].to_euler_degrees()}]"
-                    + f"[ik={deformed_ik_position}][fk={deformed_target_position}]"
-                )
 
             if dress_bone.is_translatable_standard:
                 # 移動計算 ------------------
@@ -897,9 +897,9 @@ class LoadUsecase:
 
                 dress_offset_position = model_bone_position - dress_bone_position
 
-                if dress_bone.is_leg_d:
-                    # 足D系列は足FKに揃える
-                    dress_offset_position = dress_offset_positions[dress_bone.effect_index].copy()
+                # if dress_bone.is_leg_d:
+                #     # 足D系列は足FKに揃える
+                #     dress_offset_position = dress_offset_positions[dress_bone.effect_index].copy()
 
                 dress_offset_positions[dress_bone.index] = dress_offset_position
 
@@ -915,12 +915,26 @@ class LoadUsecase:
             if dress_bone.is_rotatable_standard:
                 # 回転計算 ------------------
 
-                model_bone_matrix, model_bone_position, model_tail_position = self.get_tail_position(
-                    model, model_bone, bone_setting, matrixes=model_matrixes
-                )
-                dress_bone_matrix, dress_bone_position, dress_tail_position = self.get_tail_position(
-                    dress, dress_bone, bone_setting, motion=dress_motion, append_ik=False
-                )
+                if dress_bone.is_leg_d:
+                    # 足DはFKの向きに合わせる
+                    fk_dress_bone = dress.bones[dress_bone.effect_index]
+                    model_bone_matrix, model_bone_position, model_tail_position = self.get_tail_position(
+                        dress,
+                        fk_dress_bone,
+                        STANDARD_BONE_NAMES[fk_dress_bone.name],
+                        motion=dress_motion,
+                        append_ik=False,
+                    )
+                    dress_bone_matrix, dress_bone_position, dress_tail_position = self.get_tail_position(
+                        dress, dress_bone, bone_setting, motion=dress_motion, append_ik=False
+                    )
+                else:
+                    model_bone_matrix, model_bone_position, model_tail_position = self.get_tail_position(
+                        model, model_bone, bone_setting, matrixes=model_matrixes
+                    )
+                    dress_bone_matrix, dress_bone_position, dress_tail_position = self.get_tail_position(
+                        dress, dress_bone, bone_setting, motion=dress_motion, append_ik=False
+                    )
 
                 if model_tail_position and dress_tail_position:
                     # 衣装：自分の方向
@@ -944,9 +958,9 @@ class LoadUsecase:
                         # 自分より親は逆回転させる
                         dress_offset_qq *= dress_offset_qqs.get(tree_bone_index, MQuaternion()).inverse()
 
-                    if dress_bone.is_leg_d:
-                        # 足D系列は足FKに揃える
-                        dress_offset_qq = dress_offset_qqs[dress.bones[dress_bone.name[:-1]].index].copy()
+                    # if dress_bone.is_leg_d:
+                    #     # 足D系列は足FKに揃える
+                    #     dress_offset_qq = dress_offset_qqs[dress.bones[dress_bone.name[:-1]].index].copy()
 
                     dress_offset_qqs[dress_bone.index] = dress_offset_qq
 
