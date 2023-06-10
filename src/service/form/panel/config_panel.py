@@ -150,8 +150,8 @@ class ConfigPanel(CanvasPanel):
         self.change_motion(False, target_bone_name)
 
     def on_change(self, target_bone_name: Optional[str] = None, is_clear: bool = False) -> None:
-        if is_clear:
-            self.frame.clear_refit()
+        # if is_clear:
+        #     self.frame.clear_refit()
         self.change_motion(True, target_bone_name)
 
     # def on_fit_ground(self) -> bool:
@@ -167,7 +167,7 @@ class ConfigPanel(CanvasPanel):
             self.dress_bone_ctrl.degrees,
             self.dress_bone_ctrl.positions,
         )
-        self.frame.clear_refit()
-        if target_bone_name:
-            self.frame.refit(target_bone_name)
+        # self.frame.clear_refit()
+        # if target_bone_name:
+        #     self.frame.refit(target_bone_name)
         self.frame.fit_dress_motion(self.dress_material_ctrl.alphas.get(__("ボーンライン"), 0.5), is_bone_deform)

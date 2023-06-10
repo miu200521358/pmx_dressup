@@ -6,14 +6,12 @@ import wx
 from mlib.base.logger import MLogger
 from mlib.base.math import MVector3D
 from mlib.pmx.pmx_collection import PmxModel
-from mlib.pmx.pmx_part import BoneMorphOffset, MorphType
 from mlib.service.form.base_frame import BaseFrame
 from mlib.utils.file_utils import save_histories
 from mlib.vmd.vmd_collection import VmdMotion
 from mlib.vmd.vmd_part import VmdMorphFrame
 from service.form.panel.config_panel import ConfigPanel
 from service.form.panel.file_panel import FilePanel
-from service.usecase.load_usecase import LoadUsecase
 from service.worker.load_motion_worker import LoadMotionWorker
 from service.worker.load_worker import LoadWorker
 from service.worker.save_worker import SaveWorker
@@ -258,10 +256,10 @@ class MainFrame(BaseFrame):
                 mf.ratio = ratio - origin
                 self.dress_motion.morphs[mf.name].append(mf)
 
-            # 再フィットは倍率は常に1（実際に与える値の方で調整する）
-            mf = VmdMorphFrame(0, f"調整:{__(bone_type_name)}:Refit")
-            mf.ratio = 1
-            self.dress_motion.morphs[mf.name].append(mf)
+            # # 再フィットは倍率は常に1（実際に与える値の方で調整する）
+            # mf = VmdMorphFrame(0, f"調整:{__(bone_type_name)}:Refit")
+            # mf.ratio = 1
+            # self.dress_motion.morphs[mf.name].append(mf)
 
     def fit_model_motion(self, bone_alpha: float = 1.0, is_bone_deform: bool = True) -> None:
         self.config_panel.canvas.model_sets[0].motion = self.model_motion
@@ -297,21 +295,21 @@ class MainFrame(BaseFrame):
 
     #     return True
 
-    def refit(self, morph_bone_name: str) -> None:
-        # 再フィットしたモデルデータを設定する
-        self.file_panel.dress_ctrl.data = LoadUsecase().refit_dress_morphs(
-            self.file_panel.model_ctrl.data,
-            self.file_panel.dress_ctrl.data,
-            self.model_motion,
-            self.dress_motion,
-            morph_bone_name,
-        )
+    # def refit(self, morph_bone_name: str) -> None:
+    #     # 再フィットしたモデルデータを設定する
+    #     self.file_panel.dress_ctrl.data = LoadUsecase().refit_dress_morphs(
+    #         self.file_panel.model_ctrl.data,
+    #         self.file_panel.dress_ctrl.data,
+    #         self.model_motion,
+    #         self.dress_motion,
+    #         morph_bone_name,
+    #     )
 
-    def clear_refit(self) -> None:
-        dress: PmxModel = self.file_panel.dress_ctrl.data
-        for bone_morph in dress.morphs.filter_by_type(MorphType.BONE):
-            if "Refit" not in bone_morph.name:
-                continue
-            for offset in bone_morph.offsets:
-                bone_offset: BoneMorphOffset = offset
-                bone_offset.clear()
+    # def clear_refit(self) -> None:
+    #     dress: PmxModel = self.file_panel.dress_ctrl.data
+    #     for bone_morph in dress.morphs.filter_by_type(MorphType.BONE):
+    #         if "Refit" not in bone_morph.name:
+    #             continue
+    #         for offset in bone_morph.offsets:
+    #             bone_offset: BoneMorphOffset = offset
+    #             bone_offset.clear()
