@@ -796,37 +796,37 @@ class LoadUsecase:
 
                 for dress_ik_link in dress_ik_bone.ik.links[:-1]:
                     dress_ik_link_bone = dress.bones[dress_ik_link.bone_index]
-                    matrixes = dress_motion.animate_bone([0], model, [bone_name], append_ik=False)
+                    if STANDARD_BONE_NAMES[dress_ik_link_bone.name].translatable:
+                        matrixes = dress_motion.animate_bone([0], model, [bone_name], append_ik=False)
 
-                    # 変形後の位置
-                    deformed_start_position = matrixes[0, dress_ik_link_start_bone.name].position
-                    deformed_link_position = matrixes[0, dress_ik_link_bone.name].position
-                    deformed_target_position = matrixes[0, dress_ik_target_bone.name].position
-                    # 変形前の位置
-                    original_start_position = dress.bones[dress_ik_link_start_bone.name].position
-                    original_link_position = dress.bones[dress_ik_link_bone.name].position
-                    original_target_position = dress.bones[dress_ik_target_bone.name].position
+                        # 変形後の位置
+                        deformed_start_position = matrixes[0, dress_ik_link_start_bone.name].position
+                        deformed_link_position = matrixes[0, dress_ik_link_bone.name].position
+                        deformed_target_position = matrixes[0, dress_ik_target_bone.name].position
+                        # 変形前の位置
+                        original_start_position = dress.bones[dress_ik_link_start_bone.name].position
+                        original_link_position = dress.bones[dress_ik_link_bone.name].position
+                        original_target_position = dress.bones[dress_ik_target_bone.name].position
 
-                    original_link_ratio = (original_link_position - original_start_position).one() / (
-                        original_target_position - original_start_position
-                    ).one()
-                    deformed_refit_link_position = deformed_start_position + (
-                        (deformed_target_position - deformed_start_position) * original_link_ratio
-                    )
+                        original_link_ratio = (original_link_position - original_start_position).one() / (
+                            original_target_position - original_start_position
+                        ).one()
+                        deformed_refit_link_position = deformed_start_position + (
+                            (deformed_target_position - deformed_start_position) * original_link_ratio
+                        )
 
-                    offset_link_position = deformed_refit_link_position - deformed_link_position
-                    dress_offset_positions[dress_ik_link_bone.index].z += offset_link_position.z / 2
+                        offset_link_position = deformed_refit_link_position - deformed_link_position
+                        dress_offset_positions[dress_ik_link_bone.index].z += offset_link_position.z / 4
 
-                    # キーフレ更新
-                    mbf = dress_motion.bones[dress_ik_link_bone.name][0]
-                    mbf.position = dress_offset_positions[dress_ik_link_bone.index].copy()
-                    dress_motion.bones[dress_ik_link_bone.name].append(mbf)
+                        # キーフレ更新
+                        mbf = dress_motion.bones[dress_ik_link_bone.name][0]
+                        mbf.position = dress_offset_positions[dress_ik_link_bone.index].copy()
+                        dress_motion.bones[dress_ik_link_bone.name].append(mbf)
 
-                    logger.debug(
-                        f"-- -- 移動追加オフセット[{dress_ik_link_bone.name}][{offset_link_position}]"
-                        + f"[original={deformed_refit_link_position}][deform={deformed_link_position}]"
-                    )
-
+                        logger.debug(
+                            f"-- -- 移動追加オフセット[{dress_ik_link_bone.name}][{offset_link_position}]"
+                            + f"[original={deformed_refit_link_position}][deform={deformed_link_position}]"
+                        )
                 # matrixes = dress_motion.animate_bone([0], model, [bone_name], append_ik=False)
                 # deformed_ik_position = matrixes[0, dress_ik_bone.name].position
                 # deformed_target_position = matrixes[0, dress_ik_target_bone.name].position
@@ -869,16 +869,16 @@ class LoadUsecase:
 
             if dress_bone.is_translatable_standard:
                 # 移動計算 ------------------
-                if dress_bone.is_ik:
-                    # IK の場合、FKに合わせる
-                    fk_dress_bone = dress.bones[dress_bone.ik.bone_index]
-                    model_bone_matrix, model_bone_position, model_tail_position = self.get_tail_position(
-                        dress, fk_dress_bone, STANDARD_BONE_NAMES[fk_dress_bone.name], motion=dress_motion, append_ik=False
-                    )
-                    dress_bone_matrix, dress_bone_position, dress_tail_position = self.get_tail_position(
-                        dress, dress_bone, bone_setting, motion=dress_motion, append_ik=False
-                    )
-                elif dress_bone.is_leg_d:
+                # if dress_bone.is_ik:
+                #     # IK の場合、FKに合わせる
+                #     fk_dress_bone = dress.bones[dress_bone.ik.bone_index]
+                #     model_bone_matrix, model_bone_position, model_tail_position = self.get_tail_position(
+                #         dress, fk_dress_bone, STANDARD_BONE_NAMES[fk_dress_bone.name], motion=dress_motion, append_ik=False
+                #     )
+                #     dress_bone_matrix, dress_bone_position, dress_tail_position = self.get_tail_position(
+                #         dress, dress_bone, bone_setting, motion=dress_motion, append_ik=False
+                #     )
+                if dress_bone.is_leg_d:
                     # 足D系列は足FKに揃える
                     fk_dress_bone = dress.bones[dress_bone.effect_index]
                     model_bone_matrix, model_bone_position, model_tail_position = self.get_tail_position(
@@ -910,6 +910,29 @@ class LoadUsecase:
 
                 logger.debug(
                     f"-- -- 移動オフセット[{dress_bone.name}][{dress_offset_position}][model={model_bone_position}][dress={dress_bone_position}]"
+                )
+
+            if dress_bone.is_ik and STANDARD_BONE_NAMES[dress.bones[dress_bone.ik.bone_index].name].translatable:
+                # IKの場合、FKターゲットをIKの位置に合わせる
+                fk_dress_bone = dress.bones[dress_bone.ik.bone_index]
+                model_bone_matrix, model_bone_position, model_tail_position = self.get_tail_position(
+                    dress, dress_bone, bone_setting, motion=dress_motion, append_ik=False
+                )
+                dress_bone_matrix, dress_bone_position, dress_tail_position = self.get_tail_position(
+                    dress, fk_dress_bone, STANDARD_BONE_NAMES[fk_dress_bone.name], motion=dress_motion, append_ik=False
+                )
+
+                offset_target_position = model_bone_position - dress_bone_position
+                dress_offset_positions[fk_dress_bone.index] += offset_target_position
+
+                # キーフレ更新
+                mbf = dress_motion.bones[fk_dress_bone.name][0]
+                mbf.position = dress_offset_positions[fk_dress_bone.index].copy()
+                dress_motion.bones[fk_dress_bone.name].append(mbf)
+
+                logger.debug(
+                    f"-- -- 移動追加オフセット[{fk_dress_bone.name}][{offset_target_position}]"
+                    + f"[IK={model_bone_position}][FK={dress_bone_position}]"
                 )
 
             if dress_bone.is_rotatable_standard:
