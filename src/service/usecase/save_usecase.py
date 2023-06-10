@@ -171,9 +171,21 @@ class SaveUsecase:
 
         logger.info("ボーン出力", decoration=MLogger.Decoration.LINE)
 
+        # 出力対象ウェイトを持った頂点を持っているボーン名リスト
+        model_weight_bone_names: list[str] = []
+
         for bone in model.bones.writable():
             if bone.name in dress_model.bones:
                 continue
+
+            # 元々ウェイトを持っているボーンで、かつ出力先にも頂点を持っている場合、リスト追加
+            if (
+                bone.is_standard
+                and bone.index in model.vertices_by_bones
+                and set(model.vertices_by_bones[bone.index]) & active_model_vertices
+            ):
+                model_weight_bone_names.append(bone.name)
+
             if not bone.is_standard:
                 # 準標準ではない場合、登録可否チェック
 
@@ -317,8 +329,11 @@ class SaveUsecase:
             if bone.is_standard and bone.name in dress_model.bones:
                 # 既に登録済みの準標準ボーンは追加しない
                 dress_bone_map[bone.index] = dress_model.bones[bone.name].index
-                # 位置は衣装側に合わせる
-                dress_model.bones[bone.name].position = dress_matrixes[0, bone.name].position.copy()
+
+                if bone.name not in model_weight_bone_names and not bone.is_standard_extend:
+                    # 人物側にウェイトが乗っていない場合、変形後の位置にボーンを配置する
+                    dress_model.bones[bone.name].position = dress_matrixes[0, bone.name].position.copy()
+
                 continue
             if not bone.is_standard:
                 # 準標準ではない場合、登録可否チェック
@@ -359,7 +374,6 @@ class SaveUsecase:
                 # 準標準ではない場合、ボーン名をちょっと変える
                 dress_copy_bone.name = f"Cos:{bone.name}"
             dress_copy_bone.index = len(dress_model.bones.writable())
-            # 変形後の位置にボーンを配置する
             dress_copy_bone.position = dress_matrixes[0, bone.name].local_matrix * dress_copy_bone.position
             bone_map[dress_copy_bone.index] = {
                 "parent": [
