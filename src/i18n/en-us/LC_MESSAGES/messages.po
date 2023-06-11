@@ -1,0 +1,724 @@
+# Translations template for PROJECT.
+# Copyright (C) 2023 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2023.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2023-04-06 02:14+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.12.1\n"
+
+
+msgid "PMXモデル"
+msgstr "PMX Model"
+
+msgid "(未設定)"
+msgstr "(Not set)"
+
+msgid "{t}に記録されているモデル名です。\n文字列は選択およびコピー可能です。"
+msgstr "The model name as recorded in {t}. \The ɛn string can be selected and copied"
+
+msgid "開く"
+msgstr "Open"
+
+msgid "履歴"
+msgstr "History"
+
+msgid "これまでに指定された事のある{t}を再指定することができます。"
+msgstr "You can re-specify {t} that has been previously specified"
+
+msgid "VMDモーションデータ"
+msgstr "VMD motion data"
+
+msgid "ファイル"
+msgstr "File"
+
+msgid "ファイルを選んでダブルクリック、またはOKボタンをクリックしてください。"
+msgstr "Please select the file and double click or click the OK button"
+
+msgid "ファイル履歴選択"
+msgstr "File History Selection"
+
+msgid "----------------------"
+msgstr "----------------------"
+
+msgid "PMXモデルデータ読み取り開始"
+msgstr "PMX model data read started"
+
+msgid "頂点データ読み取り完了: {c}"
+msgstr "Vertex data read complete: {c}"
+
+msgid "面データ読み取り完了: {c}"
+msgstr "Surface data read complete: {c}"
+
+msgid "テクスチャデータ読み取り完了: {c}"
+msgstr "Texture data read complete: {c}"
+
+msgid "材質データ読み取り完了: {c}"
+msgstr "Material data read complete: {c}"
+
+msgid "ボーンデータ読み取り完了: {c}"
+msgstr "Bone data read complete: {c}"
+
+msgid "モーフデータ読み取り完了: {c}"
+msgstr "Morph data read complete: {c}"
+
+msgid "表示枠データ読み取り完了: {c}"
+msgstr "Display frame data read complete: {c}"
+
+msgid "剛体データ読み取り完了: {c}"
+msgstr "Rigid data read complete: {c}"
+
+msgid "ジョイントデータ読み取り完了: {c}"
+msgstr "Joint data read complete: {c}"
+
+msgid "VMDモーションデータ読み取り開始"
+msgstr "Start reading VMD motion data"
+
+msgid "カメラデータ読み取り完了: {c}"
+msgstr "Camera data read complete: {c}"
+
+msgid "照明データ読み取り完了: {c}"
+msgstr "Lighting data read complete: {c}"
+
+msgid "セルフ影データ読み取り完了: {c}"
+msgstr "Self shadow data read complete: {c}"
+
+msgid "IKデータ読み取り完了: {c}"
+msgstr "IK data read complete: {c}"
+
+msgid "表示モデル"
+msgstr "Display Model"
+
+msgid "表示モーション"
+msgstr "Display Motion"
+
+msgid "出力先"
+msgstr "Output to"
+
+msgid "衣装モデル"
+msgstr "Costume model"
+
+msgid "PMX衣装モデル"
+msgstr "PMX Costume Model"
+
+msgid "モデルセットアップ開始"
+msgstr "Model setup started"
+
+msgid "モデルセットアップ：ボーン"
+msgstr "Model setup: bone"
+
+msgid "読取失敗"
+msgstr "Reading failed"
+
+msgid "モデルセットアップ完了"
+msgstr "Model setup complete"
+
+msgid "出力先のチェックに失敗しました。以下の原因が考えられます。\n出力先が255文字を超えている\n出力先に使えない文字列が含まれている（例) \ / : * ? " < > |）\n出力先の親フォルダに書き込み権限がない\n出力先に書き込み権限がない"
+msgstr "Failed to check output destination. The following are possible causes. \ЈnThe output destination exceeds 255 charactersЈnThe output destination contains unusable character strings (e.g.) \ / : * ? " < > |) The parent folder of the ዄn output destination does not have write permissions.
+
+msgid "予期せぬエラーが発生しました"
+msgstr "An unexpected error has occurred"
+
+msgid "処理が継続できないため、中断しました\n----------------\n人物モデルのフィッティングに必要なボーンが不足しています。\n不足ボーン: {b}"
+msgstr "Aborted because the process cannot continue!\n----------------\nNumber of bones required for fitting the human model are missing. \ЎnMissing bones: {b}"
+
+msgid "処理が継続できないため、中断しました\n----------------\n衣装モデルのフィッティングに必要なボーンが不足しています。\n不足ボーン: {b}"
+msgstr "Aborted because the process cannot continue!\n----------------\nInsufficient bones for fitting the costume model. \ɑnInsufficient bones: {b}"
+
+
+msgid "お着替えさせたい対象の人物モデルを指定してください。"
+msgstr "Please specify the target person model you would like to change"
+
+msgid "お着替えしたい衣装モデルを指定してください。"
+msgstr "Please specify the costume model you would like to change into"
+
+msgid "任意でVMDモーションデータを指定する事ができます。\n空欄の場合、人物と衣装は初期状態で表示します。"
+msgstr "You can optionally specify VMD motion data. \If ɑn is left blank, the person and costume will be displayed in their initial state"
+
+msgid "お着替え後モデル出力先"
+msgstr "Model output destination after change of clothes"
+
+msgid "お着替え後のモデルの出力ファイルパスです。\n任意の値に変更可能です。"
+msgstr "The output file path of the model after the change of clothes. \You can change it to any value"
+
+msgid "モーションを指定している場合、任意のキーフレの結果の表示や再生ができます"
+msgstr "If motion is specified, the results of any keyfre can be displayed or played back"
+
+msgid "モーションを指定している場合、再生することができます"
+msgstr "If motion is specified, it can be played"
+
+msgid "材質透過度"
+msgstr "Material permeability"
+
+msgid "人物の材質プルダウンから選択した材質の透過度を下のスライダーで調整できます。"
+msgstr "You can adjust the transparency of the material selected from the Person Material pull-down using the slider below"
+
+msgid "人物の材質プルダウンの選択肢を上方向に移動できます。"
+msgstr "You can move the person material pull-down choices upward"
+
+msgid "スライダーで調整対象となる人物の材質です。\n「ボーンライン」はボーンを表す線を示します。\n透過度が1でない状態でエクスポートすると、お着替え結果には出力されません\n(ボーンラインは常に出力されません)"
+msgstr "Material of the person to be adjusted with the slider. \ዄn "Bone line" indicates the line that represents the bone. \If you export the image with the ɑn transparency not 1, it will not be output in the result of your change. "ɑn(Bone lines are always not output.)"
+
+msgid "人物の材質プルダウンの選択肢を下方向に移動できます。"
+msgstr "You can move the person material pull-down choices downward"
+
+msgid "衣装の材質プルダウンから選択した材質の透過度を下のスライダーで調整できます。"
+msgstr "You can adjust the transparency of the material selected from the Costume Material pull-down with the slider below"
+
+msgid "衣装の材質プルダウンの選択肢を上方向に移動できます。"
+msgstr "You can move the material pull-down choices for costumes upward"
+
+msgid "スライダーで調整対象となる衣装の材質です。\n「ボーンライン」はボーンを表す線を示します。\n透過度が1でない状態でエクスポートすると、お着替え結果には出力されません\n(ボーンラインは常に出力されません)"
+msgstr "Material" is the material of the costume to be adjusted with the slider. \ዄn "Bone line" indicates the line that represents the bone. \If you export with the ɑn transparency not 1, it will not be output in the result of the outfit.ɑn(Bone lines are always not output)"
+
+msgid "衣装の材質プルダウンの選択肢を下方向に移動できます。"
+msgstr "You can move the material pull-down choices for costumes downward"
+
+msgid "追加縮尺"
+msgstr "Additional Scale"
+
+msgid "-- 頂点データ読み取り [{i} ({p:.2f}%)]"
+msgstr "-- Vertex data read [{i} ({p:.2f}%)]"
+
+msgid "-- モデルセットアップ：システム用ボーン"
+msgstr "-- Model setup: bones for systems"
+
+msgid "-- モデルセットアップ：ボーン [{i} ({p:.2f}%)]"
+msgstr "-- Model setup: bone [{i} ({p:.2f}%)]"
+
+msgid "-- モデルセットアップ：ボーンツリー"
+msgstr "-- Model setup: bone tree"
+
+msgid "人物モデル追加セットアップ：材質透過モーフ追加"
+msgstr "Additional Setup for Human Model: Addition of Material Transparency Morph"
+
+msgid "不足ボーン調整"
+msgstr "Shortage Bone Adjustment"
+
+msgid "-- 人物モデルの追加対象準標準ボーン: {b}"
+msgstr "-- quasi-standard bones to be added to the person model: {b}"
+
+msgid "-- 衣装モデルの追加対象準標準ボーン: {b}"
+msgstr "-- Quasi-standard bones to be added to the costume model: {b}"
+
+msgid "-- -- 衣装: 準標準ボーン追加: {b}"
+msgstr "-- -- Costume: semi-standard bone addition: {b}"
+
+msgid "ウェイトボーン分布"
+msgstr "Weight Bone Distribution"
+
+msgid "-- ウェイトボーン分布 [{i} ({p:.2f}%)]"
+msgstr "-- Weight born distribution [{i} ({p:.2f}%)]"
+
+msgid "フィッティング用ウェイト別頂点取得（衣装:頭部装飾用）"
+msgstr "Acquisition of vertices by weight for fitting (costume: for head decoration)"
+
+msgid "-- 衣装: 再セットアップ"
+msgstr "-- Costume: re-set up"
+
+msgid "衣装モデル上半身2位置調整"
+msgstr "Costume model upper body 2 position adjustment"
+
+msgid "フィッティング用ウェイト別頂点取得（衣装）"
+msgstr "Acquisition of vertices by weight for fitting (costume)"
+
+msgid "衣装: {r}: 位置再計算: {u} → {p}"
+msgstr "Costume: {r}: position recalculation: {u} → {p}"
+
+msgid "衣装モデル捩り位置調整"
+msgstr "Costume model torsion position adjustment"
+
+msgid "衣装モデルウェイト調整"
+msgstr "Costume Model Weight Adjustment"
+
+msgid "衣装モデル追加セットアップ：材質透過モーフ追加"
+msgstr "Additional costume model setup: additional material transparency morph"
+
+msgid "衣装モデル追加セットアップ：フィッティングボーンモーフ追加"
+msgstr "Additional costume model setup: fitting bone morphs added"
+
+msgid "フィッティングスケール計算"
+msgstr "Fitting Scale Calculations"
+
+msgid "-- スケールオフセット [{b}][{s:.3f}]"
+msgstr "-- scale offset [{b}][{s:.3f}]"
+
+msgid "-- スケールオフセット [{b}][{s:.3f}({o:.3f})]"
+msgstr "-- Scale offset [{b}][{s:.3f}({o:.3f})]"
+
+msgid "-- フィッティング用ウェイト別頂点取得（人物）"
+msgstr "-- Vertex acquisition by weight for fitting (person)"
+
+msgid "-- フィッティング用ウェイト別頂点取得（衣装）"
+msgstr "-- Vertex acquisition by weight for fitting (costume)"
+
+msgid "フィッティングオフセット計算"
+msgstr "Fitting Offset Calculation"
+
+msgid "-- オフセット計算"
+msgstr "-- offset calculation"
+
+msgid "-- -- オフセット計算 [{i} ({p:.2f}%)]"
+msgstr "-- -- Offset calculation [{i} ({p:.2f}%)]"
+
+msgid "-- ボーンモーフ [{b}][移動={p}][回転={q}][縮尺:{o:.3f}({f:.3f})]"
+msgstr "-- Bone Morph [{b}][move={p}][rotate={q}][scale:{o:.3f}({f:.3f})]"
+
+msgid "全材質"
+msgstr "All materials"
+
+msgid "人物モデル描画準備"
+msgstr "Preparing to draw a human model"
+
+msgid "衣装モデル描画準備"
+msgstr "Preparing to draw a costume model"
+
+msgid "モデル描画"
+msgstr "Model Drawing"
+
+msgid "-- -- 人物: 準標準ボーン追加: {b}"
+msgstr "-- -- Person: semi-standard bone addition: {b}"
+
+msgid "-- 人物: 再セットアップ"
+msgstr "-- Person: re-setup"
+
+msgid "人物モデル欄に有効なパスが設定されていない為、タブ遷移を中断します。"
+msgstr "The tab transition is aborted because no valid path is set in the person model field"
+
+msgid "衣装モデル欄に有効なパスが設定されていない為、タブ遷移を中断します。"
+msgstr "The tab transition is aborted because no valid path is set in the Costume Model column"
+
+msgid "下半身"
+msgstr "Lower half"
+
+msgid "上半身"
+msgstr "Upper body"
+
+msgid "上半身2"
+msgstr "Upper body 2"
+
+msgid "首"
+msgstr "neck"
+
+msgid "頭"
+msgstr "Head"
+
+msgid "頭部装飾"
+msgstr "Head decoration"
+
+msgid "肩"
+msgstr "Shoulder"
+
+msgid "腕"
+msgstr "Arms"
+
+msgid "ひじ"
+msgstr "Elbow"
+
+msgid "手のひら"
+msgstr "Palm of the hand"
+
+msgid "足"
+msgstr "Feet"
+
+msgid "ひざ"
+msgstr "Knees"
+
+msgid "足の甲"
+msgstr "Instep"
+
+msgid "フィッティング用ウェイト別頂点取得（衣装:頭部装飾）"
+msgstr "Acquisition of vertices by weight for fitting (costume: head decoration)"
+
+msgid "衣装モデル追加セットアップ：個別調整ボーンモーフ追加"
+msgstr "Additional costume model set-up: additional individually adjusted bone morphs"
+
+msgid "-- 個別調整ボーンモーフ [{b}]"
+msgstr "-- Individually adjusted bone morph [{b}]"
+
+msgid "衣装:ボーン別調整"
+msgstr "Costume: Adjustment by Bone"
+
+msgid "ボーンプルダウンの選択肢を上方向に移動できます。"
+msgstr "You can move the choices in the bone pulldown upward"
+
+msgid "スライダーで調整対象となる衣装のボーンです。\n左右は一括で調整できます。"
+msgstr "These are the bones of the costume to be adjusted with the slider. \You can adjust the ᥉n left and right at once"
+
+msgid "ボーンプルダウンの選択肢を下方向に移動できます。"
+msgstr "You can move the choices in the bone pull-down downward"
+
+msgid "-- 個別調整ボーンモーフ [{m}]"
+msgstr "-- individually adjusted bone morph [{m}]"
+
+msgid "縮尺X"
+msgstr "Scale X"
+
+msgid "縮尺Y"
+msgstr "Scale Y"
+
+msgid "縮尺Z"
+msgstr "Scale Z"
+
+msgid "回転X"
+msgstr "Rotating X"
+
+msgid "回転Y"
+msgstr "Rotation Y"
+
+msgid "回転Z"
+msgstr "Rotating Z"
+
+msgid "移動X"
+msgstr "Move X"
+
+msgid "移動Y"
+msgstr "Move Y"
+
+msgid "移動Z"
+msgstr "Move Z"
+
+msgid "ボーン調整値をすべて初期化します"
+msgstr "Initialize all bone adjustment values"
+
+msgid "チェックをONにすると、縮尺XとZを同時に操作することができます"
+msgstr "Check ON to operate scale X and Z at the same time"
+
+msgid "お着替えモデル出力"
+msgstr "Change of clothes model output"
+
+msgid "お着替えモデル出力中"
+msgstr "Model is being output for change of clothes"
+
+msgid "フィッティングさせた衣装と人物を合成して、PMXデータを出力します。\nフィッティング結果を設定タブで確認した後にクリックできるようになります。"
+msgstr "Composite the fitted costume and person and output PMX data. \You can click on it after checking the Јn fitting results in the settings tab"
+
+msgid "ボーン出力"
+msgstr "Bone Output"
+
+msgid "-- ボーン出力: {s}"
+msgstr "-- Bourne output: {s}"
+
+msgid "ボーン定義再設定"
+msgstr "Bone definition reconfiguration"
+
+msgid "-- ボーン定義再設定: {s}"
+msgstr "-- Bone definition re-set: {s}"
+
+msgid "材質出力"
+msgstr "Material output"
+
+msgid "-- 材質出力: {s}"
+msgstr "-- Material output: {s}"
+
+msgid "お着替えモデル読み込み開始"
+msgstr "Start loading change of clothes model"
+
+msgid "お着替えモデル読み込み完了"
+msgstr "Model loading complete"
+
+msgid "お着替えモデル出力開始"
+msgstr "Start output of changeable models"
+
+msgid "人物モデル読み込み開始"
+msgstr "Start loading person model"
+
+msgid "衣装モデル読み込み開始"
+msgstr "Start loading costume model"
+
+msgid "描画準備開始"
+msgstr "Prepare to draw"
+
+msgid "*** お着替えモデル出力成功 ***\n出力先: {f}"
+msgstr "*** Success in outputting changeover model ***\nOutput: {f}"
+
+msgid "-- -- スケールオフセット [{b}][{s:.3f}]"
+msgstr "-- -- Scale offset [{b}][{s:.3f}]"
+
+msgid "-- -- スケールオフセット [{b}][{s:.3f}({o:.3f})]"
+msgstr "-- -- Scale offset [{b}][{s:.3f}({o:.3f})]"
+
+msgid "チェックをONにすると、縮尺YとZを同時に操作することができます"
+msgstr "Check ON to operate scale Y and Z at the same time"
+
+msgid "選択されたボーンのローカルX軸（ボーンの向き）方向の縮尺を調整できます"
+msgstr "Allows you to adjust the scale in the local X-axis (bone orientation) direction of the selected bone"
+
+msgid "選択されたボーンのローカルY軸（ボーンの縦方向の太さ）方向の縮尺を調整できます"
+msgstr "Allows you to adjust the scale of the selected bone in the direction of the local Y-axis (vertical thickness of the bone)"
+
+msgid "選択されたボーンのローカルZ軸（ボーンの奥行き方向の太さ）方向の縮尺を調整できます"
+msgstr "Allows you to adjust the scale of the selected bone in the direction of the local Z-axis (the thickness of the bone in the depth direction)"
+
+msgid "選択されたボーンのローカルX軸（ボーンの向き）方向の回転を調整できます"
+msgstr "Allows you to adjust the rotation of the selected bone in the local X-axis (bone orientation) direction"
+
+msgid "選択されたボーンのローカルY軸（ボーンの向きに直交する上向き）方向の回転を調整できます"
+msgstr "Allows you to adjust the rotation of the selected bone in the local Y-axis (upward, perpendicular to the orientation of the bone) direction"
+
+msgid "選択されたボーンのローカルZ軸（ボーンの向きに直交する奥向き）方向の回転を調整できます"
+msgstr "Allows you to adjust the rotation of the selected bone in the local Z-axis (backward direction perpendicular to the orientation of the bone) direction"
+
+msgid "選択されたボーンのローカルX軸（ボーンの向き）方向の移動を調整できます"
+msgstr "Allows you to adjust the movement of the selected bone in the local X-axis (bone orientation) direction"
+
+msgid "選択されたボーンのローカルY軸（ボーンの向きに直交する上向き）方向の移動を調整できます"
+msgstr "Allows you to adjust the movement of the selected bone in the local Y-axis (upward, perpendicular to the orientation of the bone) direction"
+
+msgid "選択されたボーンのローカルZ軸（ボーンの向きに直交する奥向き）方向の移動を調整できます"
+msgstr "Allows you to adjust the movement of the selected bone in the local Z-axis (backward direction perpendicular to the orientation of the bone) direction"
+
+msgid "衣装モデル首位置調整"
+msgstr "Costume model neck position adjustment"
+
+msgid "衣装モデル肩位置調整"
+msgstr "Adjustment of costume model shoulder position"
+
+msgid "体幹"
+msgstr "The trunk of the body"
+
+msgid "胸"
+msgstr "Breasts"
+
+msgid "お着替えモデル出力停止"
+msgstr "Stop output of changeable models"
+
+msgid "再フィット"
+msgstr "Refit"
+
+msgid "人物と衣装の選択されたボーンの位置が合う様に再度フィッティングします"
+msgstr "Re-fit the figure and the costume so that the selected bones are aligned"
+
+msgid "材質非透過度"
+msgstr "Material Impermeability"
+
+msgid "人物の材質プルダウンから選択した材質の非透過度を下のスライダーで調整できます。"
+msgstr "You can adjust the non-transparency of the material selected from the Person Material pull-down with the slider below"
+
+msgid "スライダーで調整対象となる人物の材質です。\n「ボーンライン」はボーンを表す線を示します。\n非透過度が1でない状態でエクスポートすると、お着替え結果には出力されません\n(ボーンラインは常に出力されません)"
+msgstr "Material of the person to be adjusted with the slider. \ዄn "Bone line" indicates the line that represents the bone. \If you export the image with the ɑn non-transparency not 1, it will not be output in the result of your change. "ɑn(Bone lines are always not output.)"
+
+msgid "衣装の材質プルダウンから選択した材質の非透過度を下のスライダーで調整できます。"
+msgstr "You can adjust the non-transparency of the material selected from the Costume Material pull-down with the slider below"
+
+msgid "スライダーで調整対象となる衣装の材質です。\n「ボーンライン」はボーンを表す線を示します。\n非透過度が1でない状態でエクスポートすると、お着替え結果には出力されません\n(ボーンラインは常に出力されません)"
+msgstr "Material of the costume to be adjusted with the slider. \ዄn "Bone line" indicates the line that represents the bone. \If you export with the ɑn non-transparency not 1, it will not be output in the result of the outfit.ɑn(Bone lines are always not output)"
+
+msgid "足首"
+msgstr "Ankle"
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}"
+msgstr "{b}: scale{s}, rotation{r}, translation{p}"
+
+msgid "つま先"
+msgstr "Toes"
+
+msgid "選択されたボーンのグローバルX軸方向の移動を調整できます"
+msgstr "Allows you to adjust the global X-axis shift of selected bones"
+
+msgid "選択されたボーンのグローバルY軸方向の移動を調整できます"
+msgstr "Allows you to adjust the global Y-axis shift of selected bones"
+
+msgid "選択されたボーンのグローバルZ軸方向の移動を調整できます"
+msgstr "Allows you to adjust the global Z-axis shift of selected bones"
+
+msgid "人物の材質の非透過度を0.5に設定します"
+msgstr "Set the non-transparency of the person material to 0.5"
+
+msgid "衣装の材質の非透過度を0.5に設定します"
+msgstr "Set the non-transparency of the costume material to 0.5"
+
+msgid "出力準備"
+msgstr "Prepare for output"
+
+msgid "人物材質選り分け"
+msgstr "Person material selection"
+
+msgid "衣装材質選り分け"
+msgstr "Costume Material Selection"
+
+msgid "モーフ出力"
+msgstr "Morph output"
+
+msgid "-- モーフ出力: {s}"
+msgstr "-- morph output: {s}"
+
+msgid "剛体出力"
+msgstr "Rigid output"
+
+msgid "-- 剛体出力: {s}"
+msgstr "-- Rigid output: {s}"
+
+msgid "ジョイント出力"
+msgstr "Joint output"
+
+msgid "-- ジョイント出力: {s}"
+msgstr "-- Joint output: {s}"
+
+msgid "処理が継続できないため、中断しました\n----------------\n人物モデルデータが読み込まれていません"
+msgstr "Aborted because the process cannot continue!\n----------------\nPersonnel model data has not been loaded"
+
+msgid "設定"
+msgstr "Settings"
+
+msgid "人物モデル"
+msgstr "Person Models"
+
+msgid "モデルセットアップ：ボーンツリー"
+msgstr "Model Setup: Bone Tree"
+
+msgid "モデルセットアップ：システム用ボーン"
+msgstr "Model Setup: bones for systems"
+
+msgid "フィッティングボーンモーフ追加"
+msgstr "Fitting bone morphs added"
+
+msgid "縮尺YZリンク"
+msgstr "Scale YZ Link"
+
+msgid "初期化"
+msgstr "Initialization"
+
+msgid "モーション"
+msgstr "Motion"
+
+msgid "人物の材質の非透過度を任意の値に変更できます。\n非透過度を1未満にした場合、お着替えモデルには出力されません"
+msgstr "You can change the non-transparency of the person material to any value. \If you set the ɑn non-transparency to a value less than 1, it will not be output to the changeover model"
+
+msgid "\nEnterキーを押下したタイミングで値が反映されます。"
+msgstr "The value is reflected at the time the \nEnter key is pressed"
+
+msgid "衣装の材質の非透過度を任意の値に変更できます。\n非透過度を1未満にした場合、お着替えモデルには出力されません"
+msgstr "You can change the non-transparency of the costume material to any value. \If you set the ɑn non-transparency to a value less than 1, it will not be output to the changeover model"
+
+msgid "処理を停止しました"
+msgstr "Processing has been stopped"
+
+msgid "*** 処理を停止します ***"
+msgstr "*** Stop processing ***"
+
+msgid "人物モデル: {m} ({p})\n衣装モデル: {d} ({q})\n個別フィッティング:\n{f}"
+msgstr "Person model: {m} ({p})\nCostume model: {d} ({q})\nIndividual fitting:\n{f}"
+
+msgid "モデル出力"
+msgstr "Model Output"
+
+msgid "人物:ルート調整"
+msgstr "Person: route coordination"
+
+msgid "人物全体のグローバルY軸方向の移動を調整できます"
+msgstr "You can adjust the global Y-axis shift of the entire person"
+
+msgid "接地"
+msgstr "Grounded"
+
+msgid "衣装の靴底が接地するように全体のY位置を調整します"
+msgstr "Adjust the overall Y position so that the soles of the costume are grounded"
+
+msgid "モーション読み込み開始"
+msgstr "Motion loading started"
+
+msgid "再生"
+msgstr "Play"
+
+msgid "停止"
+msgstr "Stop"
+
+msgid "-- 人物: 初期姿勢計算"
+msgstr "-- Person: initial posture calculation"
+
+msgid "-- 衣装: 初期姿勢計算"
+msgstr "-- Costume: Initial Attitude Calculation"
+
+msgid "-- 面データ読み取り [{i} ({p:.2f}%)]"
+msgstr "-- Surface data read [{i} ({p:.2f}%)]"
+
+msgid "モデルセットアップ：関連ボーン"
+msgstr "Model Setup: related bones"
+
+msgid "-- モデルセットアップ：関連ボーン [{i} ({p:.2f}%)]"
+msgstr "-- Model setup: related bones [{i} ({p:.2f}%)]"
+
+msgid "衣装モデル追加セットアップ：フィッティングローカルボーンモーフ追加"
+msgstr "Additional costume model setup: fitting local bone morphs added"
+
+msgid "-- ボーンモーフ [{b}][移動={p}][回転={q}][縮尺:{o:.3f}({f:.3f})][ローカル縮尺:{l}]"
+msgstr "-- Bone Morph [{b}][move={p}][rotate={q}][scale:{o:.3f}({f:.3f})][local scale:{l}]"
+
+msgid "-- ボーンモーフ [{b}][移動={p}][回転={q}][縮尺:{s}]"
+msgstr "-- Bone Morph [{b}][move={p}][rotate={q}][scale:{s}]"
+
+msgid "-- ボーンモーフ [{b}][移動={p}][回転={q}][縮尺:{s}][ローカル縮尺:{l}]"
+msgstr "-- Bone Morph [{b}][move={p}][rotate={q}][scale:{s}][local scale:{l}]"
+
+msgid "フィッティンググローバルスケール計算"
+msgstr "Fitting Global Scale Calculations"
+
+msgid "フィッティングローカルスケール計算"
+msgstr "Fitting Local Scale Calculations"
+
+msgid "衣装モデル追加セットアップ：フィッティングモーフ追加"
+msgstr "Additional costume model setup: fitting morphs added"
+
+msgid "フィッティングボーンモーフ：グローバルスケール計算"
+msgstr "Fitting Bone Morphs: Global Scale Calculations"
+
+msgid "フィッティングボーンモーフ：オフセット計算"
+msgstr "Fitting Bone Morph: Offset Calculation"
+
+msgid "フィッティングボーンモーフ：ローカルスケール計算"
+msgstr "Fitting Bone Morph: Local Scale Calculations"
+
+msgid "フィッティング頂点オフセット計算"
+msgstr "Fitting vertex offset calculation"
+
+msgid "フィッティング頂点モーフ追加"
+msgstr "Fitting vertex morph added"
+
+msgid "-- 頂点モーフ [{v}][移動={p}]"
+msgstr "-- vertex morph [{v}][move={p}]"
+
+msgid "-- 頂点オフセット"
+msgstr "-- vertex offset"
+
+msgid "-- -- 頂点オフセット [{i} ({p:.2f}%)]"
+msgstr "-- -- Vertex offset [{i} ({p:.2f}%)]"
+
+msgid "衣装モデル上半身3位置調整"
+msgstr "Costume model upper body 3-position adjustment"
+
+msgid "衣装モデル腕位置調整"
+msgstr "Costume model arm position adjustment"
+
+msgid "出力ファイルパスが有効なパスではないため、デフォルトの出力ファイルパスを再設定します。"
+msgstr "The output file path is not a valid path, reset the default output file path"
+
+msgid "衣装: 衣装モデルウェイト調整"
+msgstr "Costume: Costume Model Weight Adjustment"
+
+msgid "-- 個別調整ボーンモーフ追加"
+msgstr "-- Individual adjustment bone morphs added"
+
+msgid "-- 再調整ボーンモーフ追加"
+msgstr "-- reconditioned bone morphs added"
+
+msgid "-- グローバルスケール計算"
+msgstr "-- Global scale calculation"
+
+msgid "-- -- グローバルスケール計算 [{i} ({p:.2f}%)]"
+msgstr "-- -- Global scale calculation [{i} ({p:.2f}%)]"
+
+msgid "-- ボーンデータ読み取り [{i} ({p:.2f}%)]"
+msgstr "-- Bone data read [{i} ({p:.2f}%)]"
+
+msgid "衣装: {r}: 位置再計算: {u} → {p} ({d})"
+msgstr "Costume: {r}: position recalculation: {u} → {p} ({d})"

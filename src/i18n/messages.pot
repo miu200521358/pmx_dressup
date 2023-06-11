@@ -1,0 +1,959 @@
+# Translations template for PROJECT.
+# Copyright (C) 2023 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2023.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2023-04-06 02:14+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.12.1\n"
+
+
+msgid "PMXモデル"
+msgstr ""
+
+
+msgid "(未設定)"
+msgstr ""
+
+
+msgid "{t}に記録されているモデル名です。\n文字列は選択およびコピー可能です。"
+msgstr ""
+
+
+msgid "開く"
+msgstr ""
+
+
+msgid "履歴"
+msgstr ""
+
+
+msgid "これまでに指定された事のある{t}を再指定することができます。"
+msgstr ""
+
+
+msgid "VMDモーションデータ"
+msgstr ""
+
+
+msgid "ファイル"
+msgstr ""
+
+
+msgid "ファイルを選んでダブルクリック、またはOKボタンをクリックしてください。"
+msgstr ""
+
+
+msgid "ファイル履歴選択"
+msgstr ""
+
+
+msgid "----------------------"
+msgstr ""
+
+
+msgid "PMXモデルデータ読み取り開始"
+msgstr ""
+
+
+msgid "頂点データ読み取り完了: {c}"
+msgstr ""
+
+
+msgid "面データ読み取り完了: {c}"
+msgstr ""
+
+
+msgid "テクスチャデータ読み取り完了: {c}"
+msgstr ""
+
+
+msgid "材質データ読み取り完了: {c}"
+msgstr ""
+
+
+msgid "ボーンデータ読み取り完了: {c}"
+msgstr ""
+
+
+msgid "モーフデータ読み取り完了: {c}"
+msgstr ""
+
+
+msgid "表示枠データ読み取り完了: {c}"
+msgstr ""
+
+
+msgid "剛体データ読み取り完了: {c}"
+msgstr ""
+
+
+msgid "ジョイントデータ読み取り完了: {c}"
+msgstr ""
+
+
+msgid "VMDモーションデータ読み取り開始"
+msgstr ""
+
+
+msgid "カメラデータ読み取り完了: {c}"
+msgstr ""
+
+
+msgid "照明データ読み取り完了: {c}"
+msgstr ""
+
+
+msgid "セルフ影データ読み取り完了: {c}"
+msgstr ""
+
+
+msgid "IKデータ読み取り完了: {c}"
+msgstr ""
+
+
+msgid "表示モデル"
+msgstr ""
+
+
+msgid "表示モーション"
+msgstr ""
+
+
+msgid "出力先"
+msgstr ""
+
+
+msgid "衣装モデル"
+msgstr ""
+
+
+msgid "PMX衣装モデル"
+msgstr ""
+
+
+msgid "モデルセットアップ開始"
+msgstr ""
+
+
+msgid "モデルセットアップ：ボーン"
+msgstr ""
+
+
+msgid "読取失敗"
+msgstr ""
+
+
+msgid "モデルセットアップ完了"
+msgstr ""
+
+
+msgid "出力先のチェックに失敗しました。以下の原因が考えられます。\n出力先が255文字を超えている\n出力先に使えない文字列が含まれている（例) \ / : * ? " < > |）\n出力先の親フォルダに書き込み権限がない\n出力先に書き込み権限がない"
+msgstr ""
+
+
+msgid "予期せぬエラーが発生しました"
+msgstr ""
+
+
+msgid "処理が継続できないため、中断しました\n----------------\n人物モデルのフィッティングに必要なボーンが不足しています。\n不足ボーン: {b}"
+msgstr ""
+
+
+msgid "処理が継続できないため、中断しました\n----------------\n衣装モデルのフィッティングに必要なボーンが不足しています。\n不足ボーン: {b}"
+msgstr ""
+
+
+
+msgid "お着替えさせたい対象の人物モデルを指定してください。"
+msgstr ""
+
+
+msgid "お着替えしたい衣装モデルを指定してください。"
+msgstr ""
+
+
+msgid "任意でVMDモーションデータを指定する事ができます。\n空欄の場合、人物と衣装は初期状態で表示します。"
+msgstr ""
+
+
+msgid "お着替え後モデル出力先"
+msgstr ""
+
+
+msgid "お着替え後のモデルの出力ファイルパスです。\n任意の値に変更可能です。"
+msgstr ""
+
+
+msgid "モーションを指定している場合、任意のキーフレの結果の表示や再生ができます"
+msgstr ""
+
+
+msgid "モーションを指定している場合、再生することができます"
+msgstr ""
+
+
+msgid "材質透過度"
+msgstr ""
+
+
+msgid "人物の材質プルダウンから選択した材質の透過度を下のスライダーで調整できます。"
+msgstr ""
+
+
+msgid "人物の材質プルダウンの選択肢を上方向に移動できます。"
+msgstr ""
+
+
+msgid "スライダーで調整対象となる人物の材質です。\n「ボーンライン」はボーンを表す線を示します。\n透過度が1でない状態でエクスポートすると、お着替え結果には出力されません\n(ボーンラインは常に出力されません)"
+msgstr ""
+
+
+msgid "人物の材質プルダウンの選択肢を下方向に移動できます。"
+msgstr ""
+
+
+msgid "衣装の材質プルダウンから選択した材質の透過度を下のスライダーで調整できます。"
+msgstr ""
+
+
+msgid "衣装の材質プルダウンの選択肢を上方向に移動できます。"
+msgstr ""
+
+
+msgid "スライダーで調整対象となる衣装の材質です。\n「ボーンライン」はボーンを表す線を示します。\n透過度が1でない状態でエクスポートすると、お着替え結果には出力されません\n(ボーンラインは常に出力されません)"
+msgstr ""
+
+
+msgid "衣装の材質プルダウンの選択肢を下方向に移動できます。"
+msgstr ""
+
+
+msgid "追加縮尺"
+msgstr ""
+
+
+msgid "-- 頂点データ読み取り [{i} ({p:.2f}%)]"
+msgstr ""
+
+
+msgid "-- モデルセットアップ：システム用ボーン"
+msgstr ""
+
+
+msgid "-- モデルセットアップ：ボーン [{i} ({p:.2f}%)]"
+msgstr ""
+
+
+msgid "-- モデルセットアップ：ボーンツリー"
+msgstr ""
+
+
+msgid "人物モデル追加セットアップ：材質透過モーフ追加"
+msgstr ""
+
+
+msgid "不足ボーン調整"
+msgstr ""
+
+
+msgid "-- 人物モデルの追加対象準標準ボーン: {b}"
+msgstr ""
+
+
+msgid "-- 衣装モデルの追加対象準標準ボーン: {b}"
+msgstr ""
+
+
+msgid "-- -- 衣装: 準標準ボーン追加: {b}"
+msgstr ""
+
+
+msgid "ウェイトボーン分布"
+msgstr ""
+
+
+msgid "-- ウェイトボーン分布 [{i} ({p:.2f}%)]"
+msgstr ""
+
+
+msgid "フィッティング用ウェイト別頂点取得（衣装:頭部装飾用）"
+msgstr ""
+
+
+msgid "-- 衣装: 再セットアップ"
+msgstr ""
+
+
+msgid "衣装モデル上半身2位置調整"
+msgstr ""
+
+
+msgid "フィッティング用ウェイト別頂点取得（衣装）"
+msgstr ""
+
+
+msgid "衣装: {r}: 位置再計算: {u} → {p}"
+msgstr ""
+
+
+msgid "衣装モデル捩り位置調整"
+msgstr ""
+
+
+msgid "衣装モデルウェイト調整"
+msgstr ""
+
+
+msgid "衣装モデル追加セットアップ：材質透過モーフ追加"
+msgstr ""
+
+
+msgid "衣装モデル追加セットアップ：フィッティングボーンモーフ追加"
+msgstr ""
+
+
+msgid "フィッティングスケール計算"
+msgstr ""
+
+
+msgid "-- スケールオフセット [{b}][{s:.3f}]"
+msgstr ""
+
+
+msgid "-- スケールオフセット [{b}][{s:.3f}({o:.3f})]"
+msgstr ""
+
+
+msgid "-- フィッティング用ウェイト別頂点取得（人物）"
+msgstr ""
+
+
+msgid "-- フィッティング用ウェイト別頂点取得（衣装）"
+msgstr ""
+
+
+msgid "フィッティングオフセット計算"
+msgstr ""
+
+
+msgid "-- オフセット計算"
+msgstr ""
+
+
+msgid "-- -- オフセット計算 [{i} ({p:.2f}%)]"
+msgstr ""
+
+
+msgid "-- ボーンモーフ [{b}][移動={p}][回転={q}][縮尺:{o:.3f}({f:.3f})]"
+msgstr ""
+
+
+msgid "全材質"
+msgstr ""
+
+
+msgid "人物モデル描画準備"
+msgstr ""
+
+
+msgid "衣装モデル描画準備"
+msgstr ""
+
+
+msgid "モデル描画"
+msgstr ""
+
+
+msgid "-- -- 人物: 準標準ボーン追加: {b}"
+msgstr ""
+
+
+msgid "-- 人物: 再セットアップ"
+msgstr ""
+
+
+msgid "人物モデル欄に有効なパスが設定されていない為、タブ遷移を中断します。"
+msgstr ""
+
+
+msgid "衣装モデル欄に有効なパスが設定されていない為、タブ遷移を中断します。"
+msgstr ""
+
+
+msgid "下半身"
+msgstr ""
+
+
+msgid "上半身"
+msgstr ""
+
+
+msgid "上半身2"
+msgstr ""
+
+
+msgid "首"
+msgstr ""
+
+
+msgid "頭"
+msgstr ""
+
+
+msgid "頭部装飾"
+msgstr ""
+
+
+msgid "肩"
+msgstr ""
+
+
+msgid "腕"
+msgstr ""
+
+
+msgid "ひじ"
+msgstr ""
+
+
+msgid "手のひら"
+msgstr ""
+
+
+msgid "足"
+msgstr ""
+
+
+msgid "ひざ"
+msgstr ""
+
+
+msgid "足の甲"
+msgstr ""
+
+
+msgid "フィッティング用ウェイト別頂点取得（衣装:頭部装飾）"
+msgstr ""
+
+
+msgid "衣装モデル追加セットアップ：個別調整ボーンモーフ追加"
+msgstr ""
+
+
+msgid "-- 個別調整ボーンモーフ [{b}]"
+msgstr ""
+
+
+msgid "衣装:ボーン別調整"
+msgstr ""
+
+
+msgid "ボーンプルダウンの選択肢を上方向に移動できます。"
+msgstr ""
+
+
+msgid "スライダーで調整対象となる衣装のボーンです。\n左右は一括で調整できます。"
+msgstr ""
+
+
+msgid "ボーンプルダウンの選択肢を下方向に移動できます。"
+msgstr ""
+
+
+msgid "-- 個別調整ボーンモーフ [{m}]"
+msgstr ""
+
+
+msgid "縮尺X"
+msgstr ""
+
+
+msgid "縮尺Y"
+msgstr ""
+
+
+msgid "縮尺Z"
+msgstr ""
+
+
+msgid "回転X"
+msgstr ""
+
+
+msgid "回転Y"
+msgstr ""
+
+
+msgid "回転Z"
+msgstr ""
+
+
+msgid "移動X"
+msgstr ""
+
+
+msgid "移動Y"
+msgstr ""
+
+
+msgid "移動Z"
+msgstr ""
+
+
+msgid "ボーン調整値をすべて初期化します"
+msgstr ""
+
+
+msgid "チェックをONにすると、縮尺XとZを同時に操作することができます"
+msgstr ""
+
+
+msgid "お着替えモデル出力"
+msgstr ""
+
+
+msgid "お着替えモデル出力中"
+msgstr ""
+
+
+msgid "フィッティングさせた衣装と人物を合成して、PMXデータを出力します。\nフィッティング結果を設定タブで確認した後にクリックできるようになります。"
+msgstr ""
+
+
+msgid "ボーン出力"
+msgstr ""
+
+
+msgid "-- ボーン出力: {s}"
+msgstr ""
+
+
+msgid "ボーン定義再設定"
+msgstr ""
+
+
+msgid "-- ボーン定義再設定: {s}"
+msgstr ""
+
+
+msgid "材質出力"
+msgstr ""
+
+
+msgid "-- 材質出力: {s}"
+msgstr ""
+
+
+msgid "お着替えモデル読み込み開始"
+msgstr ""
+
+
+msgid "お着替えモデル読み込み完了"
+msgstr ""
+
+
+msgid "お着替えモデル出力開始"
+msgstr ""
+
+
+msgid "人物モデル読み込み開始"
+msgstr ""
+
+
+msgid "衣装モデル読み込み開始"
+msgstr ""
+
+
+msgid "描画準備開始"
+msgstr ""
+
+
+msgid "*** お着替えモデル出力成功 ***\n出力先: {f}"
+msgstr ""
+
+
+msgid "-- -- スケールオフセット [{b}][{s:.3f}]"
+msgstr ""
+
+
+msgid "-- -- スケールオフセット [{b}][{s:.3f}({o:.3f})]"
+msgstr ""
+
+
+msgid "チェックをONにすると、縮尺YとZを同時に操作することができます"
+msgstr ""
+
+
+msgid "選択されたボーンのローカルX軸（ボーンの向き）方向の縮尺を調整できます"
+msgstr ""
+
+
+msgid "選択されたボーンのローカルY軸（ボーンの縦方向の太さ）方向の縮尺を調整できます"
+msgstr ""
+
+
+msgid "選択されたボーンのローカルZ軸（ボーンの奥行き方向の太さ）方向の縮尺を調整できます"
+msgstr ""
+
+
+msgid "選択されたボーンのローカルX軸（ボーンの向き）方向の回転を調整できます"
+msgstr ""
+
+
+msgid "選択されたボーンのローカルY軸（ボーンの向きに直交する上向き）方向の回転を調整できます"
+msgstr ""
+
+
+msgid "選択されたボーンのローカルZ軸（ボーンの向きに直交する奥向き）方向の回転を調整できます"
+msgstr ""
+
+
+msgid "選択されたボーンのローカルX軸（ボーンの向き）方向の移動を調整できます"
+msgstr ""
+
+
+msgid "選択されたボーンのローカルY軸（ボーンの向きに直交する上向き）方向の移動を調整できます"
+msgstr ""
+
+
+msgid "選択されたボーンのローカルZ軸（ボーンの向きに直交する奥向き）方向の移動を調整できます"
+msgstr ""
+
+
+msgid "衣装モデル首位置調整"
+msgstr ""
+
+
+msgid "衣装モデル肩位置調整"
+msgstr ""
+
+
+msgid "体幹"
+msgstr ""
+
+
+msgid "胸"
+msgstr ""
+
+
+msgid "お着替えモデル出力停止"
+msgstr ""
+
+
+msgid "再フィット"
+msgstr ""
+
+
+msgid "人物と衣装の選択されたボーンの位置が合う様に再度フィッティングします"
+msgstr ""
+
+
+msgid "材質非透過度"
+msgstr ""
+
+
+msgid "人物の材質プルダウンから選択した材質の非透過度を下のスライダーで調整できます。"
+msgstr ""
+
+
+msgid "スライダーで調整対象となる人物の材質です。\n「ボーンライン」はボーンを表す線を示します。\n非透過度が1でない状態でエクスポートすると、お着替え結果には出力されません\n(ボーンラインは常に出力されません)"
+msgstr ""
+
+
+msgid "衣装の材質プルダウンから選択した材質の非透過度を下のスライダーで調整できます。"
+msgstr ""
+
+
+msgid "スライダーで調整対象となる衣装の材質です。\n「ボーンライン」はボーンを表す線を示します。\n非透過度が1でない状態でエクスポートすると、お着替え結果には出力されません\n(ボーンラインは常に出力されません)"
+msgstr ""
+
+
+msgid "足首"
+msgstr ""
+
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}"
+msgstr ""
+
+
+msgid "つま先"
+msgstr ""
+
+
+msgid "選択されたボーンのグローバルX軸方向の移動を調整できます"
+msgstr ""
+
+
+msgid "選択されたボーンのグローバルY軸方向の移動を調整できます"
+msgstr ""
+
+
+msgid "選択されたボーンのグローバルZ軸方向の移動を調整できます"
+msgstr ""
+
+
+msgid "人物の材質の非透過度を0.5に設定します"
+msgstr ""
+
+
+msgid "衣装の材質の非透過度を0.5に設定します"
+msgstr ""
+
+
+msgid "出力準備"
+msgstr ""
+
+
+msgid "人物材質選り分け"
+msgstr ""
+
+
+msgid "衣装材質選り分け"
+msgstr ""
+
+
+msgid "モーフ出力"
+msgstr ""
+
+
+msgid "-- モーフ出力: {s}"
+msgstr ""
+
+
+msgid "剛体出力"
+msgstr ""
+
+
+msgid "-- 剛体出力: {s}"
+msgstr ""
+
+
+msgid "ジョイント出力"
+msgstr ""
+
+
+msgid "-- ジョイント出力: {s}"
+msgstr ""
+
+
+msgid "処理が継続できないため、中断しました\n----------------\n人物モデルデータが読み込まれていません"
+msgstr ""
+
+
+msgid "設定"
+msgstr ""
+
+
+msgid "人物モデル"
+msgstr ""
+
+
+msgid "モデルセットアップ：ボーンツリー"
+msgstr ""
+
+
+msgid "モデルセットアップ：システム用ボーン"
+msgstr ""
+
+
+msgid "フィッティングボーンモーフ追加"
+msgstr ""
+
+
+msgid "縮尺YZリンク"
+msgstr ""
+
+
+msgid "初期化"
+msgstr ""
+
+
+msgid "モーション"
+msgstr ""
+
+
+msgid "人物の材質の非透過度を任意の値に変更できます。\n非透過度を1未満にした場合、お着替えモデルには出力されません"
+msgstr ""
+
+
+msgid "\nEnterキーを押下したタイミングで値が反映されます。"
+msgstr ""
+
+
+msgid "衣装の材質の非透過度を任意の値に変更できます。\n非透過度を1未満にした場合、お着替えモデルには出力されません"
+msgstr ""
+
+
+msgid "処理を停止しました"
+msgstr ""
+
+
+msgid "*** 処理を停止します ***"
+msgstr ""
+
+
+msgid "人物モデル: {m} ({p})\n衣装モデル: {d} ({q})\n個別フィッティング:\n{f}"
+msgstr ""
+
+
+msgid "モデル出力"
+msgstr ""
+
+
+msgid "人物:ルート調整"
+msgstr ""
+
+
+msgid "人物全体のグローバルY軸方向の移動を調整できます"
+msgstr ""
+
+
+msgid "接地"
+msgstr ""
+
+
+msgid "衣装の靴底が接地するように全体のY位置を調整します"
+msgstr ""
+
+
+msgid "モーション読み込み開始"
+msgstr ""
+
+
+msgid "再生"
+msgstr ""
+
+
+msgid "停止"
+msgstr ""
+
+
+msgid "-- 人物: 初期姿勢計算"
+msgstr ""
+
+
+msgid "-- 衣装: 初期姿勢計算"
+msgstr ""
+
+
+msgid "-- 面データ読み取り [{i} ({p:.2f}%)]"
+msgstr ""
+
+
+msgid "モデルセットアップ：関連ボーン"
+msgstr ""
+
+
+msgid "-- モデルセットアップ：関連ボーン [{i} ({p:.2f}%)]"
+msgstr ""
+
+
+msgid "衣装モデル追加セットアップ：フィッティングローカルボーンモーフ追加"
+msgstr ""
+
+
+msgid "-- ボーンモーフ [{b}][移動={p}][回転={q}][縮尺:{o:.3f}({f:.3f})][ローカル縮尺:{l}]"
+msgstr ""
+
+
+msgid "-- ボーンモーフ [{b}][移動={p}][回転={q}][縮尺:{s}]"
+msgstr ""
+
+
+msgid "-- ボーンモーフ [{b}][移動={p}][回転={q}][縮尺:{s}][ローカル縮尺:{l}]"
+msgstr ""
+
+
+msgid "フィッティンググローバルスケール計算"
+msgstr ""
+
+
+msgid "フィッティングローカルスケール計算"
+msgstr ""
+
+
+msgid "衣装モデル追加セットアップ：フィッティングモーフ追加"
+msgstr ""
+
+
+msgid "フィッティングボーンモーフ：グローバルスケール計算"
+msgstr ""
+
+
+msgid "フィッティングボーンモーフ：オフセット計算"
+msgstr ""
+
+
+msgid "フィッティングボーンモーフ：ローカルスケール計算"
+msgstr ""
+
+
+msgid "フィッティング頂点オフセット計算"
+msgstr ""
+
+
+msgid "フィッティング頂点モーフ追加"
+msgstr ""
+
+
+msgid "-- 頂点モーフ [{v}][移動={p}]"
+msgstr ""
+
+
+msgid "-- 頂点オフセット"
+msgstr ""
+
+
+msgid "-- -- 頂点オフセット [{i} ({p:.2f}%)]"
+msgstr ""
+
+
+msgid "衣装モデル上半身3位置調整"
+msgstr ""
+
+
+msgid "衣装モデル腕位置調整"
+msgstr ""
+
+
+msgid "出力ファイルパスが有効なパスではないため、デフォルトの出力ファイルパスを再設定します。"
+msgstr ""
+
+
+msgid "衣装: 衣装モデルウェイト調整"
+msgstr ""
+
+
+msgid "-- 個別調整ボーンモーフ追加"
+msgstr ""
+
+
+msgid "-- 再調整ボーンモーフ追加"
+msgstr ""
+
+
+msgid "-- グローバルスケール計算"
+msgstr ""
+
+
+msgid "-- -- グローバルスケール計算 [{i} ({p:.2f}%)]"
+msgstr ""
+
+
+msgid "-- ボーンデータ読み取り [{i} ({p:.2f}%)]"
+msgstr ""
+
+
+msgid "衣装: {r}: 位置再計算: {u} → {p} ({d})"
+msgstr ""
+
