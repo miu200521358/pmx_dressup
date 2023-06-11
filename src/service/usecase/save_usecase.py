@@ -438,9 +438,21 @@ class SaveUsecase:
 
         for bone in dress_model.bones:
             bone_setting = bone_map[bone.index]
-            bone.parent_index = dress_model.bones[bone_setting["parent"][0]].index if bone_setting["parent"][0] else -1
-            bone.tail_index = dress_model.bones[bone_setting["tail"][0]].index if bone_setting["tail"][0] else -1
-            bone.effect_index = dress_model.bones[bone_setting["effect"][0]].index if bone_setting["effect"][0] else -1
+            bone.parent_index = (
+                dress_model.bones[bone_setting["parent"][0]].index
+                if bone_setting["parent"][0] and bone_setting["parent"][0] in dress_model.bones
+                else -1
+            )
+            bone.tail_index = (
+                dress_model.bones[bone_setting["tail"][0]].index
+                if bone_setting["tail"][0] and bone_setting["tail"][0] in dress_model.bones
+                else -1
+            )
+            bone.effect_index = (
+                dress_model.bones[bone_setting["effect"][0]].index
+                if bone_setting["effect"][0] and bone_setting["effect"][0] in dress_model.bones
+                else -1
+            )
             bone.layer = max(
                 bone.layer,
                 dress_model.bones[bone.parent_index].layer,

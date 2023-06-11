@@ -38,6 +38,9 @@
 　　Delete lower vertex
 　　　　→ Delete vertices as long as they do not cause holes in the model, so that vertices do not penetrate the model and the model becomes lighter.
 
+　【Notes】
+　　The weights of the costume models have been slightly altered to clean up the deformation.
+　　　This product is not available for costume models for which weight manipulation is not permitted.
 
 ----------------------------------------------------------------
 Video distribution
@@ -49,7 +52,7 @@ Video distribution
 Included files
 ----------------------------------------------------------------
 
-　PmxDressup_x.xx.xx.exe ... Tool itself (with language-specific shortcuts)
+　PmxDressup_x.xx.xx.exe ... Tool itself (with language-specific batchs)
 　Readme.txt ... Readme
 　VMD Sizing Wiki ... Link to Wiki
 　Content tree still image ... Link to content tree still image
@@ -103,7 +106,7 @@ Terms of use, etc.
 
 　Required Information.
 
-　　- Please be sure to clearly indicate the credit when you publish or distribute the results of the physics you have set up.
+　　- If you publish or distribute a model with a change of clothes, please give credit where credit is due.
 　　- In the case of Nico Nico Douga, please register the still image (to be created) for the tree in the contents tree.
 　　　 - If you register as a parent in the content tree, credit is optional.
 　　- If you distribute your models to the general public, please clearly state the credit only in the distribution notice (video, etc.) and register the model in the content tree.
@@ -113,11 +116,11 @@ Terms of use, etc.
 
 　　- The following actions are permitted within the scope of the original model's terms and conditions.
 
-　　- Adjustment or modification of models
+　　- Adjustment and modification of changed models
 　　　 - In the case of distributed models, please make sure that the terms of use allow for alterations.
 　　- Posting videos of models on video-sharing sites, SNS, etc.
 　　　 - Posting of models with costume settings created in progress is also acceptable.
-　　　 - However, if the original model's terms and conditions stipulate posting locations, age restrictions, etc., models created with physics settings using this tool will also be subject to those terms and conditions.
+　　　 - However, if the original model's terms and conditions stipulate a posting destination, age restrictions, etc., models dressed with this tool will also be subject to those terms and conditions.
 　　- Distribution of models to an unspecified number of people
 　　　 - Only self-made models or models for which distribution to an unspecified number of people is permitted.
 

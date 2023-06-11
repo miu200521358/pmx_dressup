@@ -488,7 +488,7 @@ class LoadUsecase:
                             )
                         )
 
-                if "S" in axis_name and morph_name not in ("足首", "頭", "胸"):
+                if "SY" in axis_name and morph_name not in ("足首", "頭", "胸"):
                     # 準標準以外の子ボーンをグローバルスケーリングさせる
                     for bone_name in target_all_bone_names:
                         if bone_name not in dress.bones:
