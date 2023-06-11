@@ -488,6 +488,28 @@ class LoadUsecase:
                             )
                         )
 
+                if "S" in axis_name and morph_name not in ("足首", "頭", "胸"):
+                    # 準標準以外の子ボーンをグローバルスケーリングさせる
+                    for bone_name in target_all_bone_names:
+                        if bone_name not in dress.bones:
+                            continue
+                        for child_bone_index in dress.bones[bone_name].child_bone_indexes:
+                            child_bone = dress.bones[child_bone_index]
+                            if child_bone.is_standard:
+                                continue
+
+                            morph.offsets.append(
+                                BoneMorphOffset(
+                                    dress.bones[child_bone.name].index,
+                                    position=MVector3D(),
+                                    qq=MQuaternion(),
+                                    scale=MVector3D(1, 1, 1),
+                                    local_position=MVector3D(),
+                                    local_qq=MQuaternion(),
+                                    local_scale=MVector3D(),
+                                )
+                            )
+
                 if "R" in axis_name:
                     for bone_name in child_rotation_bone_names:
                         if axis_name in ("RX", "RZ"):
@@ -668,6 +690,8 @@ class LoadUsecase:
         dress_matrixes = VmdMotion().animate_bone([0], dress, append_ik=False)
 
         dress_scale_values: dict[str, list[float]] = {}
+        upper_scale_value = 1.0
+        lower_scale_value = 1.0
 
         for i, (bone_name, bone_setting) in enumerate(list(STANDARD_BONE_NAMES.items())):
             if not (bone_name in dress.bones and bone_name in model.bones):
@@ -693,15 +717,15 @@ class LoadUsecase:
                 dress, dress_bone, bone_setting, matrixes=dress_matrixes
             )
 
-            # if bone_name == "下半身" or ("足首" in bone_name):
-            #     # 下半身と足首は地面からのY距離で決める
-            #     dress_fit_length_scale = model_bone_position.y / (dress_bone_position.y or 1)
-            # elif bone_name == "上半身":
-            #     # 上半身は首根元までのY距離で決める
-            #     dress_fit_length_scale = (model_matrixes[0, "首根元"].position.y - model_bone_position.y) / (
-            #         (dress_matrixes[0, "首根元"].position.y - dress_bone_position.y) or 1
-            #     )
-            # else:
+            if bone_name == "下半身":
+                # 下半身と足首は地面からのY距離を保持
+                lower_scale_value = model_bone_position.y / (dress_bone_position.y or 1)
+            elif bone_name == "上半身":
+                # 上半身は首根元までのY距離を保持
+                upper_scale_value = (model_matrixes[0, "首根元"].position.y - model_bone_position.y) / (
+                    (dress_matrixes[0, "首根元"].position.y - dress_bone_position.y) or 1
+                )
+
             dress_fit_length_scale = (model_tail_position - model_bone_position).length() / (
                 (dress_tail_position - dress_bone_position).length() or 1
             )
@@ -712,18 +736,11 @@ class LoadUsecase:
 
         dress_filtered_scale_values: dict[str, float] = {}
         for category, dress_category_scale_values in dress_scale_values.items():
-            # 中央値と標準偏差を計算
-            median_local_scales = np.median(dress_category_scale_values)
-            std_local_scales = np.std(dress_category_scale_values)
+            dress_filtered_scale_values[category] = float(np.mean(dress_category_scale_values))
 
-            filtered_scales = np.array(dress_category_scale_values)[
-                (dress_category_scale_values >= median_local_scales - (std_local_scales * 1.5))
-                & (dress_category_scale_values <= median_local_scales + (std_local_scales * 1.5))
-            ]
-
-            dress_filtered_scale_values[category] = np.min(filtered_scales)
-
-            logger.debug(f"グローバルスケール [{category}][{np.round(filtered_scales, decimals=3)}][{dress_filtered_scale_values[category]:.3f}]")
+            logger.debug(
+                f"グローバルスケール [{category}][{np.round(dress_category_scale_values, decimals=3)}][{dress_filtered_scale_values[category]:.3f}]"
+            )
 
         dress_offset_scales: dict[int, MVector3D] = {}
         dress_fit_scales: dict[int, MVector3D] = {}
@@ -749,6 +766,25 @@ class LoadUsecase:
             dress_offset_scales[dress_bone.index] = dress_offset_scale
 
             logger.debug("-- -- グローバルスケール [{b}][{f:.3f}({o:.3f})]", b=bone_name, f=dress_fit_scale.x, o=dress_offset_scale.x)
+
+        for dress_bone in dress.bones:
+            # 準標準外のボーンは上半身もしくは下半身のスケールを適用する
+            if dress_bone.is_standard:
+                continue
+            if dress.bones["上半身"].index in dress_bone.relative_bone_indexes:
+                dress_fit_scale = MVector3D(upper_scale_value, upper_scale_value, upper_scale_value)
+            elif dress.bones["下半身"].index in dress_bone.relative_bone_indexes:
+                dress_fit_scale = MVector3D(lower_scale_value, lower_scale_value, lower_scale_value)
+            else:
+                continue
+
+            # 親をキャンセルしていく
+            dress_offset_scale = dress_fit_scale.copy()
+            for tree_bone_index in reversed(dress.bone_trees[dress_bone.name].indexes[:-1]):
+                dress_offset_scale *= MVector3D(1, 1, 1) / dress_offset_scales.get(tree_bone_index, MVector3D(1, 1, 1))
+
+            dress_fit_scales[dress_bone.index] = dress_fit_scale
+            dress_offset_scales[dress_bone.index] = dress_offset_scale
 
         return dress_offset_scales, dress_fit_scales
 
@@ -1403,7 +1439,7 @@ FIT_INDIVIDUAL_BONE_NAMES = {
     "下半身": (("下半身",), ("足", "ひざ", "足首"), ("足",), []),
     "上半身": (("上半身",), ("下半身", "上半身2", "首"), ("上半身2",), []),
     "上半身2": (("上半身2", "上半身3"), ("首", "頭", "肩", "腕", "ひじ", "手のひら"), ("首",), []),
-    "首": (("首根元", "首"), ("頭", "肩", "腕", "ひじ", "手のひら"), ("頭",), []),
+    "首": (("首",), ("頭", "肩", "腕", "ひじ", "手のひら"), ("頭",), []),
     "頭": (("頭",), [], [], []),
     "肩": (("右肩", "左肩"), ("腕", "ひじ", "手のひら"), [], ("腕", "ひじ", "手のひら")),
     "腕": (("右腕", "左腕"), ("ひじ", "手のひら"), [], ("ひじ", "手のひら")),
