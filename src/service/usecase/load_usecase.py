@@ -736,7 +736,10 @@ class LoadUsecase:
 
         dress_filtered_scale_values: dict[str, float] = {}
         for category, dress_category_scale_values in dress_scale_values.items():
-            dress_filtered_scale_values[category] = float(np.mean(dress_category_scale_values))
+            # meanとmaxの中間
+            dress_filtered_scale_values[category] = float(
+                np.mean([np.mean(dress_category_scale_values), np.max(dress_category_scale_values)])
+            )
 
             logger.debug(
                 f"グローバルスケール [{category}][{np.round(dress_category_scale_values, decimals=3)}][{dress_filtered_scale_values[category]:.3f}]"
@@ -953,28 +956,35 @@ class LoadUsecase:
                     f"-- -- 移動オフセット[{dress_bone.name}][{dress_offset_position}][model={model_bone_position}][dress={dress_bone_position}]"
                 )
 
-            if dress_bone.is_ik and STANDARD_BONE_NAMES[dress.bones[dress_bone.ik.bone_index].name].translatable:
-                # IKの場合、FKターゲットをIKの位置に合わせる
+            if dress_bone.is_ik:
                 fk_dress_bone = dress.bones[dress_bone.ik.bone_index]
-                model_bone_matrix, model_bone_position, model_tail_position = self.get_tail_position(
-                    dress, dress_bone, bone_setting, motion=dress_motion, append_ik=False
-                )
-                dress_bone_matrix, dress_bone_position, dress_tail_position = self.get_tail_position(
-                    dress, fk_dress_bone, STANDARD_BONE_NAMES[fk_dress_bone.name], motion=dress_motion, append_ik=False
-                )
 
-                offset_target_position = model_bone_position - dress_bone_position
-                dress_offset_positions[fk_dress_bone.index] += offset_target_position
+                if fk_dress_bone.is_translatable_standard:
+                    # IKの場合、FKターゲットをIKの位置に合わせる
+                    dress_ik_matrixes = dress_motion.animate_bone([0], dress, [dress_bone.name], append_ik=False)
+                    dress_ik_bone_position = dress_ik_matrixes[0, dress_bone.name].position
 
-                # キーフレ更新
-                mbf = dress_motion.bones[fk_dress_bone.name][0]
-                mbf.position = dress_offset_positions[fk_dress_bone.index].copy()
-                dress_motion.bones[fk_dress_bone.name].append(mbf)
+                    dress_fk_bone_position = dress_ik_matrixes[0, fk_dress_bone.name].position
 
-                logger.debug(
-                    f"-- -- 移動追加オフセット[{fk_dress_bone.name}][{offset_target_position}]"
-                    + f"[IK={model_bone_position}][FK={dress_bone_position}]"
-                )
+                    # # model_bone_matrix, model_bone_position, model_tail_position = self.get_tail_position(
+                    # #     dress, dress_bone, bone_setting, motion=dress_motion, append_ik=False
+                    # # )
+                    # dress_bone_matrix, dress_bone_position, dress_tail_position = self.get_tail_position(
+                    #     dress, fk_dress_bone, STANDARD_BONE_NAMES[fk_dress_bone.name], motion=dress_motion, append_ik=False
+                    # )
+
+                    offset_target_position = dress_ik_bone_position - dress_fk_bone_position
+                    dress_offset_positions[fk_dress_bone.index] += offset_target_position
+
+                    # キーフレ更新
+                    mbf = dress_motion.bones[fk_dress_bone.name][0]
+                    mbf.position = dress_offset_positions[fk_dress_bone.index].copy()
+                    dress_motion.bones[fk_dress_bone.name].append(mbf)
+
+                    logger.debug(
+                        f"-- -- 移動追加オフセット[{fk_dress_bone.name}][{offset_target_position}]"
+                        + f"[IK={model_bone_position}][FK={dress_bone_position}]"
+                    )
 
             if dress_bone.is_rotatable_standard:
                 # 回転計算 ------------------
