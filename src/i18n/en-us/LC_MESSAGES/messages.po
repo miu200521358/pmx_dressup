@@ -722,3 +722,12 @@ msgstr "-- Bone data read [{i} ({p:.2f}%)]"
 
 msgid "衣装: {r}: 位置再計算: {u} → {p} ({d})"
 msgstr "Costume: {r}: position recalculation: {u} → {p} ({d})"
+
+msgid "単"
+msgstr "Only"
+
+msgid "人物の材質のみを表示します。もう一回押すと元に戻ります"
+msgstr "Shows only the material of the person. Press one more time to return to the original"
+
+msgid "衣装の材質のみを表示します。もう一回押すと元に戻ります"
+msgstr "Displays costume material only. Press one more time to go back to the original"

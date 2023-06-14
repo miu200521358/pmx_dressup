@@ -15,6 +15,8 @@ class MaterialCtrlSet:
         self.sizer = sizer
         self.parent = parent
         self.window = window
+        self.type_name = type_name
+        self.is_only: bool = False
         self.alphas: dict[str, float] = {}
 
         self.title_ctrl = wx.StaticText(self.window, wx.ID_ANY, __(f"{type_name}モデル"), wx.DefaultPosition, wx.DefaultSize, 0)
@@ -38,7 +40,7 @@ class MaterialCtrlSet:
             self.window,
             wx.ID_ANY,
             wx.DefaultPosition,
-            wx.Size(210, -1),
+            wx.Size(180, -1),
             choices=[],
         )
         self.material_choice_ctrl.SetToolTip(
@@ -68,6 +70,17 @@ class MaterialCtrlSet:
         self.half_btn_ctrl.SetToolTip(__(f"{type_name}の材質の非透過度を0.5に設定します"))
         self.half_btn_ctrl.Bind(wx.EVT_BUTTON, self.on_change_material_half)
         self.material_sizer.Add(self.half_btn_ctrl, 0, wx.ALL, 3)
+
+        self.only_btn_ctrl = wx.Button(
+            self.window,
+            wx.ID_ANY,
+            __("単"),
+            wx.DefaultPosition,
+            wx.Size(30, -1),
+        )
+        self.only_btn_ctrl.SetToolTip(__(f"{type_name}の材質のみを表示します。もう一回押すと元に戻ります"))
+        self.only_btn_ctrl.Bind(wx.EVT_BUTTON, self.on_change_material_only)
+        self.material_sizer.Add(self.only_btn_ctrl, 0, wx.ALL, 3)
 
         self.sizer.Add(self.material_sizer, 0, wx.ALL, 3)
 
@@ -111,6 +124,19 @@ class MaterialCtrlSet:
 
         self.parent.Enable(False)
         self.parent.on_change_morph()
+        self.parent.Enable(True)
+
+    def on_change_material_only(self, event: wx.Event) -> None:
+        material_name = self.material_choice_ctrl.GetStringSelection()
+
+        self.parent.Enable(False)
+
+        self.is_only = not self.is_only
+        if self.is_only:
+            self.parent.show_only_material(self.type_name, material_name)
+        else:
+            self.parent.on_change_morph()
+
         self.parent.Enable(True)
 
     def on_change_material_half(self, event: wx.Event) -> None:

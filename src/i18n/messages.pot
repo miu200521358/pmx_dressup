@@ -957,3 +957,15 @@ msgstr ""
 msgid "衣装: {r}: 位置再計算: {u} → {p} ({d})"
 msgstr ""
 
+
+msgid "単"
+msgstr ""
+
+
+msgid "人物の材質のみを表示します。もう一回押すと元に戻ります"
+msgstr ""
+
+
+msgid "衣装の材質のみを表示します。もう一回押すと元に戻ります"
+msgstr ""
+
