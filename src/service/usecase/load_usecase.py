@@ -327,8 +327,10 @@ class LoadUsecase:
         morph.offsets = offsets
         model.morphs.append(morph)
 
-    def create_dress_individual_bone_morphs(self, model: PmxModel, dress: PmxModel):
+    def create_dress_individual_bone_morphs(self, dress: PmxModel) -> list[str]:
         """衣装個別フィッティング用ボーンモーフを作成"""
+
+        individual_morph_names: list[str] = []
 
         for morph_name, (
             target_bone_names,
@@ -336,6 +338,8 @@ class LoadUsecase:
             cancel_rotation_morph_names,
             child_rotation_morph_names,
         ) in FIT_INDIVIDUAL_BONE_NAMES.items():
+            individual_morph_names.append(__(morph_name))
+
             # 子どものスケーリング対象もモーフに入れる
             child_scale_bone_names = list(
                 set(
@@ -421,28 +425,6 @@ class LoadUsecase:
                             )
                         )
 
-                # if "SY" in axis_name and morph_name not in ("足首", "頭", "胸"):
-                #     # 準標準以外の子ボーンをグローバルスケーリングさせる
-                #     for bone_name in target_all_bone_names:
-                #         if bone_name not in dress.bones:
-                #             continue
-                #         for child_bone_index in dress.bones[bone_name].child_bone_indexes:
-                #             child_bone = dress.bones[child_bone_index]
-                #             if child_bone.is_standard:
-                #                 continue
-
-                #             morph.offsets.append(
-                #                 BoneMorphOffset(
-                #                     dress.bones[child_bone.name].index,
-                #                     position=MVector3D(),
-                #                     qq=MQuaternion(),
-                #                     scale=MVector3D(1, 1, 1),
-                #                     local_position=MVector3D(),
-                #                     local_qq=MQuaternion(),
-                #                     local_scale=MVector3D(),
-                #                 )
-                #             )
-
                 if "R" in axis_name:
                     for bone_name in child_rotation_bone_names:
                         if axis_name in ("RX", "RZ"):
@@ -494,7 +476,42 @@ class LoadUsecase:
 
                 dress.morphs.append(morph)
 
+        for dress_bone in dress.bones:
+            if dress_bone.is_standard or dress_bone.is_standard_extend or not dress.bones[dress_bone.parent_index].is_standard:
+                continue
+
+            individual_morph_names.append(dress_bone.name)
+
+            # 準標準を親に持つ準標準外のルートボーンの調整モーフを追加する
+            for axis_name, position, qq, scale in (
+                ("SX", MVector3D(), MQuaternion(), MVector3D(1, 0, 0)),
+                ("SY", MVector3D(), MQuaternion(), MVector3D(0, 1, 0)),
+                ("SZ", MVector3D(), MQuaternion(), MVector3D(0, 0, 1)),
+                ("RX", MVector3D(), MQuaternion.from_euler_degrees(2, 0, 0), MVector3D()),
+                ("RY", MVector3D(), MQuaternion.from_euler_degrees(0, 2, 0), MVector3D()),
+                ("RZ", MVector3D(), MQuaternion.from_euler_degrees(0, 0, 2), MVector3D()),
+                ("MX", MVector3D(1, 0, 0), MQuaternion(), MVector3D()),
+                ("MY", MVector3D(0, 1, 0), MQuaternion(), MVector3D()),
+                ("MZ", MVector3D(0, 0, 1), MQuaternion(), MVector3D()),
+            ):
+                morph = Morph(name=f"調整:{dress_bone.name}:{axis_name}")
+                morph.is_system = True
+                morph.morph_type = MorphType.BONE
+
+                morph.offsets.append(
+                    BoneMorphOffset(
+                        dress_bone.index,
+                        position=position,
+                        qq=qq,
+                        scale=scale,
+                    )
+                )
+
+                dress.morphs.append(morph)
+
         logger.info("-- 個別調整ボーンモーフ追加")
+
+        return individual_morph_names
 
     def create_dress_fit_morphs(self, model: PmxModel, dress: PmxModel):
         """衣装フィッティング用ボーンモーフを作成"""
@@ -1254,7 +1271,7 @@ FIT_INDIVIDUAL_BONE_NAMES = {
     "下半身": (("下半身",), ("足", "ひざ", "足首"), ("足",), []),
     "上半身": (("上半身",), ("下半身", "上半身2", "首"), ("上半身2",), []),
     "上半身2": (("上半身2", "上半身3"), ("首", "頭", "肩", "腕", "ひじ", "手のひら"), ("首",), []),
-    "首": (("首",), ("頭", "肩", "腕", "ひじ", "手のひら"), ("頭",), []),
+    "首": (("首",), ("頭",), ("頭",), []),
     "頭": (("頭",), [], [], []),
     "肩": (("右肩P", "左肩P", "右肩", "左肩"), ("腕", "ひじ", "手のひら"), [], ("腕", "ひじ", "手のひら")),
     "腕": (("右肩C", "左肩C", "右腕", "左腕"), ("ひじ", "手のひら"), [], ("ひじ", "手のひら")),

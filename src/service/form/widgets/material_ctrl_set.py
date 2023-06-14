@@ -163,3 +163,4 @@ class MaterialCtrlSet:
         self.right_btn_ctrl.Enable(enable)
         self.slider.Enable(enable)
         self.half_btn_ctrl.Enable(enable)
+        self.only_btn_ctrl.Enable(enable)

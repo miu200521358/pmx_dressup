@@ -266,13 +266,13 @@ class BoneCtrlSet:
 
         self.sizer.Add(self.btn_sizer, 1, wx.EXPAND, 0)
 
-    def initialize(self) -> None:
+    def initialize(self, individual_morph_names: list[str]) -> None:
         self.bone_choice_ctrl.Clear()
-        for bone_name in FIT_BONE_NAMES:
-            self.bone_choice_ctrl.Append(__(bone_name))
-            self.scales[__(bone_name)] = MVector3D(1, 1, 1)
-            self.degrees[__(bone_name)] = MVector3D()
-            self.positions[__(bone_name)] = MVector3D()
+        for morph_name in individual_morph_names:
+            self.bone_choice_ctrl.Append(morph_name)
+            self.scales[morph_name] = MVector3D(1, 1, 1)
+            self.degrees[morph_name] = MVector3D()
+            self.positions[morph_name] = MVector3D()
         self.bone_choice_ctrl.SetSelection(0)
         self.scale_x_slider.ChangeValue(1.0)
         self.scale_y_slider.ChangeValue(1.0)
@@ -286,16 +286,16 @@ class BoneCtrlSet:
         self.scale_link_check_ctrl.SetValue(1)
 
     def on_change_bone(self, event: wx.Event) -> None:
-        bone_name = self.bone_choice_ctrl.GetStringSelection()
-        self.scale_x_slider.ChangeValue(self.scales[bone_name].x)
-        self.scale_y_slider.ChangeValue(self.scales[bone_name].y)
-        self.scale_z_slider.ChangeValue(self.scales[bone_name].z)
-        self.degree_x_slider.ChangeValue(self.degrees[bone_name].x)
-        self.degree_y_slider.ChangeValue(self.degrees[bone_name].y)
-        self.degree_z_slider.ChangeValue(self.degrees[bone_name].z)
-        self.position_x_slider.ChangeValue(self.positions[bone_name].x)
-        self.position_y_slider.ChangeValue(self.positions[bone_name].y)
-        self.position_z_slider.ChangeValue(self.positions[bone_name].z)
+        morph_name = self.bone_choice_ctrl.GetStringSelection()
+        self.scale_x_slider.ChangeValue(self.scales[morph_name].x)
+        self.scale_y_slider.ChangeValue(self.scales[morph_name].y)
+        self.scale_z_slider.ChangeValue(self.scales[morph_name].z)
+        self.degree_x_slider.ChangeValue(self.degrees[morph_name].x)
+        self.degree_y_slider.ChangeValue(self.degrees[morph_name].y)
+        self.degree_z_slider.ChangeValue(self.degrees[morph_name].z)
+        self.position_x_slider.ChangeValue(self.positions[morph_name].x)
+        self.position_y_slider.ChangeValue(self.positions[morph_name].y)
+        self.position_z_slider.ChangeValue(self.positions[morph_name].z)
 
     def on_change_bone_right(self, event: wx.Event) -> None:
         selection = self.bone_choice_ctrl.GetSelection()
@@ -312,10 +312,10 @@ class BoneCtrlSet:
         self.on_change_bone(event)
 
     def on_change_clear(self, event: wx.Event) -> None:
-        for bone_name in FIT_BONE_NAMES:
-            self.scales[__(bone_name)] = MVector3D(1, 1, 1)
-            self.degrees[__(bone_name)] = MVector3D()
-            self.positions[__(bone_name)] = MVector3D()
+        for morph_name in self.scales.keys():
+            self.scales[morph_name] = MVector3D(1, 1, 1)
+            self.degrees[morph_name] = MVector3D()
+            self.positions[morph_name] = MVector3D()
         # self.bone_choice_ctrl.SetSelection(0)
         self.scale_x_slider.ChangeValue(1.0)
         self.scale_y_slider.ChangeValue(1.0)
@@ -343,19 +343,19 @@ class BoneCtrlSet:
         self.on_change_slider(event)
 
     def on_change_slider(self, event: wx.Event) -> None:
-        bone_name = self.bone_choice_ctrl.GetStringSelection()
-        self.scales[bone_name].x = self.scale_x_slider.GetValue()
-        self.scales[bone_name].y = self.scale_y_slider.GetValue()
-        self.scales[bone_name].z = self.scale_z_slider.GetValue()
-        self.degrees[bone_name].x = self.degree_x_slider.GetValue()
-        self.degrees[bone_name].y = self.degree_y_slider.GetValue()
-        self.degrees[bone_name].z = self.degree_z_slider.GetValue()
-        self.positions[bone_name].x = self.position_x_slider.GetValue()
-        self.positions[bone_name].y = self.position_y_slider.GetValue()
-        self.positions[bone_name].z = self.position_z_slider.GetValue()
+        morph_name = self.bone_choice_ctrl.GetStringSelection()
+        self.scales[morph_name].x = self.scale_x_slider.GetValue()
+        self.scales[morph_name].y = self.scale_y_slider.GetValue()
+        self.scales[morph_name].z = self.scale_z_slider.GetValue()
+        self.degrees[morph_name].x = self.degree_x_slider.GetValue()
+        self.degrees[morph_name].y = self.degree_y_slider.GetValue()
+        self.degrees[morph_name].z = self.degree_z_slider.GetValue()
+        self.positions[morph_name].x = self.position_x_slider.GetValue()
+        self.positions[morph_name].y = self.position_y_slider.GetValue()
+        self.positions[morph_name].z = self.position_z_slider.GetValue()
 
         self.parent.Enable(False)
-        self.parent.on_change(bone_name)
+        self.parent.on_change(morph_name)
         self.parent.Enable(True)
 
     # def on_fit_ground(self, event: wx.Event) -> None:
@@ -383,4 +383,4 @@ class BoneCtrlSet:
         self.scale_link_check_ctrl.Enable(enable)
 
 
-FIT_BONE_NAMES = ("上半身", "上半身2", "肩", "腕", "ひじ", "手のひら", "首", "頭", "下半身", "足", "ひざ", "足首")
+FIT_BONE_NAMES = ["上半身", "上半身2", "肩", "腕", "ひじ", "手のひら", "首", "頭", "下半身", "足", "ひざ", "足首"]
