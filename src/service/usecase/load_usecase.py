@@ -222,79 +222,12 @@ class LoadUsecase:
     def replace_twist(self, model: PmxModel, dress: PmxModel, replaced_bone_names: list[str]) -> list[str]:
         """腕捩・手捩のボーン置き換え"""
 
-        # replace_bone_names = [
-        #     "右腕",
-        #     "右ひじ",
-        #     "右腕捩",
-        #     "右腕捩1",
-        #     "右腕捩2",
-        #     "右腕捩3",
-        #     "右手首",
-        #     "右手捩",
-        #     "右手捩1",
-        #     "右手捩2",
-        #     "右手捩3",
-        #     "左腕",
-        #     "左ひじ",
-        #     "左腕捩",
-        #     "左腕捩1",
-        #     "左腕捩2",
-        #     "左腕捩3",
-        #     "左手首",
-        #     "左手捩",
-        #     "左手捩1",
-        #     "左手捩2",
-        #     "左手捩3",
-        # ]
-        # if not (model.bones.exists(replace_bone_names) and dress.bones.exists(replace_bone_names)):
-        #     return []
-
-        # logger.info("フィッティング用ウェイト別頂点取得（衣装）")
-        # dress.update_vertices_by_bone()
-
         replace_bone_set = (
             ("右腕", "右ひじ", "右腕捩"),
             ("右ひじ", "右手首", "右手捩"),
             ("左腕", "左ひじ", "左腕捩"),
             ("左ひじ", "左手首", "左手捩"),
         )
-
-        # # 一旦衣装の置き換えウェイトを元ボーンに置き換える
-        # replaced_bone_map = dict([(b.index, b.index) for b in dress.bones])
-        # for from_name, to_name, replace_name in replace_bone_set:
-        #     if replace_name in dress.bones and from_name and dress.bones:
-        #         replaced_bone_map[dress.bones[replace_name].index] = dress.bones[from_name].index
-        #     for no in range(1, 5):
-        #         replace_twist_name = f"{replace_name}{no}"
-        #         if replace_twist_name in dress.bones and replace_twist_name and dress.bones:
-        #             replaced_bone_map[dress.bones[replace_twist_name].index] = dress.bones[from_name].index
-
-        # # 捩り系の頂点リストを取得する
-        # dress_vertex_indexes = set([])
-        # for bone_name in [
-        #     "右腕捩",
-        #     "右腕捩1",
-        #     "右腕捩2",
-        #     "右腕捩3",
-        #     "右手捩",
-        #     "右手捩1",
-        #     "右手捩2",
-        #     "右手捩3",
-        #     "左腕捩",
-        #     "左腕捩1",
-        #     "左腕捩2",
-        #     "左腕捩3",
-        #     "左手捩",
-        #     "左手捩1",
-        #     "左手捩2",
-        #     "左手捩3",
-        # ]:
-        #     dress_vertex_indexes |= set(dress.vertices_by_bones.get(bone_name, []))
-
-        # # 捩りにウェイトが乗っているのを元ボーンに置き換える
-        # for vidx in list(dress_vertex_indexes):
-        #     v = dress.vertices[vidx]
-        #     v.deform.indexes = np.vectorize(replaced_bone_map.get)(v.deform.indexes)
 
         for from_name, to_name, replace_name in replace_bone_set:
             # 捩りボーンそのもの
@@ -653,35 +586,6 @@ class LoadUsecase:
 
         dress.morphs.append(dress_bone_fitting_morph)
 
-        # logger.info("フィッティング頂点モーフ追加", decoration=MLogger.Decoration.LINE)
-
-        # dress_vertex_count = len(dress.vertices)
-        # for dress_vertex in dress.vertices:
-        #     if dress_vertex.index not in dress_vertex_offset_positions:
-        #         continue
-
-        #     dress_vertex_fitting_morph.offsets.append(
-        #         VertexMorphOffset(
-        #             dress_vertex.index,
-        #             position=dress_vertex_offset_positions[dress_vertex.index],
-        #         )
-        #     )
-
-        #     logger.count(
-        #         "-- 頂点オフセット",
-        #         index=dress_vertex.index,
-        #         total_index_count=dress_vertex_count,
-        #         display_block=100,
-        #     )
-
-        #     logger.info(
-        #         "-- 頂点モーフ [{v}][移動={p}]",
-        #         v=dress_vertex.index,
-        #         p=dress_vertex_offset_positions[dress_vertex.index],
-        #     )
-
-        # dress.morphs.append(dress_vertex_fitting_morph)
-
     def get_dress_global_bone_scale_offsets(
         self,
         model: PmxModel,
@@ -874,57 +778,10 @@ class LoadUsecase:
                                 f"-- -- 移動追加オフセット[{dress_ik_link_bone.name}][{offset_link_position}]"
                                 + f"[original={deformed_refit_link_position}][deform={deformed_link_position}]"
                             )
-                # matrixes = dress_motion.animate_bone([0], model, [bone_name], append_ik=False)
-                # deformed_ik_position = matrixes[0, dress_ik_bone.name].position
-                # deformed_target_position = matrixes[0, dress_ik_target_bone.name].position
-
-                # # offset_target_position = deformed_ik_position - deformed_target_position
-                # # dress_offset_position += offset_target_position
-
-                # # logger.debug(
-                # #     f"-- -- 移動追加オフセット[{dress_ik_target_bone.name}][{offset_link_position}]"
-                # #     + f"[ik={deformed_ik_position}][fk={deformed_target_position}]"
-                # # )
-
-                # # FKボーンの位置：自分の方向
-                # dress_x_direction = (matrixes[0, dress_ik_link_bone.name].global_matrix.inverse() * deformed_target_position).normalized()
-                # dress_y_direction = dress_x_direction.cross(z_direction)
-                # dress_slope_qq = MQuaternion.from_direction(dress_x_direction, dress_y_direction)
-
-                # # IKボーンの位置：自分の方向
-                # model_x_direction = (matrixes[0, dress_ik_link_bone.name].global_matrix.inverse() * deformed_ik_position).normalized()
-                # model_y_direction = model_x_direction.cross(z_direction)
-                # model_slope_qq = MQuaternion.from_direction(model_x_direction, model_y_direction)
-
-                # dress_offset_qq = model_slope_qq * dress_slope_qq.inverse()
-
-                # for tree_bone_index in reversed(dress.bone_trees[dress_ik_link_bone.name].indexes[:-1]):
-                #     # 自分より親は逆回転させる
-                #     dress_offset_qq *= dress_offset_qqs.get(tree_bone_index, MQuaternion()).inverse()
-
-                # dress_offset_qqs[dress_ik_link_bone.index] *= dress_offset_qq
-
-                # # キーフレとして追加
-                # qbf = dress_motion.bones[dress_ik_link_bone.name][0]
-                # qbf.rotation = dress_offset_qqs[dress_ik_link_bone.index].copy()
-                # dress_motion.bones[dress_ik_link_bone.name].append(qbf)
-
-                # logger.debug(
-                #     f"-- -- 回転補正オフセット[{dress_ik_link_bone.name}][{dress_offset_qqs[dress_ik_link_bone.index].to_euler_degrees()}]"
-                #     + f"[ik={deformed_ik_position}][fk={deformed_target_position}]"
-                # )
 
             if dress_bone.is_translatable_standard:
                 # 移動計算 ------------------
-                # if dress_bone.is_ik:
-                #     # IK の場合、FKに合わせる
-                #     fk_dress_bone = dress.bones[dress_bone.ik.bone_index]
-                #     model_bone_matrix, model_bone_position, model_tail_position = self.get_tail_position(
-                #         dress, fk_dress_bone, STANDARD_BONE_NAMES[fk_dress_bone.name], motion=dress_motion, append_ik=False
-                #     )
-                #     dress_bone_matrix, dress_bone_position, dress_tail_position = self.get_tail_position(
-                #         dress, dress_bone, bone_setting, motion=dress_motion, append_ik=False
-                #     )
+
                 if dress_bone.is_leg_d:
                     # 足D系列は足FKに揃える
                     fk_dress_bone = dress.bones[dress_bone.effect_index]
@@ -943,10 +800,6 @@ class LoadUsecase:
                     )
 
                 dress_offset_position = model_bone_position - dress_bone_position
-
-                # if dress_bone.is_leg_d:
-                #     # 足D系列は足FKに揃える
-                #     dress_offset_position = dress_offset_positions[dress_bone.effect_index].copy()
 
                 dress_offset_positions[dress_bone.index] = dress_offset_position
 
@@ -968,13 +821,6 @@ class LoadUsecase:
                     dress_ik_bone_position = dress_ik_matrixes[0, dress_bone.name].position
 
                     dress_fk_bone_position = dress_ik_matrixes[0, fk_dress_bone.name].position
-
-                    # # model_bone_matrix, model_bone_position, model_tail_position = self.get_tail_position(
-                    # #     dress, dress_bone, bone_setting, motion=dress_motion, append_ik=False
-                    # # )
-                    # dress_bone_matrix, dress_bone_position, dress_tail_position = self.get_tail_position(
-                    #     dress, fk_dress_bone, STANDARD_BONE_NAMES[fk_dress_bone.name], motion=dress_motion, append_ik=False
-                    # )
 
                     offset_target_position = dress_ik_bone_position - dress_fk_bone_position
                     dress_offset_positions[fk_dress_bone.index] += offset_target_position
@@ -1035,10 +881,6 @@ class LoadUsecase:
                         # 自分より親は逆回転させる
                         dress_offset_qq *= dress_offset_qqs.get(tree_bone_index, MQuaternion()).inverse()
 
-                    # if dress_bone.is_leg_d:
-                    #     # 足D系列は足FKに揃える
-                    #     dress_offset_qq = dress_offset_qqs[dress.bones[dress_bone.name[:-1]].index].copy()
-
                     dress_offset_qqs[dress_bone.index] = dress_offset_qq
 
                     # キーフレとして追加
@@ -1050,16 +892,6 @@ class LoadUsecase:
                         f"-- -- 回転オフセット[{dress_bone.name}][{dress_offset_qq.to_euler_degrees()}]"
                         + f"[model={model_bone_position}][dress={dress_bone_position}]"
                     )
-            # elif dress_bone.has_fixed_axis:
-            #     # 軸固定の場合、軸を再計算する
-            #     if dress_bone.name[-1].isdigit():
-            #         # 分散ボーンの場合、親をコピー
-            #         dress.bones[dress_bone.name].fixed_axis = model.bones[dress_bone.name[-1]].fixed_axis.copy()
-            #         dress.bones[dress_bone.name].corrected_fixed_axis = model.bones[dress_bone.name[-1]].corrected_fixed_axis.copy()
-            #     else:
-            #         # 捩りボーンそのものであれば、そのままコピー
-            #         dress.bones[dress_bone.name].fixed_axis = model.bones[dress_bone.name].fixed_axis.copy()
-            #         dress.bones[dress_bone.name].corrected_fixed_axis = model.bones[dress_bone.name].corrected_fixed_axis.copy()
 
         for dress_other_bone in dress.bones:
             for parent_bone_index in (dress.bones["上半身"].index, dress.bones["下半身"].index):
@@ -1415,36 +1247,6 @@ class LoadUsecase:
             dress_vertex_offset_positions[vertex_index] = MVector3D(0, 0, fit_z)
 
         return dress_vertex_offset_positions
-
-
-FIT_ROOT_BONE_NAMES = [
-    ("足中心", "首根元"),
-]
-
-FIT_TRUNK_BONE_NAMES = [
-    ("上半身", "首根元"),
-    ("下半身", "足中心"),
-]
-
-FIT_EXTREMITIES_BONE_NAMES = [
-    ("左腕", (("左腕", "左ひじ"), ("左ひじ", "左手首"))),
-    ("左足", (("左足", "左ひざ"), ("左ひざ", "左足首"))),
-    ("右腕", (("右腕", "右ひじ"), ("右ひじ", "右手首"))),
-    ("右足", (("右足", "右ひざ"), ("右ひざ", "右足首"))),
-]
-
-FIT_FINGER_BONE_NAMES = [
-    ("左親指１", (("左親指１", "左親指２"),)),
-    ("左人指１", (("左人指１", "左人指２"), ("左人指２", "左人指３"))),
-    ("左中指１", (("左中指１", "左中指２"), ("左中指２", "左中指３"))),
-    ("左薬指１", (("左薬指１", "左薬指２"), ("左薬指２", "左薬指３"))),
-    ("左小指１", (("左小指１", "左小指２"), ("左小指２", "左小指３"))),
-    ("右親指１", (("右親指１", "右親指２"),)),
-    ("右人指１", (("右人指１", "右人指２"), ("右人指２", "右人指３"))),
-    ("右中指１", (("右中指１", "右中指２"), ("右中指２", "右中指３"))),
-    ("右薬指１", (("右薬指１", "右薬指２"), ("右薬指２", "右薬指３"))),
-    ("右小指１", (("右小指１", "右小指２"), ("右小指２", "右小指３"))),
-]
 
 
 # IKはFKの後に指定する事
