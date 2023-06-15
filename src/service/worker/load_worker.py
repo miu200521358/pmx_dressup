@@ -66,38 +66,48 @@ class LoadWorker(BaseWorker):
             dress = original_dress.copy()
             dress.update_vertices_by_bone()
 
+            logger.info("ボーン調整", decoration=MLogger.Decoration.BOX)
+
             # 不足ボーン追加
-            logger.info("不足ボーン調整", decoration=MLogger.Decoration.BOX)
+            logger.info("不足ボーン調整", decoration=MLogger.Decoration.LINE)
             usecase.add_mismatch_bones(model, dress)
 
             replaced_bone_names: list[str] = []
 
+            # 下半身の再設定
+            logger.info("衣装モデル下半身位置調整", decoration=MLogger.Decoration.LINE)
+            replaced_bone_names += usecase.replace_lower(model, dress)
+
+            # 上半身の再設定
+            logger.info("衣装モデル上半身位置調整", decoration=MLogger.Decoration.LINE)
+            replaced_bone_names += usecase.replace_upper(model, dress)
+
             # 上半身2の再設定
-            logger.info("衣装モデル上半身2位置調整", decoration=MLogger.Decoration.BOX)
+            logger.info("衣装モデル上半身2位置調整", decoration=MLogger.Decoration.LINE)
             replaced_bone_names += usecase.replace_upper2(model, dress)
 
             if "上半身3" in dress.bones:
                 # 上半身3の再設定
-                logger.info("衣装モデル上半身3位置調整", decoration=MLogger.Decoration.BOX)
+                logger.info("衣装モデル上半身3位置調整", decoration=MLogger.Decoration.LINE)
                 replaced_bone_names += usecase.replace_upper3(model, dress)
 
             # 首の再設定
-            logger.info("衣装モデル首位置調整", decoration=MLogger.Decoration.BOX)
+            logger.info("衣装モデル首位置調整", decoration=MLogger.Decoration.LINE)
             replaced_bone_names += usecase.replace_neck(model, dress)
 
             # 左肩の再設定
-            logger.info("衣装モデル肩位置調整", decoration=MLogger.Decoration.BOX)
+            logger.info("衣装モデル肩位置調整", decoration=MLogger.Decoration.LINE)
             replaced_bone_names += usecase.replace_shoulder(model, dress, "左")
 
             # 右肩の再設定
-            logger.info("衣装モデル肩位置調整", decoration=MLogger.Decoration.BOX)
+            logger.info("衣装モデル肩位置調整", decoration=MLogger.Decoration.LINE)
             replaced_bone_names += usecase.replace_shoulder(model, dress, "右")
 
             if dress.bones.exists(("首根元", "左腕", "右腕")):
                 dress.bones["首根元"].position = (dress.bones["左腕"].position + dress.bones["右腕"].position) / 2
 
             # 捩りの再設定
-            logger.info("衣装モデル捩り位置調整", decoration=MLogger.Decoration.BOX)
+            logger.info("衣装モデル捩り位置調整", decoration=MLogger.Decoration.LINE)
             replaced_bone_names += usecase.replace_twist(model, dress, replaced_bone_names)
 
             if replaced_bone_names:

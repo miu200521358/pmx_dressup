@@ -130,6 +130,26 @@ class LoadUsecase:
         else:
             dress.update_vertices_by_bone()
 
+    def replace_lower(self, model: PmxModel, dress: PmxModel) -> list[str]:
+        """下半身のボーン置き換え"""
+        replace_bone_names = ("足中心", "頭", "下半身")
+        if not (model.bones.exists(replace_bone_names) and dress.bones.exists(replace_bone_names)):
+            return []
+
+        is_add, diff = self.replace_bone_position(model, dress, *replace_bone_names)
+
+        return ["下半身"] if is_add else []
+
+    def replace_upper(self, model: PmxModel, dress: PmxModel) -> list[str]:
+        """上半身のボーン置き換え"""
+        replace_bone_names = ("足中心", "頭", "上半身")
+        if not (model.bones.exists(replace_bone_names) and dress.bones.exists(replace_bone_names)):
+            return []
+
+        is_add, diff = self.replace_bone_position(model, dress, *replace_bone_names)
+
+        return ["上半身"] if is_add else []
+
     def replace_upper2(self, model: PmxModel, dress: PmxModel) -> list[str]:
         """上半身2のボーン置き換え"""
         replace_bone_names = ("上半身", "頭", "上半身2")
@@ -650,7 +670,7 @@ class LoadUsecase:
 
         dress_category_scale_values: dict[str, float] = {}
         for category, dress_scale_values_by_category in dress_scale_values.items():
-            if category == "体幹":
+            if category in ("体幹"):
                 # 体幹はmeanとminの中間
                 dress_category_scale_values[category] = float(
                     np.mean([np.mean(dress_scale_values_by_category), np.min(dress_scale_values_by_category)])
@@ -1057,8 +1077,8 @@ class LoadUsecase:
 
             local_scale = MVector3D(*model_local_distances).one() / MVector3D(*dress_local_distances).one()
             local_scale_value = np.mean([local_scale.y, local_scale.z])
-            if category in dress_category_scale_values:
-                local_scale_value = np.mean([local_scale_value, dress_category_scale_values[category]])
+            # if category in dress_category_scale_values:
+            #     local_scale_value = np.mean([local_scale_value, dress_category_scale_values[category]])
 
             dress_local_scales[category] = MVector3D(1.0, local_scale_value, local_scale_value)
 

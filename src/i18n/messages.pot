@@ -973,3 +973,11 @@ msgstr ""
 msgid "-- グローバルスケール [{b}][{f:.3f}({o:.3f})]"
 msgstr ""
 
+
+msgid "衣装モデル下半身位置調整"
+msgstr ""
+
+
+msgid "衣装モデル上半身位置調整"
+msgstr ""
+
