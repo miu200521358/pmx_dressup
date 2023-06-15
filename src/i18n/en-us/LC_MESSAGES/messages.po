@@ -731,3 +731,6 @@ msgstr "Shows only the material of the person. Press one more time to return to 
 
 msgid "衣装の材質のみを表示します。もう一回押すと元に戻ります"
 msgstr "Displays costume material only. Press one more time to go back to the original"
+
+msgid "-- グローバルスケール [{b}][{f:.3f}({o:.3f})]"
+msgstr "-- global scale [{b}][{f:.3f}({o:.3f})]"
