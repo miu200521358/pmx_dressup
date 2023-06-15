@@ -86,7 +86,7 @@ class MainFrame(BaseFrame):
     def on_result(
         self,
         result: bool,
-        data: Optional[tuple[PmxModel, PmxModel, PmxModel, PmxModel, VmdMotion]],
+        data: Optional[tuple[PmxModel, PmxModel, PmxModel, PmxModel, VmdMotion, list[str]]],
         elapsed_time: str,
     ) -> None:
         self.file_panel.console_ctrl.write(f"\n----------------\n{elapsed_time}")
@@ -99,7 +99,7 @@ class MainFrame(BaseFrame):
 
         logger.info("描画準備開始", decoration=MLogger.Decoration.BOX)
 
-        original_model, model, original_dress, dress, motion = data
+        original_model, model, original_dress, dress, motion, individual_morph_names = data
 
         self.file_panel.model_ctrl.original_data = original_model
         self.file_panel.model_ctrl.data = model
@@ -122,7 +122,7 @@ class MainFrame(BaseFrame):
         self.config_panel.model_material_ctrl.initialize(model.materials.names)
         self.config_panel.dress_material_ctrl.initialize(dress.materials.names)
         # ボーン調整の選択肢を入れ替える
-        self.config_panel.dress_bone_ctrl.initialize()
+        self.config_panel.dress_bone_ctrl.initialize(individual_morph_names)
 
         # キーフレを戻す
         self.config_panel.fno = 0
@@ -238,7 +238,7 @@ class MainFrame(BaseFrame):
         mf.ratio = abs(material_alphas.get(__("全材質"), 1.0) - 1)
         self.dress_motion.morphs[mf.name].append(mf)
 
-        for bone_type_name, scale, degree, position in zip(
+        for morph_name, scale, degree, position in zip(
             bone_scales.keys(), bone_scales.values(), bone_degrees.values(), bone_positions.values()
         ):
             for ratio, axis_name, origin in (
@@ -252,7 +252,7 @@ class MainFrame(BaseFrame):
                 (position.y, "MY", 0),
                 (position.z, "MZ", 0),
             ):
-                mf = VmdMorphFrame(0, f"調整:{__(bone_type_name)}:{axis_name}")
+                mf = VmdMorphFrame(0, f"調整:{morph_name}:{axis_name}")
                 mf.ratio = ratio - origin
                 self.dress_motion.morphs[mf.name].append(mf)
 

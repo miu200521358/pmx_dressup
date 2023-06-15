@@ -171,3 +171,33 @@ class ConfigPanel(CanvasPanel):
         # if target_bone_name:
         #     self.frame.refit(target_bone_name)
         self.frame.fit_dress_motion(self.dress_material_ctrl.alphas.get(__("ボーンライン"), 0.5), is_bone_deform)
+
+    def show_only_material(self, type_name: str, material_name: str) -> None:
+        model_material_alphas: dict[str, float] = {}
+        for model_material_name in self.model_material_ctrl.alphas.keys():
+            if type_name == "人物" and material_name in model_material_name:
+                model_material_alphas[model_material_name] = 1.0
+            elif model_material_name in (__("全材質"), __("ボーンライン")):
+                model_material_alphas[model_material_name] = self.model_material_ctrl.alphas.get(model_material_name, 1.0)
+            else:
+                model_material_alphas[model_material_name] = 0.0
+
+        self.frame.set_model_motion_morphs(model_material_alphas)
+        self.frame.fit_model_motion(self.model_material_ctrl.alphas.get(__("ボーンライン"), 0.5), False)
+
+        dress_material_alphas: dict[str, float] = {}
+        for dress_material_name in self.dress_material_ctrl.alphas.keys():
+            if type_name == "衣装" and material_name in dress_material_name:
+                dress_material_alphas[dress_material_name] = 1.0
+            elif dress_material_name in (__("全材質"), __("ボーンライン")):
+                dress_material_alphas[dress_material_name] = self.dress_material_ctrl.alphas.get(dress_material_name, 1.0)
+            else:
+                dress_material_alphas[dress_material_name] = 0.0
+
+        self.frame.set_dress_motion_morphs(
+            dress_material_alphas,
+            self.dress_bone_ctrl.scales,
+            self.dress_bone_ctrl.degrees,
+            self.dress_bone_ctrl.positions,
+        )
+        self.frame.fit_dress_motion(self.dress_material_ctrl.alphas.get(__("ボーンライン"), 0.5), False)

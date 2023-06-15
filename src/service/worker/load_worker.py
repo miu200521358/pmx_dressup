@@ -27,6 +27,8 @@ class LoadWorker(BaseWorker):
         model: Optional[PmxModel] = None
         dress: Optional[PmxModel] = None
         motion: Optional[VmdMotion] = None
+        individual_morph_names: list[str] = []
+
         is_model_change = False
         is_dress_change = False
         usecase = LoadUsecase()
@@ -64,38 +66,48 @@ class LoadWorker(BaseWorker):
             dress = original_dress.copy()
             dress.update_vertices_by_bone()
 
+            logger.info("ボーン調整", decoration=MLogger.Decoration.BOX)
+
             # 不足ボーン追加
-            logger.info("不足ボーン調整", decoration=MLogger.Decoration.BOX)
+            logger.info("不足ボーン調整", decoration=MLogger.Decoration.LINE)
             usecase.add_mismatch_bones(model, dress)
 
             replaced_bone_names: list[str] = []
 
+            # 下半身の再設定
+            logger.info("衣装モデル下半身位置調整", decoration=MLogger.Decoration.LINE)
+            replaced_bone_names += usecase.replace_lower(model, dress)
+
+            # 上半身の再設定
+            logger.info("衣装モデル上半身位置調整", decoration=MLogger.Decoration.LINE)
+            replaced_bone_names += usecase.replace_upper(model, dress)
+
             # 上半身2の再設定
-            logger.info("衣装モデル上半身2位置調整", decoration=MLogger.Decoration.BOX)
+            logger.info("衣装モデル上半身2位置調整", decoration=MLogger.Decoration.LINE)
             replaced_bone_names += usecase.replace_upper2(model, dress)
 
             if "上半身3" in dress.bones:
                 # 上半身3の再設定
-                logger.info("衣装モデル上半身3位置調整", decoration=MLogger.Decoration.BOX)
+                logger.info("衣装モデル上半身3位置調整", decoration=MLogger.Decoration.LINE)
                 replaced_bone_names += usecase.replace_upper3(model, dress)
 
             # 首の再設定
-            logger.info("衣装モデル首位置調整", decoration=MLogger.Decoration.BOX)
+            logger.info("衣装モデル首位置調整", decoration=MLogger.Decoration.LINE)
             replaced_bone_names += usecase.replace_neck(model, dress)
 
             # 左肩の再設定
-            logger.info("衣装モデル肩位置調整", decoration=MLogger.Decoration.BOX)
+            logger.info("衣装モデル肩位置調整", decoration=MLogger.Decoration.LINE)
             replaced_bone_names += usecase.replace_shoulder(model, dress, "左")
 
             # 右肩の再設定
-            logger.info("衣装モデル肩位置調整", decoration=MLogger.Decoration.BOX)
+            logger.info("衣装モデル肩位置調整", decoration=MLogger.Decoration.LINE)
             replaced_bone_names += usecase.replace_shoulder(model, dress, "右")
 
             if dress.bones.exists(("首根元", "左腕", "右腕")):
                 dress.bones["首根元"].position = (dress.bones["左腕"].position + dress.bones["右腕"].position) / 2
 
             # 捩りの再設定
-            logger.info("衣装モデル捩り位置調整", decoration=MLogger.Decoration.BOX)
+            logger.info("衣装モデル捩り位置調整", decoration=MLogger.Decoration.LINE)
             replaced_bone_names += usecase.replace_twist(model, dress, replaced_bone_names)
 
             if replaced_bone_names:
@@ -113,7 +125,7 @@ class LoadWorker(BaseWorker):
 
             # 個別調整用モーフ追加
             logger.info("衣装モデル追加セットアップ：個別調整ボーンモーフ追加", decoration=MLogger.Decoration.BOX)
-            usecase.create_dress_individual_bone_morphs(model, dress)
+            individual_morph_names = usecase.create_dress_individual_bone_morphs(dress)
 
             # 衣装にフィッティングボーンモーフを入れる
             logger.info("衣装モデル追加セットアップ：フィッティングモーフ追加", decoration=MLogger.Decoration.BOX)
@@ -150,7 +162,7 @@ class LoadWorker(BaseWorker):
             PmxWriter(dress, out_path, include_system=True).save()
             logger.debug(f"変形モーフ付き衣装モデル出力: {out_path}")
 
-        self.result_data = (original_model, model, original_dress, dress, motion)
+        self.result_data = (original_model, model, original_dress, dress, motion, individual_morph_names)
 
         logger.info("お着替えモデル読み込み完了", decoration=MLogger.Decoration.BOX)
 
