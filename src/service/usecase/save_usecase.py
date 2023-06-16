@@ -115,12 +115,14 @@ class SaveUsecase:
         logger.info("出力準備", decoration=MLogger.Decoration.LINE)
 
         # 変形結果
+        logger.info("人物：変形確定")
         model_original_matrixes = VmdMotion().animate_bone([0], model)
         model_matrixes = model_motion.animate_bone([0], model)
+        logger.info("衣装：変形確定")
         dress_original_matrixes = VmdMotion().animate_bone([0], dress)
         dress_matrixes = dress_motion.animate_bone([0], dress)
 
-        logger.info("人物材質選り分け")
+        logger.info("人物：材質選り分け")
         model.update_vertices_by_bone()
         model.update_vertices_by_material()
 
@@ -133,7 +135,7 @@ class SaveUsecase:
             ]
         )
 
-        logger.info("衣装材質選り分け")
+        logger.info("衣装：材質選り分け")
         dress.update_vertices_by_bone()
         dress.update_vertices_by_material()
 
@@ -455,7 +457,7 @@ class SaveUsecase:
             )
             bone.layer = max(
                 bone.layer,
-                dress_model.bones[bone.parent_index].layer,
+                (dress_model.bones[bone.parent_index].layer if 0 < bone.parent_index else 0),
                 (dress_model.bones[bone.effect_index].layer if 0 <= bone.effect_index else 0),
             )
             if bone.is_ik and bone.ik:
@@ -592,58 +594,75 @@ class SaveUsecase:
         model_morph_map: dict[int, int] = {-1: -1}
         dress_morph_map: dict[int, int] = {-1: -1}
 
-        for morph in model.morphs:
-            if morph.is_system:
-                continue
+        for is_group in (False, True):
+            for morph in model.morphs:
+                if (
+                    morph.is_system
+                    or (not is_group and morph.morph_type == MorphType.GROUP)
+                    or (is_group and morph.morph_type != MorphType.GROUP)
+                ):
+                    continue
 
-            copy_morph, model_vertex_map = self.copy_morph(morph, model_bone_map, model_vertex_map, model_material_map, model_morph_map)
+                if is_group:
+                    copy_morph = self.copy_group_morph(morph, model_morph_map)
+                else:
+                    copy_morph = self.copy_morph(morph, model_bone_map, model_vertex_map, model_material_map)
 
-            if copy_morph.offsets:
-                copy_morph.index = len(dress_model.morphs)
-                model_morph_map[morph.index] = len(dress_model.morphs)
-                dress_model.morphs.append(copy_morph)
+                if copy_morph.offsets:
+                    copy_morph.index = len(dress_model.morphs)
+                    model_morph_map[morph.index] = len(dress_model.morphs)
+                    dress_model.morphs.append(copy_morph)
 
-                for display_slot in model.display_slots:
-                    for reference in display_slot.references:
-                        if reference.display_type == DisplayType.MORPH and reference.display_index == morph.index:
-                            if display_slot.name not in dress_model.display_slots:
-                                dress_model.display_slots.append(
-                                    DisplaySlot(name=display_slot.name, english_name=display_slot.english_name)
+                    for display_slot in model.display_slots:
+                        for reference in display_slot.references:
+                            if reference.display_type == DisplayType.MORPH and reference.display_index == morph.index:
+                                if display_slot.name not in dress_model.display_slots:
+                                    dress_model.display_slots.append(
+                                        DisplaySlot(name=display_slot.name, english_name=display_slot.english_name)
+                                    )
+                                dress_model.display_slots[display_slot.name].references.append(
+                                    DisplaySlotReference(display_type=DisplayType.MORPH, display_index=copy_morph.index)
                                 )
-                            dress_model.display_slots[display_slot.name].references.append(
-                                DisplaySlotReference(display_type=DisplayType.MORPH, display_index=copy_morph.index)
-                            )
-                            break
+                                break
 
-            if not len(dress_model.morphs) % 50:
-                logger.info("-- モーフ出力: {s}", s=len(dress_model.morphs))
+                if not len(dress_model.morphs) % 50:
+                    logger.info("-- モーフ出力: {s}", s=len(dress_model.morphs))
 
-        for morph in dress.morphs:
-            if morph.is_system:
-                continue
+        for is_group in (False, True):
+            for morph in dress.morphs:
+                if (
+                    morph.is_system
+                    or (not is_group and morph.morph_type == MorphType.GROUP)
+                    or (is_group and morph.morph_type != MorphType.GROUP)
+                ):
+                    continue
 
-            copy_morph, dress_vertex_map = self.copy_morph(morph, dress_bone_map, dress_vertex_map, dress_material_map, dress_morph_map)
-            copy_morph.name = f"Cos:{copy_morph.name}"
+                if is_group:
+                    copy_morph = self.copy_group_morph(morph, dress_morph_map)
+                else:
+                    copy_morph = self.copy_morph(morph, dress_bone_map, dress_vertex_map, dress_material_map)
 
-            if copy_morph.offsets:
-                copy_morph.index = len(dress_model.morphs)
-                dress_morph_map[morph.index] = len(dress_model.morphs)
-                dress_model.morphs.append(copy_morph)
+                copy_morph.name = f"Cos:{copy_morph.name}"
 
-                for display_slot in dress.display_slots:
-                    for reference in display_slot.references:
-                        if reference.display_type == DisplayType.MORPH and reference.display_index == morph.index:
-                            if display_slot.name not in dress_model.display_slots:
-                                dress_model.display_slots.append(
-                                    DisplaySlot(name=display_slot.name, english_name=display_slot.english_name)
+                if copy_morph.offsets:
+                    copy_morph.index = len(dress_model.morphs)
+                    dress_morph_map[morph.index] = len(dress_model.morphs)
+                    dress_model.morphs.append(copy_morph)
+
+                    for display_slot in dress.display_slots:
+                        for reference in display_slot.references:
+                            if reference.display_type == DisplayType.MORPH and reference.display_index == morph.index:
+                                if display_slot.name not in dress_model.display_slots:
+                                    dress_model.display_slots.append(
+                                        DisplaySlot(name=display_slot.name, english_name=display_slot.english_name)
+                                    )
+                                dress_model.display_slots[display_slot.name].references.append(
+                                    DisplaySlotReference(display_type=DisplayType.MORPH, display_index=copy_morph.index)
                                 )
-                            dress_model.display_slots[display_slot.name].references.append(
-                                DisplaySlotReference(display_type=DisplayType.MORPH, display_index=copy_morph.index)
-                            )
-                            break
+                                break
 
-            if not len(dress_model.morphs) % 50:
-                logger.info("-- モーフ出力: {s}", s=len(dress_model.morphs))
+                if not len(dress_model.morphs) % 50:
+                    logger.info("-- モーフ出力: {s}", s=len(dress_model.morphs))
 
         # ---------------------------------
 
@@ -827,8 +846,7 @@ class SaveUsecase:
         model_bone_map: dict[int, int],
         model_vertex_map: dict[int, int],
         model_material_map: dict[int, int],
-        model_morph_map: dict[int, int],
-    ) -> tuple[Morph, dict[int, int]]:
+    ) -> Morph:
         copy_morph = Morph(name=morph.name, english_name=morph.english_name)
         if morph.morph_type == MorphType.VERTEX:
             copy_morph.panel = morph.panel
@@ -912,7 +930,17 @@ class SaveUsecase:
                             bone_offset.local_scale.copy(),
                         )
                     )
-        elif morph.morph_type == MorphType.GROUP:
+
+        return copy_morph
+
+    def copy_group_morph(
+        self,
+        morph: Morph,
+        model_morph_map: dict[int, int],
+    ) -> Morph:
+        copy_morph = Morph(name=morph.name, english_name=morph.english_name)
+
+        if morph.morph_type == MorphType.GROUP:
             copy_morph.panel = morph.panel
             copy_morph.morph_type = MorphType.GROUP
             for offset in morph.offsets:
@@ -920,7 +948,7 @@ class SaveUsecase:
                 if group_offset.morph_index in model_morph_map:
                     copy_morph.offsets.append(GroupMorphOffset(model_morph_map[group_offset.morph_index], group_offset.morph_factor))
 
-        return copy_morph, model_vertex_map
+        return copy_morph
 
     def get_dress_ground(
         self,

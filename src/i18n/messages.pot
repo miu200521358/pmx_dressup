@@ -981,3 +981,11 @@ msgstr ""
 msgid "衣装モデル上半身位置調整"
 msgstr ""
 
+
+msgid "人物変形フィックス"
+msgstr ""
+
+
+msgid "衣装変形フィックス"
+msgstr ""
+
