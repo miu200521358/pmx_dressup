@@ -188,7 +188,7 @@ class SaveUsecase:
             ):
                 model_weight_bone_names.append(bone.name)
 
-            if not bone.is_standard:
+            if not model.bone_trees.is_in_standard(bone.name):
                 # 準標準ではない場合、登録可否チェック
 
                 if bone.index in model.vertices_by_bones and not set(model.vertices_by_bones[bone.index]) & active_model_vertices:
@@ -337,7 +337,7 @@ class SaveUsecase:
                     dress_model.bones[bone.name].position = dress_matrixes[0, bone.name].position.copy()
 
                 continue
-            if not bone.is_standard:
+            if not dress.bone_trees.is_in_standard(bone.name):
                 # 準標準ではない場合、登録可否チェック
 
                 if bone.index in dress.vertices_by_bones and not set(dress.vertices_by_bones[bone.index]) & active_dress_vertices:
