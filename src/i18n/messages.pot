@@ -1001,3 +1001,19 @@ msgstr ""
 msgid "-- ローカル軸再計算 [{i} ({p:.2f}%)]"
 msgstr ""
 
+
+msgid "人物：変形確定"
+msgstr ""
+
+
+msgid "衣装：変形確定"
+msgstr ""
+
+
+msgid "人物：材質選り分け"
+msgstr ""
+
+
+msgid "衣装：材質選り分け"
+msgstr ""
+

@@ -755,3 +755,15 @@ msgstr "Costume fitting"
 
 msgid "-- ローカル軸再計算 [{i} ({p:.2f}%)]"
 msgstr "-- Local axis recalculation [{i} ({p:.2f}%)]"
+
+msgid "人物：変形確定"
+msgstr "Person: deformation confirmed"
+
+msgid "衣装：変形確定"
+msgstr "Costume: transformation confirmed"
+
+msgid "人物：材質選り分け"
+msgstr "Person: material selection"
+
+msgid "衣装：材質選り分け"
+msgstr "Costume: material selection"
