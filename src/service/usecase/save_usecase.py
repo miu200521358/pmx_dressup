@@ -721,6 +721,20 @@ class SaveUsecase:
             ):
                 # 既に同名の準標準ボーンに繋がる剛体がある場合、INDEXだけ保持してスルー
                 dress_rigidbody_map[rigidbody.index] = dress_model.rigidbodies[rigidbody.name].index
+
+                # 位置とサイズは衣装に合わせる
+                dress_bone_name = dress.bones[rigidbody.bone_index].name
+                rigidbody_local_position = dress_original_matrixes[0, dress_bone_name].global_matrix.inverse() * rigidbody.shape_position
+                rigidbody_copy_position = dress_matrixes[0, dress_bone_name].global_matrix * rigidbody_local_position
+                rigidbody_copy_scale = MVector3D(
+                    dress_matrixes[0, dress_bone_name].global_matrix[0, 0],
+                    dress_matrixes[0, dress_bone_name].global_matrix[1, 1],
+                    dress_matrixes[0, dress_bone_name].global_matrix[2, 2],
+                )
+
+                dress_model.rigidbodies[rigidbody.name].shape_position = rigidbody_copy_position
+                dress_model.rigidbodies[rigidbody.name].shape_size = dress.rigidbodies[rigidbody.name].shape_size * rigidbody_copy_scale
+
                 continue
 
             dress_copy_rigidbody = rigidbody.copy()
