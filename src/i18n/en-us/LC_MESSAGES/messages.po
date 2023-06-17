@@ -740,3 +740,18 @@ msgstr "Costume model lower body position adjustment"
 
 msgid "衣装モデル上半身位置調整"
 msgstr "Adjustment of costume model upper body position"
+
+msgid "人物変形フィックス"
+msgstr "Person Transformation Fix"
+
+msgid "衣装変形フィックス"
+msgstr "Costume Transformation Fix"
+
+msgid "衣装モデル追加セットアップ：ローカル軸再計算"
+msgstr "Additional Costume Model Setup: Local Axis Recalculation"
+
+msgid "衣装フィッティング"
+msgstr "Costume fitting"
+
+msgid "-- ローカル軸再計算 [{i} ({p:.2f}%)]"
+msgstr "-- Local axis recalculation [{i} ({p:.2f}%)]"
