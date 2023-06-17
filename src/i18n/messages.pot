@@ -989,3 +989,15 @@ msgstr ""
 msgid "衣装変形フィックス"
 msgstr ""
 
+
+msgid "衣装モデル追加セットアップ：ローカル軸再計算"
+msgstr ""
+
+
+msgid "衣装フィッティング"
+msgstr ""
+
+
+msgid "-- ローカル軸再計算 [{i} ({p:.2f}%)]"
+msgstr ""
+

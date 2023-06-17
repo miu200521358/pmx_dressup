@@ -18,6 +18,7 @@ from mlib.pmx.pmx_part import (
     MorphType,
 )
 from mlib.vmd.vmd_collection import VmdMotion
+from mlib.vmd.vmd_part import VmdMorphFrame
 from mlib.vmd.vmd_tree import VmdBoneFrameTrees
 
 logger = MLogger(os.path.basename(__file__), level=1)
@@ -81,15 +82,15 @@ class LoadUsecase:
         short_mismatch_dress_bone_names = sorted(list(mismatch_bone_names - set(dress.bones.names)))
 
         logger.info(
-            "-- 人物モデルの追加対象準標準ボーン: {b}",
+            "人物モデルの追加対象準標準ボーン: {b}",
             b=", ".join(short_mismatch_model_bone_names),
         )
         logger.info(
-            "-- 衣装モデルの追加対象準標準ボーン: {b}",
+            "衣装モデルの追加対象準標準ボーン: {b}",
             b=", ".join(short_mismatch_dress_bone_names),
         )
 
-        logger.info("-- 人物: 初期姿勢計算")
+        logger.info("人物: 初期姿勢計算")
 
         # 人物の初期姿勢を求める
         model_matrixes = VmdMotion().animate_bone([0], model)
@@ -99,7 +100,7 @@ class LoadUsecase:
             if bone_name in short_mismatch_model_bone_names:
                 if model.insert_standard_bone(bone_name, model_matrixes):
                     model_inserted_bone_names.append(bone_name)
-                    logger.info("-- -- 人物: 準標準ボーン追加: {b}", b=bone_name)
+                    logger.info("-- 人物: 準標準ボーン追加: {b}", b=bone_name)
 
         if model_inserted_bone_names:
             model.setup()
@@ -109,7 +110,7 @@ class LoadUsecase:
         else:
             model.update_vertices_by_bone()
 
-        logger.info("-- 衣装: 初期姿勢計算")
+        logger.info("衣装: 初期姿勢計算")
 
         # 衣装の初期姿勢を求める
         dress_matrixes = VmdMotion().animate_bone([0], dress)
@@ -119,7 +120,7 @@ class LoadUsecase:
             if bone_name in short_mismatch_dress_bone_names:
                 if dress.insert_standard_bone(bone_name, dress_matrixes):
                     dress_inserted_bone_names.append(bone_name)
-                    logger.info("-- -- 衣装: 準標準ボーン追加: {b}", b=bone_name)
+                    logger.info("-- 衣装: 準標準ボーン追加: {b}", b=bone_name)
 
         if dress_inserted_bone_names:
             dress.setup()
@@ -350,6 +351,8 @@ class LoadUsecase:
     def create_dress_individual_bone_morphs(self, dress: PmxModel) -> list[str]:
         """衣装個別フィッティング用ボーンモーフを作成"""
 
+        logger.info("個別調整ボーンモーフ追加")
+
         individual_morph_names: list[str] = []
 
         for morph_name, (
@@ -503,7 +506,7 @@ class LoadUsecase:
             individual_morph_names.append(dress_bone.name)
 
             # 準標準を親に持つ準標準外のルートボーンの調整モーフを追加する
-            for axis_name, position, qq, scale in (
+            for axis_name, position, qq, local_scale in (
                 ("SX", MVector3D(), MQuaternion(), MVector3D(1, 0, 0)),
                 ("SY", MVector3D(), MQuaternion(), MVector3D(0, 1, 0)),
                 ("SZ", MVector3D(), MQuaternion(), MVector3D(0, 0, 1)),
@@ -523,13 +526,11 @@ class LoadUsecase:
                         dress_bone.index,
                         position=position,
                         qq=qq,
-                        scale=scale,
+                        local_scale=local_scale,
                     )
                 )
 
                 dress.morphs.append(morph)
-
-        logger.info("-- 個別調整ボーンモーフ追加")
 
         return individual_morph_names
 
@@ -580,11 +581,6 @@ class LoadUsecase:
         # dress_offset_positions = {}
         # dress_offset_qqs = {}
 
-        # logger.info("フィッティング頂点オフセット計算", decoration=MLogger.Decoration.LINE)
-        # dress_vertex_offset_positions = self.get_dress_vertex_offsets(
-        #     model, dress, dress_offset_positions, dress_offset_qqs, dress_offset_scales, dress_offset_local_scales, model_matrixes
-        # )
-
         logger.info("フィッティングボーンモーフ追加", decoration=MLogger.Decoration.LINE)
 
         for dress_bone in dress.bones:
@@ -623,6 +619,71 @@ class LoadUsecase:
 
         dress.morphs.append(dress_bone_fitting_morph)
 
+    def refit_local_axis(
+        self,
+        dress: PmxModel,
+    ):
+        dress_motion = VmdMotion()
+        bmf = VmdMorphFrame(0, "BoneFitting")
+        bmf.ratio = 1
+        dress_motion.morphs[bmf.name].append(bmf)
+
+        logger.info("衣装フィッティング")
+
+        dress_matrixes = dress_motion.animate_bone([0], dress)
+
+        dress_bone_count = len(dress.bones)
+        for bone in dress.bones:
+            local_axis = self.get_tail_relative_position(dress, bone, dress_matrixes).normalized()
+
+            logger.debug(f"-- ローカル軸再計算: [{bone.name}][{bone.local_axis} -> {local_axis} ({local_axis - bone.local_axis})]")
+
+            bone.local_axis = local_axis
+
+            logger.count(
+                "ローカル軸再計算",
+                index=bone.index,
+                total_index_count=dress_bone_count,
+                display_block=100,
+            )
+
+    def get_tail_relative_position(self, dress: PmxModel, bone: Bone, dress_matrixes: VmdBoneFrameTrees) -> MVector3D:
+        """
+        末端位置を取得
+
+        Parameters
+        ----------
+        bone_index : int
+            ボーンINDEX
+
+        Returns
+        -------
+        ボーンの末端位置（グローバル位置）
+        """
+        to_pos = MVector3D()
+
+        from_pos = dress_matrixes[0, bone.name].position
+        bone_setting = STANDARD_BONE_NAMES[bone.name] if bone.name in STANDARD_BONE_NAMES else None
+        if bone_setting and isinstance(bone_setting.tails, Iterable):
+            # 表示先ボーンが指定されており、いずれかある場合、そのまま使用
+            for tail_bone_name in bone_setting.tails:
+                if dress_matrixes.exists(0, tail_bone_name):
+                    return dress_matrixes[0, tail_bone_name].position - from_pos
+
+        # 合致するのがなければ通常の表示先から検出
+        if bone.is_tail_bone and 0 <= bone.tail_index and bone.tail_index in dress.bones:
+            # 表示先が指定されているの場合、保持
+            to_pos = dress_matrixes[0, dress.bones[bone.tail_index].name].position
+        elif not bone.is_tail_bone:
+            # 表示先が相対パスの場合、保持
+            to_pos = from_pos + bone.tail_position
+        else:
+            # 表示先がない場合、とりあえず親ボーンからの向きにする
+            from_pos = dress_matrixes[0, dress.bones[bone.parent_index].name].position
+            to_pos = dress_matrixes[0, bone.name].position
+
+        return to_pos - from_pos
+
     def get_dress_global_bone_scale_offsets(
         self,
         model: PmxModel,
@@ -647,7 +708,7 @@ class LoadUsecase:
                 continue
 
             logger.count(
-                "-- グローバルスケール計算",
+                "グローバルスケール計算",
                 index=i,
                 total_index_count=dress_standard_count,
                 display_block=50,
@@ -762,7 +823,7 @@ class LoadUsecase:
                 continue
 
             logger.count(
-                "-- オフセット計算",
+                "オフセット計算",
                 index=i,
                 total_index_count=dress_standard_count,
                 display_block=50,
