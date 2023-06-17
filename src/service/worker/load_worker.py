@@ -125,7 +125,7 @@ class LoadWorker(BaseWorker):
 
             # 個別調整用モーフ追加
             logger.info("衣装モデル追加セットアップ：個別調整ボーンモーフ追加", decoration=MLogger.Decoration.BOX)
-            individual_morph_names = usecase.create_dress_individual_bone_morphs(dress)
+            individual_morph_names, individual_target_bone_indexes = usecase.create_dress_individual_bone_morphs(dress)
 
             # 衣装にフィッティングボーンモーフを入れる
             logger.info("衣装モデル追加セットアップ：フィッティングモーフ追加", decoration=MLogger.Decoration.BOX)
@@ -166,7 +166,7 @@ class LoadWorker(BaseWorker):
             PmxWriter(dress, out_path, include_system=True).save()
             logger.debug(f"変形モーフ付き衣装モデル出力: {out_path}")
 
-        self.result_data = (original_model, model, original_dress, dress, motion, individual_morph_names)
+        self.result_data = (original_model, model, original_dress, dress, motion, individual_morph_names, individual_target_bone_indexes)
 
         logger.info("お着替えモデル読み込み完了", decoration=MLogger.Decoration.BOX)
 

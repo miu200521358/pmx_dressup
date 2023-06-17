@@ -19,6 +19,7 @@ class BoneCtrlSet:
         self.scales: dict[str, MVector3D] = {}
         self.degrees: dict[str, MVector3D] = {}
         self.positions: dict[str, MVector3D] = {}
+        self.individual_target_bone_indexes: list[list[int]] = []
 
         self.bone_sizer = wx.BoxSizer(wx.HORIZONTAL)
 
@@ -266,7 +267,7 @@ class BoneCtrlSet:
 
         self.sizer.Add(self.btn_sizer, 1, wx.EXPAND, 0)
 
-    def initialize(self, individual_morph_names: list[str]) -> None:
+    def initialize(self, individual_morph_names: list[str], individual_target_bone_indexes: list[list[int]]) -> None:
         self.bone_choice_ctrl.Clear()
         for morph_name in individual_morph_names:
             self.bone_choice_ctrl.Append(morph_name)
@@ -284,6 +285,8 @@ class BoneCtrlSet:
         self.position_y_slider.ChangeValue(0.0)
         self.position_z_slider.ChangeValue(0.0)
         self.scale_link_check_ctrl.SetValue(1)
+        # ボーンハイライトを変更
+        self.individual_target_bone_indexes = individual_target_bone_indexes
 
     def on_change_bone(self, event: wx.Event) -> None:
         morph_name = self.bone_choice_ctrl.GetStringSelection()
@@ -296,6 +299,8 @@ class BoneCtrlSet:
         self.position_x_slider.ChangeValue(self.positions[morph_name].x)
         self.position_y_slider.ChangeValue(self.positions[morph_name].y)
         self.position_z_slider.ChangeValue(self.positions[morph_name].z)
+        # ボーンハイライトを変更
+        self.parent.change_bone(self.individual_target_bone_indexes[self.bone_choice_ctrl.GetSelection()])
 
     def on_change_bone_right(self, event: wx.Event) -> None:
         selection = self.bone_choice_ctrl.GetSelection()

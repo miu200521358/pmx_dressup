@@ -348,12 +348,13 @@ class LoadUsecase:
         morph.offsets = offsets
         model.morphs.append(morph)
 
-    def create_dress_individual_bone_morphs(self, dress: PmxModel) -> list[str]:
+    def create_dress_individual_bone_morphs(self, dress: PmxModel) -> tuple[list[str], list[list[int]]]:
         """衣装個別フィッティング用ボーンモーフを作成"""
 
         logger.info("個別調整ボーンモーフ追加")
 
         individual_morph_names: list[str] = []
+        individual_target_bone_indexes: list[list[int]] = []
 
         for morph_name, (
             target_bone_names,
@@ -363,6 +364,7 @@ class LoadUsecase:
             child_rotation_morph_names,
         ) in FIT_INDIVIDUAL_BONE_NAMES.items():
             individual_morph_names.append(__(morph_name))
+            target_bone_indexes: list[int] = []
 
             # 子どものスケーリング対象もモーフに入れる
             child_scale_bone_names = list(
@@ -454,6 +456,8 @@ class LoadUsecase:
                             )
                         )
 
+                        target_bone_indexes.append(dress.bones[bone_name].index)
+
                 if "R" in axis_name:
                     for bone_name in child_rotation_bone_names:
                         if axis_name in ("RX", "RZ"):
@@ -478,6 +482,8 @@ class LoadUsecase:
                                 local_scale=MVector3D(),
                             )
                         )
+
+                        target_bone_indexes.append(dress.bones[bone_name].index)
 
                     for bone_name in cancel_rotation_bone_names:
                         if axis_name in ("RX", "RZ"):
@@ -504,6 +510,8 @@ class LoadUsecase:
                         )
 
                 dress.morphs.append(morph)
+
+            individual_target_bone_indexes.append(list(set(target_bone_indexes)))
 
         for dress_bone in dress.bones:
             if dress_bone.is_standard or dress_bone.is_standard_extend or not dress.bones[dress_bone.parent_index].is_standard:
@@ -538,7 +546,11 @@ class LoadUsecase:
 
                 dress.morphs.append(morph)
 
-        return individual_morph_names
+            # 自分とその子どもの準標準外ボーンのINDEXリストを保持
+            target_bone_indexes = [bone_tree.last_index for bone_tree in dress.bone_trees if dress_bone.name in bone_tree.names]
+            individual_target_bone_indexes.append(target_bone_indexes)
+
+        return individual_morph_names, individual_target_bone_indexes
 
     def create_dress_fit_morphs(self, model: PmxModel, dress: PmxModel):
         """衣装フィッティング用ボーンモーフを作成"""
