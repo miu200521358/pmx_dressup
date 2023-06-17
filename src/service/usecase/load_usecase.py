@@ -357,6 +357,7 @@ class LoadUsecase:
 
         for morph_name, (
             target_bone_names,
+            move_target_bone_names,
             child_scale_morph_names,
             cancel_rotation_morph_names,
             child_rotation_morph_names,
@@ -418,8 +419,13 @@ class LoadUsecase:
                     scale = local_scale.copy()
                     local_scale = MVector3D()
 
-                # スケールの時だけ子どもを加味する
-                target_all_bone_names = list(target_bone_names) + child_scale_bone_names if "S" in axis_name else target_bone_names
+                target_all_bone_names = list(target_bone_names)
+                if "S" in axis_name:
+                    # スケールの時だけ子どもを加味する
+                    target_all_bone_names = list(target_bone_names) + child_scale_bone_names
+                elif "M" in axis_name:
+                    # 移動の場合はP系列も動かす
+                    target_all_bone_names = list(target_bone_names) + list(move_target_bone_names)
 
                 for bone_name in target_all_bone_names:
                     if bone_name in dress.bones:
@@ -1349,14 +1355,14 @@ class LoadUsecase:
 
 # IKはFKの後に指定する事
 FIT_INDIVIDUAL_BONE_NAMES = {
-    "下半身": (("下半身",), ("足", "ひざ", "足首"), ("足",), []),
-    "上半身": (("上半身",), ("下半身", "上半身2", "首"), ("上半身2",), []),
-    "上半身2": (("上半身2", "上半身3"), ("首", "頭", "肩", "腕", "ひじ", "手のひら"), ("首",), []),
-    "首": (("首",), ("頭",), ("頭",), []),
-    "頭": (("頭",), [], [], []),
-    "肩": (("右肩P", "左肩P", "右肩", "左肩"), ("腕", "ひじ", "手のひら"), [], ("腕", "ひじ", "手のひら")),
-    "腕": (("右肩C", "左肩C", "右腕", "左腕"), ("ひじ", "手のひら"), [], ("ひじ", "手のひら")),
-    "ひじ": (("右ひじ", "左ひじ"), ("手のひら",), [], ("手のひら",)),
+    "下半身": (("下半身",), [], ("足", "ひざ", "足首"), ("足",), []),
+    "上半身": (("上半身",), [], ("下半身", "上半身2", "首"), ("上半身2",), []),
+    "上半身2": (("上半身2", "上半身3"), [], ("首", "頭", "肩", "腕", "ひじ", "手のひら"), ("首",), []),
+    "首": (("首",), [], ("頭",), ("頭",), []),
+    "頭": (("頭",), [], [], [], []),
+    "肩": (("右肩", "左肩"), ("右肩P", "左肩P"), ("腕", "ひじ", "手のひら"), [], ("腕", "ひじ", "手のひら")),
+    "腕": (("右腕", "左腕"), ("右肩C", "左肩C"), ("ひじ", "手のひら"), [], ("ひじ", "手のひら")),
+    "ひじ": (("右ひじ", "左ひじ"), ("手のひら",), [], [], ("手のひら",)),
     "手のひら": (
         (
             "右手首",
@@ -1395,8 +1401,9 @@ FIT_INDIVIDUAL_BONE_NAMES = {
         [],
         [],
         [],
+        [],
     ),
-    "足": (("右足", "左足", "右足D", "左足D"), ("ひざ", "足首"), [], []),
-    "ひざ": (("右ひざ", "左ひざ", "右ひざD", "左ひざD"), ("足首",), [], []),
-    "足首": (("右足首", "左足首", "右足首D", "左足首D"), [], [], []),
+    "足": (("右足", "左足", "右足D", "左足D"), [], ("ひざ", "足首"), [], []),
+    "ひざ": (("右ひざ", "左ひざ", "右ひざD", "左ひざD"), [], ("足首",), [], []),
+    "足首": (("右足首", "左足首", "右足首D", "左足首D"), [], [], [], []),
 }
