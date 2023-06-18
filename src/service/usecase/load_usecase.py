@@ -163,7 +163,7 @@ class LoadUsecase:
 
     def replace_upper3(self, model: PmxModel, dress: PmxModel) -> list[str]:
         """上半身3のボーン置き換え"""
-        replace_bone_names = ("上半身2", "頭", "上半身3")
+        replace_bone_names = ("上半身", "頭", "上半身3")
         if not (model.bones.exists(replace_bone_names) and dress.bones.exists(replace_bone_names)):
             return []
 
