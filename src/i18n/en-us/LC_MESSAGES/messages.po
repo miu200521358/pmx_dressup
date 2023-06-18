@@ -204,14 +204,14 @@ msgstr "Additional Setup for Human Model: Addition of Material Transparency Morp
 msgid "不足ボーン調整"
 msgstr "Shortage Bone Adjustment"
 
-msgid "-- 人物モデルの追加対象準標準ボーン: {b}"
-msgstr "-- quasi-standard bones to be added to the person model: {b}"
+msgid "人物モデルの追加対象準標準ボーン: {b}"
+msgstr "quasi-standard bones to be added to the person model: {b}"
 
-msgid "-- 衣装モデルの追加対象準標準ボーン: {b}"
-msgstr "-- Quasi-standard bones to be added to the costume model: {b}"
+msgid "衣装モデルの追加対象準標準ボーン: {b}"
+msgstr "Quasi-standard bones to be added to the costume model: {b}"
 
-msgid "-- -- 衣装: 準標準ボーン追加: {b}"
-msgstr "-- -- Costume: semi-standard bone addition: {b}"
+msgid "-- 衣装: 準標準ボーン追加: {b}"
+msgstr "-- Costume: semi-standard bone addition: {b}"
 
 msgid "ウェイトボーン分布"
 msgstr "Weight Bone Distribution"
@@ -222,8 +222,8 @@ msgstr "-- Weight born distribution [{i} ({p:.2f}%)]"
 msgid "フィッティング用ウェイト別頂点取得（衣装:頭部装飾用）"
 msgstr "Acquisition of vertices by weight for fitting (costume: for head decoration)"
 
-msgid "-- 衣装: 再セットアップ"
-msgstr "-- Costume: re-set up"
+msgid "衣装: 再セットアップ"
+msgstr "Costume: re-set up"
 
 msgid "衣装モデル上半身2位置調整"
 msgstr "Costume model upper body 2 position adjustment"
@@ -249,11 +249,11 @@ msgstr "Additional costume model setup: fitting bone morphs added"
 msgid "フィッティングスケール計算"
 msgstr "Fitting Scale Calculations"
 
-msgid "-- スケールオフセット [{b}][{s:.3f}]"
-msgstr "-- scale offset [{b}][{s:.3f}]"
+msgid "スケールオフセット [{b}][{s:.3f}]"
+msgstr "Scale offset [{b}][{s:.3f}]"
 
-msgid "-- スケールオフセット [{b}][{s:.3f}({o:.3f})]"
-msgstr "-- Scale offset [{b}][{s:.3f}({o:.3f})]"
+msgid "スケールオフセット [{b}][{s:.3f}({o:.3f})]"
+msgstr "Scale offset [{b}][{s:.3f}({o:.3f})]"
 
 msgid "-- フィッティング用ウェイト別頂点取得（人物）"
 msgstr "-- Vertex acquisition by weight for fitting (person)"
@@ -264,17 +264,20 @@ msgstr "-- Vertex acquisition by weight for fitting (costume)"
 msgid "フィッティングオフセット計算"
 msgstr "Fitting Offset Calculation"
 
-msgid "-- オフセット計算"
-msgstr "-- offset calculation"
+msgid "オフセット計算"
+msgstr "offset calculation"
 
-msgid "-- -- オフセット計算 [{i} ({p:.2f}%)]"
-msgstr "-- -- Offset calculation [{i} ({p:.2f}%)]"
+msgid "オフセット計算 [{i} ({p:.2f}%)]"
+msgstr "Offset calculation [{i} ({p:.2f}%)]"
 
 msgid "-- ボーンモーフ [{b}][移動={p}][回転={q}][縮尺:{o:.3f}({f:.3f})]"
 msgstr "-- Bone Morph [{b}][move={p}][rotate={q}][scale:{o:.3f}({f:.3f})]"
 
 msgid "全材質"
 msgstr "All materials"
+
+msgid "ボーンライン"
+msgstr "Bone Line"
 
 msgid "人物モデル描画準備"
 msgstr "Preparing to draw a human model"
@@ -440,12 +443,6 @@ msgstr "Prepare to draw"
 
 msgid "*** お着替えモデル出力成功 ***\n出力先: {f}"
 msgstr "*** Success in outputting changeover model ***\nOutput: {f}"
-
-msgid "-- -- スケールオフセット [{b}][{s:.3f}]"
-msgstr "-- -- Scale offset [{b}][{s:.3f}]"
-
-msgid "-- -- スケールオフセット [{b}][{s:.3f}({o:.3f})]"
-msgstr "-- -- Scale offset [{b}][{s:.3f}({o:.3f})]"
 
 msgid "チェックをONにすると、縮尺YとZを同時に操作することができます"
 msgstr "Check ON to operate scale Y and Z at the same time"
@@ -633,14 +630,11 @@ msgstr "Play"
 msgid "停止"
 msgstr "Stop"
 
-msgid "-- 人物: 初期姿勢計算"
-msgstr "-- Person: initial posture calculation"
+msgid "人物: 初期姿勢計算"
+msgstr "Person: initial posture calculation"
 
-msgid "-- 衣装: 初期姿勢計算"
-msgstr "-- Costume: Initial Attitude Calculation"
-
-msgid "-- 面データ読み取り [{i} ({p:.2f}%)]"
-msgstr "-- Surface data read [{i} ({p:.2f}%)]"
+msgid "衣装: 初期姿勢計算"
+msgstr "Costume: Initial Attitude Calculation"
 
 msgid "モデルセットアップ：関連ボーン"
 msgstr "Model Setup: related bones"
@@ -705,17 +699,14 @@ msgstr "The output file path is not a valid path, reset the default output file 
 msgid "衣装: 衣装モデルウェイト調整"
 msgstr "Costume: Costume Model Weight Adjustment"
 
-msgid "-- 個別調整ボーンモーフ追加"
-msgstr "-- Individual adjustment bone morphs added"
+msgid "個別調整ボーンモーフ追加"
+msgstr "Individual adjustment bone morphs added"
 
-msgid "-- 再調整ボーンモーフ追加"
-msgstr "-- reconditioned bone morphs added"
+msgid "グローバルスケール計算"
+msgstr "Global scale calculation"
 
-msgid "-- グローバルスケール計算"
-msgstr "-- Global scale calculation"
-
-msgid "-- -- グローバルスケール計算 [{i} ({p:.2f}%)]"
-msgstr "-- -- Global scale calculation [{i} ({p:.2f}%)]"
+msgid "グローバルスケール計算 [{i} ({p:.2f}%)]"
+msgstr "Global scale calculation [{i} ({p:.2f}%)]"
 
 msgid "-- ボーンデータ読み取り [{i} ({p:.2f}%)]"
 msgstr "-- Bone data read [{i} ({p:.2f}%)]"
@@ -767,3 +758,24 @@ msgstr "Person: material selection"
 
 msgid "衣装：材質選り分け"
 msgstr "Costume: material selection"
+
+msgid "-- 面データ読み取り [{i} ({p:.2f}%)]"
+msgstr "-- Surface data read [{i} ({p:.2f}%)]"
+
+msgid "-- グローバルスケール計算 [{i} ({p:.2f}%)]"
+msgstr "-- Global scale calculation [{i} ({p:.2f}%)]"
+
+msgid "-- オフセット計算 [{i} ({p:.2f}%)]"
+msgstr "-- Offset calculation [{i} ({p:.2f}%)]"
+
+msgid "人物の材質の非透過度を0.0に設定します"
+msgstr "Set the non-transparency of the person material to 0.0"
+
+msgid "衣装の材質の非透過度を0.0に設定します"
+msgstr "Set the non-transparency of the costume material to 0.0"
+
+msgid "人物の材質の非透過度を1.0に設定します"
+msgstr "Set the non-transparency of the person material to 1.0"
+
+msgid "衣装の材質の非透過度を1.0に設定します"
+msgstr "Set the non-transparency of the costume material to 1.0"

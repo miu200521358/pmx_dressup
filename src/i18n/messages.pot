@@ -266,15 +266,15 @@ msgid "不足ボーン調整"
 msgstr ""
 
 
-msgid "-- 人物モデルの追加対象準標準ボーン: {b}"
+msgid "人物モデルの追加対象準標準ボーン: {b}"
 msgstr ""
 
 
-msgid "-- 衣装モデルの追加対象準標準ボーン: {b}"
+msgid "衣装モデルの追加対象準標準ボーン: {b}"
 msgstr ""
 
 
-msgid "-- -- 衣装: 準標準ボーン追加: {b}"
+msgid "-- 衣装: 準標準ボーン追加: {b}"
 msgstr ""
 
 
@@ -290,7 +290,7 @@ msgid "フィッティング用ウェイト別頂点取得（衣装:頭部装飾
 msgstr ""
 
 
-msgid "-- 衣装: 再セットアップ"
+msgid "衣装: 再セットアップ"
 msgstr ""
 
 
@@ -326,11 +326,11 @@ msgid "フィッティングスケール計算"
 msgstr ""
 
 
-msgid "-- スケールオフセット [{b}][{s:.3f}]"
+msgid "スケールオフセット [{b}][{s:.3f}]"
 msgstr ""
 
 
-msgid "-- スケールオフセット [{b}][{s:.3f}({o:.3f})]"
+msgid "スケールオフセット [{b}][{s:.3f}({o:.3f})]"
 msgstr ""
 
 
@@ -346,11 +346,11 @@ msgid "フィッティングオフセット計算"
 msgstr ""
 
 
-msgid "-- オフセット計算"
+msgid "オフセット計算"
 msgstr ""
 
 
-msgid "-- -- オフセット計算 [{i} ({p:.2f}%)]"
+msgid "オフセット計算 [{i} ({p:.2f}%)]"
 msgstr ""
 
 
@@ -359,6 +359,10 @@ msgstr ""
 
 
 msgid "全材質"
+msgstr ""
+
+
+msgid "ボーンライン"
 msgstr ""
 
 
@@ -579,14 +583,6 @@ msgstr ""
 
 
 msgid "*** お着替えモデル出力成功 ***\n出力先: {f}"
-msgstr ""
-
-
-msgid "-- -- スケールオフセット [{b}][{s:.3f}]"
-msgstr ""
-
-
-msgid "-- -- スケールオフセット [{b}][{s:.3f}({o:.3f})]"
 msgstr ""
 
 
@@ -838,15 +834,11 @@ msgid "停止"
 msgstr ""
 
 
-msgid "-- 人物: 初期姿勢計算"
+msgid "人物: 初期姿勢計算"
 msgstr ""
 
 
-msgid "-- 衣装: 初期姿勢計算"
-msgstr ""
-
-
-msgid "-- 面データ読み取り [{i} ({p:.2f}%)]"
+msgid "衣装: 初期姿勢計算"
 msgstr ""
 
 
@@ -934,19 +926,15 @@ msgid "衣装: 衣装モデルウェイト調整"
 msgstr ""
 
 
-msgid "-- 個別調整ボーンモーフ追加"
+msgid "個別調整ボーンモーフ追加"
 msgstr ""
 
 
-msgid "-- 再調整ボーンモーフ追加"
+msgid "グローバルスケール計算"
 msgstr ""
 
 
-msgid "-- グローバルスケール計算"
-msgstr ""
-
-
-msgid "-- -- グローバルスケール計算 [{i} ({p:.2f}%)]"
+msgid "グローバルスケール計算 [{i} ({p:.2f}%)]"
 msgstr ""
 
 
@@ -1015,5 +1003,33 @@ msgstr ""
 
 
 msgid "衣装：材質選り分け"
+msgstr ""
+
+
+msgid "-- 面データ読み取り [{i} ({p:.2f}%)]"
+msgstr ""
+
+
+msgid "-- グローバルスケール計算 [{i} ({p:.2f}%)]"
+msgstr ""
+
+
+msgid "-- オフセット計算 [{i} ({p:.2f}%)]"
+msgstr ""
+
+
+msgid "人物の材質の非透過度を0.0に設定します"
+msgstr ""
+
+
+msgid "衣装の材質の非透過度を0.0に設定します"
+msgstr ""
+
+
+msgid "人物の材質の非透過度を1.0に設定します"
+msgstr ""
+
+
+msgid "衣装の材質の非透過度を1.0に設定します"
 msgstr ""
 
