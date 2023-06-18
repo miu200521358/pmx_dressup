@@ -360,10 +360,8 @@ class LoadUsecase:
             target_bone_names,
             move_target_bone_names,
             child_scale_morph_names,
-            cancel_rotation_morph_names,
             child_rotation_morph_names,
         ) in FIT_INDIVIDUAL_BONE_NAMES.items():
-            individual_morph_names.append(__(morph_name))
             target_bone_indexes: list[int] = []
 
             # 子どものスケーリング対象もモーフに入れる
@@ -372,17 +370,6 @@ class LoadUsecase:
                     [
                         child_bone_name
                         for child_morph_name in child_scale_morph_names
-                        for child_bone_name in FIT_INDIVIDUAL_BONE_NAMES[child_morph_name][0]
-                        if child_bone_name in dress.bones
-                    ]
-                )
-            )
-
-            cancel_rotation_bone_names = list(
-                set(
-                    [
-                        child_bone_name
-                        for child_morph_name in cancel_rotation_morph_names
                         for child_bone_name in FIT_INDIVIDUAL_BONE_NAMES[child_morph_name][0]
                         if child_bone_name in dress.bones
                     ]
@@ -400,7 +387,7 @@ class LoadUsecase:
                 )
             )
 
-            for axis_name, position, qq, local_scale in (
+            for axis_name, position, local_qq, local_scale in (
                 ("SX", MVector3D(), MQuaternion(), MVector3D(1, 0, 0)),
                 ("SY", MVector3D(), MQuaternion(), MVector3D(0, 1, 0)),
                 ("SZ", MVector3D(), MQuaternion(), MVector3D(0, 0, 1)),
@@ -416,8 +403,8 @@ class LoadUsecase:
                 morph.morph_type = MorphType.BONE
 
                 scale = MVector3D()
-                if morph_name in ("足首", "頭", "胸"):
-                    # 末端系はグローバルスケールで動かす
+                if morph_name in ("足首"):
+                    # 足首だけはグローバルスケールで動かす（Z方向にまっすぐ伸ばすため）
                     scale = local_scale.copy()
                     local_scale = MVector3D()
 
@@ -433,10 +420,10 @@ class LoadUsecase:
                     if bone_name in dress.bones:
                         if axis_name in ("MX", "RX", "RZ"):
                             offset_position = position * (-1 if "左" in bone_name else 1)
-                            offset_local_qq = qq.inverse() if "左" in bone_name else qq
+                            offset_local_qq = local_qq.inverse() if "左" in bone_name else local_qq
                         else:
                             offset_position = position
-                            offset_local_qq = qq
+                            offset_local_qq = local_qq
 
                         morph.offsets.append(
                             BoneMorphOffset(
@@ -453,9 +440,9 @@ class LoadUsecase:
                 if "R" in axis_name:
                     for bone_name in child_rotation_bone_names:
                         if axis_name in ("RX", "RZ"):
-                            offset_local_qq = qq.inverse() if "左" in bone_name else qq
+                            offset_local_qq = local_qq.inverse() if "左" in bone_name else local_qq
                         else:
-                            offset_local_qq = qq
+                            offset_local_qq = local_qq
 
                         morph.offsets.append(
                             BoneMorphOffset(
@@ -466,31 +453,26 @@ class LoadUsecase:
 
                         target_bone_indexes.append(dress.bones[bone_name].index)
 
-                    for bone_name in cancel_rotation_bone_names:
-                        if axis_name in ("RX", "RZ"):
-                            offset_local_qq = qq.inverse() if "左" in bone_name else qq
-                        else:
-                            offset_local_qq = qq
-
-                        morph.offsets.append(
-                            BoneMorphOffset(
-                                dress.bones[bone_name].index,
-                                local_qq=offset_local_qq.inverse(),
-                            )
-                        )
-
-                dress.morphs.append(morph)
+                if len(morph.offsets):
+                    dress.morphs.append(morph)
+                    if __(morph_name) not in individual_morph_names:
+                        individual_morph_names.append(__(morph_name))
 
             individual_target_bone_indexes.append(list(set(target_bone_indexes)))
 
         for dress_bone in dress.bones:
-            if dress_bone.is_standard or dress_bone.is_standard_extend or not dress.bones[dress_bone.parent_index].is_standard:
+            if (
+                dress_bone.is_standard
+                or dress_bone.is_standard_extend
+                or not dress.bones[dress_bone.parent_index].is_standard
+                or "操作中心" == dress_bone.name
+            ):
                 continue
 
             individual_morph_names.append(dress_bone.name)
 
             # 準標準を親に持つ準標準外のルートボーンの調整モーフを追加する
-            for axis_name, position, qq, local_scale in (
+            for axis_name, position, local_qq, local_scale in (
                 ("SX", MVector3D(), MQuaternion(), MVector3D(1, 0, 0)),
                 ("SY", MVector3D(), MQuaternion(), MVector3D(0, 1, 0)),
                 ("SZ", MVector3D(), MQuaternion(), MVector3D(0, 0, 1)),
@@ -509,7 +491,7 @@ class LoadUsecase:
                     BoneMorphOffset(
                         dress_bone.index,
                         position=position,
-                        qq=qq,
+                        local_qq=local_qq,
                         local_scale=local_scale,
                     )
                 )
@@ -1022,6 +1004,7 @@ class LoadUsecase:
             "上半身",
             "上半身2",
             "上半身3",
+            "首",
             "下半身",
             "右腕",
             "右腕捩",
@@ -1337,14 +1320,15 @@ class LoadUsecase:
 
 # IKはFKの後に指定する事
 FIT_INDIVIDUAL_BONE_NAMES = {
-    "下半身": (("下半身",), [], ("足", "ひざ", "足首"), ("足",), []),
-    "上半身": (("上半身",), [], ("下半身", "上半身2"), ("上半身2",), []),
-    "上半身2": (("上半身2", "上半身3"), [], [], ("首",), []),
-    "首": (("首",), [], [], ("頭",), []),
-    "頭": (("頭",), [], [], [], []),
-    "肩": (("右肩", "左肩"), ("右肩P", "左肩P"), ("腕", "ひじ", "手のひら"), [], ("腕", "ひじ", "手のひら")),
-    "腕": (("右腕", "左腕"), ("右肩C", "左肩C"), ("ひじ", "手のひら"), [], ("ひじ", "手のひら")),
-    "ひじ": (("右ひじ", "左ひじ"), ("手のひら",), [], [], ("手のひら",)),
+    "下半身": (("下半身",), [], ("足", "ひざ", "足首"), []),
+    "上半身": (("上半身",), [], ("下半身", "上半身2"), []),
+    "上半身2": (("上半身2",), [], ("上半身3",), ("上半身3",)),
+    "上半身3": (("上半身3",), [], [], []),
+    "首": (("首",), [], [], []),
+    "頭": (("頭",), [], [], []),
+    "肩": (("右肩", "左肩"), ("右肩P", "左肩P"), ("腕", "ひじ", "手のひら"), ("腕", "ひじ", "手のひら")),
+    "腕": (("右腕", "左腕"), ("右肩C", "左肩C"), ("ひじ", "手のひら"), ("ひじ", "手のひら")),
+    "ひじ": (("右ひじ", "左ひじ"), ("手のひら",), ("手のひら",), ("手のひら",)),
     "手のひら": (
         (
             "右手首",
@@ -1383,9 +1367,8 @@ FIT_INDIVIDUAL_BONE_NAMES = {
         [],
         [],
         [],
-        [],
     ),
-    "足": (("右足", "左足", "右足D", "左足D"), [], ("ひざ", "足首"), [], []),
-    "ひざ": (("右ひざ", "左ひざ", "右ひざD", "左ひざD"), [], ("足首",), [], []),
-    "足首": (("右足首", "左足首", "右足首D", "左足首D"), [], [], [], []),
+    "足": (("右足", "左足", "右足D", "左足D"), [], ("ひざ", "足首"), []),
+    "ひざ": (("右ひざ", "左ひざ", "右ひざD", "左ひざD"), [], ("足首",), []),
+    "足首": (("右足首", "左足首", "右足首D", "左足首D"), [], [], []),
 }
