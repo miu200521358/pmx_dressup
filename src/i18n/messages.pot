@@ -406,6 +406,10 @@ msgid "上半身2"
 msgstr ""
 
 
+msgid "上半身3"
+msgstr ""
+
+
 msgid "首"
 msgstr ""
 

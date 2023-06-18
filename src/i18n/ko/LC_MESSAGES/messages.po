@@ -309,6 +309,9 @@ msgstr "상체"
 msgid "上半身2"
 msgstr "상체2"
 
+msgid "上半身3"
+msgstr "상체 3"
+
 msgid "首"
 msgstr "목"
 

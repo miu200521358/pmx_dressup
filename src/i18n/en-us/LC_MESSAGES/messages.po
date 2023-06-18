@@ -309,6 +309,9 @@ msgstr "Upper body"
 msgid "上半身2"
 msgstr "Upper body 2"
 
+msgid "上半身3"
+msgstr "Upper body 3"
+
 msgid "首"
 msgstr "neck"
 

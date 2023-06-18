@@ -309,6 +309,9 @@ msgstr "上半身"
 msgid "上半身2"
 msgstr "上半身2"
 
+msgid "上半身3"
+msgstr "上半身3"
+
 msgid "首"
 msgstr "颈部"
 

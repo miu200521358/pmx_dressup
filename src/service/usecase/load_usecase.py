@@ -402,12 +402,6 @@ class LoadUsecase:
                 morph.is_system = True
                 morph.morph_type = MorphType.BONE
 
-                scale = MVector3D()
-                if morph_name in ("足首"):
-                    # 足首だけはグローバルスケールで動かす（Z方向にまっすぐ伸ばすため）
-                    scale = local_scale.copy()
-                    local_scale = MVector3D()
-
                 target_all_bone_names = list(target_bone_names)
                 if "S" in axis_name:
                     # スケールの時だけ子どもを加味する
@@ -425,15 +419,25 @@ class LoadUsecase:
                             offset_position = position
                             offset_local_qq = local_qq
 
-                        morph.offsets.append(
-                            BoneMorphOffset(
-                                dress.bones[bone_name].index,
-                                position=offset_position,
-                                scale=scale,
-                                local_qq=offset_local_qq,
-                                local_scale=local_scale,
+                        if morph_name == "足首":
+                            # 足首だけはグローバルスケールで動かす（Z方向にまっすぐ伸ばすため）
+                            morph.offsets.append(
+                                BoneMorphOffset(
+                                    dress.bones[bone_name].index,
+                                    position=offset_position,
+                                    local_qq=offset_local_qq,
+                                    scale=local_scale,
+                                )
                             )
-                        )
+                        else:
+                            morph.offsets.append(
+                                BoneMorphOffset(
+                                    dress.bones[bone_name].index,
+                                    position=offset_position,
+                                    local_qq=offset_local_qq,
+                                    local_scale=local_scale,
+                                )
+                            )
 
                         target_bone_indexes.append(dress.bones[bone_name].index)
 
