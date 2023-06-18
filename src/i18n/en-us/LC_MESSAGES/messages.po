@@ -373,13 +373,13 @@ msgid "縮尺Z"
 msgstr "Scale Z"
 
 msgid "回転X"
-msgstr "Rotating X"
+msgstr "Rot X"
 
 msgid "回転Y"
-msgstr "Rotation Y"
+msgstr "Rot Y"
 
 msgid "回転Z"
-msgstr "Rotating Z"
+msgstr "Rot Z"
 
 msgid "移動X"
 msgstr "Move X"
