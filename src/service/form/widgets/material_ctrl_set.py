@@ -40,7 +40,7 @@ class MaterialCtrlSet:
             self.window,
             wx.ID_ANY,
             wx.DefaultPosition,
-            wx.Size(180, -1),
+            wx.Size(210, -1),
             choices=[],
         )
         self.material_choice_ctrl.SetToolTip(
@@ -60,17 +60,6 @@ class MaterialCtrlSet:
         self.right_btn_ctrl.Bind(wx.EVT_BUTTON, self.on_change_material_right)
         self.material_sizer.Add(self.right_btn_ctrl, 0, wx.ALL, 3)
 
-        self.half_btn_ctrl = wx.Button(
-            self.window,
-            wx.ID_ANY,
-            "0.5",
-            wx.DefaultPosition,
-            wx.Size(30, -1),
-        )
-        self.half_btn_ctrl.SetToolTip(__(f"{type_name}の材質の非透過度を0.5に設定します"))
-        self.half_btn_ctrl.Bind(wx.EVT_BUTTON, self.on_change_material_half)
-        self.material_sizer.Add(self.half_btn_ctrl, 0, wx.ALL, 3)
-
         self.only_btn_ctrl = wx.Button(
             self.window,
             wx.ID_ANY,
@@ -84,6 +73,8 @@ class MaterialCtrlSet:
 
         self.sizer.Add(self.material_sizer, 0, wx.ALL, 3)
 
+        self.slider_sizer = wx.BoxSizer(wx.HORIZONTAL)
+
         self.slider = FloatSliderCtrl(
             parent=self.window,
             value=1,
@@ -92,11 +83,47 @@ class MaterialCtrlSet:
             increment=0.01,
             spin_increment=0.1,
             border=3,
-            size=wx.Size(240, -1),
+            size=wx.Size(160, -1),
             change_event=self.on_change_morph,
             tooltip=__(f"{type_name}の材質の非透過度を任意の値に変更できます。\n非透過度を1未満にした場合、お着替えモデルには出力されません"),
         )
-        self.sizer.Add(self.slider.sizer, 0, wx.ALL, 3)
+
+        self.slider_sizer.Add(self.slider.sizer, 0, wx.ALL, 3)
+
+        self.zero_btn_ctrl = wx.Button(
+            self.window,
+            wx.ID_ANY,
+            "0",
+            wx.DefaultPosition,
+            wx.Size(20, -1),
+        )
+        self.zero_btn_ctrl.SetToolTip(__(f"{type_name}の材質の非透過度を0.0に設定します"))
+        self.zero_btn_ctrl.Bind(wx.EVT_BUTTON, self.on_change_material_zero)
+        self.slider_sizer.Add(self.zero_btn_ctrl, 0, wx.ALL, 3)
+
+        self.half_btn_ctrl = wx.Button(
+            self.window,
+            wx.ID_ANY,
+            "0.5",
+            wx.DefaultPosition,
+            wx.Size(30, -1),
+        )
+        self.half_btn_ctrl.SetToolTip(__(f"{type_name}の材質の非透過度を0.5に設定します"))
+        self.half_btn_ctrl.Bind(wx.EVT_BUTTON, self.on_change_material_half)
+        self.slider_sizer.Add(self.half_btn_ctrl, 0, wx.ALL, 3)
+
+        self.one_btn_ctrl = wx.Button(
+            self.window,
+            wx.ID_ANY,
+            "1",
+            wx.DefaultPosition,
+            wx.Size(20, -1),
+        )
+        self.one_btn_ctrl.SetToolTip(__(f"{type_name}の材質の非透過度を1.0に設定します"))
+        self.one_btn_ctrl.Bind(wx.EVT_BUTTON, self.on_change_material_one)
+        self.slider_sizer.Add(self.one_btn_ctrl, 0, wx.ALL, 3)
+
+        self.sizer.Add(self.slider_sizer, 0, wx.ALL, 3)
 
     def initialize(self, material_names: list[str]) -> None:
         self.material_choice_ctrl.Clear()
@@ -143,6 +170,14 @@ class MaterialCtrlSet:
         self.slider.SetValue(0.5)
         self.on_change_morph(event)
 
+    def on_change_material_zero(self, event: wx.Event) -> None:
+        self.slider.SetValue(0.0)
+        self.on_change_morph(event)
+
+    def on_change_material_one(self, event: wx.Event) -> None:
+        self.slider.SetValue(1.0)
+        self.on_change_morph(event)
+
     def on_change_material_right(self, event: wx.Event) -> None:
         selection = self.material_choice_ctrl.GetSelection()
         if selection == len(self.alphas) - 1:
@@ -163,4 +198,6 @@ class MaterialCtrlSet:
         self.right_btn_ctrl.Enable(enable)
         self.slider.Enable(enable)
         self.half_btn_ctrl.Enable(enable)
+        self.zero_btn_ctrl.Enable(enable)
+        self.one_btn_ctrl.Enable(enable)
         self.only_btn_ctrl.Enable(enable)
