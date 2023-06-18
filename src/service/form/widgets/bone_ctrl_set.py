@@ -361,6 +361,8 @@ class BoneCtrlSet:
 
         self.parent.Enable(False)
         self.parent.on_change(morph_name)
+        # ボーンハイライトを変更
+        self.parent.change_bone(self.individual_target_bone_indexes[self.bone_choice_ctrl.GetSelection()])
         self.parent.Enable(True)
 
     # def on_fit_ground(self, event: wx.Event) -> None:
