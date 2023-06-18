@@ -1,3 +1,4 @@
+from datetime import datetime
 import os
 import shutil
 from typing import Optional
@@ -100,8 +101,15 @@ class SaveUsecase:
             dress_scales.keys(), dress_scales.values(), dress_degrees.values(), dress_positions.values()
         ):
             message = __("  {b}: 縮尺{s}, 回転{r}, 移動{p}", b=bone_type_name, s=scale, r=degree, p=position)
-            dress_model.comment += message + "\r\n"
             fitting_messages.append(message)
+
+        with open(os.path.join(os.path.dirname(output_path), f"settings_{datetime.now():%Y%m%d_%H%M%S}.txt"), "w", encoding="utf-8") as f:
+            f.write(__("人物モデル") + "\n")
+            f.write(model.path + "\n")
+            f.write(__("衣装モデル") + "\n")
+            f.write(dress.path + "\n")
+            f.write(__("個別フィッティング") + "\n")
+            f.write("\n".join(fitting_messages))
 
         logger.info(
             "人物モデル: {m} ({p})\n衣装モデル: {d} ({q})\n個別フィッティング:\n{f}",
@@ -188,7 +196,7 @@ class SaveUsecase:
             ):
                 model_weight_bone_names.append(bone.name)
 
-            if not model.bone_trees.is_in_standard(bone.name):
+            if not (model.bone_trees.is_in_standard(bone.name) or bone.is_standard_extend):
                 # 準標準ではない場合、登録可否チェック
 
                 if bone.index in model.vertices_by_bones and not set(model.vertices_by_bones[bone.index]) & active_model_vertices:
@@ -218,6 +226,7 @@ class SaveUsecase:
                 ):
                     # 自身はウェイトを持っておらず、付与親ボーンが元々ウェイトを持っていて、かつ出力先にウェイトが乗ってる頂点が無い場合、スルー
                     continue
+
             if bone.parent_index not in model_bone_map:
                 # 親ボーンが登録されていない場合、子ボーンも登録しない
                 continue
@@ -328,16 +337,28 @@ class SaveUsecase:
                 logger.info("-- ボーン出力: {s}", s=len(dress_model.bones))
 
         for bone in dress.bones.writable():
-            if bone.is_standard and bone.name in dress_model.bones:
+            if (bone.is_standard or bone.is_standard_extend) and bone.name in dress_model.bones:
                 # 既に登録済みの準標準ボーンは追加しない
                 dress_bone_map[bone.index] = dress_model.bones[bone.name].index
 
-                if bone.name not in model_weight_bone_names and not bone.is_standard_extend:
+                if bone.name not in model_weight_bone_names:
                     # 人物側にウェイトが乗っていない場合、変形後の位置にボーンを配置する
                     dress_model.bones[bone.name].position = dress_matrixes[0, bone.name].position.copy()
 
+                    if (
+                        not bone.is_tail_bone
+                        and dress_model.bones[bone.name].is_tail_bone
+                        and 0 <= dress_model.bones[bone.name].tail_index
+                        and model.bones[model.bones[bone.name].tail_index].name in dress_model.bones
+                    ):
+                        # 衣装側が表示先がなくて、人物側に表示先がある場合、表示先ボーンの位置を変形後の位置に合わせる
+                        dress_model.bones[model.bones[model.bones[bone.name].tail_index].name].position = (
+                            dress_matrixes[0, bone.name].global_matrix * bone.tail_position
+                        )
+
                 continue
-            if not dress.bone_trees.is_in_standard(bone.name):
+
+            if not (dress.bone_trees.is_in_standard(bone.name) or bone.is_standard_extend):
                 # 準標準ではない場合、登録可否チェック
 
                 if bone.index in dress.vertices_by_bones and not set(dress.vertices_by_bones[bone.index]) & active_dress_vertices:
@@ -372,7 +393,7 @@ class SaveUsecase:
                 continue
 
             dress_copy_bone = bone.copy()
-            if not bone.is_standard:
+            if not (bone.is_standard or bone.is_standard_extend):
                 # 準標準ではない場合、ボーン名をちょっと変える
                 dress_copy_bone.name = f"Cos:{bone.name}"
             dress_copy_bone.index = len(dress_model.bones.writable())
