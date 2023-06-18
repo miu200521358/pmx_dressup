@@ -60,7 +60,7 @@ class BoneCtrlSet:
 
         self.grid_sizer = wx.FlexGridSizer(0, 2, 0, 0)
 
-        scale_x_tooltip = __("選択されたボーンのローカルX軸（ボーンの向き）方向の縮尺を調整できます")
+        scale_x_tooltip = __("選択されたボーンのローカルX軸（ボーンの長さ）方向の縮尺を調整できます")
         self.scale_x_label = wx.StaticText(self.window, wx.ID_ANY, __("縮尺X"))
         self.scale_x_label.SetToolTip(scale_x_tooltip)
         self.grid_sizer.Add(self.scale_x_label, 0, wx.ALL, 3)
@@ -124,7 +124,7 @@ class BoneCtrlSet:
         )
         self.grid_sizer.Add(self.scale_z_slider.sizer, 0, wx.ALL, 3)
 
-        degree_x_tooltip = __("選択されたボーンのローカルX軸（ボーンの向き）方向の回転を調整できます")
+        degree_x_tooltip = __("選択されたボーンのローカルX軸（ボーンの長さ）方向の回転を調整できます")
         self.degree_x_label = wx.StaticText(self.window, wx.ID_ANY, __("回転X"))
         self.degree_x_label.SetToolTip(degree_x_tooltip)
         self.grid_sizer.Add(self.degree_x_label, 0, wx.ALL, 3)
