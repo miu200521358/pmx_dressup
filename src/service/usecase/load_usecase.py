@@ -45,6 +45,7 @@ class LoadUsecase:
         # 必ず追加するボーン
         add_bone_names = {
             "全ての親",
+            "腰",
             "上半身2",
             "右腕捩",
             "左腕捩",
@@ -1112,16 +1113,18 @@ class LoadUsecase:
             dress_local_distances = np.max(dress_filtered_local_positions, axis=0) - np.min(dress_filtered_local_positions, axis=0)
 
             local_scale = MVector3D(*model_local_distances).one() / MVector3D(*dress_local_distances).one()
-            local_scale_value = np.mean([local_scale.y, local_scale.z])
+            # local_scale_value = np.mean([local_scale.y, local_scale.z])
             # if category in dress_category_scale_values:
             #     local_scale_value = np.mean([local_scale_value, dress_category_scale_values[category]])
 
-            dress_local_scales[category] = MVector3D(1.0, local_scale_value, local_scale_value)
+            dress_local_scales[category] = MVector3D(1.0, local_scale.y, local_scale.z)
 
             logger.debug(
                 f"ローカルスケール [{category}][{dress_local_scales[category]}][model={model_local_distances}]"
                 + f"[dress={dress_local_distances}][scale={local_scale}]"
             )
+
+            logger.info("-- ローカルスケール [{b}][{s})]", b=category, s=dress_local_scales[category])
 
         for i, (bone_name, bone_setting) in enumerate(list(STANDARD_BONE_NAMES.items())):
             if not (bone_name in dress.bones):
@@ -1324,9 +1327,10 @@ class LoadUsecase:
 
 # IKはFKの後に指定する事
 FIT_INDIVIDUAL_BONE_NAMES = {
+    "腰": (("腰",), ("下半身", "上半身"), ("下半身", "上半身"), []),
     "下半身": (("下半身",), [], ("足", "ひざ", "足首"), []),
-    "上半身": (("上半身",), [], ("下半身", "上半身2"), []),
-    "上半身2": (("上半身2",), [], ("上半身3",), ("上半身3",)),
+    "上半身": (("上半身",), [], ("上半身2",), []),
+    "上半身2": (("上半身2",), [], ("上半身3",), []),
     "上半身3": (("上半身3",), [], [], []),
     "首": (("首",), [], [], []),
     "頭": (("頭",), [], [], []),

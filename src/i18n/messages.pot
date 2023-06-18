@@ -1113,3 +1113,11 @@ msgstr ""
 msgid "-- モデルセットアップ：ボーンツリー [{i} ({p:.2f}%)]"
 msgstr ""
 
+
+msgid "-- ローカルスケール [{b}][{s})]"
+msgstr ""
+
+
+msgid "腰"
+msgstr ""
+

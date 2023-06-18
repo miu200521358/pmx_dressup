@@ -839,3 +839,6 @@ msgstr "Costume: 3-position upper body adjustment"
 
 msgid "-- モデルセットアップ：ボーンツリー [{i} ({p:.2f}%)]"
 msgstr "-- Model setup: bone tree [{i} ({p:.2f}%)]"
+
+msgid "-- ローカルスケール [{b}][{s})]"
+msgstr "-- local scale [{b}][{s})]"
