@@ -438,19 +438,11 @@ class LoadUsecase:
                             offset_position = position
                             offset_local_qq = qq
 
-                        offset_qq = MQuaternion()
-                        if morph_name not in ("肩", "腕", "ひじ", "手のひら"):
-                            # 腕系以外はグローバル回転
-                            offset_qq = offset_local_qq.copy()
-                            offset_local_qq = MQuaternion()
-
                         morph.offsets.append(
                             BoneMorphOffset(
                                 dress.bones[bone_name].index,
                                 position=offset_position,
-                                qq=offset_qq,
                                 scale=scale,
-                                local_position=MVector3D(),
                                 local_qq=offset_local_qq,
                                 local_scale=local_scale,
                             )
@@ -465,21 +457,10 @@ class LoadUsecase:
                         else:
                             offset_local_qq = qq
 
-                        offset_qq = MQuaternion()
-                        if morph_name not in ("肩", "腕", "ひじ", "手のひら"):
-                            # 腕系以外はグローバル回転
-                            offset_qq = offset_local_qq.copy()
-                            offset_local_qq = MQuaternion()
-
                         morph.offsets.append(
                             BoneMorphOffset(
                                 dress.bones[bone_name].index,
-                                position=MVector3D(),
-                                qq=offset_qq,
-                                scale=MVector3D(),
-                                local_position=MVector3D(),
                                 local_qq=offset_local_qq,
-                                local_scale=MVector3D(),
                             )
                         )
 
@@ -491,21 +472,10 @@ class LoadUsecase:
                         else:
                             offset_local_qq = qq
 
-                        offset_qq = MQuaternion()
-                        if morph_name not in ("肩", "腕", "ひじ", "手のひら"):
-                            # 腕系以外はグローバル回転
-                            offset_qq = offset_local_qq.copy()
-                            offset_local_qq = MQuaternion()
-
                         morph.offsets.append(
                             BoneMorphOffset(
                                 dress.bones[bone_name].index,
-                                position=MVector3D(),
-                                qq=offset_qq.inverse(),
-                                scale=MVector3D(),
-                                local_position=MVector3D(),
                                 local_qq=offset_local_qq.inverse(),
-                                local_scale=MVector3D(),
                             )
                         )
 
@@ -1368,9 +1338,9 @@ class LoadUsecase:
 # IKはFKの後に指定する事
 FIT_INDIVIDUAL_BONE_NAMES = {
     "下半身": (("下半身",), [], ("足", "ひざ", "足首"), ("足",), []),
-    "上半身": (("上半身",), [], ("下半身", "上半身2", "首"), ("上半身2",), []),
-    "上半身2": (("上半身2", "上半身3"), [], ("首", "頭", "肩", "腕", "ひじ", "手のひら"), ("首",), []),
-    "首": (("首",), [], ("頭",), ("頭",), []),
+    "上半身": (("上半身",), [], ("下半身", "上半身2"), ("上半身2",), []),
+    "上半身2": (("上半身2", "上半身3"), [], [], ("首",), []),
+    "首": (("首",), [], [], ("頭",), []),
     "頭": (("頭",), [], [], [], []),
     "肩": (("右肩", "左肩"), ("右肩P", "左肩P"), ("腕", "ひじ", "手のひら"), [], ("腕", "ひじ", "手のひら")),
     "腕": (("右腕", "左腕"), ("右肩C", "左肩C"), ("ひじ", "手のひら"), [], ("ひじ", "手のひら")),
