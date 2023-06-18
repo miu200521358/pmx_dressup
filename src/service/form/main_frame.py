@@ -213,6 +213,8 @@ class MainFrame(BaseFrame):
         mf.ratio = abs(material_alphas.get(__("全材質"), 1.0) - 1)
         self.model_motion.morphs[mf.name].append(mf)
 
+        self.file_panel.create_output_path()
+
     def set_dress_motion_morphs(
         self,
         material_alphas: dict[str, float] = {},
@@ -268,6 +270,8 @@ class MainFrame(BaseFrame):
             # mf = VmdMorphFrame(0, f"調整:{__(bone_type_name)}:Refit")
             # mf.ratio = 1
             # self.dress_motion.morphs[mf.name].append(mf)
+
+        self.file_panel.create_output_path()
 
     def fit_model_motion(self, bone_alpha: float = 1.0, is_bone_deform: bool = True) -> None:
         self.config_panel.canvas.model_sets[0].motion = self.model_motion
