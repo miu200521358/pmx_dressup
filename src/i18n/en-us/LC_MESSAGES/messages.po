@@ -842,3 +842,12 @@ msgstr "-- Model setup: bone tree [{i} ({p:.2f}%)]"
 
 msgid "-- ローカルスケール [{b}][{s})]"
 msgstr "-- local scale [{b}][{s})]"
+
+msgid "腰"
+msgstr "waist"
+
+msgid "選択されたボーンのローカルX軸（ボーンの長さ）方向の回転を調整できます"
+msgstr "Allows you to adjust the rotation of the selected bone in the local X-axis (length of the bone) direction"
+
+msgid "選択されたボーンのローカルX軸（ボーンの長さ）方向の縮尺を調整できます"
+msgstr "Allows you to adjust the scale of the selected bone in the local X-axis (length of the bone) direction"
