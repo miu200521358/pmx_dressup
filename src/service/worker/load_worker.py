@@ -36,7 +36,7 @@ class LoadWorker(BaseWorker):
         logger.info("お着替えモデル読み込み開始", decoration=MLogger.Decoration.BOX)
 
         if file_panel.model_ctrl.valid() and not file_panel.model_ctrl.data:
-            logger.info("人物モデル読み込み開始", decoration=MLogger.Decoration.BOX)
+            logger.info("人物: 読み込み開始", decoration=MLogger.Decoration.BOX)
 
             original_model = file_panel.model_ctrl.reader.read_by_filepath(file_panel.model_ctrl.path)
 
@@ -45,7 +45,7 @@ class LoadWorker(BaseWorker):
             model = original_model.copy()
 
             # 人物に材質透明モーフを入れる
-            logger.info("人物モデル追加セットアップ：材質透過モーフ追加")
+            logger.info("人物: 追加セットアップ: 材質透過モーフ追加")
             usecase.create_material_transparent_morphs(model)
 
             is_model_change = True
@@ -57,7 +57,7 @@ class LoadWorker(BaseWorker):
             model = PmxModel()
 
         if model and isinstance(model, PmxModel) and file_panel.dress_ctrl.valid() and (is_model_change or not file_panel.dress_ctrl.data):
-            logger.info("衣装モデル読み込み開始", decoration=MLogger.Decoration.BOX)
+            logger.info("衣装: 読み込み開始", decoration=MLogger.Decoration.BOX)
 
             original_dress = file_panel.dress_ctrl.reader.read_by_filepath(file_panel.dress_ctrl.path)
 
@@ -66,70 +66,74 @@ class LoadWorker(BaseWorker):
             dress = original_dress.copy()
             dress.update_vertices_by_bone()
 
-            logger.info("ボーン調整", decoration=MLogger.Decoration.BOX)
+            logger.info("衣装: ボーン調整", decoration=MLogger.Decoration.BOX)
 
             # 不足ボーン追加
-            logger.info("不足ボーン調整", decoration=MLogger.Decoration.LINE)
+            logger.info("衣装: 不足ボーン調整", decoration=MLogger.Decoration.LINE)
             usecase.add_mismatch_bones(model, dress)
 
             replaced_bone_names: list[str] = []
 
             # 下半身の再設定
-            logger.info("衣装モデル下半身位置調整", decoration=MLogger.Decoration.LINE)
+            logger.info("衣装: 下半身位置調整", decoration=MLogger.Decoration.LINE)
             replaced_bone_names += usecase.replace_lower(model, dress)
 
             # 上半身の再設定
-            logger.info("衣装モデル上半身位置調整", decoration=MLogger.Decoration.LINE)
+            logger.info("衣装: 上半身位置調整", decoration=MLogger.Decoration.LINE)
             replaced_bone_names += usecase.replace_upper(model, dress)
 
             # 上半身2の再設定
-            logger.info("衣装モデル上半身2位置調整", decoration=MLogger.Decoration.LINE)
+            logger.info("衣装: 上半身2位置調整", decoration=MLogger.Decoration.LINE)
             replaced_bone_names += usecase.replace_upper2(model, dress)
 
-            if "上半身3" in dress.bones:
+            if "上半身3" in model.bones:
                 # 上半身3の再設定
-                logger.info("衣装モデル上半身3位置調整", decoration=MLogger.Decoration.LINE)
+                logger.info("衣装: 上半身3位置調整", decoration=MLogger.Decoration.LINE)
                 replaced_bone_names += usecase.replace_upper3(model, dress)
 
             # 首の再設定
-            logger.info("衣装モデル首位置調整", decoration=MLogger.Decoration.LINE)
+            logger.info("衣装: 首位置調整", decoration=MLogger.Decoration.LINE)
             replaced_bone_names += usecase.replace_neck(model, dress)
 
             # 左肩の再設定
-            logger.info("衣装モデル肩位置調整", decoration=MLogger.Decoration.LINE)
+            logger.info("衣装: 肩位置調整", decoration=MLogger.Decoration.LINE)
             replaced_bone_names += usecase.replace_shoulder(model, dress, "左")
 
             # 右肩の再設定
-            logger.info("衣装モデル肩位置調整", decoration=MLogger.Decoration.LINE)
+            logger.info("衣装: 肩位置調整", decoration=MLogger.Decoration.LINE)
             replaced_bone_names += usecase.replace_shoulder(model, dress, "右")
 
             if dress.bones.exists(("首根元", "左腕", "右腕")):
                 dress.bones["首根元"].position = (dress.bones["左腕"].position + dress.bones["右腕"].position) / 2
 
             # 捩りの再設定
-            logger.info("衣装モデル捩り位置調整", decoration=MLogger.Decoration.LINE)
+            logger.info("衣装: 捩り位置調整", decoration=MLogger.Decoration.LINE)
             replaced_bone_names += usecase.replace_twist(model, dress, replaced_bone_names)
+
+            logger.info("衣装: ウェイト調整")
 
             if replaced_bone_names:
                 dress.setup()
                 dress.replace_standard_weights(replaced_bone_names)
                 dress.update_vertices_by_bone()
-
-                logger.info("衣装: 衣装モデルウェイト調整")
             else:
                 dress.update_vertices_by_bone()
 
             # 衣装に材質透明モーフを入れる
-            logger.info("衣装モデル追加セットアップ：材質透過モーフ追加", decoration=MLogger.Decoration.BOX)
+            logger.info("衣装: 追加セットアップ: 材質透過モーフ追加", decoration=MLogger.Decoration.BOX)
             usecase.create_material_transparent_morphs(dress)
 
             # 個別調整用モーフ追加
-            logger.info("衣装モデル追加セットアップ：個別調整ボーンモーフ追加", decoration=MLogger.Decoration.BOX)
-            individual_morph_names = usecase.create_dress_individual_bone_morphs(dress)
+            logger.info("衣装: 追加セットアップ: 個別調整ボーンモーフ追加", decoration=MLogger.Decoration.BOX)
+            individual_morph_names, individual_target_bone_indexes = usecase.create_dress_individual_bone_morphs(dress)
 
             # 衣装にフィッティングボーンモーフを入れる
-            logger.info("衣装モデル追加セットアップ：フィッティングモーフ追加", decoration=MLogger.Decoration.BOX)
+            logger.info("衣装: 追加セットアップ: フィッティングモーフ追加", decoration=MLogger.Decoration.BOX)
             usecase.create_dress_fit_morphs(model, dress)
+
+            # # 衣装のローカル軸再計算
+            # logger.info("衣装: 追加セットアップ: ローカル軸再計算", decoration=MLogger.Decoration.BOX)
+            # usecase.refit_local_axis(dress)
 
             is_dress_change = True
         elif file_panel.dress_ctrl.original_data:
@@ -149,20 +153,20 @@ class LoadWorker(BaseWorker):
             motion = VmdMotion("empty")
 
         if logger.total_level <= logging.DEBUG:
-            # デバッグモードの時だけ変形モーフ付き衣装モデルデータ保存
+            # デバッグモードの時だけ変形モーフ付き衣装: データ保存
             from datetime import datetime
 
             out_path = os.path.join(os.path.dirname(file_panel.output_pmx_ctrl.path), f"{model.name}_{datetime.now():%Y%m%d_%H%M%S}.pmx")
             os.makedirs(os.path.dirname(out_path), exist_ok=True)
             PmxWriter(model, out_path, include_system=True).save()
-            logger.debug(f"人物モデル出力: {out_path}")
+            logger.debug(f"人物: 出力: {out_path}")
 
             out_path = os.path.join(os.path.dirname(file_panel.output_pmx_ctrl.path), f"{dress.name}_{datetime.now():%Y%m%d_%H%M%S}.pmx")
             os.makedirs(os.path.dirname(out_path), exist_ok=True)
             PmxWriter(dress, out_path, include_system=True).save()
-            logger.debug(f"変形モーフ付き衣装モデル出力: {out_path}")
+            logger.debug(f"変形モーフ付き衣装: 出力: {out_path}")
 
-        self.result_data = (original_model, model, original_dress, dress, motion, individual_morph_names)
+        self.result_data = (original_model, model, original_dress, dress, motion, individual_morph_names, individual_target_bone_indexes)
 
         logger.info("お着替えモデル読み込み完了", decoration=MLogger.Decoration.BOX)
 

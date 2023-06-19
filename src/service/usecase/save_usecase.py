@@ -1,3 +1,4 @@
+from datetime import datetime
 import os
 import shutil
 from typing import Optional
@@ -100,8 +101,15 @@ class SaveUsecase:
             dress_scales.keys(), dress_scales.values(), dress_degrees.values(), dress_positions.values()
         ):
             message = __("  {b}: 縮尺{s}, 回転{r}, 移動{p}", b=bone_type_name, s=scale, r=degree, p=position)
-            dress_model.comment += message + "\r\n"
             fitting_messages.append(message)
+
+        with open(os.path.join(os.path.dirname(output_path), f"settings_{datetime.now():%Y%m%d_%H%M%S}.txt"), "w", encoding="utf-8") as f:
+            f.write(__("人物モデル") + "\n")
+            f.write(model.path + "\n")
+            f.write(__("衣装モデル") + "\n")
+            f.write(dress.path + "\n")
+            f.write(__("個別フィッティング") + "\n")
+            f.write("\n".join(fitting_messages))
 
         logger.info(
             "人物モデル: {m} ({p})\n衣装モデル: {d} ({q})\n個別フィッティング:\n{f}",
@@ -115,12 +123,14 @@ class SaveUsecase:
         logger.info("出力準備", decoration=MLogger.Decoration.LINE)
 
         # 変形結果
+        logger.info("人物：変形確定")
         model_original_matrixes = VmdMotion().animate_bone([0], model)
         model_matrixes = model_motion.animate_bone([0], model)
+        logger.info("衣装：変形確定")
         dress_original_matrixes = VmdMotion().animate_bone([0], dress)
         dress_matrixes = dress_motion.animate_bone([0], dress)
 
-        logger.info("人物材質選り分け")
+        logger.info("人物：材質選り分け")
         model.update_vertices_by_bone()
         model.update_vertices_by_material()
 
@@ -133,7 +143,7 @@ class SaveUsecase:
             ]
         )
 
-        logger.info("衣装材質選り分け")
+        logger.info("衣装：材質選り分け")
         dress.update_vertices_by_bone()
         dress.update_vertices_by_material()
 
@@ -186,7 +196,7 @@ class SaveUsecase:
             ):
                 model_weight_bone_names.append(bone.name)
 
-            if not bone.is_standard:
+            if not (model.bone_trees.is_in_standard(bone.name) or bone.is_standard_extend):
                 # 準標準ではない場合、登録可否チェック
 
                 if bone.index in model.vertices_by_bones and not set(model.vertices_by_bones[bone.index]) & active_model_vertices:
@@ -216,6 +226,7 @@ class SaveUsecase:
                 ):
                     # 自身はウェイトを持っておらず、付与親ボーンが元々ウェイトを持っていて、かつ出力先にウェイトが乗ってる頂点が無い場合、スルー
                     continue
+
             if bone.parent_index not in model_bone_map:
                 # 親ボーンが登録されていない場合、子ボーンも登録しない
                 continue
@@ -326,16 +337,28 @@ class SaveUsecase:
                 logger.info("-- ボーン出力: {s}", s=len(dress_model.bones))
 
         for bone in dress.bones.writable():
-            if bone.is_standard and bone.name in dress_model.bones:
+            if (bone.is_standard or bone.is_standard_extend) and bone.name in dress_model.bones:
                 # 既に登録済みの準標準ボーンは追加しない
                 dress_bone_map[bone.index] = dress_model.bones[bone.name].index
 
-                if bone.name not in model_weight_bone_names and not bone.is_standard_extend:
+                if bone.name not in model_weight_bone_names:
                     # 人物側にウェイトが乗っていない場合、変形後の位置にボーンを配置する
                     dress_model.bones[bone.name].position = dress_matrixes[0, bone.name].position.copy()
 
+                    if (
+                        not bone.is_tail_bone
+                        and dress_model.bones[bone.name].is_tail_bone
+                        and 0 <= dress_model.bones[bone.name].tail_index
+                        and model.bones[model.bones[bone.name].tail_index].name in dress_model.bones
+                    ):
+                        # 衣装側が表示先がなくて、人物側に表示先がある場合、表示先ボーンの位置を変形後の位置に合わせる
+                        dress_model.bones[model.bones[model.bones[bone.name].tail_index].name].position = (
+                            dress_matrixes[0, bone.name].global_matrix * bone.tail_position
+                        )
+
                 continue
-            if not bone.is_standard:
+
+            if not (dress.bone_trees.is_in_standard(bone.name) or bone.is_standard_extend):
                 # 準標準ではない場合、登録可否チェック
 
                 if bone.index in dress.vertices_by_bones and not set(dress.vertices_by_bones[bone.index]) & active_dress_vertices:
@@ -370,7 +393,7 @@ class SaveUsecase:
                 continue
 
             dress_copy_bone = bone.copy()
-            if not bone.is_standard:
+            if not (bone.is_standard or bone.is_standard_extend):
                 # 準標準ではない場合、ボーン名をちょっと変える
                 dress_copy_bone.name = f"Cos:{bone.name}"
             dress_copy_bone.index = len(dress_model.bones.writable())
@@ -455,7 +478,7 @@ class SaveUsecase:
             )
             bone.layer = max(
                 bone.layer,
-                dress_model.bones[bone.parent_index].layer,
+                (dress_model.bones[bone.parent_index].layer if 0 < bone.parent_index else 0),
                 (dress_model.bones[bone.effect_index].layer if 0 <= bone.effect_index else 0),
             )
             if bone.is_ik and bone.ik:
@@ -592,58 +615,75 @@ class SaveUsecase:
         model_morph_map: dict[int, int] = {-1: -1}
         dress_morph_map: dict[int, int] = {-1: -1}
 
-        for morph in model.morphs:
-            if morph.is_system:
-                continue
+        for is_group in (False, True):
+            for morph in model.morphs:
+                if (
+                    morph.is_system
+                    or (not is_group and morph.morph_type == MorphType.GROUP)
+                    or (is_group and morph.morph_type != MorphType.GROUP)
+                ):
+                    continue
 
-            copy_morph, model_vertex_map = self.copy_morph(morph, model_bone_map, model_vertex_map, model_material_map, model_morph_map)
+                if is_group:
+                    copy_morph = self.copy_group_morph(morph, model_morph_map)
+                else:
+                    copy_morph = self.copy_morph(morph, model_bone_map, model_vertex_map, model_material_map)
 
-            if copy_morph.offsets:
-                copy_morph.index = len(dress_model.morphs)
-                model_morph_map[morph.index] = len(dress_model.morphs)
-                dress_model.morphs.append(copy_morph)
+                if copy_morph.offsets:
+                    copy_morph.index = len(dress_model.morphs)
+                    model_morph_map[morph.index] = len(dress_model.morphs)
+                    dress_model.morphs.append(copy_morph)
 
-                for display_slot in model.display_slots:
-                    for reference in display_slot.references:
-                        if reference.display_type == DisplayType.MORPH and reference.display_index == morph.index:
-                            if display_slot.name not in dress_model.display_slots:
-                                dress_model.display_slots.append(
-                                    DisplaySlot(name=display_slot.name, english_name=display_slot.english_name)
+                    for display_slot in model.display_slots:
+                        for reference in display_slot.references:
+                            if reference.display_type == DisplayType.MORPH and reference.display_index == morph.index:
+                                if display_slot.name not in dress_model.display_slots:
+                                    dress_model.display_slots.append(
+                                        DisplaySlot(name=display_slot.name, english_name=display_slot.english_name)
+                                    )
+                                dress_model.display_slots[display_slot.name].references.append(
+                                    DisplaySlotReference(display_type=DisplayType.MORPH, display_index=copy_morph.index)
                                 )
-                            dress_model.display_slots[display_slot.name].references.append(
-                                DisplaySlotReference(display_type=DisplayType.MORPH, display_index=copy_morph.index)
-                            )
-                            break
+                                break
 
-            if not len(dress_model.morphs) % 50:
-                logger.info("-- モーフ出力: {s}", s=len(dress_model.morphs))
+                if not len(dress_model.morphs) % 50:
+                    logger.info("-- モーフ出力: {s}", s=len(dress_model.morphs))
 
-        for morph in dress.morphs:
-            if morph.is_system:
-                continue
+        for is_group in (False, True):
+            for morph in dress.morphs:
+                if (
+                    morph.is_system
+                    or (not is_group and morph.morph_type == MorphType.GROUP)
+                    or (is_group and morph.morph_type != MorphType.GROUP)
+                ):
+                    continue
 
-            copy_morph, dress_vertex_map = self.copy_morph(morph, dress_bone_map, dress_vertex_map, dress_material_map, dress_morph_map)
-            copy_morph.name = f"Cos:{copy_morph.name}"
+                if is_group:
+                    copy_morph = self.copy_group_morph(morph, dress_morph_map)
+                else:
+                    copy_morph = self.copy_morph(morph, dress_bone_map, dress_vertex_map, dress_material_map)
 
-            if copy_morph.offsets:
-                copy_morph.index = len(dress_model.morphs)
-                dress_morph_map[morph.index] = len(dress_model.morphs)
-                dress_model.morphs.append(copy_morph)
+                copy_morph.name = f"Cos:{copy_morph.name}"
 
-                for display_slot in dress.display_slots:
-                    for reference in display_slot.references:
-                        if reference.display_type == DisplayType.MORPH and reference.display_index == morph.index:
-                            if display_slot.name not in dress_model.display_slots:
-                                dress_model.display_slots.append(
-                                    DisplaySlot(name=display_slot.name, english_name=display_slot.english_name)
+                if copy_morph.offsets:
+                    copy_morph.index = len(dress_model.morphs)
+                    dress_morph_map[morph.index] = len(dress_model.morphs)
+                    dress_model.morphs.append(copy_morph)
+
+                    for display_slot in dress.display_slots:
+                        for reference in display_slot.references:
+                            if reference.display_type == DisplayType.MORPH and reference.display_index == morph.index:
+                                if display_slot.name not in dress_model.display_slots:
+                                    dress_model.display_slots.append(
+                                        DisplaySlot(name=display_slot.name, english_name=display_slot.english_name)
+                                    )
+                                dress_model.display_slots[display_slot.name].references.append(
+                                    DisplaySlotReference(display_type=DisplayType.MORPH, display_index=copy_morph.index)
                                 )
-                            dress_model.display_slots[display_slot.name].references.append(
-                                DisplaySlotReference(display_type=DisplayType.MORPH, display_index=copy_morph.index)
-                            )
-                            break
+                                break
 
-            if not len(dress_model.morphs) % 50:
-                logger.info("-- モーフ出力: {s}", s=len(dress_model.morphs))
+                if not len(dress_model.morphs) % 50:
+                    logger.info("-- モーフ出力: {s}", s=len(dress_model.morphs))
 
         # ---------------------------------
 
@@ -702,6 +742,20 @@ class SaveUsecase:
             ):
                 # 既に同名の準標準ボーンに繋がる剛体がある場合、INDEXだけ保持してスルー
                 dress_rigidbody_map[rigidbody.index] = dress_model.rigidbodies[rigidbody.name].index
+
+                # 位置とサイズは衣装に合わせる
+                dress_bone_name = dress.bones[rigidbody.bone_index].name
+                rigidbody_local_position = dress_original_matrixes[0, dress_bone_name].global_matrix.inverse() * rigidbody.shape_position
+                rigidbody_copy_position = dress_matrixes[0, dress_bone_name].global_matrix * rigidbody_local_position
+                rigidbody_copy_scale = MVector3D(
+                    dress_matrixes[0, dress_bone_name].global_matrix[0, 0],
+                    dress_matrixes[0, dress_bone_name].global_matrix[1, 1],
+                    dress_matrixes[0, dress_bone_name].global_matrix[2, 2],
+                )
+
+                dress_model.rigidbodies[rigidbody.name].shape_position = rigidbody_copy_position
+                dress_model.rigidbodies[rigidbody.name].shape_size = dress.rigidbodies[rigidbody.name].shape_size * rigidbody_copy_scale
+
                 continue
 
             dress_copy_rigidbody = rigidbody.copy()
@@ -827,8 +881,7 @@ class SaveUsecase:
         model_bone_map: dict[int, int],
         model_vertex_map: dict[int, int],
         model_material_map: dict[int, int],
-        model_morph_map: dict[int, int],
-    ) -> tuple[Morph, dict[int, int]]:
+    ) -> Morph:
         copy_morph = Morph(name=morph.name, english_name=morph.english_name)
         if morph.morph_type == MorphType.VERTEX:
             copy_morph.panel = morph.panel
@@ -912,7 +965,17 @@ class SaveUsecase:
                             bone_offset.local_scale.copy(),
                         )
                     )
-        elif morph.morph_type == MorphType.GROUP:
+
+        return copy_morph
+
+    def copy_group_morph(
+        self,
+        morph: Morph,
+        model_morph_map: dict[int, int],
+    ) -> Morph:
+        copy_morph = Morph(name=morph.name, english_name=morph.english_name)
+
+        if morph.morph_type == MorphType.GROUP:
             copy_morph.panel = morph.panel
             copy_morph.morph_type = MorphType.GROUP
             for offset in morph.offsets:
@@ -920,7 +983,7 @@ class SaveUsecase:
                 if group_offset.morph_index in model_morph_map:
                     copy_morph.offsets.append(GroupMorphOffset(model_morph_map[group_offset.morph_index], group_offset.morph_factor))
 
-        return copy_morph, model_vertex_map
+        return copy_morph
 
     def get_dress_ground(
         self,

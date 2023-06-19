@@ -86,7 +86,7 @@ class MainFrame(BaseFrame):
     def on_result(
         self,
         result: bool,
-        data: Optional[tuple[PmxModel, PmxModel, PmxModel, PmxModel, VmdMotion, list[str]]],
+        data: Optional[tuple[PmxModel, PmxModel, PmxModel, PmxModel, VmdMotion, list[str], list[list[int]]]],
         elapsed_time: str,
     ) -> None:
         self.file_panel.console_ctrl.write(f"\n----------------\n{elapsed_time}")
@@ -99,7 +99,7 @@ class MainFrame(BaseFrame):
 
         logger.info("描画準備開始", decoration=MLogger.Decoration.BOX)
 
-        original_model, model, original_dress, dress, motion, individual_morph_names = data
+        original_model, model, original_dress, dress, motion, individual_morph_names, individual_target_bone_indexes = data
 
         self.file_panel.model_ctrl.original_data = original_model
         self.file_panel.model_ctrl.data = model
@@ -122,7 +122,7 @@ class MainFrame(BaseFrame):
         self.config_panel.model_material_ctrl.initialize(model.materials.names)
         self.config_panel.dress_material_ctrl.initialize(dress.materials.names)
         # ボーン調整の選択肢を入れ替える
-        self.config_panel.dress_bone_ctrl.initialize(individual_morph_names)
+        self.config_panel.dress_bone_ctrl.initialize(individual_morph_names, individual_target_bone_indexes)
 
         # キーフレを戻す
         self.config_panel.fno = 0
@@ -132,6 +132,10 @@ class MainFrame(BaseFrame):
             self.config_panel.canvas.append_model_set(self.file_panel.model_ctrl.data, self.model_motion, bone_alpha=0.5)
             logger.info("衣装モデル描画準備")
             self.config_panel.canvas.append_model_set(self.file_panel.dress_ctrl.data, self.dress_motion, bone_alpha=0.5)
+            # ボーンハイライト
+            self.config_panel.canvas.animations[1].selected_bone_indexes = self.config_panel.dress_bone_ctrl.individual_target_bone_indexes[
+                0
+            ]
             logger.info("モデル描画")
             self.config_panel.canvas.Refresh()
             self.notebook.ChangeSelection(self.config_panel.tab_idx)
@@ -174,6 +178,10 @@ class MainFrame(BaseFrame):
             self.config_panel.canvas.append_model_set(self.file_panel.model_ctrl.data, self.model_motion, bone_alpha=0.5)
             logger.info("衣装モデル描画準備")
             self.config_panel.canvas.append_model_set(self.file_panel.dress_ctrl.data, self.dress_motion, bone_alpha=0.5)
+            # ボーンハイライト
+            self.config_panel.canvas.animations[1].selected_bone_indexes = self.config_panel.dress_bone_ctrl.individual_target_bone_indexes[
+                0
+            ]
             logger.info("モデル描画")
             self.config_panel.canvas.Refresh()
             self.notebook.ChangeSelection(self.config_panel.tab_idx)
@@ -204,6 +212,8 @@ class MainFrame(BaseFrame):
         mf = VmdMorphFrame(0, "全材質TR")
         mf.ratio = abs(material_alphas.get(__("全材質"), 1.0) - 1)
         self.model_motion.morphs[mf.name].append(mf)
+
+        self.file_panel.create_output_path()
 
     def set_dress_motion_morphs(
         self,
@@ -261,6 +271,8 @@ class MainFrame(BaseFrame):
             # mf.ratio = 1
             # self.dress_motion.morphs[mf.name].append(mf)
 
+        self.file_panel.create_output_path()
+
     def fit_model_motion(self, bone_alpha: float = 1.0, is_bone_deform: bool = True) -> None:
         self.config_panel.canvas.model_sets[0].motion = self.model_motion
         self.config_panel.canvas.model_sets[0].bone_alpha = bone_alpha
@@ -271,45 +283,6 @@ class MainFrame(BaseFrame):
         self.config_panel.canvas.model_sets[1].bone_alpha = bone_alpha
         self.config_panel.canvas.change_motion(wx.SpinEvent(), is_bone_deform, 1)
 
-    # def fit_ground(self) -> bool:
-    #     """接地位置を求めてモーフに設定。接地位置を求められたか返す"""
-    #     if not self.model_motion or not self.dress_motion:
-    #         return False
-
-    #     dress_morph_motion = VmdMotion("dress morph motion")
-    #     dress_morph_motion.morphs = self.dress_motion.morphs
-
-    #     # 接地させる場合のYを取得する
-    #     root_ground_y = LoadUsecase().get_dress_ground(
-    #         self.file_panel.dress_ctrl.data,
-    #         dress_morph_motion,
-    #     )
-
-    #     mf = VmdMorphFrame(0, "Root:Adjust")
-    #     mf.ratio = root_ground_y
-    #     self.model_motion.morphs[mf.name].append(mf)
-
-    #     mf = VmdMorphFrame(0, "Root:Adjust")
-    #     mf.ratio = root_ground_y
-    #     self.dress_motion.morphs[mf.name].append(mf)
-
-    #     return True
-
-    # def refit(self, morph_bone_name: str) -> None:
-    #     # 再フィットしたモデルデータを設定する
-    #     self.file_panel.dress_ctrl.data = LoadUsecase().refit_dress_morphs(
-    #         self.file_panel.model_ctrl.data,
-    #         self.file_panel.dress_ctrl.data,
-    #         self.model_motion,
-    #         self.dress_motion,
-    #         morph_bone_name,
-    #     )
-
-    # def clear_refit(self) -> None:
-    #     dress: PmxModel = self.file_panel.dress_ctrl.data
-    #     for bone_morph in dress.morphs.filter_by_type(MorphType.BONE):
-    #         if "Refit" not in bone_morph.name:
-    #             continue
-    #         for offset in bone_morph.offsets:
-    #             bone_offset: BoneMorphOffset = offset
-    #             bone_offset.clear()
+    def change_bone(self, selected_bone_indexes: list[int]) -> None:
+        self.config_panel.canvas.animations[1].selected_bone_indexes = selected_bone_indexes
+        self.config_panel.canvas.Refresh()

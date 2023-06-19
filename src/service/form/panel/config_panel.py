@@ -150,12 +150,10 @@ class ConfigPanel(CanvasPanel):
         self.change_motion(False, target_bone_name)
 
     def on_change(self, target_bone_name: Optional[str] = None, is_clear: bool = False) -> None:
-        # if is_clear:
-        #     self.frame.clear_refit()
         self.change_motion(True, target_bone_name)
 
-    # def on_fit_ground(self) -> bool:
-    #     return self.frame.fit_ground()
+    def change_bone(self, selected_bone_indexes: list[int]) -> None:
+        self.frame.change_bone(selected_bone_indexes)
 
     def change_motion(self, is_bone_deform: bool, target_bone_name: Optional[str] = None) -> None:
         self.frame.set_model_motion_morphs(self.model_material_ctrl.alphas)

@@ -16,9 +16,11 @@ data_keys = [
     ('mmd_base/mlib/resources/share_toon/*.*', 'mlib/resources/share_toon'),
     ('mmd_base/mlib/pmx/glsl/*.*', 'mlib/pmx/glsl'),
 ]
-include_dlls = []
-exclude_dlls = []
-exclude_keys = ['PIL\_webp.cp311-win_amd64.pyd', 'PIL\_imagingtk.cp311-win_amd64.pyd', 'PIL\_imagingcms.cp311-win_amd64.pyd', '_ssl.pyd', '_asyncio.pyd']
+exclude_dlls = ['numpy\random\_bounded_integers.cp311-win_amd64.pyd', 'numpy\random\_common.cp311-win_amd64.pyd',
+                'numpy\random\_generator.cp311-win_amd64.pyd', 'numpy\random\_mt19937.cp311-win_amd64.pyd', 'numpy\random\_pcg64.cp311-win_amd64.pyd',
+                'numpy\random\_philox.cp311-win_amd64.pyd', 'numpy\random\_sfc64.cp311-win_amd64.pyd', 'numpy\random\bit_generator.cp311-win_amd64.pyd',
+                'numpy\random\mtrand.cp311-win_amd64.pyd', 'libssl-3-x64.dll', 'libcrypto-3-x64.dll',
+                'PIL\_webp.cp311-win_amd64.pyd', 'PIL\_imagingtk.cp311-win_amd64.pyd', 'PIL\_imagingcms.cp311-win_amd64.pyd', '_ssl.pyd', '_asyncio.pyd']
 
 import os
 
@@ -27,9 +29,8 @@ def remove_from_list(input):
     for item in sorted(input):
         name, path, btype = item
         flag = 0
-        for exclude_key in exclude_keys:
-            if (exclude_key in name or name in exclude_dlls) and name not in include_dlls:
-                flag = 1
+        if name in exclude_dlls:
+            flag = 1
         print(f"{' OK ' if not flag else '*NG*'} [{name}] = {flag} ({os.path.getsize(path)})")
         if flag != 1:
             outlist.append(item)
@@ -42,7 +43,7 @@ a = Analysis(['src/executor.py'],
             hiddenimports=[],
             hookspath=[],
             runtime_hooks=[],
-            excludes=exclude_keys,
+            excludes=exclude_dlls,
             win_no_prefer_redirects=False,
             win_private_assemblies=False,
             cipher=None,
