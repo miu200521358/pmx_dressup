@@ -824,48 +824,6 @@ class LoadUsecase:
                 display_block=50,
             )
 
-            # if dress_bone.ik_target_indexes:
-            #     # IKリンクボーンの位置を補正する
-            #     dress_ik_bone = dress.bones[dress_bone.ik_target_indexes[0]]
-            #     dress_ik_link_start_bone = dress.bones[dress_ik_bone.ik.links[-1].bone_index]
-            #     dress_ik_target_bone = dress.bones[dress_ik_bone.ik.bone_index]
-
-            #     for dress_ik_link in dress_ik_bone.ik.links[:-1]:
-            #         dress_ik_link_bone = dress.bones[dress_ik_link.bone_index]
-            #         if STANDARD_BONE_NAMES[dress_ik_link_bone.name].translatable:
-            #             matrixes = dress_motion.animate_bone([0], model, [bone_name], append_ik=False)
-
-            #             # 変形後の位置
-            #             deformed_start_position = matrixes[0, dress_ik_link_start_bone.name].position
-            #             deformed_link_position = matrixes[0, dress_ik_link_bone.name].position
-            #             deformed_target_position = matrixes[0, dress_ik_target_bone.name].position
-            #             # 変形前の位置
-            #             original_start_position = dress.bones[dress_ik_link_start_bone.name].position
-            #             original_link_position = dress.bones[dress_ik_link_bone.name].position
-            #             original_target_position = dress.bones[dress_ik_target_bone.name].position
-
-            #             original_link_ratio = (original_link_position - original_start_position).one() / (
-            #                 original_target_position - original_start_position
-            #             ).one()
-            #             deformed_refit_link_position = deformed_start_position + (
-            #                 (deformed_target_position - deformed_start_position) * original_link_ratio
-            #             )
-
-            #             offset_link_position = deformed_refit_link_position - deformed_link_position
-            #             if 0 > offset_link_position.z:
-            #                 # ひざが前に出る方向の補正のみ行う
-            #                 dress_offset_positions[dress_ik_link_bone.index].z += offset_link_position.z / 2
-
-            #                 # キーフレ更新
-            #                 mbf = dress_motion.bones[dress_ik_link_bone.name][0]
-            #                 mbf.position = dress_offset_positions[dress_ik_link_bone.index].copy()
-            #                 dress_motion.bones[dress_ik_link_bone.name].append(mbf)
-
-            #                 logger.debug(
-            #                     f"-- -- 移動追加オフセット[{dress_ik_link_bone.name}][{offset_link_position}]"
-            #                     + f"[original={deformed_refit_link_position}][deform={deformed_link_position}]"
-            #                 )
-
             if dress_bone.is_translatable_standard:
                 # 移動計算 ------------------
 
@@ -930,29 +888,6 @@ class LoadUsecase:
                 logger.debug(
                     f"-- -- 移動オフセット[{dress_bone.name}][{dress_offset_position}][model={model_bone_position}][dress={dress_bone_position}]"
                 )
-
-            # if dress_bone.is_ik:
-            #     fk_dress_bone = dress.bones[dress_bone.ik.bone_index]
-
-            #     if fk_dress_bone.is_translatable_standard:
-            #         # IKの場合、FKターゲットをIKの位置に合わせる
-            #         dress_ik_matrixes = dress_motion.animate_bone([0], dress, [dress_bone.name], append_ik=False)
-            #         dress_ik_bone_position = dress_ik_matrixes[0, dress_bone.name].position
-
-            #         dress_fk_bone_position = dress_ik_matrixes[0, fk_dress_bone.name].position
-
-            #         offset_target_position = dress_ik_bone_position - dress_fk_bone_position
-            #         dress_offset_positions[fk_dress_bone.index] += offset_target_position
-
-            #         # キーフレ更新
-            #         mbf = dress_motion.bones[fk_dress_bone.name][0]
-            #         mbf.position = dress_offset_positions[fk_dress_bone.index].copy()
-            #         dress_motion.bones[fk_dress_bone.name].append(mbf)
-
-            #         logger.debug(
-            #             f"-- -- 移動追加オフセット[{fk_dress_bone.name}][{offset_target_position}]"
-            #             + f"[IK={model_bone_position}][FK={dress_bone_position}]"
-            #         )
 
             if dress_bone.is_rotatable_standard:
                 # 回転計算 ------------------
