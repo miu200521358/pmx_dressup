@@ -851,3 +851,15 @@ msgstr "Allows you to adjust the rotation of the selected bone in the local X-ax
 
 msgid "選択されたボーンのローカルX軸（ボーンの長さ）方向の縮尺を調整できます"
 msgstr "Allows you to adjust the scale of the selected bone in the local X-axis (length of the bone) direction"
+
+msgid "-- 衣装初期姿勢計算"
+msgstr "-- Costume initial posture calculation"
+
+msgid "ローカル距離計算"
+msgstr "Local Distance Calculation"
+
+msgid "-- ローカル距離計算 [{i} ({p:.2f}%)]"
+msgstr "-- Local distance calculation [{i} ({p:.2f}%)]"
+
+msgid "衣装: 足IK再設定用セットアップ"
+msgstr "Costume: setup for foot IK reconfiguration"
