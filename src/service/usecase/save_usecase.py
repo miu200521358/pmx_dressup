@@ -306,7 +306,7 @@ class SaveUsecase:
             model_copy_bone = bone.copy()
             model_copy_bone.index = len(dress_model.bones.writable())
             # 変形後の位置にボーンを配置する
-            model_copy_bone.position = model_matrixes[0, bone.name].local_matrix * model_copy_bone.position
+            model_copy_bone.position = model_matrixes[0, bone.name].position.copy()
             bone_map[model_copy_bone.index] = {
                 "parent": ["" if 0 > bone.parent_index else model.bones[bone.parent_index].name],
                 "tail": ["" if 0 > bone.tail_index else model.bones[bone.tail_index].name],
@@ -354,6 +354,14 @@ class SaveUsecase:
                         # 衣装側が表示先がなくて、人物側に表示先がある場合、表示先ボーンの位置を変形後の位置に合わせる
                         dress_model.bones[model.bones[model.bones[bone.name].tail_index].name].position = (
                             dress_matrixes[0, bone.name].global_matrix * bone.tail_position
+                        )
+
+                    for parent_bone_name in reversed(model.bone_trees[bone.name].names[:-1]):
+                        if dress_model.bones[parent_bone_name].is_standard or parent_bone_name in dress.bones:
+                            break
+                        # 親が準標準ではなく、衣装側にない場合、親は子（対象）の変形後の位置からみた相対位置にボーンを配置する
+                        dress_model.bones[parent_bone_name].position = dress_matrixes[0, bone.name].global_matrix * (
+                            model_matrixes[0, parent_bone_name].position - model_matrixes[0, bone.name].position
                         )
 
                 continue
