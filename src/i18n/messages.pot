@@ -1129,3 +1129,19 @@ msgstr ""
 msgid "選択されたボーンのローカルX軸（ボーンの長さ）方向の縮尺を調整できます"
 msgstr ""
 
+
+msgid "-- 衣装初期姿勢計算"
+msgstr ""
+
+
+msgid "ローカル距離計算"
+msgstr ""
+
+
+msgid "-- ローカル距離計算 [{i} ({p:.2f}%)]"
+msgstr ""
+
+
+msgid "衣装: 足IK再設定用セットアップ"
+msgstr ""
+
