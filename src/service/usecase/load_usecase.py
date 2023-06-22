@@ -74,24 +74,34 @@ class LoadUsecase:
         # 両方の片方にしかないボーン名を抽出
         mismatch_bone_names = (short_model_bone_names ^ short_dress_bone_names) | add_bone_names
 
-        # ミスマッチボーンで追加する必要のあるボーン名を抽出(ログ用にソートする)
-        short_mismatch_model_bone_names = sorted(list(mismatch_bone_names - set(model.bones.names)))
-        short_mismatch_dress_bone_names = sorted(list(mismatch_bone_names - set(dress.bones.names)))
+        # ミスマッチボーンで追加する必要のあるボーン名を抽出(順番を保持する)
+        short_mismatch_model_bone_names = [
+            bname for bname in DRESS_STANDARD_BONE_NAMES.keys() if bname in (mismatch_bone_names - set(model.bones.names))
+        ]
+        short_mismatch_dress_bone_names = [
+            bname for bname in DRESS_STANDARD_BONE_NAMES.keys() if bname in (mismatch_bone_names - set(dress.bones.names))
+        ]
 
         logger.info("人物: 追加対象ボーン: {b}", b=", ".join(short_mismatch_model_bone_names))
         logger.info("衣装: 追加対象ボーン: {b}", b=", ".join(short_mismatch_dress_bone_names))
+
+        if not (short_model_bone_names or short_dress_bone_names):
+            return
 
         logger.info("人物: 初期姿勢計算")
 
         # 人物の初期姿勢を求める
         model_matrixes = VmdMotion().animate_bone([0], model)
 
+        model.update_vertices_by_bone()
+
         model_inserted_bone_names = []
         for bone_name in DRESS_STANDARD_BONE_NAMES.keys():
             if bone_name in short_mismatch_model_bone_names:
-                if ("胸" in bone_name or "おっぱい" in bone_name) and self.insert_bust(model, bone_name):
-                    model_inserted_bone_names.append(bone_name)
-                    logger.info("-- 人物: ボーン追加: {b}", b=bone_name)
+                if "胸" in bone_name or "おっぱい" in bone_name:
+                    if self.insert_bust(model, bone_name):
+                        model_inserted_bone_names.append(bone_name)
+                        logger.info("-- 人物: ボーン追加: {b}", b=bone_name)
                 elif model.insert_standard_bone(bone_name, model_matrixes):
                     model_inserted_bone_names.append(bone_name)
                     logger.info("-- 人物: ボーン追加: {b}", b=bone_name)
@@ -99,9 +109,6 @@ class LoadUsecase:
         if model_inserted_bone_names:
             model.setup()
             model.replace_standard_weights(model_inserted_bone_names)
-            if ["胸" in bone_name for bone_name in model_inserted_bone_names]:
-                model.update_vertices_by_bone()
-                self.replace_bust_weights(model, model_inserted_bone_names)
             logger.info("人物: 再セットアップ")
 
         model.update_vertices_by_bone()
@@ -114,9 +121,10 @@ class LoadUsecase:
         dress_inserted_bone_names = []
         for bone_name in DRESS_STANDARD_BONE_NAMES.keys():
             if bone_name in short_mismatch_dress_bone_names:
-                if ("胸" in bone_name or "おっぱい" in bone_name) and self.insert_bust(dress, bone_name):
-                    dress_inserted_bone_names.append(bone_name)
-                    logger.info("-- 衣装: ボーン追加: {b}", b=bone_name)
+                if "胸" in bone_name or "おっぱい" in bone_name:
+                    if self.insert_bust(dress, bone_name):
+                        dress_inserted_bone_names.append(bone_name)
+                        logger.info("-- 衣装: ボーン追加: {b}", b=bone_name)
                 elif dress.insert_standard_bone(bone_name, dress_matrixes):
                     dress_inserted_bone_names.append(bone_name)
                     logger.info("-- 衣装: ボーン追加: {b}", b=bone_name)
@@ -124,9 +132,6 @@ class LoadUsecase:
         if dress_inserted_bone_names:
             dress.setup()
             dress.replace_standard_weights(dress_inserted_bone_names)
-            if ["胸" in bone_name for bone_name in dress_inserted_bone_names]:
-                dress.update_vertices_by_bone()
-                self.replace_bust_weights(dress, dress_inserted_bone_names)
             logger.info("衣装: 再セットアップ")
 
         dress.update_vertices_by_bone()
@@ -135,25 +140,17 @@ class LoadUsecase:
         """胸ウェイトの置き換え"""
 
         # 既に胸にウェイトが乗っている場合、一旦上半身2に乗せ直す
-        replaced_map = dict([(b.index, b.index) for b in model.bones])
-        for bust_bone_name in ("右胸上", "左胸上", "右胸上2", "左胸上2", "右胸接続", "左胸接続", "右胸下", "左胸下"):
-            if bust_bone_name not in model.bones:
-                continue
-            replaced_map[model.bones[bust_bone_name].index] = model.bones["上半身2"].index
-        for v in model.vertices:
-            v.deform.indexes = np.vectorize(replaced_map.get)(v.deform.indexes)
-
         upper_vertex_indexes = [bone.index for bone in model.bones if "上半身" in bone.name]
 
-        for bust_bone_name in ("右胸", "左胸", "右胸上", "左胸上"):
+        for bust_bone_name in ("右胸", "左胸"):
             if bust_bone_name not in model.bones:
                 continue
 
             bust_bone = model.bones[bust_bone_name]
 
-            bust_upper_position = bust_bone.position + (model.bones["首根元"].position - model.bones["上半身"].position) * 0.15
+            bust_upper_position = bust_bone.position + (model.bones["首根元"].position - model.bones["上半身"].position) * 0.35
             bust_upper_position.z = 0
-            bust_lower_position = bust_bone.position + (model.bones["首根元"].position - model.bones["上半身"].position) * -0.35
+            bust_lower_position = bust_bone.position + (model.bones["首根元"].position - model.bones["上半身"].position) * -0.2
             bust_lower_position.z = 0
 
             # 胸ウェイトを乗せる頂点範囲
@@ -170,9 +167,9 @@ class LoadUsecase:
 
             bust_vertex_indexes: list[int] = []
             for vertex_index in set(
-                model.vertices_by_bones.get(model.bones["上半身"].index, [])
-                + model.vertices_by_bones.get(model.bones["上半身2"].index, [])
-                + model.vertices_by_bones.get(model.bones["上半身3"].index, [])
+                (model.vertices_by_bones.get(model.bones["上半身"].index, []) if "上半身" in model.bones else [])
+                + (model.vertices_by_bones.get(model.bones["上半身2"].index, []) if "上半身2" in model.bones else [])
+                + (model.vertices_by_bones.get(model.bones["上半身3"].index, []) if "上半身3" in model.bones else [])
             ):
                 # 左右に分けて胸に割り当てる頂点を取得
                 if (
@@ -221,26 +218,18 @@ class LoadUsecase:
                     )
                 v.deform.normalize(align=True)
 
-        for bone_name in bone_names:
-            # 表示先ボーンの切り替え
-            if bone_name in ("右胸上", "左胸上", "右胸上2", "左胸上2", "右胸接続", "左胸接続"):
-                bone_setting = DRESS_STANDARD_BONE_NAMES[bone_name]
-                model.bones[bone_name].tail_index = model.bones[bone_setting.tails[0]].index
-
     def insert_bust(self, model: PmxModel, bust_bone_name: str) -> bool:
         """胸ボーンの追加"""
         # 上半身1, 2, 3 のウェイト位置取得
         upper_vertices: list[int] = []
         parent_upper_name: str = ""
-        for upper_bone_name in ("上半身3", "上半身2", "上半身"):
+        for upper_bone_name in ("上半身", "上半身2", "上半身3"):
             if upper_bone_name not in model.bones:
-                continue
-            upper_vertices = model.vertices_by_bones.get(model.bones[upper_bone_name].index, [])
-            parent_upper_name = upper_bone_name
-            if upper_vertices:
                 break
+            upper_vertices += model.vertices_by_bones.get(model.bones[upper_bone_name].index, [])
+            parent_upper_name = upper_bone_name
 
-        if not parent_upper_name:
+        if not parent_upper_name or not upper_vertices:
             # 登録対象となりうる親ボーンが見つからなかった場合、スルー
             return False
 
@@ -256,33 +245,16 @@ class LoadUsecase:
             upper_vertex_positions.append(model.vertices[vertex_index].position.vector)
 
         upper_mean_position = np.mean(upper_vertex_positions, axis=0)
-        upper_min_position = np.min(upper_vertex_positions, axis=0)
-        bust_upper_position = model.bones["上半身"].position + (model.bones["首根元"].position - model.bones["上半身"].position) * 0.6
-        bust_mean_position = model.bones["上半身"].position + (model.bones["首根元"].position - model.bones["上半身"].position) * 0.5
-        bust_lower_position = model.bones["上半身"].position + (model.bones["首根元"].position - model.bones["上半身"].position) * 0.4
 
         # 胸ボーンの追加
-        bust_bone = Bone(index=model.bones[parent_upper_name].index + 1, name=bust_bone_name, english_name=bust_bone_name)
+        bust_bone = Bone(name=bust_bone_name, english_name=bust_bone_name)
         bust_bone_setting = DRESS_STANDARD_BONE_NAMES[bust_bone_name]
         bust_bone.bone_flg = bust_bone_setting.flag
         bust_bone.tail_position = bust_bone_setting.axis.copy()
-        if bust_bone_name in ("右胸", "左胸", "おっぱい調整"):
-            if bust_bone_name in ("おっぱい調整"):
-                bust_bone.position = MVector3D(0, bust_mean_position.y, bust_mean_position.z)
-            else:
-                bust_bone.position = MVector3D(upper_mean_position[0], upper_mean_position[1], upper_mean_position[2])
-            bust_bone.parent_index = model.bones[parent_upper_name].index
-            bust_bone.layer = model.bones[parent_upper_name].layer
-        elif bust_bone_name in ("右胸上", "左胸上", "右胸上2", "左胸上2", "右胸接続", "左胸接続", "右胸下", "左胸下"):
-            if bust_bone_name in ("右胸上", "左胸上"):
-                bust_bone.position = MVector3D(upper_mean_position[0], bust_upper_position.y, bust_mean_position.z)
-            elif bust_bone_name in ("右胸上2", "左胸上2", "右胸接続", "左胸接続"):
-                bust_bone.position = MVector3D(upper_mean_position[0], bust_upper_position.y, upper_min_position[2])
-            else:
-                bust_bone.position = MVector3D(upper_mean_position[0], bust_lower_position.y, upper_min_position[2])
-            bust_parent_bone = model.bones[bust_bone_setting.parents[0]]
-            bust_bone.parent_index = model.bones[bust_parent_bone.name].index
-            bust_bone.layer = model.bones[bust_parent_bone.name].layer
+        bust_bone.position = MVector3D(upper_mean_position[0], upper_mean_position[1], upper_mean_position[2])
+        bust_bone.parent_index = model.bones[parent_upper_name].index
+        bust_bone.layer = model.bones[parent_upper_name].layer
+        bust_bone.index = bust_bone.parent_index + 1
 
         model.insert_bone(bust_bone)
 
@@ -331,11 +303,13 @@ class LoadUsecase:
     def replace_bust(self, model: PmxModel, dress: PmxModel) -> list[str]:
         """胸系のボーン置き換え"""
         bust_added_bone_names: list[str] = []
-        for bust_bone_name in ("右胸", "左胸", "右胸上", "右胸上2", "右胸接続", "右胸下", "左胸上", "左胸上2", "左胸接続", "左胸下"):
+        for bust_bone_name in ("右胸", "左胸"):
             replace_bone_names = ("上半身", "頭", bust_bone_name)
             if model.bones.exists(replace_bone_names) and dress.bones.exists(replace_bone_names):
                 is_add, diff = self.replace_bone_position(model, dress, *replace_bone_names)
                 if is_add:
+                    model.bones[bust_bone_name].position.x *= 1.2
+                    model.bones[bust_bone_name].position.y *= 0.97
                     logger.info("-- 衣装: {b}位置調整", b=bust_bone_name)
                     bust_added_bone_names.append(bust_bone_name)
 
@@ -583,7 +557,7 @@ class LoadUsecase:
                 for bone_name in target_all_bone_names:
                     if bone_name in dress.bones:
                         if axis_name in ("MX", "RX", "RZ"):
-                            offset_position = position * (-1 if "左" in bone_name else 1)
+                            offset_position = position * (1 if "左" in bone_name else -1)
                             offset_local_qq = local_qq.inverse() if "左" in bone_name else local_qq
                         else:
                             offset_position = position
@@ -591,12 +565,33 @@ class LoadUsecase:
 
                         if "足首" in bone_name or "胸" in bone_name:
                             # 足首、胸だけはグローバルスケールで動かす（Z方向にまっすぐ伸ばすため）
+                            # ただし、画面指定上はローカルと同じ操作感にする
+                            scale = (
+                                MVector3D(0, 1, 0) if "SX" == axis_name else MVector3D(1, 0, 0) if "SY" == axis_name else MVector3D(0, 0, 1)
+                            )
+                            if "胸" in bone_name:
+                                scale = (
+                                    MVector3D(0, 1, 0)
+                                    if "SX" == axis_name
+                                    else MVector3D(1, 0, 0)
+                                    if "SY" == axis_name
+                                    else MVector3D(0, 0, 6)
+                                )
+                            else:
+                                scale = (
+                                    MVector3D(0, 1, 0)
+                                    if "SX" == axis_name
+                                    else MVector3D(1, 0, 0)
+                                    if "SY" == axis_name
+                                    else MVector3D(0, 0, 1)
+                                )
+
                             morph.offsets.append(
                                 BoneMorphOffset(
                                     dress.bones[bone_name].index,
                                     position=offset_position,
                                     local_qq=offset_local_qq,
-                                    scale=local_scale,
+                                    scale=scale,
                                 )
                             )
                         else:
@@ -641,6 +636,7 @@ class LoadUsecase:
                 or dress_bone.is_standard_extend
                 or not dress.bones[dress_bone.parent_index].is_standard
                 or "操作中心" == dress_bone.name
+                or "胸" in dress_bone.name
             ):
                 continue
 
@@ -917,35 +913,35 @@ class LoadUsecase:
                 "オフセット計算",
                 index=i,
                 total_index_count=dress_standard_count,
-                display_block=20,
+                display_block=10,
             )
 
-            if dress_bone.parent_index in dress.bones and not dress.bones[dress_bone.parent_index].is_standard:
-                # 衣装側の親が準標準ではない場合、自分から見た位置に合わせる
-                dress_parent_bone = dress.bones[dress_bone.parent_index]
-                dress_matrixes = dress_motion.animate_bone([0], dress, [dress_bone.name])
+            # if dress_bone.parent_index in dress.bones and not dress.bones[dress_bone.parent_index].is_standard:
+            #     # 衣装側の親が準標準ではない場合、自分から見た位置に合わせる
+            #     dress_parent_bone = dress.bones[dress_bone.parent_index]
+            #     dress_matrixes = dress_motion.animate_bone([0], dress, [dress_bone.name])
 
-                # 親の親までを調整した後の位置
-                dress_parent_fit_bone_position = dress_matrixes[0, dress_parent_bone.name].position
+            #     # 親の親までを調整した後の位置
+            #     dress_parent_fit_bone_position = dress_matrixes[0, dress_parent_bone.name].position
 
-                # 人物側の相対位置から再計算した親ボーンの位置
-                dress_parent_refit_bone_position = model_matrixes[0, model_bone.name].global_matrix * (
-                    dress_matrixes[0, dress_bone.name].position - dress_matrixes[0, dress_parent_bone.name].position
-                )
+            #     # 人物側の相対位置から再計算した親ボーンの位置
+            #     dress_parent_refit_bone_position = model_matrixes[0, model_bone.name].global_matrix * (
+            #         dress_matrixes[0, dress_bone.name].position - dress_matrixes[0, dress_parent_bone.name].position
+            #     )
 
-                # 人物側の再計算位置に合わせる
-                dress_offset_position = dress_parent_refit_bone_position - dress_parent_fit_bone_position
-                dress_offset_positions[dress_parent_bone.index] = dress_offset_position
+            #     # 人物側の再計算位置に合わせる
+            #     dress_offset_position = dress_parent_refit_bone_position - dress_parent_fit_bone_position
+            #     dress_offset_positions[dress_parent_bone.index] = dress_offset_position
 
-                # キーフレとして追加
-                mbf = dress_motion.bones[dress_parent_bone.name][0]
-                mbf.position = dress_offset_position
-                dress_motion.bones[dress_parent_bone.name].append(mbf)
+            #     # キーフレとして追加
+            #     mbf = dress_motion.bones[dress_parent_bone.name][0]
+            #     mbf.position = dress_offset_position
+            #     dress_motion.bones[dress_parent_bone.name].append(mbf)
 
-                logger.debug(
-                    f"-- -- 移動追加オフセット[{dress_parent_bone.name}][{dress_offset_position}]"
-                    + f"[refit={dress_parent_refit_bone_position}][fit={dress_parent_fit_bone_position}]"
-                )
+            #     logger.debug(
+            #         f"-- -- 移動追加オフセット[{dress_parent_bone.name}][{dress_offset_position}]"
+            #         + f"[refit={dress_parent_refit_bone_position}][fit={dress_parent_fit_bone_position}]"
+            #     )
 
             if bone_setting.translatable:
                 # 移動計算 ------------------
@@ -1152,8 +1148,8 @@ class LoadUsecase:
             # if category in dress_category_scale_values:
             #     local_scale_value = np.mean([local_scale_value, dress_category_scale_values[category]])
 
-            if category == "胸":
-                dress_local_scales[category] = MVector3D(np.max(local_scale.vector), 1.0, 1.0)
+            if category in ("胸",):
+                dress_local_scales[category] = MVector3D(local_scale.x, 1.0, local_scale.y)
             else:
                 dress_local_scales[category] = MVector3D(1.0, local_scale.y, local_scale.z)
 
@@ -1216,14 +1212,6 @@ class LoadUsecase:
         if bone.name in (
             "右胸",
             "左胸",
-            "右胸上",
-            "右胸上2",
-            "右胸接続",
-            "右胸下",
-            "左胸上",
-            "左胸上2",
-            "左胸接続",
-            "左胸下",
             "左足首",
             "右足首",
             "左足首D",

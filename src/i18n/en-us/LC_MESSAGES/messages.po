@@ -863,3 +863,21 @@ msgstr "-- Local distance calculation [{i} ({p:.2f}%)]"
 
 msgid "衣装: 足IK再設定用セットアップ"
 msgstr "Costume: setup for foot IK reconfiguration"
+
+msgid "人物: 追加対象ボーン: {b}"
+msgstr "Person: additional target bone: {b}"
+
+msgid "衣装: 追加対象ボーン: {b}"
+msgstr "Costume: additional target bones: {b}"
+
+msgid "-- 衣装: ボーン追加: {b}"
+msgstr "-- Costume: bone addition: {b}"
+
+msgid "衣装: 胸位置調整"
+msgstr "Costume: breast positioning"
+
+msgid "-- 衣装: {b}位置調整"
+msgstr "-- Costume: {b} position adjustment"
+
+msgid "-- 人物: ボーン追加: {b}"
+msgstr "-- person: bone added: {b}"

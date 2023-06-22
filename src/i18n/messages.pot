@@ -1165,3 +1165,7 @@ msgstr ""
 msgid "-- 衣装: {b}位置調整"
 msgstr ""
 
+
+msgid "-- 人物: ボーン追加: {b}"
+msgstr ""
+
