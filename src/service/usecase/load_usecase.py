@@ -151,9 +151,9 @@ class LoadUsecase:
 
             bust_bone = model.bones[bust_bone_name]
 
-            bust_upper_position = bust_bone.position + (model.bones["首根元"].position - model.bones["上半身"].position) * 0.2
+            bust_upper_position = bust_bone.position + (model.bones["首根元"].position - model.bones["上半身"].position) * 0.15
             bust_upper_position.z = 0
-            bust_lower_position = bust_bone.position + (model.bones["首根元"].position - model.bones["上半身"].position) * -0.4
+            bust_lower_position = bust_bone.position + (model.bones["首根元"].position - model.bones["上半身"].position) * -0.35
             bust_lower_position.z = 0
 
             # 胸ウェイトを乗せる頂点範囲
