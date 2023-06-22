@@ -151,10 +151,15 @@ class LoadUsecase:
 
             bust_bone = model.bones[bust_bone_name]
 
-            bust_upper_position = bust_bone.position + (model.bones["首根元"].position - model.bones["上半身"].position) * 0.1
+            bust_upper_position = bust_bone.position + (model.bones["首根元"].position - model.bones["上半身"].position) * 0.2
             bust_upper_position.z = 0
-            bust_lower_position = bust_bone.position + (model.bones["首根元"].position - model.bones["上半身"].position) * -0.3
+            bust_lower_position = bust_bone.position + (model.bones["首根元"].position - model.bones["上半身"].position) * -0.4
             bust_lower_position.z = 0
+
+            # 胸ウェイトを乗せる頂点範囲
+            bust_start_z = model.bones[bust_bone.parent_index].position.z + (
+                (bust_bone.position.z - model.bones[bust_bone.parent_index].position.z) / 2
+            )
 
             # 胸のウェイトを乗せる半径(Zは潰す)
             bust_radius = bust_upper_position.distance(bust_lower_position) / 2
@@ -176,7 +181,7 @@ class LoadUsecase:
                         or ("右" in bust_bone_name and 0 > model.vertices[vertex_index].position.x)
                     )
                     and bust_lower_position.y <= model.vertices[vertex_index].position.y <= bust_upper_position.y
-                    and 0 > model.vertices[vertex_index].position.z
+                    and bust_start_z > model.vertices[vertex_index].position.z
                 ):
                     bust_vertex_indexes.append(vertex_index)
 
@@ -1147,7 +1152,10 @@ class LoadUsecase:
             # if category in dress_category_scale_values:
             #     local_scale_value = np.mean([local_scale_value, dress_category_scale_values[category]])
 
-            dress_local_scales[category] = MVector3D(1.0, local_scale.y, local_scale.z)
+            if category == "胸":
+                dress_local_scales[category] = MVector3D(np.max(local_scale.vector), 1.0, 1.0)
+            else:
+                dress_local_scales[category] = MVector3D(1.0, local_scale.y, local_scale.z)
 
             logger.debug(
                 f"ローカルスケール [{category}][{dress_local_scales[category]}][model={model_local_distances}]"
