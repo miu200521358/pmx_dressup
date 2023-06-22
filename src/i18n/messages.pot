@@ -1145,3 +1145,23 @@ msgstr ""
 msgid "衣装: 足IK再設定用セットアップ"
 msgstr ""
 
+
+msgid "人物: 追加対象ボーン: {b}"
+msgstr ""
+
+
+msgid "衣装: 追加対象ボーン: {b}"
+msgstr ""
+
+
+msgid "-- 衣装: ボーン追加: {b}"
+msgstr ""
+
+
+msgid "衣装: 胸位置調整"
+msgstr ""
+
+
+msgid "-- 衣装: {b}位置調整"
+msgstr ""
+

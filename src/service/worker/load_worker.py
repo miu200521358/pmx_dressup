@@ -91,6 +91,10 @@ class LoadWorker(BaseWorker):
                 logger.info("衣装: 上半身3位置調整", decoration=MLogger.Decoration.LINE)
                 replaced_bone_names += usecase.replace_upper3(model, dress)
 
+            # 胸の再設定
+            logger.info("衣装: 胸位置調整", decoration=MLogger.Decoration.LINE)
+            replaced_bust_bone_names = usecase.replace_bust(model, dress)
+
             # 首の再設定
             logger.info("衣装: 首位置調整", decoration=MLogger.Decoration.LINE)
             replaced_bone_names += usecase.replace_neck(model, dress)
@@ -112,12 +116,15 @@ class LoadWorker(BaseWorker):
 
             logger.info("衣装: ウェイト調整")
 
+            if replaced_bust_bone_names:
+                dress.setup()
+                usecase.replace_bust_weights(dress, replaced_bust_bone_names)
+
             if replaced_bone_names:
                 dress.setup()
                 dress.replace_standard_weights(replaced_bone_names)
-                dress.update_vertices_by_bone()
-            else:
-                dress.update_vertices_by_bone()
+
+            dress.update_vertices_by_bone()
 
             # 衣装に材質透明モーフを入れる
             logger.info("衣装: 追加セットアップ: 材質透過モーフ追加", decoration=MLogger.Decoration.BOX)

@@ -1,7 +1,8 @@
 from enum import Enum
 from typing import Iterable
+from mlib.base.math import MVector3D
 
-from mlib.pmx.bone_setting import BoneSetting, BoneSettings
+from mlib.pmx.bone_setting import BoneFlg, BoneSetting, BoneSettings
 
 
 class DressBoneSetting(BoneSetting):
@@ -166,6 +167,108 @@ class DressBoneSettings(Enum):
         local_scale_target=False,
     )
 
+    RIGHT_BUST = DressBoneSetting(
+        setting=BoneSetting(
+            name="右胸",
+            parents=("上半身3", "上半身2", "上半身"),
+            relatives=("上半身3", "上半身2", "上半身"),
+            tails=[],
+            flag=BoneFlg.CAN_ROTATE | BoneFlg.CAN_MANIPULATE | BoneFlg.IS_VISIBLE,
+            axis=MVector3D(0, 0, -1),
+        ),
+        category="胸",
+        weight_names=("右胸",),
+        translatable=True,
+        rotatable=True,
+        global_scalable=False,
+        local_scalable=True,
+        local_scale_target=True,
+    )
+    RIGHT_BUST_ADJUST = DressBoneSetting(
+        setting=BoneSetting(
+            name="おっぱい調整",
+            parents=("上半身3", "上半身2", "上半身"),
+            relatives=("上半身3", "上半身2", "上半身"),
+            tails=[],
+            flag=BoneFlg.CAN_ROTATE | BoneFlg.CAN_TRANSLATE | BoneFlg.CAN_MANIPULATE | BoneFlg.IS_VISIBLE,
+            axis=MVector3D(0, 0, -1),
+        ),
+        category="胸",
+        weight_names=[],
+        translatable=True,
+        rotatable=False,
+        global_scalable=False,
+        local_scalable=False,
+        local_scale_target=True,
+    )
+    RIGHT_BUST_ABOVE = DressBoneSetting(
+        setting=BoneSetting(
+            name="右胸上",
+            parents=("おっぱい調整", "上半身3", "上半身2", "上半身"),
+            relatives=("上半身3", "上半身2", "上半身"),
+            tails=("右胸上2", "右胸接続"),
+            flag=BoneFlg.CAN_ROTATE | BoneFlg.CAN_MANIPULATE | BoneFlg.IS_VISIBLE | BoneFlg.TAIL_IS_BONE,
+            axis=MVector3D(0, 0, -1),
+        ),
+        category="胸",
+        weight_names=[],
+        translatable=True,
+        rotatable=False,
+        global_scalable=False,
+        local_scalable=False,
+        local_scale_target=True,
+    )
+    RIGHT_BUST_ABOVE2 = DressBoneSetting(
+        setting=BoneSetting(
+            name="右胸上2",
+            parents=("右胸上"),
+            relatives=("右胸上"),
+            tails=("右胸下",),
+            flag=BoneFlg.CAN_ROTATE | BoneFlg.CAN_MANIPULATE | BoneFlg.IS_VISIBLE | BoneFlg.TAIL_IS_BONE,
+            axis=MVector3D(0, -1, 0),
+        ),
+        category="胸",
+        weight_names=("右胸上2",),
+        translatable=True,
+        rotatable=False,
+        global_scalable=False,
+        local_scalable=True,
+        local_scale_target=True,
+    )
+    RIGHT_BUST_CONNECT = DressBoneSetting(
+        setting=BoneSetting(
+            name="右胸接続",
+            parents=("右胸上"),
+            relatives=("右胸上"),
+            tails=("右胸下",),
+            flag=BoneFlg.CAN_ROTATE | BoneFlg.CAN_MANIPULATE | BoneFlg.IS_VISIBLE | BoneFlg.TAIL_IS_BONE,
+            axis=MVector3D(0, -1, 0),
+        ),
+        category="胸",
+        weight_names=("右胸接続",),
+        translatable=True,
+        rotatable=False,
+        global_scalable=False,
+        local_scalable=True,
+        local_scale_target=True,
+    )
+    RIGHT_BUST_BELOW = DressBoneSetting(
+        setting=BoneSetting(
+            name="右胸下",
+            parents=("右胸上2", "右胸接続"),
+            relatives=MVector3D(0, 0, 1),
+            tails=[],
+            flag=BoneFlg.CAN_ROTATE | BoneFlg.CAN_MANIPULATE | BoneFlg.IS_VISIBLE,
+            axis=MVector3D(0, 0, 1),
+        ),
+        category="胸",
+        weight_names=[],
+        translatable=True,
+        rotatable=False,
+        global_scalable=False,
+        local_scalable=False,
+        local_scale_target=True,
+    )
     RIGHT_SHOULDER_P = DressBoneSetting(
         setting=BoneSettings.RIGHT_SHOULDER_P.value,
         category="肩",
@@ -627,6 +730,108 @@ class DressBoneSettings(Enum):
         local_scale_target=False,
     )
 
+    LEFT_BUST = DressBoneSetting(
+        setting=BoneSetting(
+            name="左胸",
+            parents=("上半身3", "上半身2", "上半身"),
+            relatives=("上半身3", "上半身2", "上半身"),
+            tails=[],
+            flag=BoneFlg.CAN_ROTATE | BoneFlg.CAN_MANIPULATE | BoneFlg.IS_VISIBLE,
+            axis=MVector3D(0, 0, -1),
+        ),
+        category="胸",
+        weight_names=("左胸",),
+        translatable=True,
+        rotatable=True,
+        global_scalable=False,
+        local_scalable=True,
+        local_scale_target=True,
+    )
+    LEFT_BUST_ADJUST = DressBoneSetting(
+        setting=BoneSetting(
+            name="おっぱい調整",
+            parents=("上半身3", "上半身2", "上半身"),
+            relatives=("上半身3", "上半身2", "上半身"),
+            tails=[],
+            flag=BoneFlg.CAN_ROTATE | BoneFlg.CAN_TRANSLATE | BoneFlg.CAN_MANIPULATE | BoneFlg.IS_VISIBLE,
+            axis=MVector3D(0, 0, -1),
+        ),
+        category="胸",
+        weight_names=[],
+        translatable=True,
+        rotatable=False,
+        global_scalable=False,
+        local_scalable=False,
+        local_scale_target=True,
+    )
+    LEFT_BUST_ABOVE = DressBoneSetting(
+        setting=BoneSetting(
+            name="左胸上",
+            parents=("おっぱい調整", "上半身3", "上半身2", "上半身"),
+            relatives=("上半身3", "上半身2", "上半身"),
+            tails=("左胸上2", "左胸接続"),
+            flag=BoneFlg.CAN_ROTATE | BoneFlg.CAN_MANIPULATE | BoneFlg.IS_VISIBLE | BoneFlg.TAIL_IS_BONE,
+            axis=MVector3D(0, 0, -1),
+        ),
+        category="胸",
+        weight_names=[],
+        translatable=True,
+        rotatable=False,
+        global_scalable=False,
+        local_scalable=False,
+        local_scale_target=True,
+    )
+    LEFT_BUST_ABOVE2 = DressBoneSetting(
+        setting=BoneSetting(
+            name="左胸上2",
+            parents=("左胸上"),
+            relatives=("左胸上"),
+            tails=("左胸下",),
+            flag=BoneFlg.CAN_ROTATE | BoneFlg.CAN_MANIPULATE | BoneFlg.IS_VISIBLE | BoneFlg.TAIL_IS_BONE,
+            axis=MVector3D(0, -1, 0),
+        ),
+        category="胸",
+        weight_names=("左胸上2",),
+        translatable=True,
+        rotatable=False,
+        global_scalable=False,
+        local_scalable=True,
+        local_scale_target=True,
+    )
+    LEFT_BUST_CONNECT = DressBoneSetting(
+        setting=BoneSetting(
+            name="左胸接続",
+            parents=("左胸上"),
+            relatives=("左胸上"),
+            tails=("左胸下",),
+            flag=BoneFlg.CAN_ROTATE | BoneFlg.CAN_MANIPULATE | BoneFlg.IS_VISIBLE | BoneFlg.TAIL_IS_BONE,
+            axis=MVector3D(0, -1, 0),
+        ),
+        category="胸",
+        weight_names=("左胸接続",),
+        translatable=True,
+        rotatable=False,
+        global_scalable=False,
+        local_scalable=True,
+        local_scale_target=True,
+    )
+    LEFT_BUST_BELOW = DressBoneSetting(
+        setting=BoneSetting(
+            name="左胸下",
+            parents=("左胸上2", "左胸接続"),
+            relatives=MVector3D(0, 0, 1),
+            tails=[],
+            flag=BoneFlg.CAN_ROTATE | BoneFlg.CAN_MANIPULATE | BoneFlg.IS_VISIBLE,
+            axis=MVector3D(0, 0, 1),
+        ),
+        category="胸",
+        weight_names=[],
+        translatable=True,
+        rotatable=False,
+        global_scalable=False,
+        local_scalable=False,
+        local_scale_target=True,
+    )
     LEFT_SHOULDER_P = DressBoneSetting(
         setting=BoneSettings.LEFT_SHOULDER_P.value,
         category="肩",
@@ -1104,6 +1309,7 @@ FIT_INDIVIDUAL_BONE_NAMES = {
     "上半身": (("上半身",), [], ("上半身2",), []),
     "上半身2": (("上半身2",), [], ("上半身3",), []),
     "上半身3": (("上半身3",), [], [], []),
+    "胸": (("右胸", "左胸", "右胸上2", "左胸上2", "右胸接続", "左胸接続"), [], [], []),
     "首": (("首",), [], [], []),
     "頭": (("頭",), [], [], []),
     "肩": (("右肩", "左肩"), ("右肩P", "左肩P"), ("腕", "ひじ", "手のひら"), ("腕", "ひじ", "手のひら")),
