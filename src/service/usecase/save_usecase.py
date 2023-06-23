@@ -103,20 +103,42 @@ class SaveUsecase:
             message = __("  {b}: 縮尺{s}, 回転{r}, 移動{p}", b=bone_type_name, s=scale, r=degree, p=position)
             fitting_messages.append(message)
 
+        model_output_material_names = [
+            material_name
+            for (material_name, alpha) in model_material_alphas.items()
+            if alpha == 1.0 and material_name not in [__("ボーンライン"), __("全材質")]
+        ]
+
+        dress_output_material_names = [
+            material_name
+            for (material_name, alpha) in dress_material_alphas.items()
+            if alpha == 1.0 and material_name not in [__("ボーンライン"), __("全材質")]
+        ]
+
         with open(os.path.join(os.path.dirname(output_path), f"settings_{datetime.now():%Y%m%d_%H%M%S}.txt"), "w", encoding="utf-8") as f:
             f.write(__("人物モデル") + "\n")
             f.write(model.path + "\n")
+            f.write("\n")
+            f.write(__("人物モデル：出力対象材質") + "\n    ")
+            f.write(", ".join(model_output_material_names))
+            f.write("\n")
             f.write(__("衣装モデル") + "\n")
             f.write(dress.path + "\n")
+            f.write("\n")
+            f.write(__("衣装モデル：出力対象材質") + "\n    ")
+            f.write(", ".join(dress_output_material_names))
+            f.write("\n")
             f.write(__("個別フィッティング") + "\n")
             f.write("\n".join(fitting_messages))
 
         logger.info(
-            "人物モデル: {m} ({p})\n衣装モデル: {d} ({q})\n個別フィッティング:\n{f}",
+            "人物モデル: {m} ({p})\n  出力材質: {mm}\n衣装モデル: {d} ({q})\n  出力材質: {dm}\n個別フィッティング:\n  {f}",
             m=model.name,
             p=os.path.basename(model.path),
+            mm=", ".join(model_output_material_names),
             d=dress.name,
             q=os.path.basename(dress.path),
+            dm=", ".join(dress_output_material_names),
             f="\n".join(fitting_messages),
         )
 

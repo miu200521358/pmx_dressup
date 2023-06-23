@@ -1169,3 +1169,19 @@ msgstr ""
 msgid "-- 人物: ボーン追加: {b}"
 msgstr ""
 
+
+msgid "人物モデル：出力対象材質"
+msgstr ""
+
+
+msgid "衣装モデル：出力対象材質"
+msgstr ""
+
+
+msgid "人物モデル: {m} ({p})\n  出力材質: {mm}\n衣装モデル: {d} ({q})\n  出力材質: {dm}\n個別フィッティング:\n{f}"
+msgstr ""
+
+
+msgid "人物モデル: {m} ({p})\n  出力材質: {mm}\n衣装モデル: {d} ({q})\n  出力材質: {dm}\n個別フィッティング:\n  {f}"
+msgstr ""
+
