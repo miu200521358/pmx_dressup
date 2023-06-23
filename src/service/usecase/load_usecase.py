@@ -98,7 +98,7 @@ class LoadUsecase:
         model_inserted_bone_names = []
         for bone_name in DRESS_STANDARD_BONE_NAMES.keys():
             if bone_name in short_mismatch_model_bone_names:
-                if "胸" in bone_name or "おっぱい" in bone_name:
+                if "胸" in bone_name:
                     if self.insert_bust(model, bone_name):
                         model_inserted_bone_names.append(bone_name)
                         logger.info("-- 人物: ボーン追加: {b}", b=bone_name)
@@ -121,7 +121,7 @@ class LoadUsecase:
         dress_inserted_bone_names = []
         for bone_name in DRESS_STANDARD_BONE_NAMES.keys():
             if bone_name in short_mismatch_dress_bone_names:
-                if "胸" in bone_name or "おっぱい" in bone_name:
+                if "胸" in bone_name:
                     if self.insert_bust(dress, bone_name):
                         dress_inserted_bone_names.append(bone_name)
                         logger.info("-- 衣装: ボーン追加: {b}", b=bone_name)
@@ -148,9 +148,9 @@ class LoadUsecase:
 
             bust_bone = model.bones[bust_bone_name]
 
-            bust_upper_position = bust_bone.position + (model.bones["首根元"].position - model.bones["上半身"].position) * 0.35
+            bust_upper_position = bust_bone.position + (model.bones["首根元"].position - model.bones["上半身"].position) * 0.5
             bust_upper_position.z = 0
-            bust_lower_position = bust_bone.position + (model.bones["首根元"].position - model.bones["上半身"].position) * -0.2
+            bust_lower_position = bust_bone.position + (model.bones["首根元"].position - model.bones["上半身"].position) * -0.3
             bust_lower_position.z = 0
 
             # 胸ウェイトを乗せる頂点範囲
@@ -159,7 +159,8 @@ class LoadUsecase:
             )
 
             # 胸のウェイトを乗せる半径(Zは潰す)
-            bust_radius = bust_upper_position.distance(bust_lower_position) / 2
+            bust_upper_radius = bust_upper_position.distance(bust_bone.position)
+            bust_lower_radius = bust_lower_position.distance(bust_bone.position)
 
             # 胸の位置
             bust_pos = bust_bone.position.copy()
@@ -191,7 +192,7 @@ class LoadUsecase:
 
                 # Zを潰した距離
                 bust_distance = vpos.distance(bust_pos)
-                bust_ratio = 1 - bust_distance / bust_radius
+                bust_ratio = 1 - bust_distance / (bust_upper_radius if vpos.y >= bust_pos.y else bust_lower_radius)
 
                 if 0 > bust_ratio:
                     # 半径を超えるのはそのまま上半身系に割り当てる
@@ -308,8 +309,6 @@ class LoadUsecase:
             if model.bones.exists(replace_bone_names) and dress.bones.exists(replace_bone_names):
                 is_add, diff = self.replace_bone_position(model, dress, *replace_bone_names)
                 if is_add:
-                    model.bones[bust_bone_name].position.x *= 1.2
-                    model.bones[bust_bone_name].position.y *= 0.97
                     logger.info("-- 衣装: {b}位置調整", b=bust_bone_name)
                     bust_added_bone_names.append(bust_bone_name)
 
@@ -567,30 +566,14 @@ class LoadUsecase:
                             # 足首、胸だけはグローバルスケールで動かす（Z方向にまっすぐ伸ばすため）
                             # ただし、画面指定上はローカルと同じ操作感にする
                             scale = (
-                                MVector3D(0, 1, 0) if "SX" == axis_name else MVector3D(1, 0, 0) if "SY" == axis_name else MVector3D(0, 0, 1)
+                                MVector3D(0, 1, 0) if "SX" == axis_name else MVector3D(1, 0, 0) if "SY" == axis_name else MVector3D(0, 0, 2)
                             )
-                            if "胸" in bone_name:
-                                scale = (
-                                    MVector3D(0, 1, 0)
-                                    if "SX" == axis_name
-                                    else MVector3D(1, 0, 0)
-                                    if "SY" == axis_name
-                                    else MVector3D(0, 0, 6)
-                                )
-                            else:
-                                scale = (
-                                    MVector3D(0, 1, 0)
-                                    if "SX" == axis_name
-                                    else MVector3D(1, 0, 0)
-                                    if "SY" == axis_name
-                                    else MVector3D(0, 0, 1)
-                                )
 
                             morph.offsets.append(
                                 BoneMorphOffset(
                                     dress.bones[bone_name].index,
                                     position=offset_position,
-                                    local_qq=offset_local_qq,
+                                    qq=offset_local_qq,
                                     scale=scale,
                                 )
                             )
@@ -815,6 +798,9 @@ class LoadUsecase:
             if bone_setting.category not in dress_scale_values:
                 dress_scale_values[bone_setting.category] = []
             dress_scale_values[bone_setting.category].append(dress_fit_length_scale)
+
+        # 胸はスケールキャンセルだけ入れる
+        dress_scale_values["胸"].append(1.0)
 
         dress_category_scale_values: dict[str, float] = {}
         for category, dress_scale_values_by_category in dress_scale_values.items():

@@ -180,7 +180,7 @@ class DressBoneSettings(Enum):
         weight_names=("右胸",),
         translatable=False,
         rotatable=False,
-        global_scalable=False,
+        global_scalable=True,
         local_scalable=False,
         local_scale_target=False,
     )
@@ -658,7 +658,7 @@ class DressBoneSettings(Enum):
         weight_names=("左胸",),
         translatable=False,
         rotatable=False,
-        global_scalable=False,
+        global_scalable=True,
         local_scalable=False,
         local_scale_target=False,
     )
@@ -1139,7 +1139,7 @@ FIT_INDIVIDUAL_BONE_NAMES = {
     "上半身": (("上半身",), [], ("上半身2",), []),
     "上半身2": (("上半身2",), [], ("上半身3",), []),
     "上半身3": (("上半身3",), [], [], []),
-    "胸": (("右胸", "左胸", "右胸上2", "左胸上2", "右胸接続", "左胸接続"), [], [], []),
+    "胸": (("右胸", "左胸"), [], [], []),
     "首": (("首",), [], [], []),
     "頭": (("頭",), [], [], []),
     "肩": (("右肩", "左肩"), ("右肩P", "左肩P"), ("腕", "ひじ", "手のひら"), ("腕", "ひじ", "手のひら")),
