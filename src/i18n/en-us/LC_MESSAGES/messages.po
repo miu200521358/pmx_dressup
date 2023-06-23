@@ -881,3 +881,15 @@ msgstr "-- Costume: {b} position adjustment"
 
 msgid "-- 人物: ボーン追加: {b}"
 msgstr "-- person: bone added: {b}"
+
+msgid "人物モデル：出力対象材質"
+msgstr "Person model: output target material"
+
+msgid "衣装モデル：出力対象材質"
+msgstr "Costume model: output target material"
+
+msgid "人物モデル: {m} ({p})\n  出力材質: {mm}\n衣装モデル: {d} ({q})\n  出力材質: {dm}\n個別フィッティング:\n{f}"
+msgstr "Person model: {m} ({p})\nOutput material: {mm}\nCostume model: {d} ({q})\nOutput material: {dm}\nIndividual fitting:\n{f}"
+
+msgid "人物モデル: {m} ({p})\n  出力材質: {mm}\n衣装モデル: {d} ({q})\n  出力材質: {dm}\n個別フィッティング:\n  {f}"
+msgstr "Person model: {m} ({p})\nOutput material: {mm}\nCostume model: {d} ({q})\nOutput material: {dm}\nIndividual fitting:\n {f}"
