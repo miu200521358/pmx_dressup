@@ -141,10 +141,13 @@ class MaterialCtrlSet:
         self.slider.ChangeValue(1.0)
 
     def on_change_material(self, event: wx.Event) -> None:
+        if self.is_only:
+            self.on_change_morph(event)
         material_name = self.material_choice_ctrl.GetStringSelection()
         self.slider.ChangeValue(self.alphas[material_name])
 
     def on_change_morph(self, event: wx.Event) -> None:
+        self.is_only = False
         alpha = self.slider.GetValue()
         material_name = self.material_choice_ctrl.GetStringSelection()
         self.alphas[material_name] = float(alpha)
