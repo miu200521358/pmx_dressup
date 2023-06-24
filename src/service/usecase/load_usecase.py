@@ -800,6 +800,8 @@ class LoadUsecase:
             dress_scale_values[bone_setting.category].append(dress_fit_length_scale)
 
         # 胸はスケールキャンセルだけ入れる
+        if "胸" not in dress_scale_values:
+            dress_scale_values["胸"] = []
         dress_scale_values["胸"].append(1.0)
 
         dress_category_scale_values: dict[str, float] = {}
