@@ -519,6 +519,9 @@ class SaveUsecase:
                     dress_model.bones[bone.ik.bone_index].position = dress_matrixes[0, bone_setting["ik_target"][0]].position.copy()
                 for n in range(len(bone.ik.links)):
                     bone.ik.links[n].bone_index = dress_model.bones[bone_setting["ik_link"][n]].index
+            if bone.is_leg_d and dress_matrixes.exists(0, bone_setting["effect"][0]):
+                # 足Dを足FKに揃える
+                dress_model.bones[bone.index].position = dress_matrixes[0, bone_setting["effect"][0]].position.copy()
 
             if 0 < bone.index and not bone.index % 100:
                 logger.info("-- ボーン定義再設定: {s}", s=bone.index)
