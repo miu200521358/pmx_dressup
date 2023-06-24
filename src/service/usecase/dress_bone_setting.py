@@ -1,8 +1,7 @@
 from enum import Enum
 from typing import Iterable
-from mlib.base.math import MVector3D
 
-from mlib.pmx.bone_setting import BoneFlg, BoneSetting, BoneSettings
+from mlib.pmx.bone_setting import BoneSetting, BoneSettings
 
 
 class DressBoneSetting(BoneSetting):
@@ -168,17 +167,10 @@ class DressBoneSettings(Enum):
     )
 
     RIGHT_BUST = DressBoneSetting(
-        setting=BoneSetting(
-            name="右胸",
-            parents=("上半身3", "上半身2", "上半身"),
-            relatives=("上半身3", "上半身2", "上半身"),
-            tails=[],
-            flag=BoneFlg.CAN_ROTATE | BoneFlg.CAN_MANIPULATE | BoneFlg.IS_VISIBLE,
-            axis=MVector3D(0, 0, -1),
-        ),
+        setting=BoneSettings.RIGHT_BUST.value,
         category="胸",
         weight_names=("右胸",),
-        translatable=False,
+        translatable=True,
         rotatable=False,
         global_scalable=True,
         local_scalable=False,
@@ -646,17 +638,10 @@ class DressBoneSettings(Enum):
     )
 
     LEFT_BUST = DressBoneSetting(
-        setting=BoneSetting(
-            name="左胸",
-            parents=("上半身3", "上半身2", "上半身"),
-            relatives=("上半身3", "上半身2", "上半身"),
-            tails=[],
-            flag=BoneFlg.CAN_ROTATE | BoneFlg.CAN_MANIPULATE | BoneFlg.IS_VISIBLE,
-            axis=MVector3D(0, 0, -1),
-        ),
+        setting=BoneSettings.LEFT_BUST.value,
         category="胸",
         weight_names=("左胸",),
-        translatable=False,
+        translatable=True,
         rotatable=False,
         global_scalable=True,
         local_scalable=False,
