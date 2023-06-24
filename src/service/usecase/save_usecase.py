@@ -146,11 +146,11 @@ class SaveUsecase:
 
         # 変形結果
         logger.info("人物：変形確定")
-        model_original_matrixes = VmdMotion().animate_bone([0], model)
-        model_matrixes = model_motion.animate_bone([0], model)
+        model_original_matrixes = VmdMotion().animate_bone([0], model, append_ik=False)
+        model_matrixes = model_motion.animate_bone([0], model, append_ik=False)
         logger.info("衣装：変形確定")
-        dress_original_matrixes = VmdMotion().animate_bone([0], dress)
-        dress_matrixes = dress_motion.animate_bone([0], dress)
+        dress_original_matrixes = VmdMotion().animate_bone([0], dress, append_ik=False)
+        dress_matrixes = dress_motion.animate_bone([0], dress, append_ik=False)
 
         logger.info("人物：材質選り分け")
         model.update_vertices_by_bone()
