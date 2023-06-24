@@ -530,12 +530,13 @@ class LoadUsecase:
                 )
             )
 
+            # X軸：横方向, Y軸：進行方向、Z軸：奥行き方向
             for axis_name, position, local_qq, local_scale in (
-                ("SX", MVector3D(), MQuaternion(), MVector3D(1, 0, 0)),
-                ("SY", MVector3D(), MQuaternion(), MVector3D(0, 1, 0)),
+                ("SX", MVector3D(), MQuaternion(), MVector3D(0, 1, 0)),
+                ("SY", MVector3D(), MQuaternion(), MVector3D(1, 0, 0)),
                 ("SZ", MVector3D(), MQuaternion(), MVector3D(0, 0, 1)),
-                ("RX", MVector3D(), MQuaternion.from_euler_degrees(2, 0, 0), MVector3D()),
-                ("RY", MVector3D(), MQuaternion.from_euler_degrees(0, 2, 0), MVector3D()),
+                ("RX", MVector3D(), MQuaternion.from_euler_degrees(2, 2, 0), MVector3D()),
+                ("RY", MVector3D(), MQuaternion.from_euler_degrees(2, 0, 0), MVector3D()),
                 ("RZ", MVector3D(), MQuaternion.from_euler_degrees(0, 0, 2), MVector3D()),
                 ("MX", MVector3D(1, 0, 0), MQuaternion(), MVector3D()),
                 ("MY", MVector3D(0, 1, 0), MQuaternion(), MVector3D()),
@@ -555,7 +556,7 @@ class LoadUsecase:
 
                 for bone_name in target_all_bone_names:
                     if bone_name in dress.bones:
-                        if axis_name in ("MX", "RX", "RZ"):
+                        if axis_name in ("MX", "RY", "RZ"):
                             offset_position = position * (1 if "左" in bone_name else -1)
                             offset_local_qq = local_qq.inverse() if "左" in bone_name else local_qq
                         else:
@@ -566,7 +567,7 @@ class LoadUsecase:
                             # 足首、胸だけはグローバルスケールで動かす（Z方向にまっすぐ伸ばすため）
                             # ただし、画面指定上はローカルと同じ操作感にする
                             scale = (
-                                MVector3D(0, 1, 0) if "SX" == axis_name else MVector3D(1, 0, 0) if "SY" == axis_name else MVector3D(0, 0, 2)
+                                MVector3D(1, 0, 0) if "SX" == axis_name else MVector3D(0, 1, 0) if "SY" == axis_name else MVector3D(0, 0, 2)
                             )
 
                             morph.offsets.append(
@@ -591,7 +592,7 @@ class LoadUsecase:
 
                 if "R" in axis_name:
                     for bone_name in child_rotation_bone_names:
-                        if axis_name in ("RX", "RZ"):
+                        if axis_name in ("RY", "RZ"):
                             offset_local_qq = local_qq.inverse() if "左" in bone_name else local_qq
                         else:
                             offset_local_qq = local_qq
@@ -630,11 +631,11 @@ class LoadUsecase:
 
             # 準標準を親に持つ準標準外のルートボーンの調整モーフを追加する
             for axis_name, position, local_qq, local_scale in (
-                ("SX", MVector3D(), MQuaternion(), MVector3D(1, 0, 0)),
-                ("SY", MVector3D(), MQuaternion(), MVector3D(0, 1, 0)),
+                ("SX", MVector3D(), MQuaternion(), MVector3D(0, 1, 0)),
+                ("SY", MVector3D(), MQuaternion(), MVector3D(1, 0, 0)),
                 ("SZ", MVector3D(), MQuaternion(), MVector3D(0, 0, 1)),
-                ("RX", MVector3D(), MQuaternion.from_euler_degrees(2, 0, 0), MVector3D()),
-                ("RY", MVector3D(), MQuaternion.from_euler_degrees(0, 2, 0), MVector3D()),
+                ("RX", MVector3D(), MQuaternion.from_euler_degrees(2, 2, 0), MVector3D()),
+                ("RY", MVector3D(), MQuaternion.from_euler_degrees(2, 0, 0), MVector3D()),
                 ("RZ", MVector3D(), MQuaternion.from_euler_degrees(0, 0, 2), MVector3D()),
                 ("MX", MVector3D(1, 0, 0), MQuaternion(), MVector3D()),
                 ("MY", MVector3D(0, 1, 0), MQuaternion(), MVector3D()),
