@@ -893,3 +893,30 @@ msgstr "Person model: {m} ({p})\nOutput material: {mm}\nCostume model: {d} ({q})
 
 msgid "人物モデル: {m} ({p})\n  出力材質: {mm}\n衣装モデル: {d} ({q})\n  出力材質: {dm}\n個別フィッティング:\n  {f}"
 msgstr "Person model: {m} ({p})\nOutput material: {mm}\nCostume model: {d} ({q})\nOutput material: {dm}\nIndividual fitting:\n {f}"
+
+msgid "選択されたボーンの横方向の縮尺を調整できます"
+msgstr "Allows you to adjust the horizontal scale of the selected bone"
+
+msgid "選択されたボーンの長さ方向の縮尺を調整できます"
+msgstr "Allows you to adjust the lengthwise scale of selected bones"
+
+msgid "選択されたボーンの奥行き方向の縮尺を調整できます"
+msgstr "Allows you to adjust the depth scale of selected bones"
+
+msgid "選択されたボーンの横方向の回転を調整できます"
+msgstr "Allows you to adjust the lateral rotation of selected bones"
+
+msgid "選択されたボーンの長さ方向の回転を調整できます"
+msgstr "Allows you to adjust the lengthwise rotation of selected bones"
+
+msgid "選択されたボーンの奥行き方向の回転を調整できます"
+msgstr "Allows you to adjust the depth rotation of selected bones"
+
+msgid "選択されたボーンの横方向の移動を調整できます"
+msgstr "Allows you to adjust the lateral movement of selected bones"
+
+msgid "選択されたボーンの長さ方向の移動を調整できます"
+msgstr "Allows you to adjust the lengthwise movement of selected bones"
+
+msgid "選択されたボーンの奥行き方向の移動を調整できます"
+msgstr "Allows you to adjust the depth shift of selected bones"
