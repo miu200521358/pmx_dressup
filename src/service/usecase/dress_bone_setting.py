@@ -331,8 +331,8 @@ class DressBoneSettings(Enum):
         translatable=False,
         rotatable=False,
         global_scalable=False,
-        local_scalable=True,
-        local_scale_target=True,
+        local_scalable=False,
+        local_scale_target=False,
     )
     RIGHT_THUMB1 = DressBoneSetting(
         setting=BoneSettings.RIGHT_THUMB1.value,
@@ -341,8 +341,8 @@ class DressBoneSettings(Enum):
         translatable=False,
         rotatable=False,
         global_scalable=False,
-        local_scalable=True,
-        local_scale_target=True,
+        local_scalable=False,
+        local_scale_target=False,
     )
     RIGHT_THUMB2 = DressBoneSetting(
         setting=BoneSettings.RIGHT_THUMB2.value,
@@ -351,8 +351,8 @@ class DressBoneSettings(Enum):
         translatable=False,
         rotatable=False,
         global_scalable=False,
-        local_scalable=True,
-        local_scale_target=True,
+        local_scalable=False,
+        local_scale_target=False,
     )
     RIGHT_THUMB_TAIL = DressBoneSetting(
         setting=BoneSettings.RIGHT_THUMB_TAIL.value,
@@ -371,8 +371,8 @@ class DressBoneSettings(Enum):
         translatable=False,
         rotatable=False,
         global_scalable=False,
-        local_scalable=True,
-        local_scale_target=True,
+        local_scalable=False,
+        local_scale_target=False,
     )
     RIGHT_INDEX1 = DressBoneSetting(
         setting=BoneSettings.RIGHT_INDEX1.value,
@@ -381,8 +381,8 @@ class DressBoneSettings(Enum):
         translatable=False,
         rotatable=False,
         global_scalable=False,
-        local_scalable=True,
-        local_scale_target=True,
+        local_scalable=False,
+        local_scale_target=False,
     )
     RIGHT_INDEX2 = DressBoneSetting(
         setting=BoneSettings.RIGHT_INDEX2.value,
@@ -391,8 +391,8 @@ class DressBoneSettings(Enum):
         translatable=False,
         rotatable=False,
         global_scalable=False,
-        local_scalable=True,
-        local_scale_target=True,
+        local_scalable=False,
+        local_scale_target=False,
     )
     RIGHT_INDEX_TAIL = DressBoneSetting(
         setting=BoneSettings.RIGHT_INDEX_TAIL.value,
@@ -411,8 +411,8 @@ class DressBoneSettings(Enum):
         translatable=False,
         rotatable=False,
         global_scalable=False,
-        local_scalable=True,
-        local_scale_target=True,
+        local_scalable=False,
+        local_scale_target=False,
     )
     RIGHT_MIDDLE1 = DressBoneSetting(
         setting=BoneSettings.RIGHT_MIDDLE1.value,
@@ -421,8 +421,8 @@ class DressBoneSettings(Enum):
         translatable=False,
         rotatable=False,
         global_scalable=False,
-        local_scalable=True,
-        local_scale_target=True,
+        local_scalable=False,
+        local_scale_target=False,
     )
     RIGHT_MIDDLE2 = DressBoneSetting(
         setting=BoneSettings.RIGHT_MIDDLE2.value,
@@ -431,8 +431,8 @@ class DressBoneSettings(Enum):
         translatable=False,
         rotatable=False,
         global_scalable=False,
-        local_scalable=True,
-        local_scale_target=True,
+        local_scalable=False,
+        local_scale_target=False,
     )
     RIGHT_MIDDLE_TAIL = DressBoneSetting(
         setting=BoneSettings.RIGHT_MIDDLE_TAIL.value,
@@ -451,8 +451,8 @@ class DressBoneSettings(Enum):
         translatable=False,
         rotatable=False,
         global_scalable=False,
-        local_scalable=True,
-        local_scale_target=True,
+        local_scalable=False,
+        local_scale_target=False,
     )
     RIGHT_RING1 = DressBoneSetting(
         setting=BoneSettings.RIGHT_RING1.value,
@@ -461,8 +461,8 @@ class DressBoneSettings(Enum):
         translatable=False,
         rotatable=False,
         global_scalable=False,
-        local_scalable=True,
-        local_scale_target=True,
+        local_scalable=False,
+        local_scale_target=False,
     )
     RIGHT_RING2 = DressBoneSetting(
         setting=BoneSettings.RIGHT_RING2.value,
@@ -471,8 +471,8 @@ class DressBoneSettings(Enum):
         translatable=False,
         rotatable=False,
         global_scalable=False,
-        local_scalable=True,
-        local_scale_target=True,
+        local_scalable=False,
+        local_scale_target=False,
     )
     RIGHT_RING_TAIL = DressBoneSetting(
         setting=BoneSettings.RIGHT_RING_TAIL.value,
@@ -491,8 +491,8 @@ class DressBoneSettings(Enum):
         translatable=False,
         rotatable=False,
         global_scalable=False,
-        local_scalable=True,
-        local_scale_target=True,
+        local_scalable=False,
+        local_scale_target=False,
     )
     RIGHT_PINKY1 = DressBoneSetting(
         setting=BoneSettings.RIGHT_PINKY1.value,
@@ -501,8 +501,8 @@ class DressBoneSettings(Enum):
         translatable=False,
         rotatable=False,
         global_scalable=False,
-        local_scalable=True,
-        local_scale_target=True,
+        local_scalable=False,
+        local_scale_target=False,
     )
     RIGHT_PINKY2 = DressBoneSetting(
         setting=BoneSettings.RIGHT_PINKY2.value,
@@ -511,8 +511,8 @@ class DressBoneSettings(Enum):
         translatable=False,
         rotatable=False,
         global_scalable=False,
-        local_scalable=True,
-        local_scale_target=True,
+        local_scalable=False,
+        local_scale_target=False,
     )
     RIGHT_PINKY_TAIL = DressBoneSetting(
         setting=BoneSettings.RIGHT_PINKY_TAIL.value,
@@ -809,8 +809,8 @@ class DressBoneSettings(Enum):
         translatable=False,
         rotatable=False,
         global_scalable=False,
-        local_scalable=True,
-        local_scale_target=True,
+        local_scalable=False,
+        local_scale_target=False,
     )
     LEFT_THUMB1 = DressBoneSetting(
         setting=BoneSettings.LEFT_THUMB1.value,
@@ -819,8 +819,8 @@ class DressBoneSettings(Enum):
         translatable=False,
         rotatable=False,
         global_scalable=False,
-        local_scalable=True,
-        local_scale_target=True,
+        local_scalable=False,
+        local_scale_target=False,
     )
     LEFT_THUMB2 = DressBoneSetting(
         setting=BoneSettings.LEFT_THUMB2.value,
@@ -829,8 +829,8 @@ class DressBoneSettings(Enum):
         translatable=False,
         rotatable=False,
         global_scalable=False,
-        local_scalable=True,
-        local_scale_target=True,
+        local_scalable=False,
+        local_scale_target=False,
     )
     LEFT_THUMB_TAIL = DressBoneSetting(
         setting=BoneSettings.LEFT_THUMB_TAIL.value,
@@ -849,8 +849,8 @@ class DressBoneSettings(Enum):
         translatable=False,
         rotatable=False,
         global_scalable=False,
-        local_scalable=True,
-        local_scale_target=True,
+        local_scalable=False,
+        local_scale_target=False,
     )
     LEFT_INDEX1 = DressBoneSetting(
         setting=BoneSettings.LEFT_INDEX1.value,
@@ -859,8 +859,8 @@ class DressBoneSettings(Enum):
         translatable=False,
         rotatable=False,
         global_scalable=False,
-        local_scalable=True,
-        local_scale_target=True,
+        local_scalable=False,
+        local_scale_target=False,
     )
     LEFT_INDEX2 = DressBoneSetting(
         setting=BoneSettings.LEFT_INDEX2.value,
@@ -869,8 +869,8 @@ class DressBoneSettings(Enum):
         translatable=False,
         rotatable=False,
         global_scalable=False,
-        local_scalable=True,
-        local_scale_target=True,
+        local_scalable=False,
+        local_scale_target=False,
     )
     LEFT_INDEX_TAIL = DressBoneSetting(
         setting=BoneSettings.LEFT_INDEX_TAIL.value,
@@ -889,8 +889,8 @@ class DressBoneSettings(Enum):
         translatable=False,
         rotatable=False,
         global_scalable=False,
-        local_scalable=True,
-        local_scale_target=True,
+        local_scalable=False,
+        local_scale_target=False,
     )
     LEFT_MIDDLE1 = DressBoneSetting(
         setting=BoneSettings.LEFT_MIDDLE1.value,
@@ -899,8 +899,8 @@ class DressBoneSettings(Enum):
         translatable=False,
         rotatable=False,
         global_scalable=False,
-        local_scalable=True,
-        local_scale_target=True,
+        local_scalable=False,
+        local_scale_target=False,
     )
     LEFT_MIDDLE2 = DressBoneSetting(
         setting=BoneSettings.LEFT_MIDDLE2.value,
@@ -909,8 +909,8 @@ class DressBoneSettings(Enum):
         translatable=False,
         rotatable=False,
         global_scalable=False,
-        local_scalable=True,
-        local_scale_target=True,
+        local_scalable=False,
+        local_scale_target=False,
     )
     LEFT_MIDDLE_TAIL = DressBoneSetting(
         setting=BoneSettings.LEFT_MIDDLE_TAIL.value,
@@ -929,8 +929,8 @@ class DressBoneSettings(Enum):
         translatable=False,
         rotatable=False,
         global_scalable=False,
-        local_scalable=True,
-        local_scale_target=True,
+        local_scalable=False,
+        local_scale_target=False,
     )
     LEFT_RING1 = DressBoneSetting(
         setting=BoneSettings.LEFT_RING1.value,
@@ -939,8 +939,8 @@ class DressBoneSettings(Enum):
         translatable=False,
         rotatable=False,
         global_scalable=False,
-        local_scalable=True,
-        local_scale_target=True,
+        local_scalable=False,
+        local_scale_target=False,
     )
     LEFT_RING2 = DressBoneSetting(
         setting=BoneSettings.LEFT_RING2.value,
@@ -949,8 +949,8 @@ class DressBoneSettings(Enum):
         translatable=False,
         rotatable=False,
         global_scalable=False,
-        local_scalable=True,
-        local_scale_target=True,
+        local_scalable=False,
+        local_scale_target=False,
     )
     LEFT_RING_TAIL = DressBoneSetting(
         setting=BoneSettings.LEFT_RING_TAIL.value,
@@ -969,8 +969,8 @@ class DressBoneSettings(Enum):
         translatable=False,
         rotatable=False,
         global_scalable=False,
-        local_scalable=True,
-        local_scale_target=True,
+        local_scalable=False,
+        local_scale_target=False,
     )
     LEFT_PINKY1 = DressBoneSetting(
         setting=BoneSettings.LEFT_PINKY1.value,
@@ -979,8 +979,8 @@ class DressBoneSettings(Enum):
         translatable=False,
         rotatable=False,
         global_scalable=False,
-        local_scalable=True,
-        local_scale_target=True,
+        local_scalable=False,
+        local_scale_target=False,
     )
     LEFT_PINKY2 = DressBoneSetting(
         setting=BoneSettings.LEFT_PINKY2.value,
@@ -989,8 +989,8 @@ class DressBoneSettings(Enum):
         translatable=False,
         rotatable=False,
         global_scalable=False,
-        local_scalable=True,
-        local_scale_target=True,
+        local_scalable=False,
+        local_scale_target=False,
     )
     LEFT_PINKY_TAIL = DressBoneSetting(
         setting=BoneSettings.LEFT_PINKY_TAIL.value,
