@@ -537,7 +537,7 @@ class LoadUsecase:
                 ("SZ", MVector3D(), MQuaternion(), MVector3D(0, 0, 1)),
                 ("RX", MVector3D(), MQuaternion.from_euler_degrees(2, 2, 0), MVector3D()),
                 ("RY", MVector3D(), MQuaternion.from_euler_degrees(2, 0, 0), MVector3D()),
-                ("RZ", MVector3D(), MQuaternion.from_euler_degrees(0, 0, 2), MVector3D()),
+                ("RZ", MVector3D(), MQuaternion.from_euler_degrees(0, 0, -2), MVector3D()),
                 ("MX", MVector3D(1, 0, 0), MQuaternion(), MVector3D()),
                 ("MY", MVector3D(0, 1, 0), MQuaternion(), MVector3D()),
                 ("MZ", MVector3D(0, 0, 1), MQuaternion(), MVector3D()),
