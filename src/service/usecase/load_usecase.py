@@ -24,7 +24,6 @@ from service.usecase.dress_bone_setting import (
     FIT_INDIVIDUAL_BONE_NAMES,
     LOCAL_SCALE_WEIGHT_BONE_NAMES,
     DressBoneSetting,
-    DressBoneSettings,
 )
 
 logger = MLogger(os.path.basename(__file__), level=1)
@@ -114,7 +113,7 @@ class LoadUsecase:
 
         model.update_vertices_by_bone()
 
-        for bone_name in (DressBoneSettings.LEFT_BUST.name, DressBoneSettings.RIGHT_BUST.name):
+        for bone_name in ("左胸", "右胸"):
             # 胸ボーンの追加
             if bone_name in short_mismatch_model_bone_names and self.insert_bust(model, bone_name):
                 logger.info("-- 人物: ボーン追加: {b}", b=bone_name)
@@ -141,7 +140,7 @@ class LoadUsecase:
 
         dress.update_vertices_by_bone()
 
-        for bone_name in (DressBoneSettings.LEFT_BUST.name, DressBoneSettings.RIGHT_BUST.name):
+        for bone_name in ("左胸", "右胸"):
             # 胸ボーンの追加
             if bone_name in short_mismatch_dress_bone_names and self.insert_bust(dress, bone_name):
                 logger.info("-- 衣装: ボーン追加: {b}", b=bone_name)
