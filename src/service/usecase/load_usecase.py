@@ -8,15 +8,14 @@ from mlib.base.logger import MLogger
 from mlib.base.math import MMatrix4x4, MQuaternion, MVector3D, MVector4D, calc_local_positions, align_triangle, filter_values
 from mlib.pmx.pmx_collection import PmxModel
 from mlib.pmx.pmx_part import (
+    Bdef1,
     Bdef2,
-    Bdef4,
     Bone,
     BoneMorphOffset,
     MaterialMorphCalcMode,
     MaterialMorphOffset,
     Morph,
     MorphType,
-    Sdef,
 )
 from mlib.vmd.vmd_collection import VmdMotion
 from mlib.vmd.vmd_tree import VmdBoneFrameTrees
@@ -25,6 +24,7 @@ from service.usecase.dress_bone_setting import (
     FIT_INDIVIDUAL_BONE_NAMES,
     LOCAL_SCALE_WEIGHT_BONE_NAMES,
     DressBoneSetting,
+    DressBoneSettings,
 )
 
 logger = MLogger(os.path.basename(__file__), level=1)
@@ -102,6 +102,7 @@ class LoadUsecase:
 
         model_inserted_bone_names = []
         for bone_name in DRESS_STANDARD_BONE_NAMES.keys():
+            # 準標準ボーンの追加
             if bone_name in short_mismatch_model_bone_names and model.insert_standard_bone(bone_name, model_matrixes):
                 model_inserted_bone_names.append(bone_name)
                 logger.info("-- 人物: ボーン追加: {b}", b=bone_name)
@@ -113,25 +114,22 @@ class LoadUsecase:
 
         model.update_vertices_by_bone()
 
-        for bone_name in DRESS_STANDARD_BONE_NAMES.keys():
-            if bone_name in short_mismatch_model_bone_names and "胸" in bone_name and self.insert_bust(model, bone_name):
-                model_inserted_bone_names.append(bone_name)
+        for bone_name in (DressBoneSettings.LEFT_BUST.name, DressBoneSettings.RIGHT_BUST.name):
+            # 胸ボーンの追加
+            if bone_name in short_mismatch_model_bone_names and self.insert_bust(model, bone_name):
                 logger.info("-- 人物: ボーン追加: {b}", b=bone_name)
 
-        if model_inserted_bone_names:
-            model.setup()
-            model.replace_standard_weights(model_inserted_bone_names)
-            logger.info("人物: 再セットアップ")
-
-        model.update_vertices_by_bone()
-
+        # ------------------------------------------------------
         logger.info("衣装: 初期姿勢計算")
 
         # 衣装の初期姿勢を求める
         dress_matrixes = VmdMotion().animate_bone([0], dress)
 
+        dress.update_vertices_by_bone()
+
         dress_inserted_bone_names = []
         for bone_name in DRESS_STANDARD_BONE_NAMES.keys():
+            # 準標準ボーンの追加
             if bone_name in short_mismatch_dress_bone_names and dress.insert_standard_bone(bone_name, dress_matrixes):
                 dress_inserted_bone_names.append(bone_name)
                 logger.info("-- 衣装: ボーン追加: {b}", b=bone_name)
@@ -143,17 +141,10 @@ class LoadUsecase:
 
         dress.update_vertices_by_bone()
 
-        for bone_name in DRESS_STANDARD_BONE_NAMES.keys():
-            if bone_name in short_mismatch_dress_bone_names and "胸" in bone_name and self.insert_bust(dress, bone_name):
-                dress_inserted_bone_names.append(bone_name)
+        for bone_name in (DressBoneSettings.LEFT_BUST.name, DressBoneSettings.RIGHT_BUST.name):
+            # 胸ボーンの追加
+            if bone_name in short_mismatch_dress_bone_names and self.insert_bust(dress, bone_name):
                 logger.info("-- 衣装: ボーン追加: {b}", b=bone_name)
-
-        if dress_inserted_bone_names:
-            dress.setup()
-            dress.replace_standard_weights(dress_inserted_bone_names)
-            logger.info("衣装: 再セットアップ")
-
-        dress.update_vertices_by_bone()
 
     def replace_bust_weights(self, model: PmxModel, bone_names: list[str]) -> None:
         """胸ウェイトの置き換え"""
@@ -219,22 +210,27 @@ class LoadUsecase:
 
                 upper_matches = np.array([i in upper_vertex_indexes for i in v.deform.indexes])
                 original_weight = np.sum(v.deform.weights[upper_matches])
-                separate_weight = original_weight * bust_ratio / np.count_nonzero(upper_matches)
+                separate_weight = original_weight * bust_ratio / (np.count_nonzero(upper_matches) or 1)
                 # 元ボーンは分割先ボーンの残り
                 v.deform.weights = np.where(upper_matches, (v.deform.weights * (1 - bust_ratio)) - separate_weight, v.deform.weights)
-                v.deform.weights[0 > v.deform.weights] = 0
+                v.deform.weights[0.01 > v.deform.weights] = 0
                 v.deform.weights = np.append(v.deform.weights, separate_weight)
                 v.deform.indexes = np.append(v.deform.indexes, bust_bone.index)
                 # 一旦最大値で正規化
                 v.deform.count = 4
                 v.deform.normalize(align=True)
-                if np.count_nonzero(v.deform.weights) <= 2:
+                if np.count_nonzero(v.deform.weights) == 0:
+                    # 念のためウェイトが割り当てられなかったら、元ボーンを割り当てとく
+                    v.deform = Bdef1(bust_bone.parent_index)
+                elif np.count_nonzero(v.deform.weights) == 1:
+                    # Bdef1で再定義
+                    v.deform = Bdef1(v.deform.indexes[np.argmax(v.deform.weights)])
+                elif np.count_nonzero(v.deform.weights) == 2:
                     # Bdef2で再定義
-                    v.deform = Bdef2(v.deform.indexes[0], v.deform.indexes[1], v.deform.weights[0])
-                elif not isinstance(v.deform, Sdef):
-                    # SdefではなければBdef4で再定義
-                    v.deform = Bdef4(
-                        *(v.deform.indexes.tolist() + [0, 0, 0, 0])[:4], *(v.deform.weights.tolist() + [0.0, 0.0, 0.0, 0.0])[:4]
+                    v.deform = Bdef2(
+                        v.deform.indexes[np.argsort(v.deform.weights)[-1]],
+                        v.deform.indexes[np.argsort(v.deform.weights)[-2]],
+                        float(np.max(v.deform.weights)),
                     )
                 v.deform.normalize(align=True)
 
