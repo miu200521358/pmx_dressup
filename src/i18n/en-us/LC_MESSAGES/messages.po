@@ -920,3 +920,12 @@ msgstr "Allows you to adjust the lengthwise movement of selected bones"
 
 msgid "選択されたボーンの奥行き方向の移動を調整できます"
 msgstr "Allows you to adjust the depth shift of selected bones"
+
+msgid "表示枠出力"
+msgstr "Display frame output"
+
+msgid "-- モーフ表示枠出力: {s}"
+msgstr "-- morph display frame output: {s}"
+
+msgid "-- ボーン表示枠出力: {s}"
+msgstr "-- Bone display frame output: {s}"

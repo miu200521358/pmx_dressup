@@ -51,8 +51,13 @@ class LoadUsecase:
         # 必ず追加するボーン
         add_bone_names = {
             "全ての親",
+            "グルーブ",
             "腰",
             "上半身2",
+            "左肩P",
+            "左肩C",
+            "右肩P",
+            "右肩C",
             "右腕捩",
             "左腕捩",
             "右手捩",
@@ -97,14 +102,21 @@ class LoadUsecase:
 
         model_inserted_bone_names = []
         for bone_name in DRESS_STANDARD_BONE_NAMES.keys():
-            if bone_name in short_mismatch_model_bone_names:
-                if "胸" in bone_name:
-                    if self.insert_bust(model, bone_name):
-                        model_inserted_bone_names.append(bone_name)
-                        logger.info("-- 人物: ボーン追加: {b}", b=bone_name)
-                elif model.insert_standard_bone(bone_name, model_matrixes):
-                    model_inserted_bone_names.append(bone_name)
-                    logger.info("-- 人物: ボーン追加: {b}", b=bone_name)
+            if bone_name in short_mismatch_model_bone_names and model.insert_standard_bone(bone_name, model_matrixes):
+                model_inserted_bone_names.append(bone_name)
+                logger.info("-- 人物: ボーン追加: {b}", b=bone_name)
+
+        if model_inserted_bone_names:
+            model.setup()
+            model.replace_standard_weights(model_inserted_bone_names)
+            logger.info("人物: 再セットアップ")
+
+        model.update_vertices_by_bone()
+
+        for bone_name in DRESS_STANDARD_BONE_NAMES.keys():
+            if bone_name in short_mismatch_model_bone_names and "胸" in bone_name and self.insert_bust(model, bone_name):
+                model_inserted_bone_names.append(bone_name)
+                logger.info("-- 人物: ボーン追加: {b}", b=bone_name)
 
         if model_inserted_bone_names:
             model.setup()
@@ -120,14 +132,21 @@ class LoadUsecase:
 
         dress_inserted_bone_names = []
         for bone_name in DRESS_STANDARD_BONE_NAMES.keys():
-            if bone_name in short_mismatch_dress_bone_names:
-                if "胸" in bone_name:
-                    if self.insert_bust(dress, bone_name):
-                        dress_inserted_bone_names.append(bone_name)
-                        logger.info("-- 衣装: ボーン追加: {b}", b=bone_name)
-                elif dress.insert_standard_bone(bone_name, dress_matrixes):
-                    dress_inserted_bone_names.append(bone_name)
-                    logger.info("-- 衣装: ボーン追加: {b}", b=bone_name)
+            if bone_name in short_mismatch_dress_bone_names and dress.insert_standard_bone(bone_name, dress_matrixes):
+                dress_inserted_bone_names.append(bone_name)
+                logger.info("-- 衣装: ボーン追加: {b}", b=bone_name)
+
+        if dress_inserted_bone_names:
+            dress.setup()
+            dress.replace_standard_weights(dress_inserted_bone_names)
+            logger.info("衣装: 再セットアップ")
+
+        dress.update_vertices_by_bone()
+
+        for bone_name in DRESS_STANDARD_BONE_NAMES.keys():
+            if bone_name in short_mismatch_dress_bone_names and "胸" in bone_name and self.insert_bust(dress, bone_name):
+                dress_inserted_bone_names.append(bone_name)
+                logger.info("-- 衣装: ボーン追加: {b}", b=bone_name)
 
         if dress_inserted_bone_names:
             dress.setup()
@@ -244,6 +263,10 @@ class LoadUsecase:
             ):
                 continue
             upper_vertex_positions.append(model.vertices[vertex_index].position.vector)
+
+        if not upper_vertex_positions:
+            # 登録対象となりうる親ボーンが見つからなかった場合、スルー
+            return False
 
         upper_mean_position = np.mean(upper_vertex_positions, axis=0)
 

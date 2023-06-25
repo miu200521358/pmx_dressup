@@ -7,6 +7,7 @@ import numpy as np
 
 from mlib.base.logger import MLogger
 from mlib.base.math import MMatrix4x4, MVector3D
+from mlib.base.part import Switch
 from mlib.pmx.pmx_collection import PmxModel
 from mlib.pmx.pmx_part import (
     Bone,
@@ -309,19 +310,6 @@ class SaveUsecase:
                     dress_model.bones.append(dress_prev_copy_bone, is_sort=False)
                     dress_bone_map[dress_bone.index] = dress_prev_copy_bone.index
 
-                    # 表示枠
-                    for display_slot in dress.display_slots:
-                        for reference in display_slot.references:
-                            if reference.display_type == DisplayType.BONE and reference.display_index == dress_bone.index:
-                                if display_slot.name not in dress_model.display_slots:
-                                    dress_model.display_slots.append(
-                                        DisplaySlot(name=display_slot.name, english_name=display_slot.english_name)
-                                    )
-                                dress_model.display_slots[display_slot.name].references.append(
-                                    DisplaySlotReference(display_type=DisplayType.BONE, display_index=dress_prev_copy_bone.index)
-                                )
-                                break
-
                     if not len(dress_model.bones) % 100:
                         logger.info("-- ボーン出力: {s}", s=len(dress_model.bones))
 
@@ -338,22 +326,6 @@ class SaveUsecase:
             }
             dress_model.bones.append(model_copy_bone, is_sort=False)
             model_bone_map[bone.index] = model_copy_bone.index
-
-            # 表示枠
-            if 0 == model_copy_bone.index:
-                dress_model.display_slots["Root"].references.append(DisplaySlotReference(display_index=model_copy_bone.index))
-            else:
-                for display_slot in model.display_slots:
-                    for reference in display_slot.references:
-                        if reference.display_type == DisplayType.BONE and reference.display_index == bone.index:
-                            if display_slot.name not in dress_model.display_slots:
-                                dress_model.display_slots.append(
-                                    DisplaySlot(name=display_slot.name, english_name=display_slot.english_name)
-                                )
-                            dress_model.display_slots[display_slot.name].references.append(
-                                DisplaySlotReference(display_type=DisplayType.BONE, display_index=model_copy_bone.index)
-                            )
-                            break
 
             if not len(dress_model.bones) % 100:
                 logger.info("-- ボーン出力: {s}", s=len(dress_model.bones))
@@ -472,17 +444,6 @@ class SaveUsecase:
             }
             dress_model.bones.append(dress_copy_bone, is_sort=False)
             dress_bone_map[bone.index] = dress_copy_bone.index
-
-            # 表示枠
-            for display_slot in dress.display_slots:
-                for reference in display_slot.references:
-                    if reference.display_type == DisplayType.BONE and reference.display_index == bone.index:
-                        if display_slot.name not in dress_model.display_slots:
-                            dress_model.display_slots.append(DisplaySlot(name=display_slot.name, english_name=display_slot.english_name))
-                        dress_model.display_slots[display_slot.name].references.append(
-                            DisplaySlotReference(display_type=DisplayType.BONE, display_index=dress_copy_bone.index)
-                        )
-                        break
 
             if not len(dress_model.bones) % 100:
                 logger.info("-- ボーン出力: {s}", s=len(dress_model.bones))
@@ -667,18 +628,6 @@ class SaveUsecase:
                     model_morph_map[morph.index] = len(dress_model.morphs)
                     dress_model.morphs.append(copy_morph)
 
-                    for display_slot in model.display_slots:
-                        for reference in display_slot.references:
-                            if reference.display_type == DisplayType.MORPH and reference.display_index == morph.index:
-                                if display_slot.name not in dress_model.display_slots:
-                                    dress_model.display_slots.append(
-                                        DisplaySlot(name=display_slot.name, english_name=display_slot.english_name)
-                                    )
-                                dress_model.display_slots[display_slot.name].references.append(
-                                    DisplaySlotReference(display_type=DisplayType.MORPH, display_index=copy_morph.index)
-                                )
-                                break
-
                 if not len(dress_model.morphs) % 50:
                     logger.info("-- モーフ出力: {s}", s=len(dress_model.morphs))
 
@@ -702,18 +651,6 @@ class SaveUsecase:
                     copy_morph.index = len(dress_model.morphs)
                     dress_morph_map[morph.index] = len(dress_model.morphs)
                     dress_model.morphs.append(copy_morph)
-
-                    for display_slot in dress.display_slots:
-                        for reference in display_slot.references:
-                            if reference.display_type == DisplayType.MORPH and reference.display_index == morph.index:
-                                if display_slot.name not in dress_model.display_slots:
-                                    dress_model.display_slots.append(
-                                        DisplaySlot(name=display_slot.name, english_name=display_slot.english_name)
-                                    )
-                                dress_model.display_slots[display_slot.name].references.append(
-                                    DisplaySlotReference(display_type=DisplayType.MORPH, display_index=copy_morph.index)
-                                )
-                                break
 
                 if not len(dress_model.morphs) % 50:
                     logger.info("-- モーフ出力: {s}", s=len(dress_model.morphs))
@@ -878,6 +815,91 @@ class SaveUsecase:
 
             if not len(dress_model.joints) % 50:
                 logger.info("-- ジョイント出力: {s}", s=len(dress_model.joints))
+
+        # ---------------------------------
+
+        logger.info("表示枠出力", decoration=MLogger.Decoration.LINE)
+
+        for morph in dress_model.morphs:
+            dress_model.display_slots["表情"].references.append(
+                DisplaySlotReference(display_type=DisplayType.MORPH, display_index=morph.index)
+            )
+
+            if not morph.index % 100:
+                logger.info("-- モーフ表示枠出力: {s}", s=morph.index)
+
+        dress_display_slot_indexes: dict[int, int] = {}
+
+        for bone in dress_model.bones:
+            if 0 == bone.index:
+                # 全親は単品で追加
+                dress_model.display_slots["Root"].references.append(
+                    DisplaySlotReference(display_type=DisplayType.BONE, display_index=bone.index)
+                )
+                continue
+            # 表示枠
+            if not bone.is_visible:
+                # 非表示ボーンはスルー
+                continue
+            # 人物側の表示枠に基本的には合わせる
+            display_slot_name = ""
+            display_slot_english_name = ""
+            for model_display_slot in model.display_slots:
+                if model_display_slot.special_flg == Switch.ON:
+                    continue
+                for model_reference in model_display_slot.references:
+                    if model_reference.display_type == DisplayType.MORPH:
+                        continue
+                    if model.bones[model_reference.display_index].name == bone.name:
+                        # 同じ名前のとこに入れる
+                        display_slot_name = model_display_slot.name
+                        display_slot_english_name = model_display_slot.english_name
+                        break
+                if display_slot_name:
+                    break
+
+            if not display_slot_name:
+                # 人物側に表示枠が見つからなかった場合、衣装側を確認する
+                for dress_display_slot in dress.display_slots:
+                    if dress_display_slot.special_flg == Switch.ON:
+                        continue
+                    for dress_reference in dress_display_slot.references:
+                        if dress_reference.display_type == DisplayType.MORPH:
+                            continue
+                        if dress.bones[dress_reference.display_index].name == bone.name:
+                            # 同じ名前のとこに入れる
+                            display_slot_name = dress_display_slot.name
+                            display_slot_english_name = dress_display_slot.english_name
+                            break
+                    if display_slot_name:
+                        break
+
+            if not display_slot_name:
+                # それでも見つからなければ、親の表示枠に入れる
+                for tree_index in reversed(dress_model.bone_trees[bone.name].indexes):
+                    if tree_index in dress_display_slot_indexes:
+                        display_slot_name = dress_model.display_slots[dress_display_slot_indexes[tree_index]].name
+                        display_slot_english_name = dress_model.display_slots[dress_display_slot_indexes[tree_index]].english_name
+                        break
+
+            if display_slot_name:
+                # 既存の表示枠がある場合はそこに追加
+                if display_slot_name not in dress_model.display_slots:
+                    dress_model.display_slots.append(DisplaySlot(name=display_slot_name, english_name=display_slot_english_name))
+                dress_model.display_slots[display_slot_name].references.append(
+                    DisplaySlotReference(display_type=DisplayType.BONE, display_index=bone.index)
+                )
+                dress_display_slot_indexes[bone.index] = dress_model.display_slots[display_slot_name].index
+            else:
+                # なければ新規作成
+                dress_model.display_slots.append(DisplaySlot(name=bone.name, english_name=bone.english_name))
+                dress_model.display_slots[bone.name].references.append(
+                    DisplaySlotReference(display_type=DisplayType.BONE, display_index=bone.index)
+                )
+                dress_display_slot_indexes[bone.index] = dress_model.display_slots[bone.name].index
+
+            if not bone.index % 100:
+                logger.info("-- ボーン表示枠出力: {s}", s=bone.index)
 
         logger.info("モデル出力", decoration=MLogger.Decoration.LINE)
 
