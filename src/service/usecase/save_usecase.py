@@ -218,6 +218,9 @@ class SaveUsecase:
                 and set(model.vertices_by_bones[bone.index]) & active_model_vertices
             ):
                 model_weight_bone_names.append(bone.name)
+                if bone.is_external_translation or bone.is_external_rotation:
+                    # 付与親も対象とする
+                    model_weight_bone_names.append(model.bones[bone.effect_index].name)
 
             if not (model.bone_trees.is_in_standard(bone.name) or bone.is_standard_extend):
                 # 準標準ではない場合、登録可否チェック
@@ -326,6 +329,7 @@ class SaveUsecase:
             }
             dress_model.bones.append(model_copy_bone, is_sort=False)
             model_bone_map[bone.index] = model_copy_bone.index
+            model_weight_bone_names.append(model_copy_bone.name)
 
             if not len(dress_model.bones) % 100:
                 logger.info("-- ボーン出力: {s}", s=len(dress_model.bones))
