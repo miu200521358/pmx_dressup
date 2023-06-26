@@ -929,3 +929,24 @@ msgstr "-- morph display frame output: {s}"
 
 msgid "-- ボーン表示枠出力: {s}"
 msgstr "-- Bone display frame output: {s}"
+
+msgid "人物と衣装のどちらにもメッシュがある場合に、ボーン位置をどちらのモデルに合わせるかを選択できます\n指など人物と衣装のボーンがズレてる場合に選択してください。"
+msgstr "If there is a mesh on both the person and the costume, you can choose which model the bone position should be aligned with.
+
+msgid "ボーン基準"
+msgstr "Bourne Criteria"
+
+msgid "どちらに合わせるか"
+msgstr "Which way do you want to go?"
+
+msgid "人物と衣装のどちらにもメッシュがある場合には、基本的には人物側のボーン位置で出力します。\n"
+msgstr "If there is a mesh for both the person and the costume, the output is basically the bone position on the person side. \n"
+
+msgid "このチェックをONにすると、指など人物と衣装のボーン位置がずれている場合に衣装側のボーン位置で出力することができます。"
+msgstr "If this check box is turned on, you can output with the bone positions on the costume side if the bone positions of the person and the costume are not aligned, such as fingers"
+
+msgid "衣装モデルに合わせる"
+msgstr "Match the costume model"
+
+msgid "ボーン位置を衣装モデルに合わせる"
+msgstr "Bone position is aligned with the costume model"
