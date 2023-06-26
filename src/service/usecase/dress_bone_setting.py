@@ -172,7 +172,7 @@ class DressBoneSettings(Enum):
         weight_names=("右胸",),
         translatable=True,
         rotatable=False,
-        global_scalable=True,
+        global_scalable=False,
         local_scalable=False,
         local_scale_target=False,
     )
@@ -643,7 +643,7 @@ class DressBoneSettings(Enum):
         weight_names=("左胸",),
         translatable=True,
         rotatable=False,
-        global_scalable=True,
+        global_scalable=False,
         local_scalable=False,
         local_scale_target=False,
     )
