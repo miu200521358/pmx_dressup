@@ -184,8 +184,8 @@ class LoadUsecase:
                 # 左右に分けて胸に割り当てる頂点を取得
                 if (
                     (
-                        ("左" in bust_bone_name and 0 < model.vertices[vertex_index].position.x)
-                        or ("右" in bust_bone_name and 0 > model.vertices[vertex_index].position.x)
+                        ("左" in bust_bone_name and -bust_bone.position.x / 2 < model.vertices[vertex_index].position.x)
+                        or ("右" in bust_bone_name and -bust_bone.position.x / 2 > model.vertices[vertex_index].position.x)
                     )
                     and bust_lower_position.y <= model.vertices[vertex_index].position.y <= bust_upper_position.y
                     and bust_start_z > model.vertices[vertex_index].position.z
@@ -916,7 +916,7 @@ class LoadUsecase:
                 "オフセット計算",
                 index=i,
                 total_index_count=dress_standard_count,
-                display_block=10,
+                display_block=5,
             )
 
             if not (bone_name in dress.bones and bone_name in model.bones):
@@ -1027,7 +1027,7 @@ class LoadUsecase:
                     model_slope_qq = MQuaternion.from_direction(model_x_direction, model_y_direction)
 
                     # モデルのボーンの向きに衣装を合わせる
-                    if "足首" in dress_bone.name or "胸" in dress_bone.name:
+                    if "足首" in dress_bone.name or "胸" in dress_bone.name or "頭" == dress_bone.name:
                         # 足首は親のキャンセルだけ行う
                         dress_offset_qq = MQuaternion()
                     else:
@@ -1077,7 +1077,7 @@ class LoadUsecase:
                         bf.rotation = dress_fit_qq
                         dress_motion.bones[dress_other_bone.name].append(bf)
 
-                        logger.debug(f"-- -- 回転オフセット(順標準外)[{dress_other_bone.name}][{dress_fit_qq.to_euler_degrees()}]")
+                        logger.debug(f"-- -- 回転オフセット(準標準外)[{dress_other_bone.name}][{dress_fit_qq.to_euler_degrees()}]")
 
         return dress_offset_positions, dress_offset_qqs
 
