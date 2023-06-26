@@ -159,7 +159,8 @@ class DressBoneSettings(Enum):
         setting=BoneSettings.HEAD.value,
         category="頭",
         weight_names=("頭",),
-        translatable=True,
+        translatable=False,
+        # 回転はキャンセル用
         rotatable=True,
         global_scalable=False,
         local_scalable=False,
@@ -170,8 +171,9 @@ class DressBoneSettings(Enum):
         setting=BoneSettings.RIGHT_BUST.value,
         category="胸",
         weight_names=("右胸",),
-        translatable=True,
-        rotatable=False,
+        translatable=False,
+        # 回転はキャンセル用
+        rotatable=True,
         # グローバルスケールはキャンセル用
         global_scalable=True,
         local_scalable=False,
@@ -552,7 +554,7 @@ class DressBoneSettings(Enum):
         category="足首",
         weight_names=("右足首", "右足首D", "右つま先", "右足先EX"),
         translatable=True,
-        rotatable=False,
+        rotatable=True,
         global_scalable=True,
         local_scalable=False,
         local_scale_target=False,
@@ -612,7 +614,7 @@ class DressBoneSettings(Enum):
         category="足首",
         weight_names=[],
         translatable=False,
-        rotatable=False,
+        rotatable=True,
         global_scalable=True,
         local_scalable=False,
         local_scale_target=False,
@@ -642,8 +644,10 @@ class DressBoneSettings(Enum):
         setting=BoneSettings.LEFT_BUST.value,
         category="胸",
         weight_names=("左胸",),
-        translatable=True,
-        rotatable=False,
+        translatable=False,
+        # 回転はキャンセル用
+        rotatable=True,
+        # グローバルスケールはキャンセル用
         global_scalable=True,
         local_scalable=False,
         local_scale_target=False,
@@ -1023,7 +1027,7 @@ class DressBoneSettings(Enum):
         category="足首",
         weight_names=("左足首", "左足首D", "左つま先", "左足先EX"),
         translatable=True,
-        rotatable=False,
+        rotatable=True,
         global_scalable=True,
         local_scalable=False,
         local_scale_target=False,
@@ -1083,7 +1087,7 @@ class DressBoneSettings(Enum):
         category="足首",
         weight_names=[],
         translatable=False,
-        rotatable=False,
+        rotatable=True,
         global_scalable=True,
         local_scalable=False,
         local_scale_target=False,
@@ -1120,9 +1124,9 @@ LOCAL_SCALE_WEIGHT_BONE_NAMES: list[str] = [bs.value.name for bs in DressBoneSet
 # IKはFKの後に指定する事
 """個別フィッティング用ボーン設定"""
 FIT_INDIVIDUAL_BONE_NAMES = {
-    "腰": (("腰",), ("下半身", "上半身", "上半身2", "上半身3"), ("下半身", "上半身"), []),
+    "腰": (("腰",), ("下半身", "上半身", "上半身2", "上半身3"), ("下半身", "上半身", "上半身2", "上半身3"), []),
     "下半身": (("下半身",), [], ("足", "ひざ", "足首"), []),
-    "上半身": (("上半身",), [], ("上半身2",), []),
+    "上半身": (("上半身",), [], ("上半身2", "上半身3"), []),
     "上半身2": (("上半身2",), [], ("上半身3",), []),
     "上半身3": (("上半身3",), [], [], []),
     "胸": (("右胸", "左胸"), [], [], []),
