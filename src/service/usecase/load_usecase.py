@@ -870,7 +870,7 @@ class LoadUsecase:
 
             dress_fit_scale = MVector3D(1.0, 1.0, 1.0)
             for bone_name in reversed(dress.bone_trees[dress_bone.name].get_standard().names):
-                if DRESS_STANDARD_BONE_NAMES[bone_name].category in dress_category_scale_values:
+                if bone_name in DRESS_STANDARD_BONE_NAMES and DRESS_STANDARD_BONE_NAMES[bone_name].category in dress_category_scale_values:
                     s = dress_category_scale_values[DRESS_STANDARD_BONE_NAMES[bone_name].category]
                     dress_fit_scale = MVector3D(s, s, s)
                     break
@@ -912,6 +912,13 @@ class LoadUsecase:
 
         z_direction = MVector3D(0, 0, -1)
         for i, (bone_name, bone_setting) in enumerate(list(DRESS_STANDARD_BONE_NAMES.items())):
+            logger.count(
+                "オフセット計算",
+                index=i,
+                total_index_count=dress_standard_count,
+                display_block=10,
+            )
+
             if not (bone_name in dress.bones and bone_name in model.bones):
                 # 人物と衣装の両方にボーンがなければスルー
                 continue
@@ -921,13 +928,6 @@ class LoadUsecase:
             if dress_bone.is_system and bone_name not in ("足中心", "首根元"):
                 # システムボーンはスルー
                 continue
-
-            logger.count(
-                "オフセット計算",
-                index=i,
-                total_index_count=dress_standard_count,
-                display_block=10,
-            )
 
             # if dress_bone.parent_index in dress.bones and not dress.bones[dress_bone.parent_index].is_standard:
             #     # 衣装側の親が準標準ではない場合、自分から見た位置に合わせる
