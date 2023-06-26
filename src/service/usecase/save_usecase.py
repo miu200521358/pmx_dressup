@@ -253,7 +253,7 @@ class SaveUsecase:
                     # 自身はウェイトを持っておらず、付与親ボーンが元々ウェイトを持っていて、かつ出力先にウェイトが乗ってる頂点が無い場合、スルー
                     continue
 
-            if bone.parent_index not in model_bone_map:
+            if bone.parent_index not in model_bone_map and not bone.is_standard:
                 # 親ボーンが登録されていない場合、子ボーンも登録しない
                 continue
 
@@ -394,7 +394,7 @@ class SaveUsecase:
                 ):
                     # 自身はウェイトを持っておらず、付与親ボーンが元々ウェイトを持っていて、かつ出力先にウェイトが乗ってる頂点が無い場合、スルー
                     continue
-            if bone.parent_index not in dress_bone_map:
+            if bone.parent_index not in dress_bone_map and not bone.is_standard:
                 # 親ボーンが登録されていない場合、子ボーンも登録しない
                 continue
 
@@ -454,6 +454,7 @@ class SaveUsecase:
 
         logger.info("ボーン定義再設定", decoration=MLogger.Decoration.LINE)
 
+        local_y_vector = MVector3D(0, -1, 0)
         for bone in dress_model.bones:
             bone_setting = bone_map[bone.index]
             bone.parent_index = (
@@ -488,8 +489,20 @@ class SaveUsecase:
                 # 足Dを足FKに揃える
                 dress_model.bones[bone.index].position = dress_matrixes[0, bone_setting["effect"][0]].position.copy()
 
+            if bone.has_fixed_axis:
+                # 軸制限がある場合、合わせる
+                bone.fixed_axis = dress_model.bones.get_tail_relative_position(bone.index).normalized()
+
+            if bone.has_local_coordinate:
+                # ローカル軸も合わせる
+                bone.local_z_vector = dress_model.bones.get_tail_relative_position(bone.index).normalized()
+                bone.local_x_vector = local_y_vector.cross(bone.local_x_vector).normalized()
+
             if 0 < bone.index and not bone.index % 100:
                 logger.info("-- ボーン定義再設定: {s}", s=bone.index)
+
+        model_all_bone_map: dict[int, int] = dict([(bone.index, model_bone_map.get(bone.index, 0)) for bone in model.bones])
+        dress_all_bone_map: dict[int, int] = dict([(bone.index, dress_bone_map.get(bone.index, 0)) for bone in dress.bones])
 
         # ---------------------------------
 
@@ -531,7 +544,7 @@ class SaveUsecase:
                     if vertex_index not in model_vertex_map:
                         copy_vertex = model.vertices[vertex_index].copy()
                         copy_vertex.index = -1
-                        copy_vertex.deform.indexes = np.vectorize(model_bone_map.get)(copy_vertex.deform.indexes)
+                        copy_vertex.deform.indexes = np.vectorize(model_all_bone_map.get)(copy_vertex.deform.indexes)
 
                         # 変形後の位置に頂点を配置する
                         mat = np.zeros((4, 4))
@@ -583,7 +596,7 @@ class SaveUsecase:
                     if vertex_index not in dress_vertex_map:
                         copy_vertex = dress.vertices[vertex_index].copy()
                         copy_vertex.index = -1
-                        copy_vertex.deform.indexes = np.vectorize(dress_bone_map.get)(copy_vertex.deform.indexes)
+                        copy_vertex.deform.indexes = np.vectorize(dress_all_bone_map.get)(copy_vertex.deform.indexes)
 
                         # 変形後の位置に頂点を配置する
                         mat = np.zeros((4, 4))
@@ -625,7 +638,7 @@ class SaveUsecase:
                 if is_group:
                     copy_morph = self.copy_group_morph(morph, model_morph_map)
                 else:
-                    copy_morph = self.copy_morph(morph, model_bone_map, model_vertex_map, model_material_map)
+                    copy_morph = self.copy_morph(morph, model_all_bone_map, model_vertex_map, model_material_map)
 
                 if copy_morph.offsets:
                     copy_morph.index = len(dress_model.morphs)
@@ -647,7 +660,7 @@ class SaveUsecase:
                 if is_group:
                     copy_morph = self.copy_group_morph(morph, dress_morph_map)
                 else:
-                    copy_morph = self.copy_morph(morph, dress_bone_map, dress_vertex_map, dress_material_map)
+                    copy_morph = self.copy_morph(morph, dress_all_bone_map, dress_vertex_map, dress_material_map)
 
                 copy_morph.name = f"Cos:{copy_morph.name}"
 
@@ -678,7 +691,7 @@ class SaveUsecase:
 
             model_copy_rigidbody = rigidbody.copy()
             model_copy_rigidbody.index = len(dress_model.rigidbodies)
-            model_copy_rigidbody.bone_index = model_bone_map[rigidbody.bone_index]
+            model_copy_rigidbody.bone_index = model_all_bone_map[rigidbody.bone_index]
 
             # ボーンと剛体の位置関係から剛体位置を求め直す
             model_bone_name = model.bones[rigidbody.bone_index].name
@@ -735,7 +748,7 @@ class SaveUsecase:
             dress_copy_rigidbody = rigidbody.copy()
             dress_copy_rigidbody.name = f"Cos:{rigidbody.name}"
             dress_copy_rigidbody.index = len(dress_model.rigidbodies)
-            dress_copy_rigidbody.bone_index = dress_bone_map[rigidbody.bone_index]
+            dress_copy_rigidbody.bone_index = dress_all_bone_map[rigidbody.bone_index]
 
             # ボーンと剛体の位置関係から剛体位置を求め直す
             dress_bone_name = dress.bones[rigidbody.bone_index].name
