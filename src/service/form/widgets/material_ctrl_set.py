@@ -159,6 +159,9 @@ class MaterialCtrlSet:
     def on_change_material_only(self, event: wx.Event) -> None:
         material_name = self.material_choice_ctrl.GetStringSelection()
 
+        if material_name in (__("ボーンライン"), __("全材質")):
+            return
+
         self.parent.Enable(False)
 
         self.is_only = not self.is_only
