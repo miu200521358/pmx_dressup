@@ -51,6 +51,7 @@ class SaveWorker(BaseWorker):
             config_panel.dress_bone_ctrl.scales,
             config_panel.dress_bone_ctrl.degrees,
             config_panel.dress_bone_ctrl.positions,
+            config_panel.dress_bone_ctrl.bone_target_dress,
         )
 
         logger.info("*** お着替えモデル出力成功 ***\n出力先: {f}", f=file_panel.output_pmx_ctrl.path, decoration=MLogger.Decoration.BOX)

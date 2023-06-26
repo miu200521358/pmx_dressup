@@ -173,7 +173,7 @@ class ConfigPanel(CanvasPanel):
     def show_only_material(self, type_name: str, material_name: str) -> None:
         model_material_alphas: dict[str, float] = {}
         for model_material_name in self.model_material_ctrl.alphas.keys():
-            if type_name == "人物" and material_name in model_material_name:
+            if type_name == "人物" and material_name == model_material_name:
                 model_material_alphas[model_material_name] = 1.0
             elif model_material_name in (__("全材質"), __("ボーンライン")):
                 model_material_alphas[model_material_name] = self.model_material_ctrl.alphas.get(model_material_name, 1.0)
@@ -185,7 +185,7 @@ class ConfigPanel(CanvasPanel):
 
         dress_material_alphas: dict[str, float] = {}
         for dress_material_name in self.dress_material_ctrl.alphas.keys():
-            if type_name == "衣装" and material_name in dress_material_name:
+            if type_name == "衣装" and material_name == dress_material_name:
                 dress_material_alphas[dress_material_name] = 1.0
             elif dress_material_name in (__("全材質"), __("ボーンライン")):
                 dress_material_alphas[dress_material_name] = self.dress_material_ctrl.alphas.get(dress_material_name, 1.0)

@@ -7,6 +7,7 @@ import numpy as np
 
 from mlib.base.logger import MLogger
 from mlib.base.math import MMatrix4x4, MVector3D
+from mlib.base.part import Switch
 from mlib.pmx.pmx_collection import PmxModel
 from mlib.pmx.pmx_part import (
     Bone,
@@ -46,6 +47,7 @@ class SaveUsecase:
         dress_scales: dict[str, MVector3D],
         dress_degrees: dict[str, MVector3D],
         dress_positions: dict[str, MVector3D],
+        bone_target_dress: dict[str, bool],
     ) -> None:
         os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
@@ -103,32 +105,69 @@ class SaveUsecase:
             message = __("  {b}: 縮尺{s}, 回転{r}, 移動{p}", b=bone_type_name, s=scale, r=degree, p=position)
             fitting_messages.append(message)
 
+        model_output_material_names = [
+            material_name
+            for (material_name, alpha) in model_material_alphas.items()
+            if alpha == 1.0 and material_name not in [__("ボーンライン"), __("全材質")]
+        ]
+
+        dress_output_material_names = [
+            material_name
+            for (material_name, alpha) in dress_material_alphas.items()
+            if alpha == 1.0 and material_name not in [__("ボーンライン"), __("全材質")]
+        ]
+
         with open(os.path.join(os.path.dirname(output_path), f"settings_{datetime.now():%Y%m%d_%H%M%S}.txt"), "w", encoding="utf-8") as f:
             f.write(__("人物モデル") + "\n")
             f.write(model.path + "\n")
+            f.write("\n")
+            f.write(__("人物モデル：出力対象材質") + "\n    ")
+            f.write(", ".join(model_output_material_names))
+            f.write("\n")
             f.write(__("衣装モデル") + "\n")
             f.write(dress.path + "\n")
+            f.write("\n")
+            f.write(__("衣装モデル：出力対象材質") + "\n    ")
+            f.write(", ".join(dress_output_material_names))
+            f.write("\n")
             f.write(__("個別フィッティング") + "\n")
             f.write("\n".join(fitting_messages))
 
         logger.info(
-            "人物モデル: {m} ({p})\n衣装モデル: {d} ({q})\n個別フィッティング:\n{f}",
+            "人物モデル: {m} ({p})\n  出力材質: {mm}\n衣装モデル: {d} ({q})\n  出力材質: {dm}\n個別フィッティング:\n  {f}",
             m=model.name,
             p=os.path.basename(model.path),
+            mm=", ".join(model_output_material_names),
             d=dress.name,
             q=os.path.basename(dress.path),
+            dm=", ".join(dress_output_material_names),
             f="\n".join(fitting_messages),
         )
 
         logger.info("出力準備", decoration=MLogger.Decoration.LINE)
 
+        # 衣装側の位置に合わせるボーンINDEXリスト
+        dress_offset_bone_names = [
+            dress.bones[offset.bone_index].name
+            for (morph_name, active) in bone_target_dress.items()
+            if active
+            for offset in dress.morphs[f"調整:{__(morph_name)}:SX"].offsets
+        ]
+        dress_fit_bone_indexes = [
+            bone_index
+            for bone_tree in dress.bone_trees
+            for offset_bone_name in dress_offset_bone_names
+            if offset_bone_name in bone_tree.names
+            for bone_index in bone_tree.filter(start_bone_name=offset_bone_name).indexes
+        ]
+
         # 変形結果
         logger.info("人物：変形確定")
-        model_original_matrixes = VmdMotion().animate_bone([0], model)
-        model_matrixes = model_motion.animate_bone([0], model)
+        model_original_matrixes = VmdMotion().animate_bone([0], model, append_ik=False)
+        model_matrixes = model_motion.animate_bone([0], model, append_ik=False)
         logger.info("衣装：変形確定")
-        dress_original_matrixes = VmdMotion().animate_bone([0], dress)
-        dress_matrixes = dress_motion.animate_bone([0], dress)
+        dress_original_matrixes = VmdMotion().animate_bone([0], dress, append_ik=False)
+        dress_matrixes = dress_motion.animate_bone([0], dress, append_ik=False)
 
         logger.info("人物：材質選り分け")
         model.update_vertices_by_bone()
@@ -195,6 +234,9 @@ class SaveUsecase:
                 and set(model.vertices_by_bones[bone.index]) & active_model_vertices
             ):
                 model_weight_bone_names.append(bone.name)
+                if bone.is_external_translation or bone.is_external_rotation:
+                    # 付与親も対象とする
+                    model_weight_bone_names.append(model.bones[bone.effect_index].name)
 
             if not (model.bone_trees.is_in_standard(bone.name) or bone.is_standard_extend):
                 # 準標準ではない場合、登録可否チェック
@@ -227,7 +269,7 @@ class SaveUsecase:
                     # 自身はウェイトを持っておらず、付与親ボーンが元々ウェイトを持っていて、かつ出力先にウェイトが乗ってる頂点が無い場合、スルー
                     continue
 
-            if bone.parent_index not in model_bone_map:
+            if bone.parent_index not in model_bone_map and not bone.is_standard:
                 # 親ボーンが登録されていない場合、子ボーンも登録しない
                 continue
 
@@ -287,26 +329,13 @@ class SaveUsecase:
                     dress_model.bones.append(dress_prev_copy_bone, is_sort=False)
                     dress_bone_map[dress_bone.index] = dress_prev_copy_bone.index
 
-                    # 表示枠
-                    for display_slot in dress.display_slots:
-                        for reference in display_slot.references:
-                            if reference.display_type == DisplayType.BONE and reference.display_index == dress_bone.index:
-                                if display_slot.name not in dress_model.display_slots:
-                                    dress_model.display_slots.append(
-                                        DisplaySlot(name=display_slot.name, english_name=display_slot.english_name)
-                                    )
-                                dress_model.display_slots[display_slot.name].references.append(
-                                    DisplaySlotReference(display_type=DisplayType.BONE, display_index=dress_prev_copy_bone.index)
-                                )
-                                break
-
                     if not len(dress_model.bones) % 100:
                         logger.info("-- ボーン出力: {s}", s=len(dress_model.bones))
 
             model_copy_bone = bone.copy()
             model_copy_bone.index = len(dress_model.bones.writable())
             # 変形後の位置にボーンを配置する
-            model_copy_bone.position = model_matrixes[0, bone.name].local_matrix * model_copy_bone.position
+            model_copy_bone.position = model_matrixes[0, bone.name].position.copy()
             bone_map[model_copy_bone.index] = {
                 "parent": ["" if 0 > bone.parent_index else model.bones[bone.parent_index].name],
                 "tail": ["" if 0 > bone.tail_index else model.bones[bone.tail_index].name],
@@ -316,22 +345,7 @@ class SaveUsecase:
             }
             dress_model.bones.append(model_copy_bone, is_sort=False)
             model_bone_map[bone.index] = model_copy_bone.index
-
-            # 表示枠
-            if 0 == model_copy_bone.index:
-                dress_model.display_slots["Root"].references.append(DisplaySlotReference(display_index=model_copy_bone.index))
-            else:
-                for display_slot in model.display_slots:
-                    for reference in display_slot.references:
-                        if reference.display_type == DisplayType.BONE and reference.display_index == bone.index:
-                            if display_slot.name not in dress_model.display_slots:
-                                dress_model.display_slots.append(
-                                    DisplaySlot(name=display_slot.name, english_name=display_slot.english_name)
-                                )
-                            dress_model.display_slots[display_slot.name].references.append(
-                                DisplaySlotReference(display_type=DisplayType.BONE, display_index=model_copy_bone.index)
-                            )
-                            break
+            model_weight_bone_names.append(model_copy_bone.name)
 
             if not len(dress_model.bones) % 100:
                 logger.info("-- ボーン出力: {s}", s=len(dress_model.bones))
@@ -341,8 +355,9 @@ class SaveUsecase:
                 # 既に登録済みの準標準ボーンは追加しない
                 dress_bone_map[bone.index] = dress_model.bones[bone.name].index
 
-                if bone.name not in model_weight_bone_names:
+                if bone.name not in model_weight_bone_names or bone.index in dress_fit_bone_indexes:
                     # 人物側にウェイトが乗っていない場合、変形後の位置にボーンを配置する
+                    # もしくは衣装側に合わせる、と指示したボーンは衣装側の変形後の位置に配置
                     dress_model.bones[bone.name].position = dress_matrixes[0, bone.name].position.copy()
 
                     if (
@@ -354,6 +369,14 @@ class SaveUsecase:
                         # 衣装側が表示先がなくて、人物側に表示先がある場合、表示先ボーンの位置を変形後の位置に合わせる
                         dress_model.bones[model.bones[model.bones[bone.name].tail_index].name].position = (
                             dress_matrixes[0, bone.name].global_matrix * bone.tail_position
+                        )
+
+                    for parent_bone_name in reversed(model.bone_trees[bone.name].names[:-1]):
+                        if dress_model.bones[parent_bone_name].is_standard or parent_bone_name in dress.bones:
+                            break
+                        # 親が準標準ではなく、衣装側にない場合、親は子（対象）の変形後の位置からみた相対位置にボーンを配置する
+                        dress_model.bones[parent_bone_name].position = dress_matrixes[0, bone.name].global_matrix * (
+                            model_matrixes[0, parent_bone_name].position - model_matrixes[0, bone.name].position
                         )
 
                 continue
@@ -388,7 +411,7 @@ class SaveUsecase:
                 ):
                     # 自身はウェイトを持っておらず、付与親ボーンが元々ウェイトを持っていて、かつ出力先にウェイトが乗ってる頂点が無い場合、スルー
                     continue
-            if bone.parent_index not in dress_bone_map:
+            if bone.parent_index not in dress_bone_map and not bone.is_standard:
                 # 親ボーンが登録されていない場合、子ボーンも登録しない
                 continue
 
@@ -443,22 +466,12 @@ class SaveUsecase:
             dress_model.bones.append(dress_copy_bone, is_sort=False)
             dress_bone_map[bone.index] = dress_copy_bone.index
 
-            # 表示枠
-            for display_slot in dress.display_slots:
-                for reference in display_slot.references:
-                    if reference.display_type == DisplayType.BONE and reference.display_index == bone.index:
-                        if display_slot.name not in dress_model.display_slots:
-                            dress_model.display_slots.append(DisplaySlot(name=display_slot.name, english_name=display_slot.english_name))
-                        dress_model.display_slots[display_slot.name].references.append(
-                            DisplaySlotReference(display_type=DisplayType.BONE, display_index=dress_copy_bone.index)
-                        )
-                        break
-
             if not len(dress_model.bones) % 100:
                 logger.info("-- ボーン出力: {s}", s=len(dress_model.bones))
 
         logger.info("ボーン定義再設定", decoration=MLogger.Decoration.LINE)
 
+        local_y_vector = MVector3D(0, -1, 0)
         for bone in dress_model.bones:
             bone_setting = bone_map[bone.index]
             bone.parent_index = (
@@ -489,9 +502,24 @@ class SaveUsecase:
                     dress_model.bones[bone.ik.bone_index].position = dress_matrixes[0, bone_setting["ik_target"][0]].position.copy()
                 for n in range(len(bone.ik.links)):
                     bone.ik.links[n].bone_index = dress_model.bones[bone_setting["ik_link"][n]].index
+            if bone.is_leg_d and dress_matrixes.exists(0, bone_setting["effect"][0]):
+                # 足Dを足FKに揃える
+                dress_model.bones[bone.index].position = dress_matrixes[0, bone_setting["effect"][0]].position.copy()
+
+            if bone.has_fixed_axis:
+                # 軸制限がある場合、合わせる
+                bone.fixed_axis = dress_model.bones.get_tail_relative_position(bone.index).normalized()
+
+            if bone.has_local_coordinate:
+                # ローカル軸も合わせる
+                bone.local_z_vector = dress_model.bones.get_tail_relative_position(bone.index).normalized()
+                bone.local_x_vector = local_y_vector.cross(bone.local_x_vector).normalized()
 
             if 0 < bone.index and not bone.index % 100:
                 logger.info("-- ボーン定義再設定: {s}", s=bone.index)
+
+        model_all_bone_map: dict[int, int] = dict([(bone.index, model_bone_map.get(bone.index, 0)) for bone in model.bones])
+        dress_all_bone_map: dict[int, int] = dict([(bone.index, dress_bone_map.get(bone.index, 0)) for bone in dress.bones])
 
         # ---------------------------------
 
@@ -533,7 +561,7 @@ class SaveUsecase:
                     if vertex_index not in model_vertex_map:
                         copy_vertex = model.vertices[vertex_index].copy()
                         copy_vertex.index = -1
-                        copy_vertex.deform.indexes = np.vectorize(model_bone_map.get)(copy_vertex.deform.indexes)
+                        copy_vertex.deform.indexes = np.vectorize(model_all_bone_map.get)(copy_vertex.deform.indexes)
 
                         # 変形後の位置に頂点を配置する
                         mat = np.zeros((4, 4))
@@ -585,7 +613,7 @@ class SaveUsecase:
                     if vertex_index not in dress_vertex_map:
                         copy_vertex = dress.vertices[vertex_index].copy()
                         copy_vertex.index = -1
-                        copy_vertex.deform.indexes = np.vectorize(dress_bone_map.get)(copy_vertex.deform.indexes)
+                        copy_vertex.deform.indexes = np.vectorize(dress_all_bone_map.get)(copy_vertex.deform.indexes)
 
                         # 変形後の位置に頂点を配置する
                         mat = np.zeros((4, 4))
@@ -627,24 +655,12 @@ class SaveUsecase:
                 if is_group:
                     copy_morph = self.copy_group_morph(morph, model_morph_map)
                 else:
-                    copy_morph = self.copy_morph(morph, model_bone_map, model_vertex_map, model_material_map)
+                    copy_morph = self.copy_morph(morph, model_all_bone_map, model_vertex_map, model_material_map)
 
                 if copy_morph.offsets:
                     copy_morph.index = len(dress_model.morphs)
                     model_morph_map[morph.index] = len(dress_model.morphs)
                     dress_model.morphs.append(copy_morph)
-
-                    for display_slot in model.display_slots:
-                        for reference in display_slot.references:
-                            if reference.display_type == DisplayType.MORPH and reference.display_index == morph.index:
-                                if display_slot.name not in dress_model.display_slots:
-                                    dress_model.display_slots.append(
-                                        DisplaySlot(name=display_slot.name, english_name=display_slot.english_name)
-                                    )
-                                dress_model.display_slots[display_slot.name].references.append(
-                                    DisplaySlotReference(display_type=DisplayType.MORPH, display_index=copy_morph.index)
-                                )
-                                break
 
                 if not len(dress_model.morphs) % 50:
                     logger.info("-- モーフ出力: {s}", s=len(dress_model.morphs))
@@ -661,7 +677,7 @@ class SaveUsecase:
                 if is_group:
                     copy_morph = self.copy_group_morph(morph, dress_morph_map)
                 else:
-                    copy_morph = self.copy_morph(morph, dress_bone_map, dress_vertex_map, dress_material_map)
+                    copy_morph = self.copy_morph(morph, dress_all_bone_map, dress_vertex_map, dress_material_map)
 
                 copy_morph.name = f"Cos:{copy_morph.name}"
 
@@ -669,18 +685,6 @@ class SaveUsecase:
                     copy_morph.index = len(dress_model.morphs)
                     dress_morph_map[morph.index] = len(dress_model.morphs)
                     dress_model.morphs.append(copy_morph)
-
-                    for display_slot in dress.display_slots:
-                        for reference in display_slot.references:
-                            if reference.display_type == DisplayType.MORPH and reference.display_index == morph.index:
-                                if display_slot.name not in dress_model.display_slots:
-                                    dress_model.display_slots.append(
-                                        DisplaySlot(name=display_slot.name, english_name=display_slot.english_name)
-                                    )
-                                dress_model.display_slots[display_slot.name].references.append(
-                                    DisplaySlotReference(display_type=DisplayType.MORPH, display_index=copy_morph.index)
-                                )
-                                break
 
                 if not len(dress_model.morphs) % 50:
                     logger.info("-- モーフ出力: {s}", s=len(dress_model.morphs))
@@ -704,7 +708,7 @@ class SaveUsecase:
 
             model_copy_rigidbody = rigidbody.copy()
             model_copy_rigidbody.index = len(dress_model.rigidbodies)
-            model_copy_rigidbody.bone_index = model_bone_map[rigidbody.bone_index]
+            model_copy_rigidbody.bone_index = model_all_bone_map[rigidbody.bone_index]
 
             # ボーンと剛体の位置関係から剛体位置を求め直す
             model_bone_name = model.bones[rigidbody.bone_index].name
@@ -761,7 +765,7 @@ class SaveUsecase:
             dress_copy_rigidbody = rigidbody.copy()
             dress_copy_rigidbody.name = f"Cos:{rigidbody.name}"
             dress_copy_rigidbody.index = len(dress_model.rigidbodies)
-            dress_copy_rigidbody.bone_index = dress_bone_map[rigidbody.bone_index]
+            dress_copy_rigidbody.bone_index = dress_all_bone_map[rigidbody.bone_index]
 
             # ボーンと剛体の位置関係から剛体位置を求め直す
             dress_bone_name = dress.bones[rigidbody.bone_index].name
@@ -845,6 +849,91 @@ class SaveUsecase:
 
             if not len(dress_model.joints) % 50:
                 logger.info("-- ジョイント出力: {s}", s=len(dress_model.joints))
+
+        # ---------------------------------
+
+        logger.info("表示枠出力", decoration=MLogger.Decoration.LINE)
+
+        for morph in dress_model.morphs:
+            dress_model.display_slots["表情"].references.append(
+                DisplaySlotReference(display_type=DisplayType.MORPH, display_index=morph.index)
+            )
+
+            if not morph.index % 100:
+                logger.info("-- モーフ表示枠出力: {s}", s=morph.index)
+
+        dress_display_slot_indexes: dict[int, int] = {}
+
+        for bone in dress_model.bones:
+            if 0 == bone.index:
+                # 全親は単品で追加
+                dress_model.display_slots["Root"].references.append(
+                    DisplaySlotReference(display_type=DisplayType.BONE, display_index=bone.index)
+                )
+                continue
+            # 表示枠
+            if not bone.is_visible:
+                # 非表示ボーンはスルー
+                continue
+            # 人物側の表示枠に基本的には合わせる
+            display_slot_name = ""
+            display_slot_english_name = ""
+            for model_display_slot in model.display_slots:
+                if model_display_slot.special_flg == Switch.ON:
+                    continue
+                for model_reference in model_display_slot.references:
+                    if model_reference.display_type == DisplayType.MORPH:
+                        continue
+                    if model.bones[model_reference.display_index].name == bone.name:
+                        # 同じ名前のとこに入れる
+                        display_slot_name = model_display_slot.name
+                        display_slot_english_name = model_display_slot.english_name
+                        break
+                if display_slot_name:
+                    break
+
+            if not display_slot_name:
+                # 人物側に表示枠が見つからなかった場合、衣装側を確認する
+                for dress_display_slot in dress.display_slots:
+                    if dress_display_slot.special_flg == Switch.ON:
+                        continue
+                    for dress_reference in dress_display_slot.references:
+                        if dress_reference.display_type == DisplayType.MORPH:
+                            continue
+                        if dress.bones[dress_reference.display_index].name == bone.name:
+                            # 同じ名前のとこに入れる
+                            display_slot_name = dress_display_slot.name
+                            display_slot_english_name = dress_display_slot.english_name
+                            break
+                    if display_slot_name:
+                        break
+
+            if not display_slot_name:
+                # それでも見つからなければ、親の表示枠に入れる
+                for tree_index in reversed(dress_model.bone_trees[bone.name].indexes):
+                    if tree_index in dress_display_slot_indexes:
+                        display_slot_name = dress_model.display_slots[dress_display_slot_indexes[tree_index]].name
+                        display_slot_english_name = dress_model.display_slots[dress_display_slot_indexes[tree_index]].english_name
+                        break
+
+            if display_slot_name:
+                # 既存の表示枠がある場合はそこに追加
+                if display_slot_name not in dress_model.display_slots:
+                    dress_model.display_slots.append(DisplaySlot(name=display_slot_name, english_name=display_slot_english_name))
+                dress_model.display_slots[display_slot_name].references.append(
+                    DisplaySlotReference(display_type=DisplayType.BONE, display_index=bone.index)
+                )
+                dress_display_slot_indexes[bone.index] = dress_model.display_slots[display_slot_name].index
+            else:
+                # なければ新規作成
+                dress_model.display_slots.append(DisplaySlot(name=bone.name, english_name=bone.english_name))
+                dress_model.display_slots[bone.name].references.append(
+                    DisplaySlotReference(display_type=DisplayType.BONE, display_index=bone.index)
+                )
+                dress_display_slot_indexes[bone.index] = dress_model.display_slots[bone.name].index
+
+            if not bone.index % 100:
+                logger.info("-- ボーン表示枠出力: {s}", s=bone.index)
 
         logger.info("モデル出力", decoration=MLogger.Decoration.LINE)
 

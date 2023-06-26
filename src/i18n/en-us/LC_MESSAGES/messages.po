@@ -851,3 +851,102 @@ msgstr "Allows you to adjust the rotation of the selected bone in the local X-ax
 
 msgid "選択されたボーンのローカルX軸（ボーンの長さ）方向の縮尺を調整できます"
 msgstr "Allows you to adjust the scale of the selected bone in the local X-axis (length of the bone) direction"
+
+msgid "-- 衣装初期姿勢計算"
+msgstr "-- Costume initial posture calculation"
+
+msgid "ローカル距離計算"
+msgstr "Local Distance Calculation"
+
+msgid "-- ローカル距離計算 [{i} ({p:.2f}%)]"
+msgstr "-- Local distance calculation [{i} ({p:.2f}%)]"
+
+msgid "衣装: 足IK再設定用セットアップ"
+msgstr "Costume: setup for foot IK reconfiguration"
+
+msgid "人物: 追加対象ボーン: {b}"
+msgstr "Person: additional target bone: {b}"
+
+msgid "衣装: 追加対象ボーン: {b}"
+msgstr "Costume: additional target bones: {b}"
+
+msgid "-- 衣装: ボーン追加: {b}"
+msgstr "-- Costume: bone addition: {b}"
+
+msgid "衣装: 胸位置調整"
+msgstr "Costume: breast positioning"
+
+msgid "-- 衣装: {b}位置調整"
+msgstr "-- Costume: {b} position adjustment"
+
+msgid "-- 人物: ボーン追加: {b}"
+msgstr "-- person: bone added: {b}"
+
+msgid "人物モデル：出力対象材質"
+msgstr "Person model: output target material"
+
+msgid "衣装モデル：出力対象材質"
+msgstr "Costume model: output target material"
+
+msgid "人物モデル: {m} ({p})\n  出力材質: {mm}\n衣装モデル: {d} ({q})\n  出力材質: {dm}\n個別フィッティング:\n{f}"
+msgstr "Person model: {m} ({p})\nOutput material: {mm}\nCostume model: {d} ({q})\nOutput material: {dm}\nIndividual fitting:\n{f}"
+
+msgid "人物モデル: {m} ({p})\n  出力材質: {mm}\n衣装モデル: {d} ({q})\n  出力材質: {dm}\n個別フィッティング:\n  {f}"
+msgstr "Person model: {m} ({p})\nOutput material: {mm}\nCostume model: {d} ({q})\nOutput material: {dm}\nIndividual fitting:\n {f}"
+
+msgid "選択されたボーンの横方向の縮尺を調整できます"
+msgstr "Allows you to adjust the horizontal scale of the selected bone"
+
+msgid "選択されたボーンの長さ方向の縮尺を調整できます"
+msgstr "Allows you to adjust the lengthwise scale of selected bones"
+
+msgid "選択されたボーンの奥行き方向の縮尺を調整できます"
+msgstr "Allows you to adjust the depth scale of selected bones"
+
+msgid "選択されたボーンの横方向の回転を調整できます"
+msgstr "Allows you to adjust the lateral rotation of selected bones"
+
+msgid "選択されたボーンの長さ方向の回転を調整できます"
+msgstr "Allows you to adjust the lengthwise rotation of selected bones"
+
+msgid "選択されたボーンの奥行き方向の回転を調整できます"
+msgstr "Allows you to adjust the depth rotation of selected bones"
+
+msgid "選択されたボーンの横方向の移動を調整できます"
+msgstr "Allows you to adjust the lateral movement of selected bones"
+
+msgid "選択されたボーンの長さ方向の移動を調整できます"
+msgstr "Allows you to adjust the lengthwise movement of selected bones"
+
+msgid "選択されたボーンの奥行き方向の移動を調整できます"
+msgstr "Allows you to adjust the depth shift of selected bones"
+
+msgid "表示枠出力"
+msgstr "Display frame output"
+
+msgid "-- モーフ表示枠出力: {s}"
+msgstr "-- morph display frame output: {s}"
+
+msgid "-- ボーン表示枠出力: {s}"
+msgstr "-- Bone display frame output: {s}"
+
+msgid "人物と衣装のどちらにもメッシュがある場合に、ボーン位置をどちらのモデルに合わせるかを選択できます\n指など人物と衣装のボーンがズレてる場合に選択してください。"
+msgstr "If there is a mesh on both the person and the costume, you can choose which model the bone position should be aligned with.
+
+msgid "ボーン基準"
+msgstr "Bourne Criteria"
+
+msgid "どちらに合わせるか"
+msgstr "Which way do you want to go?"
+
+msgid "人物と衣装のどちらにもメッシュがある場合には、基本的には人物側のボーン位置で出力します。\n"
+msgstr "If there is a mesh for both the person and the costume, the output is basically the bone position on the person side. \n"
+
+msgid "このチェックをONにすると、指など人物と衣装のボーン位置がずれている場合に衣装側のボーン位置で出力することができます。"
+msgstr "If this check box is turned on, you can output with the bone positions on the costume side if the bone positions of the person and the costume are not aligned, such as fingers"
+
+msgid "衣装モデルに合わせる"
+msgstr "Match the costume model"
+
+msgid "ボーン位置を衣装モデルに合わせる"
+msgstr "Bone position is aligned costume"
