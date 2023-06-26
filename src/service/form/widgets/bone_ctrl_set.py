@@ -19,6 +19,7 @@ class BoneCtrlSet:
         self.scales: dict[str, MVector3D] = {}
         self.degrees: dict[str, MVector3D] = {}
         self.positions: dict[str, MVector3D] = {}
+        self.bone_target_dress: dict[str, bool] = {}
         self.individual_target_bone_indexes: list[list[int]] = []
 
         self.bone_sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -101,7 +102,7 @@ class BoneCtrlSet:
         )
         self.grid_sizer.Add(self.scale_y_slider.sizer, 0, wx.ALL, 3)
 
-        self.scale_link_check_ctrl = wx.CheckBox(self.window, wx.ID_ANY, "🔗", wx.DefaultPosition, wx.DefaultSize, 0)
+        self.scale_link_check_ctrl = wx.CheckBox(self.window, wx.ID_ANY, "", wx.DefaultPosition, wx.DefaultSize, 0)
         self.scale_link_check_ctrl.SetToolTip(__("チェックをONにすると、縮尺XとZを同時に操作することができます"))
         self.grid_sizer.Add(self.scale_link_check_ctrl, 0, wx.ALL, 3)
 
@@ -253,6 +254,20 @@ class BoneCtrlSet:
 
         self.grid_sizer.Add(wx.StaticText(self.window, wx.ID_ANY, ""), 0, wx.ALL, 3)
 
+        bone_target_dress_tooltip = __("人物と衣装のどちらにもメッシュがある場合には、基本的には人物側のボーン位置で出力します。\n") + __(
+            "このチェックをONにすると、指など人物と衣装のボーン位置がずれている場合に衣装側のボーン位置で出力することができます。"
+        )
+        self.grid_sizer.Add(wx.StaticText(self.window, wx.ID_ANY, ""), 0, wx.ALL, 3)
+
+        self.bone_target_dress_check_ctrl = wx.CheckBox(
+            self.window, wx.ID_ANY, __("ボーン位置を衣装モデルに合わせる"), wx.DefaultPosition, wx.DefaultSize, 0
+        )
+        self.bone_target_dress_check_ctrl.Bind(wx.EVT_CHECKBOX, self.on_change_bone_target_dress)
+        self.bone_target_dress_check_ctrl.SetToolTip(bone_target_dress_tooltip)
+        self.grid_sizer.Add(self.bone_target_dress_check_ctrl, 0, wx.ALL, 3)
+
+        self.grid_sizer.Add(wx.StaticText(self.window, wx.ID_ANY, ""), 0, wx.ALL, 3)
+
         self.sizer.Add(self.grid_sizer, 0, wx.ALL, 0)
 
         self.btn_sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -278,6 +293,7 @@ class BoneCtrlSet:
             self.scales[morph_name] = MVector3D(1, 1, 1)
             self.degrees[morph_name] = MVector3D()
             self.positions[morph_name] = MVector3D()
+            self.bone_target_dress[morph_name] = False
         self.bone_choice_ctrl.SetSelection(0)
         self.scale_x_slider.ChangeValue(1.0)
         self.scale_y_slider.ChangeValue(1.0)
@@ -303,6 +319,7 @@ class BoneCtrlSet:
         self.position_x_slider.ChangeValue(self.positions[morph_name].x)
         self.position_y_slider.ChangeValue(self.positions[morph_name].y)
         self.position_z_slider.ChangeValue(self.positions[morph_name].z)
+        self.bone_target_dress_check_ctrl.SetValue(self.bone_target_dress[morph_name])
         # ボーンハイライトを変更
         self.parent.change_bone(self.individual_target_bone_indexes[self.bone_choice_ctrl.GetSelection()])
 
@@ -320,11 +337,16 @@ class BoneCtrlSet:
         self.bone_choice_ctrl.SetSelection(selection - 1)
         self.on_change_bone(event)
 
+    def on_change_bone_target_dress(self, event: wx.Event) -> None:
+        morph_name = self.bone_choice_ctrl.GetStringSelection()
+        self.bone_target_dress[morph_name] = self.bone_target_dress_check_ctrl.GetValue()
+
     def on_change_clear(self, event: wx.Event) -> None:
         for morph_name in self.scales.keys():
             self.scales[morph_name] = MVector3D(1, 1, 1)
             self.degrees[morph_name] = MVector3D()
             self.positions[morph_name] = MVector3D()
+            self.bone_target_dress[morph_name] = False
         # self.bone_choice_ctrl.SetSelection(0)
         self.scale_x_slider.ChangeValue(1.0)
         self.scale_y_slider.ChangeValue(1.0)
@@ -336,6 +358,7 @@ class BoneCtrlSet:
         self.position_y_slider.ChangeValue(0.0)
         self.position_z_slider.ChangeValue(0.0)
         self.scale_link_check_ctrl.SetValue(1)
+        self.bone_target_dress_check_ctrl.SetValue(0)
 
         self.parent.Enable(False)
         self.parent.on_change(is_clear=True)
@@ -362,19 +385,13 @@ class BoneCtrlSet:
         self.positions[morph_name].x = self.position_x_slider.GetValue()
         self.positions[morph_name].y = self.position_y_slider.GetValue()
         self.positions[morph_name].z = self.position_z_slider.GetValue()
+        self.bone_target_dress[morph_name] = self.bone_target_dress_check_ctrl.GetValue()
 
         self.parent.Enable(False)
         self.parent.on_change(morph_name)
         # ボーンハイライトを変更
         self.parent.change_bone(self.individual_target_bone_indexes[self.bone_choice_ctrl.GetSelection()])
         self.parent.Enable(True)
-
-    # def on_fit_ground(self, event: wx.Event) -> None:
-    #     self.parent.Enable(False)
-    #     if self.parent.on_fit_ground():
-    #         # 接地位置が求められたらモーション適用
-    #         self.parent.on_change()
-    #     self.parent.Enable(True)
 
     def Enable(self, enable: bool) -> None:
         self.bone_choice_ctrl.Enable(enable)
@@ -390,5 +407,5 @@ class BoneCtrlSet:
         self.position_y_slider.Enable(enable)
         self.position_z_slider.Enable(enable)
         self.clear_btn_ctrl.Enable(enable)
-        # self.ground_btn_ctrl.Enable(enable)
         self.scale_link_check_ctrl.Enable(enable)
+        self.bone_target_dress_check_ctrl.Enable(enable)

@@ -47,6 +47,7 @@ class SaveUsecase:
         dress_scales: dict[str, MVector3D],
         dress_degrees: dict[str, MVector3D],
         dress_positions: dict[str, MVector3D],
+        bone_target_dress: dict[str, bool],
     ) -> None:
         os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
@@ -144,6 +145,21 @@ class SaveUsecase:
         )
 
         logger.info("出力準備", decoration=MLogger.Decoration.LINE)
+
+        # 衣装側の位置に合わせるボーンINDEXリスト
+        dress_offset_bone_names = [
+            dress.bones[offset.bone_index].name
+            for (morph_name, active) in bone_target_dress.items()
+            if active
+            for offset in dress.morphs[f"調整:{__(morph_name)}:SX"].offsets
+        ]
+        dress_fit_bone_indexes = [
+            bone_index
+            for bone_tree in dress.bone_trees
+            for offset_bone_name in dress_offset_bone_names
+            if offset_bone_name in bone_tree.names
+            for bone_index in bone_tree.filter(start_bone_name=offset_bone_name).indexes
+        ]
 
         # 変形結果
         logger.info("人物：変形確定")
@@ -339,8 +355,9 @@ class SaveUsecase:
                 # 既に登録済みの準標準ボーンは追加しない
                 dress_bone_map[bone.index] = dress_model.bones[bone.name].index
 
-                if bone.name not in model_weight_bone_names:
+                if bone.name not in model_weight_bone_names or bone.index in dress_fit_bone_indexes:
                     # 人物側にウェイトが乗っていない場合、変形後の位置にボーンを配置する
+                    # もしくは衣装側に合わせる、と指示したボーンは衣装側の変形後の位置に配置
                     dress_model.bones[bone.name].position = dress_matrixes[0, bone.name].position.copy()
 
                     if (
