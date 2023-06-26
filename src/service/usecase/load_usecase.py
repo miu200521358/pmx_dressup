@@ -585,7 +585,13 @@ class LoadUsecase:
                             # 足首、胸だけはグローバルスケールで動かす（Z方向にまっすぐ伸ばすため）
                             # ただし、画面指定上はローカルと同じ操作感にする
                             scale = (
-                                MVector3D(1, 0, 0) if "SX" == axis_name else MVector3D(0, 1, 0) if "SY" == axis_name else MVector3D(0, 0, 2)
+                                MVector3D(1, 0, 0)
+                                if "SX" == axis_name
+                                else MVector3D(0, 1, 0)
+                                if "SY" == axis_name
+                                else MVector3D(0, 0, 2)
+                                if "SZ" == axis_name
+                                else MVector3D(0, 0, 0)
                             )
 
                             morph.offsets.append(
@@ -1151,14 +1157,13 @@ class LoadUsecase:
             dress_local_distances = np.max(dress_filtered_local_positions, axis=0) - np.min(dress_filtered_local_positions, axis=0)
 
             local_scale = MVector3D(*model_local_distances).one() / MVector3D(*dress_local_distances).one()
-            # local_scale_value = np.mean([local_scale.y, local_scale.z])
-            # if category in dress_category_scale_values:
-            #     local_scale_value = np.mean([local_scale_value, dress_category_scale_values[category]])
 
             if category in ("胸",):
-                dress_local_scales[category] = MVector3D(local_scale.x, 1.0, local_scale.y)
+                local_scale_value = np.mean([local_scale.x, local_scale.z])
+                dress_local_scales[category] = MVector3D(local_scale_value, 1.0, local_scale_value)
             else:
-                dress_local_scales[category] = MVector3D(1.0, local_scale.y, local_scale.z)
+                local_scale_value = np.mean([local_scale.y, local_scale.z])
+                dress_local_scales[category] = MVector3D(1.0, local_scale_value, local_scale_value)
 
             logger.debug(
                 f"ローカルスケール [{category}][{dress_local_scales[category]}][model={model_local_distances}]"
