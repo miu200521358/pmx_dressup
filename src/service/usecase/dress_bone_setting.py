@@ -150,7 +150,6 @@ class DressBoneSettings(Enum):
         category="首",
         weight_names=("首"),
         translatable=True,
-        # 回転はキャンセル用
         rotatable=True,
         global_scalable=True,
         local_scalable=False,
@@ -160,9 +159,9 @@ class DressBoneSettings(Enum):
         setting=BoneSettings.HEAD.value,
         category="頭",
         weight_names=("頭",),
-        translatable=False,
-        rotatable=False,
-        global_scalable=False,
+        translatable=True,
+        rotatable=True,
+        global_scalable=True,
         local_scalable=False,
         local_scale_target=False,
     )

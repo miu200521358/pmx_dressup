@@ -585,10 +585,10 @@ class LoadUsecase:
                             offset_position = position
                             offset_local_qq = local_qq
 
-                        if bone_name in ("頭", "首", "左胸", "右胸", "左足首D", "右足首D", "左足首", "右足首"):
+                        if bone_name in ("頭", "左胸", "右胸", "左足首D", "右足首D", "左足首", "右足首"):
                             # 末端だけはグローバルスケールで動かす（Z方向にまっすぐ伸ばすため）
                             # ただし、画面指定上はローカルと同じ操作感にする
-                            if bone_name in ("頭", "首"):
+                            if bone_name in ("頭",):
                                 scale = (
                                     MVector3D(1, 0, 0)
                                     if "SX" == axis_name
@@ -925,7 +925,7 @@ class LoadUsecase:
         dress_offset_positions: dict[int, MVector3D] = {}
         dress_offset_qqs: dict[int, MQuaternion] = {}
 
-        z_direction = MVector3D(0, 0, -1)
+        # z_direction = MVector3D(0, 0, -1)
         for i, (bone_name, bone_setting) in enumerate(list(DRESS_STANDARD_BONE_NAMES.items())):
             logger.count(
                 "オフセット計算",
@@ -1005,17 +1005,19 @@ class LoadUsecase:
 
                 if model_tail_position and dress_tail_position:
                     # 衣装：自分の方向
-                    dress_x_direction = (dress_bone_matrix.inverse() * dress_tail_position).normalized()
-                    dress_y_direction = dress_x_direction.cross(z_direction)
-                    dress_slope_qq = MQuaternion.from_direction(dress_x_direction, dress_y_direction)
+                    dress_slope_qq = (dress_bone_matrix.inverse() * dress_tail_position).to_local_matrix4x4().to_quaternion()
+                    # dress_x_direction = (dress_bone_matrix.inverse() * dress_tail_position).normalized()
+                    # dress_y_direction = dress_x_direction.cross(z_direction)
+                    # dress_slope_qq = MQuaternion.from_direction(dress_x_direction, dress_y_direction)
 
                     # 人物：自分の方向
-                    model_x_direction = (model_bone_matrix.inverse() * model_tail_position).normalized()
-                    model_y_direction = model_x_direction.cross(z_direction)
-                    model_slope_qq = MQuaternion.from_direction(model_x_direction, model_y_direction)
+                    model_slope_qq = (model_bone_matrix.inverse() * model_tail_position).to_local_matrix4x4().to_quaternion()
+                    # model_x_direction = (model_bone_matrix.inverse() * model_tail_position).normalized()
+                    # model_y_direction = model_x_direction.cross(z_direction)
+                    # model_slope_qq = MQuaternion.from_direction(model_x_direction, model_y_direction)
 
                     # モデルのボーンの向きに衣装を合わせる
-                    if dress_bone.name in ("首", "左胸", "右胸", "左足首D", "右足首D", "左足首", "右足首"):
+                    if dress_bone.name in ("頭", "左胸", "右胸", "左足首D", "右足首D", "左足首", "右足首"):
                         # 末端は親のキャンセルだけ行う
                         dress_offset_qq = MQuaternion()
                     else:
