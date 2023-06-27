@@ -950,3 +950,6 @@ msgstr "Match the costume model"
 
 msgid "ボーン位置を衣装モデルに合わせる"
 msgstr "Bone position is aligned costume"
+
+msgid "衣装: 位置調整"
+msgstr "Costume: positioning"

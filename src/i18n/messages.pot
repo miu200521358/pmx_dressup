@@ -1261,3 +1261,7 @@ msgstr ""
 msgid "ボーン位置を衣装モデルに合わせる"
 msgstr ""
 
+
+msgid "衣装: 位置調整"
+msgstr ""
+
