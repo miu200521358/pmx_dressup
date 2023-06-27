@@ -523,6 +523,10 @@ class LoadUsecase:
             child_scale_morph_names,
             child_rotation_morph_names,
         ) in FIT_INDIVIDUAL_BONE_NAMES.items():
+            if not [bone_name for bone_name in target_bone_names if bone_name in dress.bones]:
+                # 処理対象ボーンがなければスルー
+                continue
+
             target_bone_indexes: list[int] = []
 
             # 子どものスケーリング対象もモーフに入れる
@@ -575,24 +579,35 @@ class LoadUsecase:
                 for bone_name in target_all_bone_names:
                     if bone_name in dress.bones:
                         if axis_name in ("MX", "RY", "RZ"):
-                            offset_position = position * (1 if "左" in bone_name else -1)
+                            offset_position = position * (-1 if "右" in bone_name else 1)
                             offset_local_qq = local_qq.inverse() if "左" in bone_name else local_qq
                         else:
                             offset_position = position
                             offset_local_qq = local_qq
 
-                        if "足首" in bone_name or "胸" in bone_name:
-                            # 足首、胸だけはグローバルスケールで動かす（Z方向にまっすぐ伸ばすため）
+                        if bone_name in ("頭", "首", "左胸", "右胸", "左足首D", "右足首D", "左足首", "右足首"):
+                            # 末端だけはグローバルスケールで動かす（Z方向にまっすぐ伸ばすため）
                             # ただし、画面指定上はローカルと同じ操作感にする
-                            scale = (
-                                MVector3D(1, 0, 0)
-                                if "SX" == axis_name
-                                else MVector3D(0, 1, 0)
-                                if "SY" == axis_name
-                                else MVector3D(0, 0, 2)
-                                if "SZ" == axis_name
-                                else MVector3D(0, 0, 0)
-                            )
+                            if bone_name in ("頭", "首"):
+                                scale = (
+                                    MVector3D(1, 0, 0)
+                                    if "SX" == axis_name
+                                    else MVector3D(0, 1, 0)
+                                    if "SY" == axis_name
+                                    else MVector3D(0, 0, 1)
+                                    if "SZ" == axis_name
+                                    else MVector3D(0, 0, 0)
+                                )
+                            else:
+                                scale = (
+                                    MVector3D(1, 0, 0)
+                                    if "SX" == axis_name
+                                    else MVector3D(0, 1, 0)
+                                    if "SY" == axis_name
+                                    else MVector3D(0, 0, 2)
+                                    if "SZ" == axis_name
+                                    else MVector3D(0, 0, 0)
+                                )
 
                             morph.offsets.append(
                                 BoneMorphOffset(
@@ -929,33 +944,6 @@ class LoadUsecase:
                 # システムボーンはスルー
                 continue
 
-            # if dress_bone.parent_index in dress.bones and not dress.bones[dress_bone.parent_index].is_standard:
-            #     # 衣装側の親が準標準ではない場合、自分から見た位置に合わせる
-            #     dress_parent_bone = dress.bones[dress_bone.parent_index]
-            #     dress_matrixes = dress_motion.animate_bone([0], dress, [dress_bone.name])
-
-            #     # 親の親までを調整した後の位置
-            #     dress_parent_fit_bone_position = dress_matrixes[0, dress_parent_bone.name].position
-
-            #     # 人物側の相対位置から再計算した親ボーンの位置
-            #     dress_parent_refit_bone_position = model_matrixes[0, model_bone.name].global_matrix * (
-            #         dress_matrixes[0, dress_bone.name].position - dress_matrixes[0, dress_parent_bone.name].position
-            #     )
-
-            #     # 人物側の再計算位置に合わせる
-            #     dress_offset_position = dress_parent_refit_bone_position - dress_parent_fit_bone_position
-            #     dress_offset_positions[dress_parent_bone.index] = dress_offset_position
-
-            #     # キーフレとして追加
-            #     mbf = dress_motion.bones[dress_parent_bone.name][0]
-            #     mbf.position = dress_offset_position
-            #     dress_motion.bones[dress_parent_bone.name].append(mbf)
-
-            #     logger.debug(
-            #         f"-- -- 移動追加オフセット[{dress_parent_bone.name}][{dress_offset_position}]"
-            #         + f"[refit={dress_parent_refit_bone_position}][fit={dress_parent_fit_bone_position}]"
-            #     )
-
             if bone_setting.translatable:
                 # 移動計算 ------------------
 
@@ -1027,8 +1015,8 @@ class LoadUsecase:
                     model_slope_qq = MQuaternion.from_direction(model_x_direction, model_y_direction)
 
                     # モデルのボーンの向きに衣装を合わせる
-                    if "足首" in dress_bone.name or "胸" in dress_bone.name or "頭" == dress_bone.name:
-                        # 足首は親のキャンセルだけ行う
+                    if dress_bone.name in ("首", "左胸", "右胸", "左足首D", "右足首D", "左足首", "右足首"):
+                        # 末端は親のキャンセルだけ行う
                         dress_offset_qq = MQuaternion()
                     else:
                         dress_offset_qq = model_slope_qq * dress_slope_qq.inverse()

@@ -150,18 +150,18 @@ class DressBoneSettings(Enum):
         category="首",
         weight_names=("首"),
         translatable=True,
+        # 回転はキャンセル用
         rotatable=True,
         global_scalable=True,
-        local_scalable=True,
-        local_scale_target=True,
+        local_scalable=False,
+        local_scale_target=False,
     )
     HEAD = DressBoneSetting(
         setting=BoneSettings.HEAD.value,
         category="頭",
         weight_names=("頭",),
         translatable=False,
-        # 回転はキャンセル用
-        rotatable=True,
+        rotatable=False,
         global_scalable=False,
         local_scalable=False,
         local_scale_target=False,
@@ -1124,11 +1124,11 @@ LOCAL_SCALE_WEIGHT_BONE_NAMES: list[str] = [bs.value.name for bs in DressBoneSet
 # IKはFKの後に指定する事
 """個別フィッティング用ボーン設定"""
 FIT_INDIVIDUAL_BONE_NAMES = {
-    "腰": (("腰",), ("下半身", "上半身", "上半身2", "上半身3"), ("下半身", "上半身", "上半身2", "上半身3"), []),
+    "腰": (("腰",), ("下半身", "上半身", "上半身2", "上半身3"), ("下半身", "上半身", "上半身2", "上半身3", "首"), []),
     "下半身": (("下半身",), [], ("足", "ひざ", "足首"), []),
-    "上半身": (("上半身",), [], ("上半身2", "上半身3"), []),
-    "上半身2": (("上半身2",), [], ("上半身3",), []),
-    "上半身3": (("上半身3",), [], [], []),
+    "上半身": (("上半身",), [], ("上半身2", "上半身3", "首"), []),
+    "上半身2": (("上半身2",), [], ("上半身3", "首"), []),
+    "上半身3": (("上半身3",), [], ("首",), []),
     "胸": (("右胸", "左胸"), [], [], []),
     "首": (("首",), [], [], []),
     "頭": (("頭",), [], [], []),
