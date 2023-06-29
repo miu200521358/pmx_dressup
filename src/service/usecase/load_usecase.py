@@ -957,14 +957,6 @@ class LoadUsecase:
 
         dress_motion = VmdMotion()
 
-        # これまでのフィッティングパラを適用したモーションを生成する
-        for dress_bone in dress.bones:
-            # キーフレとしてスケーリング追加
-            sbf = dress_motion.bones[dress_bone.name][0]
-            sbf.scale = dress_offset_scales.get(dress_bone.index, MVector3D(1, 1, 1)) - 1
-            # sbf.local_scale = dress_offset_local_scales.get(dress_bone.index, MVector3D(1, 1, 1)) - 1
-            dress_motion.bones[dress_bone.name].append(sbf)
-
         dress_offset_positions: dict[int, MVector3D] = {}
         dress_offset_qqs: dict[int, MQuaternion] = {}
 
@@ -1022,61 +1014,6 @@ class LoadUsecase:
                         + f"[model={model_bone_position}][dress={dress_bone_position}]"
                     )
 
-                # if "足ＩＫ" == bone_setting.category:
-                #     # 足IKの場合、リンクとターゲットも再計算
-                #     knee_name = dress.bones[dress_bone.ik.links[0].bone_index].name
-                #     ankle_name = dress.bones[dress_bone.ik.bone_index].name
-
-                #     dress_matrixes = dress_motion.animate_bone([0], model, [ankle_name], append_ik=True)
-
-                #     # ひざの位置
-                #     model_knee_position = model_matrixes[0, knee_name].position
-                #     dress_knee_position = dress_matrixes[0, knee_name].position
-                #     dress_knee_offset_position = model_knee_position - dress_knee_position
-                #     dress_offset_positions[dress.bones[knee_name].index] = dress_knee_offset_position
-
-                #     mbf2 = dress_motion.bones[knee_name][0]
-                #     mbf2.position = dress_knee_offset_position
-                #     dress_motion.bones[knee_name].append(mbf2)
-
-                #     if f"{knee_name}D" in dress.bones:
-                #         # ひざDがある場合、そっちにもコピー
-                #         d_dress_knee_bone = dress.bones[f"{knee_name}D"]
-                #         dress_offset_positions[d_dress_knee_bone.index] = dress_knee_offset_position.copy()
-
-                #         mbf = dress_motion.bones[d_dress_knee_bone.name][0]
-                #         mbf.position = dress_knee_offset_position.copy()
-                #         dress_motion.bones[d_dress_knee_bone.name].append(mbf)
-
-                #     logger.debug(
-                #         f"-- -- 移動オフセット[{d_dress_knee_bone.name}][{dress_knee_offset_position}]"
-                #         + f"[model={model_knee_position}][dress={dress_knee_position}]"
-                #     )
-
-                #     # 足首の位置
-                #     model_ankle_position = model_matrixes[0, ankle_name].position
-                #     dress_ankle_position = dress_matrixes[0, ankle_name].position
-                #     dress_ankle_offset_position = model_ankle_position - dress_ankle_position
-                #     dress_offset_positions[dress.bones[ankle_name].index] = dress_ankle_offset_position
-
-                #     mbf3 = dress_motion.bones[ankle_name][0]
-                #     mbf3.position = dress_ankle_offset_position
-                #     dress_motion.bones[ankle_name].append(mbf3)
-
-                #     if f"{ankle_name}D" in dress.bones:
-                #         # 足首Dがある場合、そっちにもコピー
-                #         d_dress_ankle_bone = dress.bones[f"{ankle_name}D"]
-                #         dress_offset_positions[d_dress_ankle_bone.index] = dress_ankle_offset_position.copy()
-
-                #         mbf = dress_motion.bones[d_dress_ankle_bone.name][0]
-                #         mbf.position = dress_ankle_offset_position.copy()
-                #         dress_motion.bones[d_dress_ankle_bone.name].append(mbf)
-
-                #     logger.debug(
-                #         f"-- -- 移動オフセット[{d_dress_ankle_bone.name}][{dress_ankle_offset_position}]"
-                #         + f"[model={model_ankle_position}][dress={dress_ankle_position}]"
-                #     )
-
             if bone_setting.rotatable:
                 # 回転計算 ------------------
 
@@ -1090,15 +1027,9 @@ class LoadUsecase:
                 if model_tail_position and dress_tail_position:
                     # 衣装：自分の方向
                     dress_slope_qq = (dress_bone_matrix.inverse() * dress_tail_position).to_local_matrix4x4().to_quaternion()
-                    # dress_x_direction = (dress_bone_matrix.inverse() * dress_tail_position).normalized()
-                    # dress_y_direction = dress_x_direction.cross(z_direction)
-                    # dress_slope_qq = MQuaternion.from_direction(dress_x_direction, dress_y_direction)
 
                     # 人物：自分の方向
                     model_slope_qq = (model_bone_matrix.inverse() * model_tail_position).to_local_matrix4x4().to_quaternion()
-                    # model_x_direction = (model_bone_matrix.inverse() * model_tail_position).normalized()
-                    # model_y_direction = model_x_direction.cross(z_direction)
-                    # model_slope_qq = MQuaternion.from_direction(model_x_direction, model_y_direction)
 
                     # モデルのボーンの向きに衣装を合わせる
                     if dress_bone.name in ("頭", "左胸", "右胸", "左足首D", "右足首D", "左足首", "右足首"):
@@ -1137,6 +1068,11 @@ class LoadUsecase:
                             f"-- -- 回転オフセット[{d_dress_bone.name}][{dress_offset_qq.to_euler_degrees()}]"
                             + f"[model={model_bone_position}][dress={dress_bone_position}]"
                         )
+            # キーフレとしてスケーリング追加
+            sbf = dress_motion.bones[dress_bone.name][0]
+            sbf.scale = dress_offset_scales.get(dress_bone.index, MVector3D(1, 1, 1)) - 1
+            sbf.local_scale = dress_offset_local_scales.get(dress_bone.index, MVector3D(1, 1, 1)) - 1
+            dress_motion.bones[dress_bone.name].append(sbf)
 
         for dress_other_bone in dress.bones:
             for parent_bone_index in (dress.bones["上半身"].index, dress.bones["下半身"].index):
