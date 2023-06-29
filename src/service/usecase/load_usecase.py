@@ -344,7 +344,7 @@ class LoadUsecase:
 
     def replace_shoulder(self, model: PmxModel, dress: PmxModel, direction: str) -> list[str]:
         """肩のボーン置き換え"""
-        replace_bone_names = ("首", f"{direction}腕", f"{direction}肩")
+        replace_bone_names = ("首根元", f"{direction}腕", f"{direction}肩")
         if not (model.bones.exists(replace_bone_names) and dress.bones.exists(replace_bone_names)):
             return []
 
@@ -389,19 +389,20 @@ class LoadUsecase:
 
         # 衣装の置換ボーンの位置を求め直す
         dress_replace_new_pos = align_triangle(model_from_pos, model_to_pos, model_replace_pos, dress_from_pos, dress_to_pos)
+        dress_replace_diff_pos = dress_replace_new_pos - dress_replace_pos
         if is_fix_x_zero:
-            dress_replace_new_pos.x = 0
+            dress_replace_diff_pos.x = 0
 
-        dress.bones[replace_name].position = dress_replace_new_pos
+        dress.bones[replace_name].position += dress_replace_diff_pos
         logger.info(
             "衣装: {r}: 位置再計算: {u} → {p} ({d})",
             r=replace_name,
             u=dress_replace_pos,
             p=dress_replace_new_pos,
-            d=(dress_replace_new_pos - dress_replace_pos),
+            d=dress_replace_diff_pos,
         )
 
-        return True, dress_replace_new_pos - dress_replace_pos
+        return True, dress_replace_diff_pos
 
     def replace_twist(self, model: PmxModel, dress: PmxModel, replaced_bone_names: list[str]) -> list[str]:
         """腕捩・手捩のボーン置き換え"""
@@ -730,10 +731,6 @@ class LoadUsecase:
         dress_bone_fitting_morph.is_system = True
         dress_bone_fitting_morph.morph_type = MorphType.BONE
 
-        dress_vertex_fitting_morph = Morph(name="VertexFitting")
-        dress_vertex_fitting_morph.is_system = True
-        dress_vertex_fitting_morph.morph_type = MorphType.VERTEX
-
         # モデルの初期姿勢を求める
         model_matrixes = VmdMotion().animate_bone([0], model)
 
@@ -757,6 +754,29 @@ class LoadUsecase:
         # dress_offset_positions = {}
         # dress_offset_qqs = {}
 
+        dress_part_offset_positions: dict[str, list[np.ndarray]] = {}
+        dress_part_offset_degrees: dict[str, list[np.ndarray]] = {}
+
+        for dress_bone in dress.bones:
+            if not (dress_bone.is_standard and ("左" in dress_bone.name or "右" in dress_bone.name)):
+                # 準標準ボーンかつ左右のみ対象
+                continue
+            if not (dress_bone.index in dress_offset_positions or dress_bone.index in dress_offset_qqs):
+                # オフセットが無い場合スルー
+                continue
+
+            dress_offset_position = dress_offset_positions.get(dress_bone.index, MVector3D())
+            dress_offset_qq = dress_offset_qqs.get(dress_bone.index, MQuaternion())
+
+            part_name = dress_bone.name[1:]
+
+            if part_name not in dress_part_offset_positions:
+                dress_part_offset_positions[part_name] = []
+                dress_part_offset_degrees[part_name] = []
+
+            dress_part_offset_positions[part_name].append(dress_offset_position.abs().vector)
+            dress_part_offset_degrees[part_name].append(dress_offset_qq.to_euler_degrees().abs().vector)
+
         logger.info("フィッティングボーンモーフ追加", decoration=MLogger.Decoration.LINE)
 
         for dress_bone in dress.bones:
@@ -770,6 +790,16 @@ class LoadUsecase:
 
             dress_offset_position = dress_offset_positions.get(dress_bone.index, MVector3D())
             dress_offset_qq = dress_offset_qqs.get(dress_bone.index, MQuaternion())
+
+            if dress_bone.name[1:] in dress_part_offset_positions:
+                # 左右の場合、平均値を採用する
+                dress_offset_position.vector = np.mean(dress_part_offset_positions[dress_bone.name[1:]], axis=0) * np.sign(
+                    dress_offset_position.vector
+                )
+                dress_offset_qq = MQuaternion.from_euler_degrees(
+                    *np.mean(dress_part_offset_degrees[dress_bone.name[1:]], axis=0) * np.sign(dress_offset_qq.to_euler_degrees().vector)
+                )
+
             dress_fit_scale = dress_fit_scales.get(dress_bone.index, MVector3D(1, 1, 1))
             dress_offset_scale = dress_offset_scales.get(dress_bone.index, MVector3D(1, 1, 1))
             dress_offset_local_scale = dress_offset_local_scales.get(dress_bone.index, MVector3D(1, 1, 1))
@@ -810,6 +840,13 @@ class LoadUsecase:
         dress_scale_values: dict[str, list[float]] = {}
 
         for i, (bone_name, bone_setting) in enumerate(list(DRESS_STANDARD_BONE_NAMES.items())):
+            logger.count(
+                "グローバルスケール計算",
+                index=i,
+                total_index_count=dress_standard_count,
+                display_block=50,
+            )
+
             if not (bone_name in dress.bones and bone_name in model.bones):
                 # 人物と衣装の両方にボーンがなければスルー
                 continue
@@ -819,23 +856,27 @@ class LoadUsecase:
             if not bone_setting.global_scalable:
                 continue
 
-            logger.count(
-                "グローバルスケール計算",
-                index=i,
-                total_index_count=dress_standard_count,
-                display_block=50,
-            )
+            if bone_setting.category == "足ＩＫ":
+                # 足IKの比率は足ボーンから足IKボーンまでの直線距離とする
+                dress_fit_length_scale = (model_bone.position - model.bones[bone_name[:2]].position).length() / (
+                    (dress_bone.position - dress.bones[bone_name[:2]].position).length() or 1
+                )
+            elif bone_setting.category == "つま先ＩＫ":
+                # つま先IKの比率はグローバルZ方向だけ合わせる
+                dress_fit_length_scale = (model_bone.position - model.bones[bone_name[:4]].position).z / (
+                    (dress_bone.position - dress.bones[bone_name[:4]].position).z or 1
+                )
+            else:
+                model_bone_matrix, model_bone_position, model_tail_position = self.get_tail_position(
+                    model, model_bone, bone_setting, matrixes=model_matrixes
+                )
+                dress_bone_matrix, dress_bone_position, dress_tail_position = self.get_tail_position(
+                    dress, dress_bone, bone_setting, matrixes=dress_matrixes
+                )
 
-            model_bone_matrix, model_bone_position, model_tail_position = self.get_tail_position(
-                model, model_bone, bone_setting, matrixes=model_matrixes
-            )
-            dress_bone_matrix, dress_bone_position, dress_tail_position = self.get_tail_position(
-                dress, dress_bone, bone_setting, matrixes=dress_matrixes
-            )
-
-            dress_fit_length_scale = (model_tail_position - model_bone_position).length() / (
-                (dress_tail_position - dress_bone_position).length() or 1
-            )
+                dress_fit_length_scale = (model_tail_position - model_bone_position).length() / (
+                    (dress_tail_position - dress_bone_position).length() or 1
+                )
 
             if bone_setting.category not in dress_scale_values:
                 dress_scale_values[bone_setting.category] = []
@@ -939,35 +980,21 @@ class LoadUsecase:
             if not (bone_name in dress.bones and bone_name in model.bones):
                 # 人物と衣装の両方にボーンがなければスルー
                 continue
+
             dress_bone = dress.bones[bone_name]
             model_bone = model.bones[bone_name]
-
-            if dress_bone.is_system and bone_name not in ("足中心", "首根元"):
-                # システムボーンはスルー
-                continue
 
             if bone_setting.translatable:
                 # 移動計算 ------------------
 
-                if dress_bone.is_ik:
-                    # IKの場合、FKの位置に合わせる
-                    ik_dress_target_bone = dress.bones[dress_bone.ik.bone_index]
-
-                    dress_fk_matrixes = dress_motion.animate_bone([0], dress, [ik_dress_target_bone.name], append_ik=False)
-                    dress_ik_matrixes = dress_motion.animate_bone([0], dress, [dress_bone.name])
-
-                    model_bone_position = dress_fk_matrixes[0, ik_dress_target_bone.name].position
-                    dress_bone_position = dress_ik_matrixes[0, dress_bone.name].position
-                else:
-                    model_bone_matrix, model_bone_position, model_tail_position = self.get_tail_position(
-                        model, model_bone, bone_setting, matrixes=model_matrixes
-                    )
-                    dress_bone_matrix, dress_bone_position, dress_tail_position = self.get_tail_position(
-                        dress, dress_bone, bone_setting, motion=dress_motion, append_ik=False
-                    )
+                model_bone_matrix, model_bone_position, model_tail_position = self.get_tail_position(
+                    model, model_bone, bone_setting, matrixes=model_matrixes
+                )
+                dress_bone_matrix, dress_bone_position, dress_tail_position = self.get_tail_position(
+                    dress, dress_bone, bone_setting, motion=dress_motion, append_ik=False
+                )
 
                 dress_offset_position = model_bone_position - dress_bone_position
-
                 dress_offset_positions[dress_bone.index] = dress_offset_position
 
                 # キーフレとして追加
@@ -995,14 +1022,69 @@ class LoadUsecase:
                         + f"[model={model_bone_position}][dress={dress_bone_position}]"
                     )
 
+                # if "足ＩＫ" == bone_setting.category:
+                #     # 足IKの場合、リンクとターゲットも再計算
+                #     knee_name = dress.bones[dress_bone.ik.links[0].bone_index].name
+                #     ankle_name = dress.bones[dress_bone.ik.bone_index].name
+
+                #     dress_matrixes = dress_motion.animate_bone([0], model, [ankle_name], append_ik=True)
+
+                #     # ひざの位置
+                #     model_knee_position = model_matrixes[0, knee_name].position
+                #     dress_knee_position = dress_matrixes[0, knee_name].position
+                #     dress_knee_offset_position = model_knee_position - dress_knee_position
+                #     dress_offset_positions[dress.bones[knee_name].index] = dress_knee_offset_position
+
+                #     mbf2 = dress_motion.bones[knee_name][0]
+                #     mbf2.position = dress_knee_offset_position
+                #     dress_motion.bones[knee_name].append(mbf2)
+
+                #     if f"{knee_name}D" in dress.bones:
+                #         # ひざDがある場合、そっちにもコピー
+                #         d_dress_knee_bone = dress.bones[f"{knee_name}D"]
+                #         dress_offset_positions[d_dress_knee_bone.index] = dress_knee_offset_position.copy()
+
+                #         mbf = dress_motion.bones[d_dress_knee_bone.name][0]
+                #         mbf.position = dress_knee_offset_position.copy()
+                #         dress_motion.bones[d_dress_knee_bone.name].append(mbf)
+
+                #     logger.debug(
+                #         f"-- -- 移動オフセット[{d_dress_knee_bone.name}][{dress_knee_offset_position}]"
+                #         + f"[model={model_knee_position}][dress={dress_knee_position}]"
+                #     )
+
+                #     # 足首の位置
+                #     model_ankle_position = model_matrixes[0, ankle_name].position
+                #     dress_ankle_position = dress_matrixes[0, ankle_name].position
+                #     dress_ankle_offset_position = model_ankle_position - dress_ankle_position
+                #     dress_offset_positions[dress.bones[ankle_name].index] = dress_ankle_offset_position
+
+                #     mbf3 = dress_motion.bones[ankle_name][0]
+                #     mbf3.position = dress_ankle_offset_position
+                #     dress_motion.bones[ankle_name].append(mbf3)
+
+                #     if f"{ankle_name}D" in dress.bones:
+                #         # 足首Dがある場合、そっちにもコピー
+                #         d_dress_ankle_bone = dress.bones[f"{ankle_name}D"]
+                #         dress_offset_positions[d_dress_ankle_bone.index] = dress_ankle_offset_position.copy()
+
+                #         mbf = dress_motion.bones[d_dress_ankle_bone.name][0]
+                #         mbf.position = dress_ankle_offset_position.copy()
+                #         dress_motion.bones[d_dress_ankle_bone.name].append(mbf)
+
+                #     logger.debug(
+                #         f"-- -- 移動オフセット[{d_dress_ankle_bone.name}][{dress_ankle_offset_position}]"
+                #         + f"[model={model_ankle_position}][dress={dress_ankle_position}]"
+                #     )
+
             if bone_setting.rotatable:
                 # 回転計算 ------------------
 
                 model_bone_matrix, model_bone_position, model_tail_position = self.get_tail_position(
-                    model, model_bone, bone_setting, matrixes=model_matrixes
+                    model, model_bone, bone_setting, matrixes=model_matrixes, append_ik=False
                 )
                 dress_bone_matrix, dress_bone_position, dress_tail_position = self.get_tail_position(
-                    dress, dress_bone, bone_setting, motion=dress_motion
+                    dress, dress_bone, bone_setting, motion=dress_motion, append_ik=False
                 )
 
                 if model_tail_position and dress_tail_position:
