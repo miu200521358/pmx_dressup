@@ -90,7 +90,7 @@ class DressBoneSettings(Enum):
         category="下半身",
         weight_names=("下半身",),
         translatable=True,
-        rotatable=True,
+        rotatable=False,
         global_scalable=True,
         local_scalable=True,
         local_scale_target=True,

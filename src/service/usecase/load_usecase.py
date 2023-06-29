@@ -791,11 +791,18 @@ class LoadUsecase:
             dress_offset_position = dress_offset_positions.get(dress_bone.index, MVector3D())
             dress_offset_qq = dress_offset_qqs.get(dress_bone.index, MQuaternion())
 
-            if dress_bone.name[1:] in dress_part_offset_positions:
+            if dress_bone.name[1:] in dress_part_offset_positions and dress_offset_position:
                 # 左右の場合、平均値を採用する
                 dress_offset_position.vector = np.mean(dress_part_offset_positions[dress_bone.name[1:]], axis=0) * np.sign(
                     dress_offset_position.vector
                 )
+
+                if "左" == dress_bone.name[0]:
+                    dress_offset_position.x = abs(dress_offset_position.x)
+                else:
+                    dress_offset_position.x = -abs(dress_offset_position.x)
+
+            if dress_bone.name[1:] in dress_part_offset_degrees and dress_offset_qq:
                 dress_offset_qq = MQuaternion.from_euler_degrees(
                     *np.mean(dress_part_offset_degrees[dress_bone.name[1:]], axis=0) * np.sign(dress_offset_qq.to_euler_degrees().vector)
                 )
