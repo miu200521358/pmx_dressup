@@ -1172,10 +1172,10 @@ class LoadUsecase:
             local_scale = MVector3D(*model_local_distances).one() / MVector3D(*dress_local_distances).one()
 
             if category in ("胸",):
-                local_scale_value = np.mean([local_scale.x, local_scale.z])
+                local_scale_value = max(1, np.mean([local_scale.x, local_scale.z]))
                 dress_local_scales[category] = MVector3D(local_scale_value, 1.0, local_scale_value)
             else:
-                local_scale_value = np.mean([local_scale.y, local_scale.z])
+                local_scale_value = max(1, np.mean([local_scale.y, local_scale.z]))
                 dress_local_scales[category] = MVector3D(1.0, local_scale_value, local_scale_value)
 
             logger.debug(
