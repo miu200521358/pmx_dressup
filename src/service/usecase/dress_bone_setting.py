@@ -535,8 +535,8 @@ class DressBoneSettings(Enum):
         translatable=True,
         rotatable=False,
         global_scalable=True,
-        local_scalable=False,
-        local_scale_target=False,
+        local_scalable=True,
+        local_scale_target=True,
     )
     RIGHT_KNEE = DressBoneSetting(
         setting=BoneSettings.RIGHT_KNEE.value,
@@ -545,8 +545,8 @@ class DressBoneSettings(Enum):
         translatable=True,
         rotatable=False,
         global_scalable=True,
-        local_scalable=False,
-        local_scale_target=False,
+        local_scalable=True,
+        local_scale_target=True,
     )
     RIGHT_ANKLE = DressBoneSetting(
         setting=BoneSettings.RIGHT_ANKLE.value,
@@ -555,8 +555,8 @@ class DressBoneSettings(Enum):
         translatable=True,
         rotatable=False,
         global_scalable=True,
-        local_scalable=False,
-        local_scale_target=False,
+        local_scalable=True,
+        local_scale_target=True,
     )
     RIGHT_TOE = DressBoneSetting(
         setting=BoneSettings.RIGHT_TOE.value,
@@ -575,8 +575,8 @@ class DressBoneSettings(Enum):
         translatable=False,
         rotatable=False,
         global_scalable=True,
-        local_scalable=False,
-        local_scale_target=False,
+        local_scalable=True,
+        local_scale_target=True,
     )
     RIGHT_KNEE_D = DressBoneSetting(
         setting=BoneSettings.RIGHT_KNEE_D.value,
@@ -585,8 +585,8 @@ class DressBoneSettings(Enum):
         translatable=True,
         rotatable=False,
         global_scalable=True,
-        local_scalable=False,
-        local_scale_target=False,
+        local_scalable=True,
+        local_scale_target=True,
     )
     RIGHT_ANKLE_D = DressBoneSetting(
         setting=BoneSettings.RIGHT_ANKLE_D.value,
@@ -595,8 +595,8 @@ class DressBoneSettings(Enum):
         translatable=True,
         rotatable=False,
         global_scalable=True,
-        local_scalable=False,
-        local_scale_target=False,
+        local_scalable=True,
+        local_scale_target=True,
     )
     RIGHT_TOE_EX = DressBoneSetting(
         setting=BoneSettings.RIGHT_TOE_EX.value,
