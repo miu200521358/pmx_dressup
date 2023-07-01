@@ -367,6 +367,30 @@ class LoadUsecase:
 
         return replaced_bone_names
 
+    def replace_twist(self, model: PmxModel, dress: PmxModel, replaced_bone_names: list[str]) -> list[str]:
+        """腕捩・手捩のボーン置き換え"""
+
+        replace_bone_set = (
+            ("右腕", "右ひじ", "右腕捩"),
+            ("右ひじ", "右手首", "右手捩"),
+            ("左腕", "左ひじ", "左腕捩"),
+            ("左ひじ", "左手首", "左手捩"),
+        )
+
+        for from_name, to_name, replace_name in replace_bone_set:
+            # 捩りボーンそのもの
+            is_add = self.replace_bone_position(model, dress, from_name, to_name, replace_name)
+            if is_add:
+                replaced_bone_names.append(replace_name)
+
+            # 分散の付与ボーン
+            for no in range(1, 5):
+                is_add = self.replace_bone_position(model, dress, from_name, to_name, f"{replace_name}{no}")
+                if is_add:
+                    replaced_bone_names.append(replace_name)
+
+        return replaced_bone_names
+
     def replace_bone_position(
         self, model: PmxModel, dress: PmxModel, from_name: str, to_name: str, replace_name: str, is_fix_x_zero: bool = False
     ) -> tuple[bool, MVector3D]:
@@ -402,68 +426,6 @@ class LoadUsecase:
         )
 
         return True, dress_replace_diff_pos
-
-    def replace_twist(self, model: PmxModel, dress: PmxModel, replaced_bone_names: list[str]) -> list[str]:
-        """腕捩・手捩のボーン置き換え"""
-
-        replace_bone_set = (
-            ("右腕", "右ひじ", "右腕捩"),
-            ("右ひじ", "右手首", "右手捩"),
-            ("左腕", "左ひじ", "左腕捩"),
-            ("左ひじ", "左手首", "左手捩"),
-        )
-
-        for from_name, to_name, replace_name in replace_bone_set:
-            # 捩りボーンそのもの
-            is_add = self.replace_bone_position_twist(model, dress, from_name, to_name, replace_name)
-            if is_add:
-                replaced_bone_names.append(replace_name)
-
-            # 分散の付与ボーン
-            for no in range(1, 5):
-                is_add = self.replace_bone_position_twist(model, dress, from_name, to_name, f"{replace_name}{no}")
-                if is_add:
-                    replaced_bone_names.append(replace_name)
-
-        return replaced_bone_names
-
-    def replace_bone_position_twist(self, model: PmxModel, dress: PmxModel, from_name: str, to_name: str, replace_name: str) -> bool:
-        """
-        衣装のボーン位置を人物ボーン位置に合わせて配置を変える(斜め)
-        """
-        if not (model.bones.exists([from_name, to_name, replace_name]) and dress.bones.exists([from_name, to_name, replace_name])):
-            # ボーンが足りなかったら追加しない
-            return False
-
-        model_from_pos = model.bones[from_name].position
-        model_replace_pos = model.bones[replace_name].position
-        model_to_pos = model.bones[to_name].position
-        dress_from_pos = dress.bones[from_name].position
-        dress_replace_pos = dress.bones[replace_name].position
-        dress_to_pos = dress.bones[to_name].position
-
-        # 元ボーン-置換ボーン ベースで求めた時の位置 ---------------
-
-        # 元ボーン-置換ボーン:縮尺
-        from_replace_scale = ((model_replace_pos - model_from_pos) / (model_to_pos - model_from_pos)) / (
-            (dress_replace_pos - dress_from_pos) / (dress_to_pos - dress_from_pos)
-        )
-
-        # 縮尺に合わせた位置
-        dress_replace_new_pos = dress_from_pos + ((dress_replace_pos - dress_from_pos) * from_replace_scale)
-
-        # 最終的な置換ボーンは元ボーン-置換ボーン,先ボーン-置換ボーンの中間とする
-        dress.bones[replace_name].position = dress_replace_new_pos
-
-        logger.info(
-            "衣装: {r}: 位置再計算: {u} → {p} ({d})",
-            r=replace_name,
-            u=dress_replace_pos,
-            p=dress_replace_new_pos,
-            d=(dress_replace_new_pos - dress_replace_pos),
-        )
-
-        return True
 
     def create_material_transparent_morphs(self, model: PmxModel) -> None:
         """材質OFFモーフ追加"""
