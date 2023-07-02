@@ -87,17 +87,17 @@ class DressBoneSettings(Enum):
     )
     LOWER = DressBoneSetting(
         setting=BoneSettings.LOWER.value,
-        category="下半身",
+        category="体幹",
         weight_names=("下半身",),
         translatable=True,
         rotatable=False,
-        global_scalable=False,
+        global_scalable=True,
         local_scalable=True,
         local_scale_target=True,
     )
     LEG_CENTER = DressBoneSetting(
         setting=BoneSettings.LEG_CENTER.value,
-        category="下半身",
+        category="体幹",
         weight_names=[],
         translatable=True,
         rotatable=False,
@@ -107,7 +107,7 @@ class DressBoneSettings(Enum):
     )
     UPPER = DressBoneSetting(
         setting=BoneSettings.UPPER.value,
-        category="上半身",
+        category="体幹",
         weight_names=("上半身",),
         translatable=True,
         rotatable=True,
@@ -117,7 +117,7 @@ class DressBoneSettings(Enum):
     )
     UPPER2 = DressBoneSetting(
         setting=BoneSettings.UPPER2.value,
-        category="上半身",
+        category="体幹",
         weight_names=("上半身2", "左胸", "右胸", "首根元"),
         translatable=True,
         rotatable=True,
@@ -127,7 +127,7 @@ class DressBoneSettings(Enum):
     )
     UPPER3 = DressBoneSetting(
         setting=BoneSettings.UPPER3.value,
-        category="上半身",
+        category="体幹",
         weight_names=("上半身3", "左胸", "右胸", "首根元"),
         translatable=True,
         rotatable=True,
@@ -137,7 +137,7 @@ class DressBoneSettings(Enum):
     )
     ARM_CENTER = DressBoneSetting(
         setting=BoneSettings.ARM_CENTER.value,
-        category="上半身",
+        category="体幹",
         weight_names=[],
         translatable=True,
         rotatable=True,

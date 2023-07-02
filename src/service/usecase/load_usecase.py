@@ -758,10 +758,10 @@ class LoadUsecase:
                     dress_offset_position.vector
                 )
 
-                if "左" in dress_bone.name:
-                    dress_offset_position.x = abs(dress_offset_position.x)
-                else:
-                    dress_offset_position.x = -abs(dress_offset_position.x)
+                # if "左" in dress_bone.name:
+                #     dress_offset_position.x = abs(dress_offset_position.x)
+                # else:
+                #     dress_offset_position.x = -abs(dress_offset_position.x)
 
             if dress_bone.name[1:] in dress_part_offset_degrees and dress_offset_qq:
                 dress_offset_qq = MQuaternion.from_euler_degrees(

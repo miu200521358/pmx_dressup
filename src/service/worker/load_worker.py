@@ -74,19 +74,19 @@ class LoadWorker(BaseWorker):
 
             replaced_bone_names: list[str] = []
 
-            # 下半身の再設定
             logger.info("衣装: 位置調整", decoration=MLogger.Decoration.LINE)
-            replaced_bone_names += usecase.replace_lower(model, dress)
 
-            # 上半身の再設定
-            replaced_bone_names += usecase.replace_upper(model, dress)
+            # # 下半身の再設定
+            # replaced_bone_names += usecase.replace_lower(model, dress)
+
+            # # 上半身の再設定
+            # replaced_bone_names += usecase.replace_upper(model, dress)
 
             # 上半身2の再設定
             replaced_bone_names += usecase.replace_upper2(model, dress)
 
-            if "上半身3" in model.bones:
-                # 上半身3の再設定
-                replaced_bone_names += usecase.replace_upper3(model, dress)
+            # 上半身3の再設定
+            replaced_bone_names += usecase.replace_upper3(model, dress)
 
             # 胸の再設定
             replaced_bust_bone_names = usecase.replace_bust(model, dress)
