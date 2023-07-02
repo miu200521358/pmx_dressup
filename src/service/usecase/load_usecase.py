@@ -1062,6 +1062,7 @@ class LoadUsecase:
                 ):
                     continue
                 dress_matrixes = dress_motion.animate_bone([0], dress, [to_name], append_ik=False)
+                twist_no_position = dress_matrixes[0, twist_no_name].position
                 twist_no_new_position = align_triangle(
                     model_matrixes[0, from_name].position,
                     model_matrixes[0, to_name].position,
@@ -1070,13 +1071,13 @@ class LoadUsecase:
                     dress_matrixes[0, to_name].position,
                 )
 
-                dress_offset_position = twist_no_new_position - dress_matrixes[0, twist_no_name].position
+                dress_offset_position = twist_no_position - twist_no_new_position
                 dress_twist_offset_position = dress_offset_positions.get(dress.bones[twist_no_name].index, MVector3D())
                 dress_offset_positions[dress.bones[twist_no_name].index] = dress_twist_offset_position + dress_offset_position
 
                 logger.debug(
                     f"-- -- 捩り移動オフセット[{twist_no_name}][{dress_offset_position}]"
-                    + f"[after={dress_matrixes[0, twist_no_name].position}][before={twist_no_new_position}]"
+                    + f"[now={twist_no_position}][fit={twist_no_new_position}]"
                 )
 
         dress_bone_count = len(dress.bones)
