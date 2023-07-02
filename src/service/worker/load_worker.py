@@ -70,7 +70,7 @@ class LoadWorker(BaseWorker):
 
             # 不足ボーン追加
             logger.info("衣装: 不足ボーン調整", decoration=MLogger.Decoration.LINE)
-            usecase.add_mismatch_bones(model, dress)
+            usecase.insert_mismatch_bones(model, dress)
 
             replaced_bone_names: list[str] = []
 

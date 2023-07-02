@@ -44,7 +44,7 @@ class LoadUsecase:
                 b=", ".join(missing_bone_names),
             )
 
-    def add_mismatch_bones(self, model: PmxModel, dress: PmxModel) -> None:
+    def insert_mismatch_bones(self, model: PmxModel, dress: PmxModel) -> None:
         """準標準ボーンの不足分を追加"""
         # 必ず追加するボーン
         add_bone_names = {
@@ -53,9 +53,7 @@ class LoadUsecase:
             "腰",
             "上半身2",
             "左肩P",
-            "左肩C",
             "右肩P",
-            "右肩C",
             "右腕捩",
             "左腕捩",
             "右手捩",
@@ -1076,8 +1074,7 @@ class LoadUsecase:
                 dress_offset_positions[dress.bones[twist_no_name].index] = dress_twist_offset_position + dress_offset_position
 
                 logger.debug(
-                    f"-- -- 捩り移動オフセット[{twist_no_name}][{dress_offset_position}]"
-                    + f"[now={twist_no_position}][fit={twist_no_new_position}]"
+                    f"-- -- 捩り移動オフセット[{twist_no_name}][{dress_offset_position}][now={twist_no_position}][fit={twist_no_new_position}]"
                 )
 
         dress_bone_count = len(dress.bones)
