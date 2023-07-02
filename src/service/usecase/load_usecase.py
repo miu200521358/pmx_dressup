@@ -845,9 +845,10 @@ class LoadUsecase:
                     (dress_tail_position - dress_bone_position).length() or 1
                 )
 
-            if bone_setting.category not in dress_scale_values:
-                dress_scale_values[bone_setting.category] = []
-            dress_scale_values[bone_setting.category].append(dress_fit_length_scale)
+            if not np.isclose(dress_fit_length_scale, 0, atol=1e-3):
+                if bone_setting.category not in dress_scale_values:
+                    dress_scale_values[bone_setting.category] = []
+                dress_scale_values[bone_setting.category].append(dress_fit_length_scale)
 
         # 胸はスケールキャンセルだけ入れる
         if "胸" not in dress_scale_values:
@@ -872,7 +873,7 @@ class LoadUsecase:
                 continue
             dress_bone = dress.bones[bone_name]
 
-            if not bone_setting.global_scalable:
+            if not bone_setting.global_scalable or bone_setting.category not in dress_category_scale_values:
                 continue
 
             dress_fit_length_scale = dress_category_scale_values[bone_setting.category]
@@ -1040,6 +1041,43 @@ class LoadUsecase:
             sbf.scale = dress_offset_scales.get(dress_bone.index, MVector3D(1, 1, 1)) - 1
             sbf.local_scale = dress_offset_local_scales.get(dress_bone.index, MVector3D(1, 1, 1)) - 1
             dress_motion.bones[dress_bone.name].append(sbf)
+
+            if bone_name in ("右ひじ", "左ひじ"):
+                # ひじの場合、腕捩りを再調整
+                dress_matrixes = dress_motion.animate_bone([0], dress, [bone_name], append_ik=False)
+
+        twist_bone_set = (
+            ("右腕", "右ひじ", "右腕捩"),
+            ("右ひじ", "右手首", "右手捩"),
+            ("左腕", "左ひじ", "左腕捩"),
+            ("左ひじ", "左手首", "左手捩"),
+        )
+
+        for from_name, to_name, twist_name in twist_bone_set:
+            # 分散の付与ボーン
+            for no in range(5):
+                twist_no_name = twist_name if no == 0 else f"{twist_name}{no}"
+                if not (
+                    model.bones.exists((from_name, to_name, twist_no_name)) and dress.bones.exists((from_name, to_name, twist_no_name))
+                ):
+                    continue
+                dress_matrixes = dress_motion.animate_bone([0], dress, [to_name], append_ik=False)
+                twist_no_new_position = align_triangle(
+                    model_matrixes[0, from_name].position,
+                    model_matrixes[0, to_name].position,
+                    model_matrixes[0, twist_no_name].position,
+                    dress_matrixes[0, from_name].position,
+                    dress_matrixes[0, to_name].position,
+                )
+
+                dress_offset_position = twist_no_new_position - dress_matrixes[0, twist_no_name].position
+                dress_twist_offset_position = dress_offset_positions.get(dress.bones[twist_no_name].index, MVector3D())
+                dress_offset_positions[dress.bones[twist_no_name].index] = dress_twist_offset_position + dress_offset_position
+
+                logger.debug(
+                    f"-- -- 捩り移動オフセット[{twist_no_name}][{dress_offset_position}]"
+                    + f"[after={dress_matrixes[0, twist_no_name].position}][before={twist_no_new_position}]"
+                )
 
         # for dress_other_bone in dress.bones:
         #     if not (
