@@ -1265,3 +1265,11 @@ msgstr ""
 msgid "衣装: 位置調整"
 msgstr ""
 
+
+msgid "準標準オフセット計算"
+msgstr ""
+
+
+msgid "-- 準標準オフセット計算 [{i} ({p:.2f}%)]"
+msgstr ""
+

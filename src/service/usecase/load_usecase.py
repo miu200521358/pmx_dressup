@@ -932,7 +932,7 @@ class LoadUsecase:
         # z_direction = MVector3D(0, 0, -1)
         for i, (bone_name, bone_setting) in enumerate(list(DRESS_STANDARD_BONE_NAMES.items())):
             logger.count(
-                "オフセット計算",
+                "準標準オフセット計算",
                 index=i,
                 total_index_count=dress_standard_count,
                 display_block=5,
@@ -1079,80 +1079,101 @@ class LoadUsecase:
                     + f"[after={dress_matrixes[0, twist_no_name].position}][before={twist_no_new_position}]"
                 )
 
-        # for dress_other_bone in dress.bones:
-        #     if not (
-        #         0 <= dress_other_bone.parent_index
-        #         and dress_other_bone.parent_index in dress.bones
-        #         and dress.bones[dress_other_bone.parent_index].is_standard
-        #         and not dress.bone_trees.is_in_standard(dress_other_bone.name)
-        #     ):
-        #         continue
+        dress_bone_count = len(dress.bones)
+        for dress_other_bone in dress.bones:
+            logger.count(
+                "オフセット計算",
+                index=i,
+                total_index_count=dress_bone_count,
+                display_block=50,
+            )
 
-        #     # 親ボーンが準標準、かつ自身が準標準外の場合
-        #     dress_offset_position = MVector3D()
-        #     dress_offset_qq = MQuaternion()
-        #     dress_parent_bone = dress.bones[dress_other_bone.parent_index]
-        #     if DRESS_STANDARD_BONE_NAMES[dress_parent_bone.name].category in ("肩", "腕", "手首", "指"):
-        #         # 腕系は親の変形を引き継ぐ
-        #         original_parent_position = dress_parent_bone.position
-        #         original_bone_position = dress_other_bone.position
-        #         original_tail_position = dress_other_bone.position + dress_other_bone.tail_relative_position
+            if not (
+                0 <= dress_other_bone.parent_index
+                and dress_other_bone.parent_index in dress.bones
+                and dress.bones[dress_other_bone.parent_index].is_standard
+                and not dress.bone_trees.is_in_standard(dress_other_bone.name)
+            ):
+                continue
 
-        #         original_diff_position = original_bone_position - original_parent_position
-        #         original_bone_slope_qq = original_diff_position.to_local_matrix4x4().to_quaternion()
+            # 親ボーンが準標準、かつ自身が準標準外の場合
+            dress_offset_position = MVector3D()
+            dress_offset_qq = MQuaternion()
+            dress_parent_bone = dress.bones[dress_other_bone.parent_index]
+            if DRESS_STANDARD_BONE_NAMES[dress_parent_bone.name].category in ("肩", "腕", "手首", "指"):
+                # 腕系は親の変形を引き継ぐ
 
-        #         dress_matrixes = dress_motion.animate_bone([0], dress, [dress_other_bone.name], append_ik=False)
+                # 子ボーン（準標準があれば、それを優先させる）
+                child_bone_indexes = [
+                    child_bone_index
+                    for child_bone_index in dress_parent_bone.child_bone_indexes
+                    if dress.bones[child_bone_index].is_standard
+                ]
+                if not child_bone_indexes:
+                    child_bone_indexes = [
+                        child_bone_index
+                        for child_bone_index in dress_other_bone.child_bone_indexes
+                        if dress.bones[child_bone_index].is_standard
+                    ]
+                if not child_bone_indexes:
+                    child_bone_indexes = dress_parent_bone.child_bone_indexes
+                if not child_bone_indexes:
+                    child_bone_indexes = dress_other_bone.child_bone_indexes
 
-        #         # 変形後の位置
-        #         deformed_parent_position = dress_matrixes[0, dress_parent_bone.name].position
-        #         deformed_bone_position = dress_matrixes[0, dress_other_bone.name].position
-        #         deformed_tail_position = dress_matrixes[0, dress_other_bone.name].global_matrix * dress_other_bone.tail_relative_position
+                child_bone_index = child_bone_indexes[0] if len(child_bone_indexes) else -1
 
-        #         deformed_diff_position = deformed_bone_position - deformed_parent_position
-        #         deformed_bone_slope_qq = deformed_diff_position.to_local_matrix4x4().to_quaternion()
+                original_parent_position = dress_parent_bone.position
+                original_bone_position = dress_other_bone.position
+                original_child_position = (
+                    dress.bones[child_bone_index].position
+                    if 0 <= child_bone_index
+                    else dress_other_bone.position + dress_other_bone.tail_relative_position
+                )
 
-        #         deformed_original_offset_slope_qq = deformed_bone_slope_qq * original_bone_slope_qq.inverse()
-        #         deformed_original_diff_position = deformed_original_offset_slope_qq * original_diff_position
+                target_bone_names = [dress_parent_bone.name, dress_other_bone.name]
+                if 0 <= child_bone_index:
+                    target_bone_names.append(dress.bones[child_bone_index].name)
 
-        #         dress_offset_position = deformed_original_diff_position - original_diff_position
+                dress_matrixes = dress_motion.animate_bone([0], dress, target_bone_names, append_ik=False)
 
-        #         # キーフレとして追加
-        #         mbf = dress_motion.bones[dress_other_bone.name][0]
-        #         mbf.position = dress_offset_position.copy()
-        #         dress_motion.bones[dress_other_bone.name].append(mbf)
+                # 変形後の位置
+                deformed_parent_position = dress_matrixes[0, dress_parent_bone.name].position
+                deformed_bone_position = dress_matrixes[0, dress_other_bone.name].position
+                deformed_child_position = (
+                    dress_matrixes[0, dress.bones[child_bone_index].name].position
+                    if 0 <= child_bone_index
+                    else dress_matrixes[0, dress_other_bone.name].global_matrix * dress_other_bone.tail_relative_position
+                )
 
-        #         # # 変形後の回転
-        #         # dress_matrixes = dress_motion.animate_bone([0], dress, [dress_other_bone.name], append_ik=False)
+                deformed_new_bone_position = align_triangle(
+                    original_parent_position,
+                    original_child_position,
+                    original_bone_position,
+                    deformed_parent_position,
+                    deformed_child_position,
+                )
 
-        #         # # 変形後の位置
-        #         # deformed_parent_position = dress_matrixes[0, dress_parent_bone.name].position
-        #         # deformed_bone_position = dress_matrixes[0, dress_other_bone.name].position
-        #         # deformed_tail_position = dress_matrixes[0, dress_other_bone.name].global_matrix * dress_other_bone.tail_relative_position
+                dress_offset_position = deformed_new_bone_position - deformed_bone_position
 
-        #         # original_slope_qq = (original_tail_position - original_bone_position).to_local_matrix4x4().to_quaternion()
-        #         # deformed_slope_qq = (deformed_tail_position - deformed_bone_position).to_local_matrix4x4().to_quaternion()
+                # キーフレとして追加
+                mbf = dress_motion.bones[dress_other_bone.name][0]
+                mbf.position = dress_offset_position.copy()
+                dress_motion.bones[dress_other_bone.name].append(mbf)
 
-        #         # # 変形後の角度
-        #         # dress_offset_qq = deformed_slope_qq * original_slope_qq.inverse()
+                # 回転補正
+                original_slope_qq = (deformed_bone_position - deformed_parent_position).to_local_matrix4x4().to_quaternion()
+                deformed_slope_qq = (deformed_new_bone_position - deformed_parent_position).to_local_matrix4x4().to_quaternion()
 
-        #         # for tree_bone_index in reversed(dress.bone_trees[dress_other_bone.name].indexes[:-1]):
-        #         #     # 自分より親は逆回転させる
-        #         #     dress_offset_qq *= dress_offset_qqs.get(tree_bone_index, MQuaternion()).inverse()
+                dress_offset_qq = deformed_slope_qq * original_slope_qq.inverse()
+            else:
+                for tree_bone_index in reversed(dress.bone_trees[dress_other_bone.name].indexes[:-1]):
+                    # 自分より親は逆回転させる
+                    dress_offset_qq *= dress_offset_qqs.get(tree_bone_index, MQuaternion()).inverse()
 
-        #         # # キーフレとして追加
-        #         # qbf = dress_motion.bones[dress_other_bone.name][0]
-        #         # qbf.rotation = dress_offset_qq.copy()
-        #         # dress_motion.bones[dress_other_bone.name].append(qbf)
-        #     else:
-        #         # 腕系以外は親のキャンセルだけ行う
-        #         for tree_bone_index in reversed(dress.bone_trees[dress_other_bone.name].indexes[:-1]):
-        #             # 自分より親は逆回転させる
-        #             dress_offset_qq *= dress_offset_qqs.get(tree_bone_index, MQuaternion()).inverse()
+            dress_offset_qqs[dress_other_bone.index] = dress_offset_qq
+            dress_offset_positions[dress_other_bone.index] = dress_offset_position
 
-        #     dress_offset_qqs[dress_other_bone.index] = dress_offset_qq
-        #     dress_offset_positions[dress_other_bone.index] = dress_offset_position
-
-        #     logger.debug(f"-- -- 準標準外オフセット[{dress_other_bone.name}][pos={dress_offset_position}][qq={dress_offset_qq.to_euler_degrees()}]")
+            logger.debug(f"-- -- 準標準外オフセット[{dress_other_bone.name}][pos={dress_offset_position}][qq={dress_offset_qq.to_euler_degrees()}]")
 
         return dress_offset_positions, dress_offset_qqs
 
