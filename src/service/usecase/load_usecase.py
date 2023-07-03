@@ -1000,8 +1000,8 @@ class LoadUsecase:
                         dress_leg_ik_position,
                     )
 
-                    # XY位置は人物側のひざ位置に合わせる
-                    knee_new_position.y = model.bones[bone_name].position.y
+                    # # XY位置は人物側のひざ位置に合わせる
+                    # knee_new_position.y = model.bones[bone_name].position.y
 
                     model_bone_position = knee_new_position
                     dress_bone_position = dress_knee_position
