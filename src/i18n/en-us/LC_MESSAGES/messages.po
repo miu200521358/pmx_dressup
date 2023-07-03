@@ -953,3 +953,9 @@ msgstr "Bone position is aligned costume"
 
 msgid "衣装: 位置調整"
 msgstr "Costume: positioning"
+
+msgid "準標準オフセット計算"
+msgstr "Quasi-Standard Offset Calculations"
+
+msgid "-- 準標準オフセット計算 [{i} ({p:.2f}%)]"
+msgstr "-- Quasi-standard offset calculation [{i} ({p:.2f}%)]"
