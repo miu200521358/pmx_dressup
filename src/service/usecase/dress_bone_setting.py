@@ -100,7 +100,8 @@ class DressBoneSettings(Enum):
         category="体幹",
         weight_names=[],
         translatable=True,
-        rotatable=False,
+        # 回転はキャンセル用
+        rotatable=True,
         global_scalable=False,
         local_scalable=False,
         local_scale_target=False,
@@ -140,7 +141,8 @@ class DressBoneSettings(Enum):
         category="体幹",
         weight_names=[],
         translatable=True,
-        rotatable=False,
+        # 回転はキャンセル用
+        rotatable=True,
         global_scalable=False,
         local_scalable=False,
         local_scale_target=False,
@@ -183,7 +185,7 @@ class DressBoneSettings(Enum):
         category="肩",
         weight_names=[],
         translatable=True,
-        rotatable=False,
+        rotatable=True,
         global_scalable=True,
         local_scalable=False,
         local_scale_target=False,
@@ -203,7 +205,7 @@ class DressBoneSettings(Enum):
         category="腕",
         weight_names=[],
         translatable=True,
-        rotatable=False,
+        rotatable=True,
         global_scalable=True,
         local_scalable=False,
         local_scale_target=False,
@@ -531,82 +533,12 @@ class DressBoneSettings(Enum):
     RIGHT_LEG = DressBoneSetting(
         setting=BoneSettings.RIGHT_LEG.value,
         category="足",
-        weight_names=("右足", "右足D", "足中心"),
+        weight_names=("右足", "右足D"),
         translatable=True,
-        rotatable=False,
+        rotatable=True,
         global_scalable=True,
         local_scalable=True,
         local_scale_target=True,
-    )
-    RIGHT_KNEE = DressBoneSetting(
-        setting=BoneSettings.RIGHT_KNEE.value,
-        category="ひざ",
-        weight_names=("右ひざ", "右ひざD"),
-        translatable=True,
-        rotatable=False,
-        global_scalable=True,
-        local_scalable=True,
-        local_scale_target=True,
-    )
-    RIGHT_ANKLE = DressBoneSetting(
-        setting=BoneSettings.RIGHT_ANKLE.value,
-        category="足首",
-        weight_names=("右足首", "右足首D", "右つま先", "右足先EX"),
-        translatable=True,
-        rotatable=False,
-        global_scalable=True,
-        local_scalable=True,
-        local_scale_target=True,
-    )
-    RIGHT_TOE = DressBoneSetting(
-        setting=BoneSettings.RIGHT_TOE.value,
-        category="足首",
-        weight_names=("右つま先",),
-        translatable=False,
-        rotatable=False,
-        global_scalable=False,
-        local_scalable=False,
-        local_scale_target=False,
-    )
-    RIGHT_LEG_D = DressBoneSetting(
-        setting=BoneSettings.RIGHT_LEG_D.value,
-        category="足",
-        weight_names=[],
-        translatable=False,
-        rotatable=False,
-        global_scalable=True,
-        local_scalable=True,
-        local_scale_target=True,
-    )
-    RIGHT_KNEE_D = DressBoneSetting(
-        setting=BoneSettings.RIGHT_KNEE_D.value,
-        category="ひざ",
-        weight_names=[],
-        translatable=True,
-        rotatable=False,
-        global_scalable=True,
-        local_scalable=True,
-        local_scale_target=True,
-    )
-    RIGHT_ANKLE_D = DressBoneSetting(
-        setting=BoneSettings.RIGHT_ANKLE_D.value,
-        category="足首",
-        weight_names=[],
-        translatable=True,
-        rotatable=False,
-        global_scalable=True,
-        local_scalable=True,
-        local_scale_target=True,
-    )
-    RIGHT_TOE_EX = DressBoneSetting(
-        setting=BoneSettings.RIGHT_TOE_EX.value,
-        category="足首",
-        weight_names=[],
-        translatable=False,
-        rotatable=False,
-        global_scalable=False,
-        local_scalable=False,
-        local_scale_target=False,
     )
     RIGHT_LEG_IK_PARENT = DressBoneSetting(
         setting=BoneSettings.RIGHT_LEG_IK_PARENT.value,
@@ -638,6 +570,77 @@ class DressBoneSettings(Enum):
         local_scalable=False,
         local_scale_target=False,
     )
+    RIGHT_KNEE = DressBoneSetting(
+        setting=BoneSettings.RIGHT_KNEE.value,
+        category="足",
+        weight_names=("右ひざ", "右ひざD"),
+        translatable=True,
+        rotatable=True,
+        global_scalable=True,
+        local_scalable=True,
+        local_scale_target=True,
+    )
+    RIGHT_ANKLE = DressBoneSetting(
+        setting=BoneSettings.RIGHT_ANKLE.value,
+        category="足首",
+        weight_names=("右足首", "右足首D", "右つま先", "右足先EX"),
+        translatable=True,
+        # キャンセル用
+        rotatable=True,
+        global_scalable=True,
+        local_scalable=True,
+        local_scale_target=True,
+    )
+    RIGHT_TOE = DressBoneSetting(
+        setting=BoneSettings.RIGHT_TOE.value,
+        category="足首",
+        weight_names=("右つま先",),
+        translatable=True,
+        rotatable=False,
+        global_scalable=False,
+        local_scalable=True,
+        local_scale_target=True,
+    )
+    RIGHT_LEG_D = DressBoneSetting(
+        setting=BoneSettings.RIGHT_LEG_D.value,
+        category="足",
+        weight_names=[],
+        translatable=False,
+        rotatable=False,
+        global_scalable=True,
+        local_scalable=True,
+        local_scale_target=True,
+    )
+    RIGHT_KNEE_D = DressBoneSetting(
+        setting=BoneSettings.RIGHT_KNEE_D.value,
+        category="足",
+        weight_names=[],
+        translatable=False,
+        rotatable=False,
+        global_scalable=True,
+        local_scalable=True,
+        local_scale_target=True,
+    )
+    RIGHT_ANKLE_D = DressBoneSetting(
+        setting=BoneSettings.RIGHT_ANKLE_D.value,
+        category="足首",
+        weight_names=[],
+        translatable=False,
+        rotatable=False,
+        global_scalable=True,
+        local_scalable=True,
+        local_scale_target=True,
+    )
+    RIGHT_TOE_EX = DressBoneSetting(
+        setting=BoneSettings.RIGHT_TOE_EX.value,
+        category="足首",
+        weight_names=[],
+        translatable=True,
+        rotatable=False,
+        global_scalable=True,
+        local_scalable=False,
+        local_scale_target=False,
+    )
 
     LEFT_BUST = DressBoneSetting(
         setting=BoneSettings.LEFT_BUST.value,
@@ -656,7 +659,7 @@ class DressBoneSettings(Enum):
         category="肩",
         weight_names=[],
         translatable=True,
-        rotatable=False,
+        rotatable=True,
         global_scalable=True,
         local_scalable=False,
         local_scale_target=False,
@@ -676,7 +679,7 @@ class DressBoneSettings(Enum):
         category="腕",
         weight_names=[],
         translatable=True,
-        rotatable=False,
+        rotatable=True,
         global_scalable=True,
         local_scalable=False,
         local_scale_target=False,
@@ -1004,82 +1007,12 @@ class DressBoneSettings(Enum):
     LEFT_LEG = DressBoneSetting(
         setting=BoneSettings.LEFT_LEG.value,
         category="足",
-        weight_names=("左足", "左足D", "足中心"),
+        weight_names=("左足", "左足D"),
         translatable=True,
-        rotatable=False,
+        rotatable=True,
         global_scalable=True,
         local_scalable=True,
         local_scale_target=True,
-    )
-    LEFT_KNEE = DressBoneSetting(
-        setting=BoneSettings.LEFT_KNEE.value,
-        category="ひざ",
-        weight_names=("左ひざ", "左ひざD"),
-        translatable=True,
-        rotatable=False,
-        global_scalable=True,
-        local_scalable=True,
-        local_scale_target=True,
-    )
-    LEFT_ANKLE = DressBoneSetting(
-        setting=BoneSettings.LEFT_ANKLE.value,
-        category="足首",
-        weight_names=("左足首", "左足首D", "左つま先", "左足先EX"),
-        translatable=True,
-        rotatable=False,
-        global_scalable=True,
-        local_scalable=True,
-        local_scale_target=True,
-    )
-    LEFT_TOE = DressBoneSetting(
-        setting=BoneSettings.LEFT_TOE.value,
-        category="足首",
-        weight_names=("左つま先",),
-        translatable=False,
-        rotatable=False,
-        global_scalable=False,
-        local_scalable=False,
-        local_scale_target=False,
-    )
-    LEFT_LEG_D = DressBoneSetting(
-        setting=BoneSettings.LEFT_LEG_D.value,
-        category="足",
-        weight_names=[],
-        translatable=False,
-        rotatable=False,
-        global_scalable=True,
-        local_scalable=True,
-        local_scale_target=True,
-    )
-    LEFT_KNEE_D = DressBoneSetting(
-        setting=BoneSettings.LEFT_KNEE_D.value,
-        category="ひざ",
-        weight_names=[],
-        translatable=True,
-        rotatable=False,
-        global_scalable=True,
-        local_scalable=True,
-        local_scale_target=True,
-    )
-    LEFT_ANKLE_D = DressBoneSetting(
-        setting=BoneSettings.LEFT_ANKLE_D.value,
-        category="足首",
-        weight_names=[],
-        translatable=True,
-        rotatable=False,
-        global_scalable=True,
-        local_scalable=True,
-        local_scale_target=True,
-    )
-    LEFT_TOE_EX = DressBoneSetting(
-        setting=BoneSettings.LEFT_TOE_EX.value,
-        category="足首",
-        weight_names=[],
-        translatable=False,
-        rotatable=False,
-        global_scalable=False,
-        local_scalable=False,
-        local_scale_target=False,
     )
     LEFT_LEG_IK_PARENT = DressBoneSetting(
         setting=BoneSettings.LEFT_LEG_IK_PARENT.value,
@@ -1104,6 +1037,76 @@ class DressBoneSettings(Enum):
     LEFT_TOE_IK = DressBoneSetting(
         setting=BoneSettings.LEFT_TOE_IK.value,
         category="つま先ＩＫ",
+        weight_names=[],
+        translatable=True,
+        rotatable=False,
+        global_scalable=True,
+        local_scalable=False,
+        local_scale_target=False,
+    )
+    LEFT_KNEE = DressBoneSetting(
+        setting=BoneSettings.LEFT_KNEE.value,
+        category="足",
+        weight_names=("左ひざ", "左ひざD"),
+        translatable=True,
+        rotatable=True,
+        global_scalable=True,
+        local_scalable=True,
+        local_scale_target=True,
+    )
+    LEFT_ANKLE = DressBoneSetting(
+        setting=BoneSettings.LEFT_ANKLE.value,
+        category="足首",
+        weight_names=("左足首", "左足首D", "左つま先", "左足先EX"),
+        translatable=True,
+        rotatable=True,
+        global_scalable=True,
+        local_scalable=True,
+        local_scale_target=True,
+    )
+    LEFT_TOE = DressBoneSetting(
+        setting=BoneSettings.LEFT_TOE.value,
+        category="足首",
+        weight_names=("左つま先",),
+        translatable=True,
+        rotatable=False,
+        global_scalable=False,
+        local_scalable=False,
+        local_scale_target=False,
+    )
+    LEFT_LEG_D = DressBoneSetting(
+        setting=BoneSettings.LEFT_LEG_D.value,
+        category="足",
+        weight_names=[],
+        translatable=False,
+        rotatable=False,
+        global_scalable=True,
+        local_scalable=True,
+        local_scale_target=True,
+    )
+    LEFT_KNEE_D = DressBoneSetting(
+        setting=BoneSettings.LEFT_KNEE_D.value,
+        category="足",
+        weight_names=[],
+        translatable=False,
+        rotatable=False,
+        global_scalable=True,
+        local_scalable=True,
+        local_scale_target=True,
+    )
+    LEFT_ANKLE_D = DressBoneSetting(
+        setting=BoneSettings.LEFT_ANKLE_D.value,
+        category="足首",
+        weight_names=[],
+        translatable=False,
+        rotatable=False,
+        global_scalable=True,
+        local_scalable=False,
+        local_scale_target=False,
+    )
+    LEFT_TOE_EX = DressBoneSetting(
+        setting=BoneSettings.LEFT_TOE_EX.value,
+        category="足首",
         weight_names=[],
         translatable=True,
         rotatable=False,
