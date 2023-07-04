@@ -867,17 +867,17 @@ class LoadUsecase:
                 dress_fit_length_scale = (model_bone.position - model.bones[bone_name[:4]].position).z / (
                     (dress_bone.position - dress.bones[bone_name[:4]].position).z or 1
                 )
-            elif bone_name == "下半身":
-                # 下半身は腰から足中心までの長さ
-                model_bone_position = model_matrixes[0, "腰"].position
-                model_tail_position = model_matrixes[0, "足中心"].position
+            # elif bone_name == "下半身":
+            #     # 下半身は腰から足中心までの長さ
+            #     model_bone_position = model_matrixes[0, "腰"].position
+            #     model_tail_position = model_matrixes[0, "足中心"].position
 
-                dress_bone_position = dress_matrixes[0, "腰"].position
-                dress_tail_position = dress_matrixes[0, "足中心"].position
+            #     dress_bone_position = dress_matrixes[0, "腰"].position
+            #     dress_tail_position = dress_matrixes[0, "足中心"].position
 
-                dress_fit_length_scale = (model_tail_position - model_bone_position).length() / (
-                    (dress_tail_position - dress_bone_position).length() or 1
-                )
+            #     dress_fit_length_scale = (model_tail_position - model_bone_position).length() / (
+            #         (dress_tail_position - dress_bone_position).length() or 1
+            #     )
             else:
                 model_bone_position = model_matrixes[0, bone_name].position
                 model_tail_position = model_matrixes[0, bone_name].global_matrix * model_bone.tail_relative_position
@@ -988,6 +988,14 @@ class LoadUsecase:
             dress_bone = dress.bones[bone_name]
             model_bone = model.bones[bone_name]
 
+            parent_bone_names = [bone_name for bone_name in bone_setting.parents if bone_name in dress.bones and bone_name in model.bones]
+            dress_parent_bone = dress.bones[parent_bone_names[0]] if parent_bone_names else dress.bones[dress_bone.parent_index]
+            model_parent_bone = model.bones[parent_bone_names[0]] if parent_bone_names else model.bones[model_bone.parent_index]
+
+            tail_bone_names = [bone_name for bone_name in bone_setting.tails if bone_name in dress.bones and bone_name in model.bones]
+            dress_tail_bone = dress.bones[tail_bone_names[0]] if tail_bone_names else dress.bones[dress_bone.tail_index]
+            model_tail_bone = model.bones[tail_bone_names[0]] if tail_bone_names else model.bones[model_bone.tail_index]
+
             if bone_setting.translatable:
                 # 移動計算 ------------------
 
@@ -1014,27 +1022,40 @@ class LoadUsecase:
                     # # XY位置は人物側のひざ位置に合わせる
                     # knee_new_position.y = model.bones[bone_name].position.y
 
-                    model_bone_position = knee_new_position
+                    dress_bone_fit_position = knee_new_position
                     dress_bone_position = dress_knee_position
                 elif "足首" in bone_name:
                     leg_ik_bone_name = f"{bone_name[0]}足ＩＫ"
                     dress_matrixes = dress_motion.animate_bone([0], dress, [bone_name, leg_ik_bone_name], append_ik=False)
 
-                    model_bone_position = dress_matrixes[0, leg_ik_bone_name].position
+                    dress_bone_fit_position = dress_matrixes[0, leg_ik_bone_name].position
                     dress_bone_position = dress_matrixes[0, bone_name].position
                 elif "つま先" in bone_name:
                     toe_ik_bone_name = f"{bone_name[0]}つま先ＩＫ"
                     dress_matrixes = dress_motion.animate_bone([0], dress, [bone_name, toe_ik_bone_name], append_ik=False)
 
-                    model_bone_position = dress_matrixes[0, toe_ik_bone_name].position
+                    dress_bone_fit_position = dress_matrixes[0, toe_ik_bone_name].position
                     dress_bone_position = dress_matrixes[0, bone_name].position
                 else:
+                    model_parent_position = model_matrixes[0, model_parent_bone.name].position
                     model_bone_position = model_matrixes[0, bone_name].position
+                    model_tail_position = model_matrixes[0, model_tail_bone.name].position
 
-                    dress_matrixes = dress_motion.animate_bone([0], dress, [bone_name], append_ik=False)
+                    dress_matrixes = dress_motion.animate_bone([0], dress, [dress_tail_bone.name], append_ik=False)
+
+                    dress_parent_position = dress_matrixes[0, dress_parent_bone.name].position
                     dress_bone_position = dress_matrixes[0, bone_name].position
+                    dress_tail_position = dress_matrixes[0, dress_tail_bone.name].position
 
-                dress_offset_position = model_bone_position - dress_bone_position
+                    dress_bone_fit_position = align_triangle(
+                        model_parent_position,
+                        model_tail_position,
+                        model_bone_position,
+                        dress_parent_position,
+                        model_tail_position,
+                    )
+
+                dress_offset_position = dress_bone_fit_position - dress_bone_position
                 dress_offset_positions[dress_bone.index] = dress_offset_position
 
                 # キーフレとして追加
@@ -1044,7 +1065,7 @@ class LoadUsecase:
 
                 logger.debug(
                     f"-- -- 移動オフセット[{dress_bone.name}][{dress_offset_position}]"
-                    + f"[model={model_bone_position}][dress={dress_bone_position}]"
+                    + f"[fit={dress_bone_fit_position}][dress={dress_bone_position}]"
                 )
 
                 if f"{bone_name}D" in dress.bones and "足" in bone_setting.category:
@@ -1059,7 +1080,7 @@ class LoadUsecase:
 
                     logger.debug(
                         f"-- -- 移動オフセット[{d_dress_bone.name}][{dress_offset_position}]"
-                        + f"[model={model_bone_position}][dress={dress_bone_position}]"
+                        + f"[fit={dress_bone_fit_position}][dress={dress_bone_position}]"
                     )
 
             if bone_setting.rotatable:
@@ -1074,8 +1095,16 @@ class LoadUsecase:
                     tail_bone_names = [f"{bone_name[0]}手首"]
 
                 # モデルのボーンの向きに衣装を合わせる
-                if dress_bone.name in ("頭", "左胸", "右胸", "左足首D", "右足首D", "左足首", "右足首", "肩C", "足中心"):
-                    # 特定ボーンは親のキャンセルだけ行う(首根元・足中心は四肢系のフィッティングのため、一旦キャンセルする)
+                if (
+                    "胸" in dress_bone.name
+                    or "足首" in dress_bone.name
+                    or "肩" in dress_bone.name
+                    or "ひじ" in dress_bone.name
+                    or "手首" in dress_bone.name
+                    or dress_bone.name in ("頭", "首根元", "足中心")
+                    or dress_bone.is_twist
+                ):
+                    # 特定ボーンは親のキャンセルだけ行う
                     dress_offset_qq = MQuaternion()
                 else:
                     model_bone_position = model_matrixes[0, bone_name].position
@@ -1154,6 +1183,10 @@ class LoadUsecase:
                 and dress.bones[dress_other_bone.parent_index].is_standard
                 and not dress.bone_trees.is_in_standard(dress_other_bone.name)
             ):
+                continue
+
+            if "握" in dress_other_bone.name or "拡散" in dress_other_bone.name:
+                # 握り拡散系はスルー
                 continue
 
             # 親ボーンが準標準、かつ自身が準標準外の場合
@@ -1338,10 +1371,13 @@ class LoadUsecase:
             local_scale = MVector3D(*model_local_distances).one() / MVector3D(*dress_local_distances).one()
 
             if category in ("胸",):
-                local_scale_value = min(dress_category_scale_values.get(category, 1) * 1.5, max(1, np.mean([local_scale.x, local_scale.z])))
+                local_scale_value = np.mean([local_scale.x, local_scale.z]) / min(1, dress_category_scale_values.get(category, 1))
                 dress_local_scales[category] = MVector3D(local_scale_value, 1.0, local_scale_value)
             else:
-                local_scale_value = min(dress_category_scale_values.get(category, 1) * 1.5, max(1, np.mean([local_scale.y, local_scale.z])))
+                local_scale_value = np.mean([local_scale.y, local_scale.z]) / min(1, dress_category_scale_values.get(category, 1))
+                if category in ("腕", "手首", "足", "足首"):
+                    # 四肢はフィットしすぎるので少し大きめに
+                    local_scale_value += 0.1
                 dress_local_scales[category] = MVector3D(1.0, local_scale_value, local_scale_value)
 
             logger.debug(
