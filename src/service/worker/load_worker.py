@@ -9,7 +9,7 @@ from mlib.pmx.pmx_collection import PmxModel
 from mlib.pmx.pmx_writer import PmxWriter
 from mlib.service.base_worker import BaseWorker
 from mlib.service.form.base_frame import BaseFrame
-from mlib.utils.file_utils import get_root_dir
+from mlib.utils.file_utils import get_path, get_root_dir
 from mlib.vmd.vmd_collection import VmdMotion
 from service.form.panel.file_panel import FilePanel
 from service.usecase.load_usecase import LoadUsecase
@@ -56,6 +56,11 @@ class LoadWorker(BaseWorker):
             original_model = PmxModel()
             model = PmxModel()
 
+        # 素体読み込み
+        logger.info("フィッティング用素体: 読み込み開始", decoration=MLogger.Decoration.BOX)
+        prime = file_panel.model_ctrl.reader.read_by_filepath(get_path("resources/prime_body.pmx"))
+        prime.update_vertices_by_bone()
+
         if model and isinstance(model, PmxModel) and file_panel.dress_ctrl.valid() and (is_model_change or not file_panel.dress_ctrl.data):
             logger.info("衣装: 読み込み開始", decoration=MLogger.Decoration.BOX)
 
@@ -76,11 +81,11 @@ class LoadWorker(BaseWorker):
 
             logger.info("衣装: 位置調整", decoration=MLogger.Decoration.LINE)
 
-            # # 下半身の再設定
-            # replaced_bone_names += usecase.replace_lower(model, dress)
+            # 下半身の再設定
+            replaced_bone_names += usecase.replace_lower(model, dress)
 
-            # # 上半身の再設定
-            # replaced_bone_names += usecase.replace_upper(model, dress)
+            # 上半身の再設定
+            replaced_bone_names += usecase.replace_upper(model, dress)
 
             # 上半身2の再設定
             replaced_bone_names += usecase.replace_upper2(model, dress)
@@ -131,7 +136,7 @@ class LoadWorker(BaseWorker):
 
             # 衣装にフィッティングボーンモーフを入れる
             logger.info("衣装: 追加セットアップ: フィッティングモーフ追加", decoration=MLogger.Decoration.BOX)
-            usecase.create_dress_fit_morphs(model, dress)
+            usecase.create_dress_fit_morphs(model, dress, prime)
 
             # # 衣装のローカル軸再計算
             # logger.info("衣装: 追加セットアップ: ローカル軸再計算", decoration=MLogger.Decoration.BOX)
