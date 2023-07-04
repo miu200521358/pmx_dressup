@@ -1030,6 +1030,23 @@ class LoadUsecase:
 
                     dress_bone_fit_position = dress_matrixes[0, leg_ik_bone_name].position
                     dress_bone_position = dress_matrixes[0, bone_name].position
+                elif "足先EX" in bone_name:
+                    leg_ik_bone_name = f"{bone_name[0]}足ＩＫ"
+                    toe_ik_bone_name = f"{bone_name[0]}つま先ＩＫ"
+                    dress_matrixes = dress_motion.animate_bone([0], dress, [bone_name, leg_ik_bone_name, toe_ik_bone_name], append_ik=False)
+
+                    dress_leg_ik_position = dress_matrixes[0, leg_ik_bone_name].position
+                    dress_toe_ik_position = dress_matrixes[0, toe_ik_bone_name].position
+                    dress_bone_position = dress_matrixes[0, bone_name].position
+
+                    dress_bone_fit_position = align_triangle(
+                        dress.bones[leg_ik_bone_name].position,
+                        dress.bones[toe_ik_bone_name].position,
+                        dress.bones[bone_name].position,
+                        dress_leg_ik_position,
+                        dress_toe_ik_position,
+                    )
+
                 elif "つま先" in bone_name:
                     toe_ik_bone_name = f"{bone_name[0]}つま先ＩＫ"
                     dress_matrixes = dress_motion.animate_bone([0], dress, [bone_name, toe_ik_bone_name], append_ik=False)
