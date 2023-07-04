@@ -867,6 +867,17 @@ class LoadUsecase:
                 dress_fit_length_scale = (model_bone.position - model.bones[bone_name[:4]].position).z / (
                     (dress_bone.position - dress.bones[bone_name[:4]].position).z or 1
                 )
+            elif bone_name == "下半身":
+                # 下半身は腰から足中心までの長さ
+                model_bone_position = model_matrixes[0, "腰"].position
+                model_tail_position = model_matrixes[0, "足中心"].position
+
+                dress_bone_position = dress_matrixes[0, "腰"].position
+                dress_tail_position = dress_matrixes[0, "足中心"].position
+
+                dress_fit_length_scale = (model_tail_position - model_bone_position).length() / (
+                    (dress_tail_position - dress_bone_position).length() or 1
+                )
             else:
                 model_bone_position = model_matrixes[0, bone_name].position
                 model_tail_position = model_matrixes[0, bone_name].global_matrix * model_bone.tail_relative_position
@@ -1058,13 +1069,17 @@ class LoadUsecase:
                     for tail_bone_name in bone_setting.tails
                     if tail_bone_name in dress.bones and tail_bone_name in model.bones
                 ]
+                if bone_name in ("右腕", "左腕") and f"{bone_name[0]}手首" in dress.bones and f"{bone_name[0]}手首" in model.bones:
+                    # 腕だけは手首を参照する（直線角度を測る）
+                    tail_bone_names = [f"{bone_name[0]}手首"]
 
                 # モデルのボーンの向きに衣装を合わせる
-                if dress_bone.name in ("頭", "左胸", "右胸", "左足首D", "右足首D", "左足首", "右足首", "首根元", "足中心"):
+                if dress_bone.name in ("頭", "左胸", "右胸", "左足首D", "右足首D", "左足首", "右足首", "肩C", "足中心"):
                     # 特定ボーンは親のキャンセルだけ行う(首根元・足中心は四肢系のフィッティングのため、一旦キャンセルする)
                     dress_offset_qq = MQuaternion()
                 else:
                     model_bone_position = model_matrixes[0, bone_name].position
+
                     if tail_bone_names:
                         dress_matrixes = dress_motion.animate_bone([0], dress, [tail_bone_names[0]], append_ik=False)
                         dress_bone_position = dress_matrixes[0, bone_name].position
@@ -1073,10 +1088,11 @@ class LoadUsecase:
                         dress_tail_position = dress_matrixes[0, tail_bone_names[0]].position
                     else:
                         dress_matrixes = dress_motion.animate_bone([0], dress, [bone_name], append_ik=False)
+
                         dress_bone_position = dress_matrixes[0, bone_name].position
+                        dress_tail_position = dress_matrixes[0, bone_name].global_matrix * dress_bone.tail_relative_position
 
                         model_tail_position = model_matrixes[0, bone_name].global_matrix * model_bone.tail_relative_position
-                        dress_tail_position = dress_matrixes[0, bone_name].global_matrix * dress_bone.tail_relative_position
 
                     # 衣装：自分の方向
                     dress_slope_qq = (dress_tail_position - dress_bone_position).to_local_matrix4x4().to_quaternion()
@@ -1084,7 +1100,7 @@ class LoadUsecase:
                     # 人物：自分の方向
                     model_slope_qq = (model_tail_position - model_bone_position).to_local_matrix4x4().to_quaternion()
 
-                    dress_offset_qq = dress_slope_qq * model_slope_qq.inverse()
+                    dress_offset_qq = model_slope_qq * dress_slope_qq.inverse()
 
                 for tree_bone_index in reversed(dress.bone_trees[bone_name].indexes[:-1]):
                     # 自分より親は逆回転させる
@@ -1205,11 +1221,12 @@ class LoadUsecase:
                 dress_motion.bones[dress_other_bone.name].append(mbf)
 
                 # 回転補正
-                original_slope_qq = (deformed_bone_position - deformed_parent_position).to_local_matrix4x4().to_quaternion()
-                deformed_slope_qq = (deformed_new_bone_position - deformed_parent_position).to_local_matrix4x4().to_quaternion()
+                original_slope_qq = (deformed_new_bone_position - deformed_parent_position).to_local_matrix4x4().to_quaternion()
+                deformed_slope_qq = (deformed_bone_position - deformed_parent_position).to_local_matrix4x4().to_quaternion()
 
-                dress_offset_qq = deformed_slope_qq * original_slope_qq.inverse()
-            else:
+                dress_offset_qq = original_slope_qq * deformed_slope_qq.inverse()
+
+            elif DRESS_STANDARD_BONE_NAMES[dress_parent_bone.name].category in ("上半身", "下半身", "体幹"):
                 for tree_bone_index in reversed(dress.bone_trees[dress_other_bone.name].indexes[:-1]):
                     # 自分より親は逆回転させる
                     dress_offset_qq *= dress_offset_qqs.get(tree_bone_index, MQuaternion()).inverse()
@@ -1321,10 +1338,10 @@ class LoadUsecase:
             local_scale = MVector3D(*model_local_distances).one() / MVector3D(*dress_local_distances).one()
 
             if category in ("胸",):
-                local_scale_value = max(1, np.mean([local_scale.x, local_scale.z]))
+                local_scale_value = min(dress_category_scale_values.get(category, 1) * 1.5, max(1, np.mean([local_scale.x, local_scale.z])))
                 dress_local_scales[category] = MVector3D(local_scale_value, 1.0, local_scale_value)
             else:
-                local_scale_value = max(1, np.mean([local_scale.y, local_scale.z]))
+                local_scale_value = min(dress_category_scale_values.get(category, 1) * 1.5, max(1, np.mean([local_scale.y, local_scale.z])))
                 dress_local_scales[category] = MVector3D(1.0, local_scale_value, local_scale_value)
 
             logger.debug(

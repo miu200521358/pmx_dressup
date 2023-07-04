@@ -77,7 +77,7 @@ class DressBoneSettings(Enum):
     )
     WAIST = DressBoneSetting(
         setting=BoneSettings.WAIST.value,
-        category="体幹",
+        category="下半身",
         weight_names=[],
         translatable=True,
         rotatable=False,
@@ -87,7 +87,7 @@ class DressBoneSettings(Enum):
     )
     LOWER = DressBoneSetting(
         setting=BoneSettings.LOWER.value,
-        category="体幹",
+        category="下半身",
         weight_names=("下半身",),
         translatable=True,
         rotatable=False,
@@ -97,7 +97,7 @@ class DressBoneSettings(Enum):
     )
     LEG_CENTER = DressBoneSetting(
         setting=BoneSettings.LEG_CENTER.value,
-        category="体幹",
+        category="下半身",
         weight_names=[],
         translatable=True,
         # 回転はキャンセル用
@@ -108,7 +108,7 @@ class DressBoneSettings(Enum):
     )
     UPPER = DressBoneSetting(
         setting=BoneSettings.UPPER.value,
-        category="体幹",
+        category="上半身",
         weight_names=("上半身",),
         translatable=True,
         rotatable=True,
@@ -118,7 +118,7 @@ class DressBoneSettings(Enum):
     )
     UPPER2 = DressBoneSetting(
         setting=BoneSettings.UPPER2.value,
-        category="体幹",
+        category="上半身",
         weight_names=("上半身2", "左胸", "右胸", "首根元"),
         translatable=True,
         rotatable=True,
@@ -128,7 +128,7 @@ class DressBoneSettings(Enum):
     )
     UPPER3 = DressBoneSetting(
         setting=BoneSettings.UPPER3.value,
-        category="体幹",
+        category="上半身",
         weight_names=("上半身3", "左胸", "右胸", "首根元"),
         translatable=True,
         rotatable=True,
@@ -138,7 +138,7 @@ class DressBoneSettings(Enum):
     )
     ARM_CENTER = DressBoneSetting(
         setting=BoneSettings.ARM_CENTER.value,
-        category="体幹",
+        category="上半身",
         weight_names=[],
         translatable=True,
         # 回転はキャンセル用
@@ -205,7 +205,7 @@ class DressBoneSettings(Enum):
         category="腕",
         weight_names=[],
         translatable=True,
-        rotatable=False,
+        rotatable=True,
         global_scalable=False,
         local_scalable=False,
         local_scale_target=False,
@@ -225,7 +225,7 @@ class DressBoneSettings(Enum):
         category="腕",
         weight_names=[],
         translatable=True,
-        rotatable=True,
+        rotatable=False,
         global_scalable=False,
         local_scalable=False,
         local_scale_target=True,
@@ -265,7 +265,7 @@ class DressBoneSettings(Enum):
         category="腕",
         weight_names=("右ひじ", "右手捩", "右手捩1", "右手捩2", "右手捩3", "右手捩4", "右手捩5"),
         translatable=True,
-        rotatable=True,
+        rotatable=False,
         global_scalable=True,
         local_scalable=True,
         local_scale_target=True,
@@ -275,7 +275,7 @@ class DressBoneSettings(Enum):
         category="腕",
         weight_names=[],
         translatable=True,
-        rotatable=True,
+        rotatable=False,
         global_scalable=False,
         local_scalable=False,
         local_scale_target=True,
@@ -315,7 +315,7 @@ class DressBoneSettings(Enum):
         category="手首",
         weight_names=("右手首",),
         translatable=True,
-        rotatable=True,
+        rotatable=False,
         global_scalable=True,
         local_scalable=True,
         local_scale_target=True,
@@ -659,8 +659,8 @@ class DressBoneSettings(Enum):
         category="肩",
         weight_names=[],
         translatable=True,
-        rotatable=True,
-        global_scalable=True,
+        rotatable=False,
+        global_scalable=False,
         local_scalable=False,
         local_scale_target=False,
     )
@@ -668,7 +668,7 @@ class DressBoneSettings(Enum):
         setting=BoneSettings.LEFT_SHOULDER.value,
         category="肩",
         weight_names=("左肩",),
-        translatable=True,
+        translatable=False,
         rotatable=True,
         global_scalable=True,
         local_scalable=True,
@@ -680,7 +680,7 @@ class DressBoneSettings(Enum):
         weight_names=[],
         translatable=True,
         rotatable=True,
-        global_scalable=True,
+        global_scalable=False,
         local_scalable=False,
         local_scale_target=False,
     )
@@ -688,7 +688,7 @@ class DressBoneSettings(Enum):
         setting=BoneSettings.LEFT_ARM.value,
         category="腕",
         weight_names=("左腕", "左腕捩", "左腕捩1", "左腕捩2", "左腕捩3", "左腕捩4", "左腕捩5"),
-        translatable=True,
+        translatable=False,
         rotatable=True,
         global_scalable=True,
         local_scalable=True,
@@ -699,7 +699,7 @@ class DressBoneSettings(Enum):
         category="腕",
         weight_names=[],
         translatable=True,
-        rotatable=True,
+        rotatable=False,
         global_scalable=False,
         local_scalable=False,
         local_scale_target=True,
@@ -739,7 +739,7 @@ class DressBoneSettings(Enum):
         category="腕",
         weight_names=("左ひじ", "左手捩", "左手捩1", "左手捩2", "左手捩3", "左手捩4", "左手捩5"),
         translatable=True,
-        rotatable=True,
+        rotatable=False,
         global_scalable=True,
         local_scalable=True,
         local_scale_target=True,
@@ -749,7 +749,7 @@ class DressBoneSettings(Enum):
         category="腕",
         weight_names=[],
         translatable=True,
-        rotatable=True,
+        rotatable=False,
         global_scalable=False,
         local_scalable=False,
         local_scale_target=True,
@@ -789,7 +789,7 @@ class DressBoneSettings(Enum):
         category="手首",
         weight_names=("左手首",),
         translatable=True,
-        rotatable=True,
+        rotatable=False,
         global_scalable=True,
         local_scalable=True,
         local_scale_target=True,
