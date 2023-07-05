@@ -1333,3 +1333,79 @@ msgstr ""
 msgid "衣装: 追加候補ボーン: {b}"
 msgstr ""
 
+
+msgid "-- ローカルスケール計算 [{i} ({p:.2f}%)]"
+msgstr ""
+
+
+msgid "ローカルXスケール計算"
+msgstr ""
+
+
+msgid "-- ローカルXスケール計算 [{i} ({p:.2f}%)]"
+msgstr ""
+
+
+msgid "ローカルフィッティング"
+msgstr ""
+
+
+msgid "-- ローカルフィッティング [{i} ({p:.2f}%)]"
+msgstr ""
+
+
+msgid "フィッティングボーンモーフ作成"
+msgstr ""
+
+
+msgid "-- ローカルスケール [{b}][{s:.3f})]"
+msgstr ""
+
+
+msgid "ボーン距離比率"
+msgstr ""
+
+
+msgid "-- ボーン距離比率 [{i} ({p:.2f}%)]"
+msgstr ""
+
+
+msgid "-- 厚み比率 [{b}][{s:.3f})]"
+msgstr ""
+
+
+msgid "ボーンフィッティング"
+msgstr ""
+
+
+msgid "-- ボーンフィッティング [{i} ({p:.2f}%)]"
+msgstr ""
+
+
+msgid "-- フィッティング [{b}][移動={p}][回転={q}][縮尺:{s}][ローカル縮尺:{l}]"
+msgstr ""
+
+
+msgid "フィッティング設定"
+msgstr ""
+
+
+msgid "-- [{b}][移動={p}][回転={q}][縮尺:{s}][ローカル縮尺:{l}]"
+msgstr ""
+
+
+msgid "ボーンフィッティング(準標準)"
+msgstr ""
+
+
+msgid "-- ボーンフィッティング(準標準) [{i} ({p:.2f}%)]"
+msgstr ""
+
+
+msgid "ボーンフィッティング(準標準外)"
+msgstr ""
+
+
+msgid "-- ボーンフィッティング(準標準外) [{i} ({p:.2f}%)]"
+msgstr ""
+

@@ -43,6 +43,7 @@ class LoadWorker(BaseWorker):
             usecase.valid_model(original_model, "人物")
 
             model = original_model.copy()
+            model.update_vertices_by_bone()
 
             # 人物に材質透明モーフを入れる
             logger.info("人物: 追加セットアップ: 材質透過モーフ追加")
@@ -84,11 +85,11 @@ class LoadWorker(BaseWorker):
 
             logger.info("衣装: 位置調整", decoration=MLogger.Decoration.LINE)
 
-            # # 下半身の再設定
-            # replaced_bone_names += usecase.replace_lower(model, dress)
+            # 下半身の再設定
+            replaced_bone_names += usecase.replace_lower(model, dress)
 
-            # # 上半身の再設定
-            # replaced_bone_names += usecase.replace_upper(model, dress)
+            # 上半身の再設定
+            replaced_bone_names += usecase.replace_upper(model, dress)
 
             # 上半身2の再設定
             replaced_bone_names += usecase.replace_upper2(model, dress)
