@@ -48,24 +48,6 @@ class FilePanel(BasePanel):
         )
         self.dress_ctrl.set_parent_sizer(self.root_sizer)
 
-        self.prime_title_ctrl = wx.StaticText(self, wx.ID_ANY, __("フィッティング用素体"), wx.DefaultPosition)
-        self.root_sizer.Add(self.prime_title_ctrl, 0, wx.ALL, 3)
-
-        self.prime_sizer = wx.BoxSizer(wx.HORIZONTAL)
-
-        self.prime_choice_ctrl = wx.Choice(
-            self,
-            wx.ID_ANY,
-            wx.DefaultPosition,
-            wx.Size(-1, -1),
-            choices=[__("男性素体"), __("女性素体")],
-        )
-        self.prime_choice_ctrl.SetToolTip(__("フィッティングに使用する素体の性別を選択してください"))
-        self.prime_choice_ctrl.SetSelection(0)
-        self.prime_sizer.Add(self.prime_choice_ctrl, 0, wx.ALL, 3)
-
-        self.root_sizer.Add(self.prime_sizer, 0, wx.ALL, 3)
-
         self.motion_ctrl = MVmdFilePickerCtrl(
             self.frame,
             self,
@@ -148,5 +130,4 @@ class FilePanel(BasePanel):
         self.model_ctrl.Enable(enable)
         self.dress_ctrl.Enable(enable)
         self.motion_ctrl.Enable(enable)
-        self.prime_choice_ctrl.Enable(enable)
         self.output_pmx_ctrl.Enable(enable)

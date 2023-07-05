@@ -706,7 +706,7 @@ class LoadUsecase:
 
         return individual_morph_names, individual_target_bone_indexes
 
-    def create_dress_fit_morphs(self, model: PmxModel, dress: PmxModel, prime: PmxModel):
+    def create_dress_fit_morphs(self, model: PmxModel, dress: PmxModel):
         """衣装フィッティング用ボーンモーフを作成"""
 
         # ルート調整用ボーンモーフ追加
@@ -1142,9 +1142,10 @@ class LoadUsecase:
                     category_local_scale = MVector3D(*model_local_distance).one() / MVector3D(*dress_local_distance).one()
                     category_local_scales.append(category_local_scale.vector)
 
-            local_scale = np.mean(category_local_scales, axis=0)
-            # Xスケール＋αより大きくはしない
-            local_scale_value = min(np.mean([local_scale[1], local_scale[2]]), np.mean(dress_category_local_x_scales[category]) * 1.2) - 1
+            local_scale = 1 if not category_local_scales else np.mean(category_local_scales, axis=0)
+            # Xスケール±αより大きくはしない
+            avg_x_scale = np.mean(dress_category_local_x_scales[category])
+            local_scale_value = max(min(np.mean([local_scale[1], local_scale[2]]), avg_x_scale * 1.2), avg_x_scale * 0.9) - 1
             dress_category_local_scales[category] = local_scale_value
 
             logger.info("-- 厚み比率 [{b}][{s:.3f})]", b=category, s=(local_scale_value + 1))
