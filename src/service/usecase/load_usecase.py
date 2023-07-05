@@ -1,3 +1,4 @@
+import logging
 import os
 
 import numpy as np
@@ -17,6 +18,7 @@ from mlib.pmx.pmx_part import (
     MorphType,
 )
 from mlib.vmd.vmd_collection import VmdMotion
+from mlib.vmd.vmd_part import VmdMorphFrame
 from mlib.vmd.vmd_tree import VmdBoneFrameTrees
 from service.usecase.dress_bone_setting import (
     DRESS_STANDARD_BONE_NAMES,
@@ -83,8 +85,8 @@ class LoadUsecase:
             bname for bname in DRESS_STANDARD_BONE_NAMES.keys() if bname in (mismatch_bone_names - set(dress.bones.names))
         ]
 
-        logger.info("人物: 追加対象ボーン: {b}", b=", ".join(short_mismatch_model_bone_names))
-        logger.info("衣装: 追加対象ボーン: {b}", b=", ".join(short_mismatch_dress_bone_names))
+        logger.info("人物: 追加候補ボーン: {b}", b=", ".join(short_mismatch_model_bone_names))
+        logger.info("衣装: 追加候補ボーン: {b}", b=", ".join(short_mismatch_dress_bone_names))
 
         if not (short_model_bone_names or short_dress_bone_names):
             return
@@ -728,6 +730,55 @@ class LoadUsecase:
         # モデルの初期姿勢を求める
         model_matrixes = VmdMotion().animate_bone([0], model)
 
+        logger.info("フィッティングボーンモーフ：素体グローバルスケール計算", decoration=MLogger.Decoration.LINE)
+        prime_offset_scales, prime_fit_scales, prime_category_scale_values = self.get_dress_global_bone_scale_offsets(
+            model, prime, model_matrixes
+        )
+
+        # 素体のフィッティングモーション生成
+        prime_motion = VmdMotion("prime fit motion")
+        prime_motion.morphs["BoneFitting"][0] = VmdMorphFrame(0, "BoneFitting", ratio=1.0)
+        prime_fitting_morph = prime.morphs["BoneFitting"]
+
+        logger.info("フィッティングボーンモーフ：素体オフセット計算", decoration=MLogger.Decoration.LINE)
+        prime_offset_positions, prime_offset_qqs = self.get_dress_global_bone_offsets(model, prime, prime_offset_scales, {}, model_matrixes)
+
+        # スケール、移動、回転を適用した素体用モーションを生成する
+        for prime_bone in prime.bones:
+            if prime_bone.name in prime.bones:
+                prime_position = prime_offset_positions.get(prime_bone.index, MVector3D())
+                prime_qq = prime_offset_qqs.get(prime_bone.index, MQuaternion())
+                prime_scale = prime_offset_scales.get(prime_bone.index, MVector3D(1, 1, 1)) - 1
+                prime_local_scale = MVector3D()
+                # if prime_scale.x > 0:
+                #     prime_local_scale = prime_fit_scales.get(prime_bone.index, MVector3D(1, 1, 1)) - 1
+                #     prime_local_scale.x = 0
+                prime_fitting_morph.offsets.append(
+                    BoneMorphOffset(
+                        prime_bone.index, position=prime_position, qq=prime_qq, scale=prime_scale, local_scale=prime_local_scale
+                    )
+                )
+        prime_matrixes = prime_motion.animate_bone([0], prime, append_ik=False)
+
+        if logger.total_level <= logging.DEBUG:
+            # デバッグモードの時だけ素体結果出力
+            from datetime import datetime
+            from service.usecase.save_usecase import SaveUsecase
+
+            SaveUsecase().save(
+                model,
+                prime,
+                VmdMotion(),
+                prime_motion,
+                os.path.join("E:/MMD/Dressup/output", f"{datetime.now():%Y%m%d_%H%M%S}_prime.pmx"),
+                dict([(m.name, 0.0) for m in model.materials]),
+                dict([(m.name, 1.0) for m in prime.materials]),
+                {},
+                {},
+                {},
+                {},
+            )
+
         logger.info("フィッティングボーンモーフ：グローバルスケール計算", decoration=MLogger.Decoration.LINE)
         dress_offset_scales, dress_fit_scales, dress_category_scale_values = self.get_dress_global_bone_scale_offsets(
             model, dress, model_matrixes
@@ -735,14 +786,9 @@ class LoadUsecase:
         # dress_offset_scales = {}
         # dress_fit_scales = {}
 
-        logger.info("フィッティングボーンモーフ：素体グローバルスケール計算", decoration=MLogger.Decoration.LINE)
-        prime_offset_scales, prime_prime_scales, prime_category_scale_values = self.get_dress_global_bone_scale_offsets(
-            model, prime, model_matrixes
-        )
-
         logger.info("フィッティングボーンモーフ：ローカルスケール計算", decoration=MLogger.Decoration.LINE)
         dress_offset_local_scales = self.get_dress_bone_local_scale_offsets(
-            dress, dress_offset_scales, dress_category_scale_values, prime, prime_offset_scales
+            dress, dress_offset_scales, dress_category_scale_values, prime, prime_matrixes
         )
         # dress_offset_local_scales = {}
 
@@ -872,17 +918,9 @@ class LoadUsecase:
                 dress_fit_length_scale = (model_bone.position - model.bones[bone_name[:4]].position).z / (
                     (dress_bone.position - dress.bones[bone_name[:4]].position).z or 1
                 )
-            # elif bone_name == "下半身":
-            #     # 下半身は腰から足中心までの長さ
-            #     model_bone_position = model_matrixes[0, "腰"].position
-            #     model_tail_position = model_matrixes[0, "足中心"].position
-
-            #     dress_bone_position = dress_matrixes[0, "腰"].position
-            #     dress_tail_position = dress_matrixes[0, "足中心"].position
-
-            #     dress_fit_length_scale = (model_tail_position - model_bone_position).length() / (
-            #         (dress_tail_position - dress_bone_position).length() or 1
-            #     )
+            elif bone_name == "下半身":
+                # 下半身は足中心までのY距離
+                dress_fit_length_scale = model_matrixes[0, "足中心"].position.y / (dress_matrixes[0, "足中心"].position.y or 1)
             else:
                 model_bone_position = model_matrixes[0, bone_name].position
                 model_tail_position = model_matrixes[0, bone_name].global_matrix * model_bone.tail_relative_position
@@ -1024,8 +1062,11 @@ class LoadUsecase:
                         dress_leg_ik_position,
                     )
 
-                    # # XY位置は人物側のひざ位置に合わせる
-                    # knee_new_position.y = model.bones[bone_name].position.y
+                    # XY位置は人物側のひざ位置に合わせる
+                    knee_new_position.y = model.bones[bone_name].position.y
+
+                    # Z位置は少し手前に出す
+                    knee_new_position.z -= dress_leg_position.distance(dress_leg_ik_position) * 0.03
 
                     dress_bone_fit_position = knee_new_position
                     dress_bone_position = dress_knee_position
@@ -1323,24 +1364,10 @@ class LoadUsecase:
         dress_offset_scales: dict[int, MVector3D],
         dress_category_scale_values: dict[str, float],
         prime: PmxModel,
-        prime_offset_scales: dict[int, MVector3D],
+        prime_matrixes: VmdBoneFrameTrees,
     ) -> dict[int, MVector3D]:
         dress_motion = VmdMotion()
         dress_offset_local_scales: dict[int, MVector3D] = {}
-
-        # これまでのフィッティングパラを適用したモーションを生成する
-        for dress_bone in dress.bones:
-            bf = dress_motion.bones[dress_bone.name][0]
-            bf.scale = dress_offset_scales.get(dress_bone.index, MVector3D(1, 1, 1)) - 1
-            dress_motion.bones[dress_bone.name].append(bf)
-
-        # 素体のフィッティングモーション生成
-        prime_motion = VmdMotion()
-        for prime_bone in prime.bones:
-            bf = prime_motion.bones[prime_bone.name][0]
-            bf.scale = prime_offset_scales.get(prime_bone.index, MVector3D(1, 1, 1)) - 1
-            prime_motion.bones[prime_bone.name].append(bf)
-        prime_matrixes = prime_motion.animate_bone([0], prime, append_ik=False)
 
         # 衣装の初期姿勢を求める
         logger.info("-- 衣装初期姿勢計算")

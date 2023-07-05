@@ -84,11 +84,11 @@ class LoadWorker(BaseWorker):
 
             logger.info("衣装: 位置調整", decoration=MLogger.Decoration.LINE)
 
-            # 下半身の再設定
-            replaced_bone_names += usecase.replace_lower(model, dress)
+            # # 下半身の再設定
+            # replaced_bone_names += usecase.replace_lower(model, dress)
 
-            # 上半身の再設定
-            replaced_bone_names += usecase.replace_upper(model, dress)
+            # # 上半身の再設定
+            # replaced_bone_names += usecase.replace_upper(model, dress)
 
             # 上半身2の再設定
             replaced_bone_names += usecase.replace_upper2(model, dress)

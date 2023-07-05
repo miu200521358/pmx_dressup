@@ -995,3 +995,12 @@ msgstr "Aborted because the process cannot continue\n----------------\nThe proce
 
 msgid "-- スケール [{b}] グローバル=[{f:.3f}({o:.3f})] ローカル=[{l:.3f})]"
 msgstr "-- scale [{b}] global=[{f:.3f}({o:.3f})] local=[{l:.3f})]"
+
+msgid "フィッティングボーンモーフ：素体オフセット計算"
+msgstr "Fitting Bone Morphs: Calculating Body Offsets"
+
+msgid "人物: 追加候補ボーン: {b}"
+msgstr "Person: additional candidate bones: {b}"
+
+msgid "衣装: 追加候補ボーン: {b}"
+msgstr "Costume: additional candidate bones: {b}"

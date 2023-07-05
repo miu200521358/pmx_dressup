@@ -357,7 +357,7 @@ class SaveUsecase:
                 if 0 <= dress_model_bone.bone.ik.bone_index and dress_matrixes.exists(0, dress_model_bone.bone.name):
                     # IKターゲットとその位置を修正
                     dress_model_bone.position = dress_matrixes[0, dress_model_bone.bone.name].position.copy()
-                    dress_model_bones[dress_model_bone.bone.ik.bone_index].position = dress_matrixes[
+                    dress_model_bones[dress_model_bone.ik.bone_index].position = dress_matrixes[
                         0, dress_model_bone.bone.name
                     ].position.copy()
                 for link in dress_model_bone.bone.ik.links:
