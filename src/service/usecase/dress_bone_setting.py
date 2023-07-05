@@ -279,7 +279,7 @@ class DressBoneSettings(Enum):
     )
     RIGHT_WRIST = DressBoneSetting(
         setting=BoneSettings.RIGHT_WRIST.value,
-        category="手首",
+        category="腕",
         translatable=True,
         rotatable=True,
         local_scalable=False,
@@ -659,7 +659,7 @@ class DressBoneSettings(Enum):
     )
     LEFT_WRIST = DressBoneSetting(
         setting=BoneSettings.LEFT_WRIST.value,
-        category="手首",
+        category="腕",
         translatable=True,
         rotatable=True,
         local_scalable=False,

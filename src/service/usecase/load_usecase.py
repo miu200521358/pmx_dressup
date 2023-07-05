@@ -342,7 +342,7 @@ class LoadUsecase:
 
     def replace_shoulder(self, model: PmxModel, dress: PmxModel, direction: str) -> list[str]:
         """肩のボーン置き換え"""
-        replace_bone_names = ("首根元", f"{direction}腕", f"{direction}肩")
+        replace_bone_names = ("頭", f"{direction}腕", f"{direction}肩")
         if not (model.bones.exists(replace_bone_names) and dress.bones.exists(replace_bone_names)):
             return []
 
@@ -1142,9 +1142,9 @@ class LoadUsecase:
                     category_local_scale = MVector3D(*model_local_distance).one() / MVector3D(*dress_local_distance).one()
                     category_local_scales.append(category_local_scale.vector)
 
-            local_scale = 1 if not category_local_scales else np.mean(category_local_scales, axis=0)
+            local_scale = np.ones(3) if not category_local_scales else np.mean(category_local_scales, axis=0)
             # Xスケール±αより大きくはしない
-            avg_x_scale = np.mean(dress_category_local_x_scales[category])
+            avg_x_scale = np.mean([np.max(dress_category_local_x_scales[category]), np.mean(dress_category_local_x_scales[category])])
             local_scale_value = max(min(np.mean([local_scale[1], local_scale[2]]), avg_x_scale * 1.2), avg_x_scale * 0.9) - 1
             dress_category_local_scales[category] = local_scale_value
 
@@ -1261,12 +1261,12 @@ class LoadUsecase:
                     "胸" in dress_bone.name
                     or "足首" in dress_bone.name
                     or "腰キャンセル" in dress_bone.name
-                    # or "肩" in dress_bone.name
-                    # or "ひじ" in dress_bone.name
-                    # or "手首" in dress_bone.name
-                    # or "指" in dress_bone.name
+                    or "肩" in dress_bone.name
+                    or "ひじ" in dress_bone.name
+                    or "手首" in dress_bone.name
+                    or "指" in dress_bone.name
                     or dress_bone.name in ("頭", "首根元", "足中心")
-                    # or dress_bone.is_twist
+                    or dress_bone.is_twist
                 ):
                     # 特定ボーンは親のキャンセルだけ行う
                     dress_offset_qq = MQuaternion()
