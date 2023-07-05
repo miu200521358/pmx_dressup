@@ -9,7 +9,8 @@ file_name = f"{APP_NAME}_{VERSION_NAME}"
 binary_keys = []
 data_keys = [
     ('src/resources/pmx_dressup.ico', 'resources'),
-    ('src/resources/prime_body.pmx', 'resources'),
+    ('src/resources/fitting_male_body.pmx', 'resources'),
+    ('src/resources/fitting_female_body.pmx', 'resources'),
     ('src/i18n/en-us/LC_MESSAGES/messages.mo', 'i18n/en-us/LC_MESSAGES'),
     ('src/i18n/ja/LC_MESSAGES/messages.mo', 'i18n/ja/LC_MESSAGES'),
     ('src/i18n/ko/LC_MESSAGES/messages.mo', 'i18n/ko/LC_MESSAGES'),

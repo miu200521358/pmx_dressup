@@ -965,3 +965,33 @@ msgstr "Body for fitting: start reading"
 
 msgid "フィッティングボーンモーフ：素体グローバルスケール計算"
 msgstr "Fitting Bone Morph: Elementary Global Scale Calculations"
+
+msgid "フィッティングに使用する素体を選択してください"
+msgstr "Please select the element to be used for fitting"
+
+msgid "男性素体"
+msgstr "Male Body"
+
+msgid "女性素体"
+msgstr "Female Body"
+
+msgid "お着替え後のモデルの出力ファイルパスです\n任意の値に変更可能です"
+msgstr "The output file path of the model after the change of clothes.
+
+msgid "フィッティングさせた衣装と人物を合成して、PMXデータを出力します\nフィッティング結果を設定タブで確認した後にクリックできるようになります"
+msgstr "The fitted costume and the person will be combined and the PMX data will be output to be clickable after checking the results of the fitting in the settings tab"
+
+msgid "フィッティングに使用する素体の性別を選択してください"
+msgstr "Please select the gender of the element to be used for fitting"
+
+msgid "任意でVMDモーションデータを指定する事ができます\n空欄の場合、人物と衣装は初期状態で表示します"
+msgstr "You can optionally specify the VMD motion data.
+
+msgid "指定されたパスに読み取り対象がいないため、処理を中断します"
+msgstr "The process is aborted because there are no read targets in the specified path"
+
+msgid "処理が継続できないため、中断しました\n----------------\n指定されたパスに読み取り対象がいないため、処理を中断します"
+msgstr "Aborted because the process cannot continue\n----------------\nThe process is aborted because there is no read target in the specified path"
+
+msgid "-- スケール [{b}] グローバル=[{f:.3f}({o:.3f})] ローカル=[{l:.3f})]"
+msgstr "-- scale [{b}] global=[{f:.3f}({o:.3f})] local=[{l:.3f})]"

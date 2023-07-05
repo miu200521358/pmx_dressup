@@ -30,7 +30,7 @@ class FilePanel(BasePanel):
             is_show_name=True,
             name_spacer=3,
             is_save=False,
-            tooltip="お着替えさせたい対象の人物モデルを指定してください。",
+            tooltip="お着替えさせたい対象の人物モデルを指定してください",
             file_change_event=self.on_change_model_pmx,
         )
         self.model_ctrl.set_parent_sizer(self.root_sizer)
@@ -43,10 +43,28 @@ class FilePanel(BasePanel):
             is_show_name=True,
             name_spacer=3,
             is_save=False,
-            tooltip="お着替えしたい衣装モデルを指定してください。",
+            tooltip="お着替えしたい衣装モデルを指定してください",
             file_change_event=self.on_change_dress_pmx,
         )
         self.dress_ctrl.set_parent_sizer(self.root_sizer)
+
+        self.prime_title_ctrl = wx.StaticText(self, wx.ID_ANY, __("フィッティング用素体"), wx.DefaultPosition)
+        self.root_sizer.Add(self.prime_title_ctrl, 0, wx.ALL, 3)
+
+        self.prime_sizer = wx.BoxSizer(wx.HORIZONTAL)
+
+        self.prime_choice_ctrl = wx.Choice(
+            self,
+            wx.ID_ANY,
+            wx.DefaultPosition,
+            wx.Size(-1, -1),
+            choices=[__("男性素体"), __("女性素体")],
+        )
+        self.prime_choice_ctrl.SetToolTip(__("フィッティングに使用する素体の性別を選択してください"))
+        self.prime_choice_ctrl.SetSelection(0)
+        self.prime_sizer.Add(self.prime_choice_ctrl, 0, wx.ALL, 3)
+
+        self.root_sizer.Add(self.prime_sizer, 0, wx.ALL, 3)
 
         self.motion_ctrl = MVmdFilePickerCtrl(
             self.frame,
@@ -56,7 +74,7 @@ class FilePanel(BasePanel):
             is_show_name=True,
             name_spacer=1,
             is_save=False,
-            tooltip="任意でVMDモーションデータを指定する事ができます。\n空欄の場合、人物と衣装は初期状態で表示します。",
+            tooltip="任意でVMDモーションデータを指定する事ができます\n空欄の場合、人物と衣装は初期状態で表示します",
             file_change_event=self.on_change_motion,
         )
         self.motion_ctrl.set_parent_sizer(self.root_sizer)
@@ -67,7 +85,7 @@ class FilePanel(BasePanel):
             title="お着替え後モデル出力先",
             is_show_name=False,
             is_save=True,
-            tooltip="お着替え後のモデルの出力ファイルパスです。\n任意の値に変更可能です。",
+            tooltip="お着替え後のモデルの出力ファイルパスです\n任意の値に変更可能です",
         )
         self.output_pmx_ctrl.set_parent_sizer(self.root_sizer)
 
@@ -78,7 +96,7 @@ class FilePanel(BasePanel):
             __("お着替えモデル出力停止"),
             self.exec,
             250,
-            __("フィッティングさせた衣装と人物を合成して、PMXデータを出力します。\nフィッティング結果を設定タブで確認した後にクリックできるようになります。"),
+            __("フィッティングさせた衣装と人物を合成して、PMXデータを出力します\nフィッティング結果を設定タブで確認した後にクリックできるようになります"),
         )
         # 初期では無効化
         self.exec_btn_ctrl.Enable(False)
@@ -130,4 +148,5 @@ class FilePanel(BasePanel):
         self.model_ctrl.Enable(enable)
         self.dress_ctrl.Enable(enable)
         self.motion_ctrl.Enable(enable)
+        self.prime_choice_ctrl.Enable(enable)
         self.output_pmx_ctrl.Enable(enable)

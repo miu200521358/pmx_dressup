@@ -58,7 +58,10 @@ class LoadWorker(BaseWorker):
 
         # 素体読み込み
         logger.info("フィッティング用素体: 読み込み開始", decoration=MLogger.Decoration.BOX)
-        prime = file_panel.model_ctrl.reader.read_by_filepath(get_path("resources/prime_body.pmx"))
+        prime_path = (
+            "resources/fitting_male_body.pmx" if file_panel.prime_choice_ctrl.GetSelection() == 0 else "resources/fitting_female_body.pmx"
+        )
+        prime = file_panel.model_ctrl.reader.read_by_filepath(get_path(prime_path))
         prime.update_vertices_by_bone()
 
         if model and isinstance(model, PmxModel) and file_panel.dress_ctrl.valid() and (is_model_change or not file_panel.dress_ctrl.data):
