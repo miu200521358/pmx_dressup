@@ -354,6 +354,8 @@ class SaveUsecase:
                 dress_model_bone.ik.bone_index = dress_model_bones.get_index_by_map(
                     dress_model_bone.bone.ik.bone_index, dress_model_bone.is_dress
                 )
+                dress_model_bone.ik.loop_count = dress_model_bone.bone.ik.loop_count
+                dress_model_bone.ik.unit_rotation = dress_model_bone.bone.ik.unit_rotation
                 if 0 <= dress_model_bone.bone.ik.bone_index and dress_matrixes.exists(0, dress_model_bone.bone.name):
                     # IKターゲットとその位置を修正
                     dress_model_bone.position = dress_matrixes[0, dress_model_bone.bone.name].position.copy()
