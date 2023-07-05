@@ -1061,3 +1061,13 @@ msgstr "Bone Fitting (non-quasi-standard)"
 
 msgid "-- ボーンフィッティング(準標準外) [{i} ({p:.2f}%)]"
 msgstr "-- Bone Fitting (non-quasi-standard) [{i} ({p:.2f}%)]"
+
+msgid "人物: 再セットアップ"
+msgstr "Person: re-setup"
+
+msgid "フィッティング"
+msgstr "Fitting"
+
+msgid "フィッティング"
+msgstr "Fitting"
+

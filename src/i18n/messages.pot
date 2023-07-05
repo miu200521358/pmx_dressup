@@ -1409,3 +1409,16 @@ msgstr ""
 msgid "-- ボーンフィッティング(準標準外) [{i} ({p:.2f}%)]"
 msgstr ""
 
+
+msgid "人物: 再セットアップ"
+msgstr ""
+
+
+msgid "フィッティング"
+msgstr ""
+
+
+msgid "フィッティング"
+msgstr ""
+
+
