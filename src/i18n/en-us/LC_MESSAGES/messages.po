@@ -1004,3 +1004,60 @@ msgstr "Person: additional candidate bones: {b}"
 
 msgid "衣装: 追加候補ボーン: {b}"
 msgstr "Costume: additional candidate bones: {b}"
+
+msgid "-- ローカルスケール計算 [{i} ({p:.2f}%)]"
+msgstr "-- Local scale calculation [{i} ({p:.2f}%)]"
+
+msgid "ローカルXスケール計算"
+msgstr "Local X-Scale Calculations"
+
+msgid "-- ローカルXスケール計算 [{i} ({p:.2f}%)]"
+msgstr "-- Local X-scale calculation [{i} ({p:.2f}%)]"
+
+msgid "ローカルフィッティング"
+msgstr "Local fitting"
+
+msgid "-- ローカルフィッティング [{i} ({p:.2f}%)]"
+msgstr "-- Local fitting [{i} ({p:.2f}%)]"
+
+msgid "フィッティングボーンモーフ作成"
+msgstr "Fitting Bone Morph Creation"
+
+msgid "-- ローカルスケール [{b}][{s:.3f})]"
+msgstr "-- local scale [{b}][{s:.3f})]"
+
+msgid "ボーン距離比率"
+msgstr "Bone Distance Ratio"
+
+msgid "-- ボーン距離比率 [{i} ({p:.2f}%)]"
+msgstr "-- Bourne Distance Ratio [{i} ({p:.2f}%)]"
+
+msgid "-- 厚み比率 [{b}][{s:.3f})]"
+msgstr "-- Thickness ratio [{b}][{s:.3f})]"
+
+msgid "ボーンフィッティング"
+msgstr "Bone Fitting"
+
+msgid "-- ボーンフィッティング [{i} ({p:.2f}%)]"
+msgstr "-- Bone Fitting [{i} ({p:.2f}%)]"
+
+msgid "-- フィッティング [{b}][移動={p}][回転={q}][縮尺:{s}][ローカル縮尺:{l}]"
+msgstr "-- Fitting [{b}][move={p}][rotate={q}][scale:{s}][local scale:{l}]"
+
+msgid "フィッティング設定"
+msgstr "Fitting Settings"
+
+msgid "-- [{b}][移動={p}][回転={q}][縮尺:{s}][ローカル縮尺:{l}]"
+msgstr "-- [{b}][move={p}][rotate={q}][scale:{s}][local scale:{l}]"
+
+msgid "ボーンフィッティング(準標準)"
+msgstr "Bone fitting (semi-standard)"
+
+msgid "-- ボーンフィッティング(準標準) [{i} ({p:.2f}%)]"
+msgstr "-- Bone Fitting (semi-standard) [{i} ({p:.2f}%)]"
+
+msgid "ボーンフィッティング(準標準外)"
+msgstr "Bone Fitting (non-quasi-standard)"
+
+msgid "-- ボーンフィッティング(準標準外) [{i} ({p:.2f}%)]"
+msgstr "-- Bone Fitting (non-quasi-standard) [{i} ({p:.2f}%)]"
