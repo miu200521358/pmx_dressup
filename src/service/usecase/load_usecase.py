@@ -111,10 +111,19 @@ class LoadUsecase:
 
         model.update_vertices_by_bone()
 
+        model_inserted_bust_bone_names = []
         for bone_name in ("左胸", "右胸"):
             # 胸ボーンの追加
             if bone_name in short_mismatch_model_bone_names and self.insert_bust(model, bone_name):
                 logger.info("-- 人物: ボーン追加: {b}", b=bone_name)
+                model_inserted_bust_bone_names.append(bone_name)
+
+        if model_inserted_bust_bone_names:
+            model.setup()
+            model.replace_standard_weights(model_inserted_bust_bone_names)
+            logger.info("人物: 再セットアップ")
+
+            model.update_vertices_by_bone()
 
         # ------------------------------------------------------
         logger.info("衣装: 初期姿勢計算")
@@ -138,10 +147,19 @@ class LoadUsecase:
 
         dress.update_vertices_by_bone()
 
+        dress_inserted_bust_bone_names = []
         for bone_name in ("左胸", "右胸"):
             # 胸ボーンの追加
             if bone_name in short_mismatch_dress_bone_names and self.insert_bust(dress, bone_name):
                 logger.info("-- 衣装: ボーン追加: {b}", b=bone_name)
+                dress_inserted_bust_bone_names.append(bone_name)
+
+        if dress_inserted_bust_bone_names:
+            dress.setup()
+            dress.replace_standard_weights(dress_inserted_bust_bone_names)
+            logger.info("衣装: 再セットアップ")
+
+            dress.update_vertices_by_bone()
 
     def replace_bust_weights(self, model: PmxModel, bone_names: list[str]) -> None:
         """胸ウェイトの置き換え"""
