@@ -950,3 +950,124 @@ msgstr "Match the costume model"
 
 msgid "ボーン位置を衣装モデルに合わせる"
 msgstr "Bone position is aligned costume"
+
+msgid "衣装: 位置調整"
+msgstr "Costume: positioning"
+
+msgid "準標準オフセット計算"
+msgstr "Quasi-Standard Offset Calculations"
+
+msgid "-- 準標準オフセット計算 [{i} ({p:.2f}%)]"
+msgstr "-- Quasi-standard offset calculation [{i} ({p:.2f}%)]"
+
+msgid "フィッティング用素体: 読み込み開始"
+msgstr "Body for fitting: start reading"
+
+msgid "フィッティングボーンモーフ：素体グローバルスケール計算"
+msgstr "Fitting Bone Morph: Elementary Global Scale Calculations"
+
+msgid "フィッティングに使用する素体を選択してください"
+msgstr "Please select the element to be used for fitting"
+
+msgid "男性素体"
+msgstr "Male Body"
+
+msgid "女性素体"
+msgstr "Female Body"
+
+msgid "お着替え後のモデルの出力ファイルパスです\n任意の値に変更可能です"
+msgstr "The output file path of the model after the change of clothes.
+
+msgid "フィッティングさせた衣装と人物を合成して、PMXデータを出力します\nフィッティング結果を設定タブで確認した後にクリックできるようになります"
+msgstr "The fitted costume and the person will be combined and the PMX data will be output to be clickable after checking the results of the fitting in the settings tab"
+
+msgid "フィッティングに使用する素体の性別を選択してください"
+msgstr "Please select the gender of the element to be used for fitting"
+
+msgid "任意でVMDモーションデータを指定する事ができます\n空欄の場合、人物と衣装は初期状態で表示します"
+msgstr "You can optionally specify the VMD motion data.
+
+msgid "指定されたパスに読み取り対象がいないため、処理を中断します"
+msgstr "The process is aborted because there are no read targets in the specified path"
+
+msgid "処理が継続できないため、中断しました\n----------------\n指定されたパスに読み取り対象がいないため、処理を中断します"
+msgstr "Aborted because the process cannot continue\n----------------\nThe process is aborted because there is no read target in the specified path"
+
+msgid "-- スケール [{b}] グローバル=[{f:.3f}({o:.3f})] ローカル=[{l:.3f})]"
+msgstr "-- scale [{b}] global=[{f:.3f}({o:.3f})] local=[{l:.3f})]"
+
+msgid "フィッティングボーンモーフ：素体オフセット計算"
+msgstr "Fitting Bone Morphs: Calculating Body Offsets"
+
+msgid "人物: 追加候補ボーン: {b}"
+msgstr "Person: additional candidate bones: {b}"
+
+msgid "衣装: 追加候補ボーン: {b}"
+msgstr "Costume: additional candidate bones: {b}"
+
+msgid "-- ローカルスケール計算 [{i} ({p:.2f}%)]"
+msgstr "-- Local scale calculation [{i} ({p:.2f}%)]"
+
+msgid "ローカルXスケール計算"
+msgstr "Local X-Scale Calculations"
+
+msgid "-- ローカルXスケール計算 [{i} ({p:.2f}%)]"
+msgstr "-- Local X-scale calculation [{i} ({p:.2f}%)]"
+
+msgid "ローカルフィッティング"
+msgstr "Local fitting"
+
+msgid "-- ローカルフィッティング [{i} ({p:.2f}%)]"
+msgstr "-- Local fitting [{i} ({p:.2f}%)]"
+
+msgid "フィッティングボーンモーフ作成"
+msgstr "Fitting Bone Morph Creation"
+
+msgid "-- ローカルスケール [{b}][{s:.3f})]"
+msgstr "-- local scale [{b}][{s:.3f})]"
+
+msgid "ボーン距離比率"
+msgstr "Bone Distance Ratio"
+
+msgid "-- ボーン距離比率 [{i} ({p:.2f}%)]"
+msgstr "-- Bourne Distance Ratio [{i} ({p:.2f}%)]"
+
+msgid "-- 厚み比率 [{b}][{s:.3f})]"
+msgstr "-- Thickness ratio [{b}][{s:.3f})]"
+
+msgid "ボーンフィッティング"
+msgstr "Bone Fitting"
+
+msgid "-- ボーンフィッティング [{i} ({p:.2f}%)]"
+msgstr "-- Bone Fitting [{i} ({p:.2f}%)]"
+
+msgid "-- フィッティング [{b}][移動={p}][回転={q}][縮尺:{s}][ローカル縮尺:{l}]"
+msgstr "-- Fitting [{b}][move={p}][rotate={q}][scale:{s}][local scale:{l}]"
+
+msgid "フィッティング設定"
+msgstr "Fitting Settings"
+
+msgid "-- [{b}][移動={p}][回転={q}][縮尺:{s}][ローカル縮尺:{l}]"
+msgstr "-- [{b}][move={p}][rotate={q}][scale:{s}][local scale:{l}]"
+
+msgid "ボーンフィッティング(準標準)"
+msgstr "Bone fitting (semi-standard)"
+
+msgid "-- ボーンフィッティング(準標準) [{i} ({p:.2f}%)]"
+msgstr "-- Bone Fitting (semi-standard) [{i} ({p:.2f}%)]"
+
+msgid "ボーンフィッティング(準標準外)"
+msgstr "Bone Fitting (non-quasi-standard)"
+
+msgid "-- ボーンフィッティング(準標準外) [{i} ({p:.2f}%)]"
+msgstr "-- Bone Fitting (non-quasi-standard) [{i} ({p:.2f}%)]"
+
+msgid "人物: 再セットアップ"
+msgstr "Person: re-setup"
+
+msgid "フィッティング"
+msgstr "Fitting"
+
+msgid "フィッティング"
+msgstr "Fitting"
+

@@ -43,6 +43,7 @@ class LoadWorker(BaseWorker):
             usecase.valid_model(original_model, "人物")
 
             model = original_model.copy()
+            model.update_vertices_by_bone()
 
             # 人物に材質透明モーフを入れる
             logger.info("人物: 追加セットアップ: 材質透過モーフ追加")
@@ -70,51 +71,46 @@ class LoadWorker(BaseWorker):
 
             # 不足ボーン追加
             logger.info("衣装: 不足ボーン調整", decoration=MLogger.Decoration.LINE)
-            usecase.add_mismatch_bones(model, dress)
+            usecase.insert_mismatch_bones(model, dress)
 
             replaced_bone_names: list[str] = []
 
+            logger.info("衣装: 位置調整", decoration=MLogger.Decoration.LINE)
+
             # 下半身の再設定
-            logger.info("衣装: 下半身位置調整", decoration=MLogger.Decoration.LINE)
             replaced_bone_names += usecase.replace_lower(model, dress)
 
             # 上半身の再設定
-            logger.info("衣装: 上半身位置調整", decoration=MLogger.Decoration.LINE)
             replaced_bone_names += usecase.replace_upper(model, dress)
 
             # 上半身2の再設定
-            logger.info("衣装: 上半身2位置調整", decoration=MLogger.Decoration.LINE)
             replaced_bone_names += usecase.replace_upper2(model, dress)
 
-            if "上半身3" in model.bones:
-                # 上半身3の再設定
-                logger.info("衣装: 上半身3位置調整", decoration=MLogger.Decoration.LINE)
-                replaced_bone_names += usecase.replace_upper3(model, dress)
+            # 上半身3の再設定
+            replaced_bone_names += usecase.replace_upper3(model, dress)
 
             # 胸の再設定
-            logger.info("衣装: 胸位置調整", decoration=MLogger.Decoration.LINE)
             replaced_bust_bone_names = usecase.replace_bust(model, dress)
 
             # 首の再設定
-            logger.info("衣装: 首位置調整", decoration=MLogger.Decoration.LINE)
             replaced_bone_names += usecase.replace_neck(model, dress)
 
             # 左肩の再設定
-            logger.info("衣装: 肩位置調整", decoration=MLogger.Decoration.LINE)
             replaced_bone_names += usecase.replace_shoulder(model, dress, "左")
 
             # 右肩の再設定
-            logger.info("衣装: 肩位置調整", decoration=MLogger.Decoration.LINE)
             replaced_bone_names += usecase.replace_shoulder(model, dress, "右")
 
-            if dress.bones.exists(("首根元", "左腕", "右腕")):
-                dress.bones["首根元"].position = (dress.bones["左腕"].position + dress.bones["右腕"].position) / 2
+            # 左足先EXの再設定
+            replaced_bone_names += usecase.replace_toe_ex(model, dress, "左")
+
+            # 右足先EXの再設定
+            replaced_bone_names += usecase.replace_toe_ex(model, dress, "右")
 
             # 捩りの再設定
-            logger.info("衣装: 捩り位置調整", decoration=MLogger.Decoration.LINE)
             replaced_bone_names += usecase.replace_twist(model, dress, replaced_bone_names)
 
-            logger.info("衣装: ウェイト調整")
+            logger.info("衣装: ウェイト調整", decoration=MLogger.Decoration.LINE)
 
             if replaced_bust_bone_names:
                 dress.setup()
