@@ -55,7 +55,7 @@ class DressBones(BaseIndexNameDictModel[DressBone]):
         self.model_map: dict[int, int] = {}
         self.dress_map: dict[int, int] = {}
 
-    def append(self, bone: Bone, is_dress: bool, is_weight: bool, position: Optional[MVector3D] = None) -> None:
+    def append(self, bone: Bone, is_dress: bool, is_weight: bool, position: Optional[MVector3D] = None, bone_index: int = -1) -> None:
         # 人物もしくは準標準の場合、そのまま。それ以外は衣装用に名前を変える
         dress_bone_name = bone.name if not is_dress or bone.is_standard or bone.is_standard_extend else f"Cos:{bone.name}"
 
@@ -70,9 +70,22 @@ class DressBones(BaseIndexNameDictModel[DressBone]):
                 suffix += 1
             dress_bone_name = f"{dress_bone_name}{suffix}"
 
-        dress_bone = DressBone(len(self.data), dress_bone_name, bone, is_dress, is_weight, position)
+        if 0 <= bone_index:
+            # 同じINDEX位置にある元のボーン
+            dress_bone = DressBone(bone_index, dress_bone_name, bone, is_dress, is_weight, position)
+            self.insert(dress_bone, is_sort=False)
 
-        self.data[dress_bone.index] = dress_bone
+            # 既に同じINDEXがある場合、ずらす
+            for k, v in self.dress_map.items():
+                if v >= bone_index:
+                    self.dress_map[k] = v + 1
+
+            for k, v in self.model_map.items():
+                if v >= bone_index:
+                    self.model_map[k] = v + 1
+        else:
+            dress_bone = DressBone(len(self.data), dress_bone_name, bone, is_dress, is_weight, position)
+            self.data[dress_bone.index] = dress_bone
 
         if dress_bone_name not in self._names:
             # 名前は先勝ちで保持

@@ -1,3 +1,4 @@
+# import logging
 import os
 
 import numpy as np
@@ -676,6 +677,8 @@ class LoadUsecase:
                 or not dress.bones[dress_bone.parent_index].is_standard
                 or "操作中心" == dress_bone.name
                 or "胸" in dress_bone.name
+                or "握" in dress_bone.name
+                or "拡散" in dress_bone.name
             ):
                 continue
 
@@ -1313,6 +1316,25 @@ class LoadUsecase:
                 )
 
                 dress_local_scales[dress_bone.index] = dress_local_scales[dress_bone.parent_index].copy()
+
+        # if logger.total_level <= logging.DEBUG:
+        #     # デバッグモードの時だけ結果出力
+        #     from datetime import datetime
+        #     from service.usecase.save_usecase import SaveUsecase
+
+        #     SaveUsecase().save(
+        #         model,
+        #         dress,
+        #         VmdMotion(),
+        #         dress_motion,
+        #         os.path.join("E:/MMD/Dressup/output", f"{datetime.now():%Y%m%d_%H%M%S}_dress.pmx"),
+        #         dict([(m.name, 0.0) for m in model.materials]),
+        #         dict([(m.name, 1.0) for m in dress.materials]),
+        #         {},
+        #         {},
+        #         {},
+        #         {},
+        #     )
 
         return dress_local_scales, dress_global_scales, dress_offset_positions, dress_offset_qqs
 

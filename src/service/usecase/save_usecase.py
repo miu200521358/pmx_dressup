@@ -217,14 +217,17 @@ class SaveUsecase:
                     # 自身はウェイトを持っておらず、親ボーンが元々ウェイトを持っていて、かつ出力先にウェイトが乗ってる頂点が無い場合、スルー
                     continue
                 if bone.is_ik and not (
-                    set(model.vertices_by_bones.get(bone.ik.bone_index, [])) & active_model_vertices
+                    0 <= dress_model_bones.get_index_by_map(bone.ik.bone_index, False)
+                    or set(model.vertices_by_bones.get(bone.ik.bone_index, [])) & active_model_vertices
                     or [
-                        vertex_index
+                        link_bone_index
                         for link in bone.ik.links
-                        for vertex_index in set(model.vertices_by_bones.get(link.bone_index, [])) & active_model_vertices
+                        for link_bone_index in set(model.vertices_by_bones.get(link.bone_index, [])) & active_model_vertices
                     ]
+                    or [link.bone_index for link in bone.ik.links if 0 <= dress_model_bones.get_index_by_map(link.bone_index, False)]
                 ):
                     # IKボーンで、かつ出力先にリンクやターゲットボーンのウェイトが乗ってる頂点が無い場合、スルー
+                    # またIKのリンクやターゲットが既に出力対象である場合、IKボーンも出力する
                     continue
                 if (
                     (bone.is_external_translation or bone.is_external_rotation)
@@ -320,14 +323,46 @@ class SaveUsecase:
                 ):
                     # 自身はウェイトを持っておらず、付与親ボーンが元々ウェイトを持っていて、かつ出力先にウェイトが乗ってる頂点が無い場合、スルー
                     continue
+
             if bone.parent_index not in dress_model_bones.dress_map and not bone.is_standard:
                 # 親ボーンが登録されていない場合、子ボーンも登録しない
                 continue
 
             # 変形後の位置にボーンを配置する
-            dress_model_bones.append(
-                bone, is_dress=True, is_weight=True, position=dress_matrixes[0, bone.name].local_matrix * bone.position
-            )
+            if bone.child_bone_indexes and dress.bones[bone.child_bone_indexes[0]].name in dress_model_bones:
+                # 自分の子どもが既に登録されている場合、自分の子ボーンのひとつ前に挿入する
+                child_bone = dress_model_bones[dress.bones[bone.child_bone_indexes[0]].name]
+
+                dress_model_bones.append(
+                    bone,
+                    is_dress=True,
+                    is_weight=True,
+                    position=dress_matrixes[0, bone.name].local_matrix * bone.position,
+                    bone_index=child_bone.index,
+                )
+            elif bone.child_bone_indexes and dress.bone_trees.is_in_standard(dress.bones[bone.child_bone_indexes[0]].name):
+                # 準標準の中の順標準外の場合、子どもの準標準ボーンのひとつ前に挿入する
+                child_bones = [b for b in dress.bones if bone.child_bone_indexes[0] in b.relative_bone_indexes and b.is_standard]
+                child_bone_index = dress_model_bones[child_bones[0].name].index if child_bones else -1
+
+                dress_model_bones.append(
+                    bone,
+                    is_dress=True,
+                    is_weight=True,
+                    position=dress_matrixes[0, bone.name].local_matrix * bone.position,
+                    bone_index=child_bone_index,
+                )
+
+                if child_bones:
+                    # 子ボーンを置き換えた場合、子ボーンは衣装側のボーンを参照する
+                    child_name = child_bones[0].name
+                    dress_model_bones[child_name].is_dress = True
+                    dress_model_bones[child_name].bone = dress.bones[child_name].copy()
+            else:
+                # そのまま追加する
+                dress_model_bones.append(
+                    bone, is_dress=True, is_weight=True, position=dress_matrixes[0, bone.name].local_matrix * bone.position
+                )
 
             if not len(dress_model_bones) % 100:
                 logger.info("-- ボーン出力: {s}", s=len(dress_model_bones))
@@ -349,6 +384,11 @@ class SaveUsecase:
                 (dress_model_bones[dress_model_bone.parent_index].layer if 0 < dress_model_bone.parent_index else 0),
                 (dress_model_bones[dress_model_bone.effect_index].layer if 0 <= dress_model_bone.effect_index else 0),
             )
+
+            dress_model_bone.external_key = dress_model_bone.bone.external_key
+            dress_model_bone.fixed_axis = dress_model_bone.bone.fixed_axis
+            dress_model_bone.local_x_vector = dress_model_bone.bone.local_x_vector
+            dress_model_bone.local_z_vector = dress_model_bone.bone.local_z_vector
 
             if dress_model_bone.bone.is_ik and dress_model_bone.bone.ik:
                 dress_model_bone.ik.bone_index = dress_model_bones.get_index_by_map(
@@ -381,12 +421,34 @@ class SaveUsecase:
         for bone in dress_model.bones:
             if bone.has_fixed_axis:
                 # 軸制限がある場合、合わせる
-                bone.fixed_axis = dress_model.bones.get_tail_relative_position(bone.index).normalized()
+                fixed_axis = dress_model.bones.get_tail_relative_position(bone.index).normalized()
+                if 0 != fixed_axis.dot(bone.fixed_axis):
+                    # 元々のローカル軸と大きく違いすぎてる場合は判定結果を入れない
+                    bone.fixed_axis = fixed_axis
 
             if bone.has_local_coordinate:
                 # ローカル軸も合わせる
-                bone.local_z_vector = dress_model.bones.get_tail_relative_position(bone.index).normalized()
-                bone.local_x_vector = local_y_vector.cross(bone.local_x_vector).normalized()
+                local_z_vector = dress_model.bones.get_tail_relative_position(bone.index).normalized()
+                if 0 != local_z_vector.dot(bone.local_z_vector):
+                    # 元々のローカル軸と大きく違いすぎてる場合は判定結果を入れない
+                    bone.local_z_vector = local_z_vector
+                    bone.local_x_vector = local_y_vector.cross(bone.local_z_vector).normalized()
+
+            # if (bone.is_external_rotation or bone.is_external_translation) and bone.effect_index in dress_model.bones:
+            #     external_bone = dress_model.bones[bone.effect_index]
+            #     if bone.layer < external_bone.layer or (bone.layer == external_bone.layer and bone.index < external_bone.index):
+            #         # 変形階層が正しく無い場合、修正する
+            #         new_layer = max(bone.layer, external_bone.layer) + 1
+            #         logger.info(
+            #             "-- 変形階層が正しくないため、修正を試みます ボーン名={b}, 変形階層=[{l1} -> {l2}]",
+            #             b=bone.name,
+            #             l1=bone.layer,
+            #             l2=new_layer,
+            #         )
+            #         bone.layer = new_layer
+
+            if 0 < bone.index and not bone.index % 100:
+                logger.info("-- ボーン軸定義再設定: {s}", s=bone.index)
 
         model_all_bone_map: dict[int, int] = dict([(bone.index, dress_model_bones.model_map.get(bone.index, 0)) for bone in model.bones])
         dress_all_bone_map: dict[int, int] = dict([(bone.index, dress_model_bones.dress_map.get(bone.index, 0)) for bone in dress.bones])
@@ -724,13 +786,45 @@ class SaveUsecase:
 
         logger.info("表示枠出力", decoration=MLogger.Decoration.LINE)
 
-        for morph in dress_model.morphs:
-            dress_model.display_slots["表情"].references.append(
-                DisplaySlotReference(display_type=DisplayType.MORPH, display_index=morph.index)
-            )
+        # まずは人物側の表情を表情順に入れる
+        morph_cnt = 0
+        for morph in model.morphs:
+            if morph.name not in dress_model.morphs:
+                continue
+            if [
+                reference
+                for reference in model.display_slots["表情"].references
+                if reference.display_type == DisplayType.MORPH and reference.display_index == morph.index
+            ]:
+                dress_model.display_slots["表情"].references.append(
+                    DisplaySlotReference(display_type=DisplayType.MORPH, display_index=dress_model.morphs[morph.name].index)
+                )
 
-            if not morph.index % 100:
-                logger.info("-- モーフ表示枠出力: {s}", s=morph.index)
+                morph_cnt += 1
+                if morph_cnt % 100 == 0:
+                    logger.info("-- モーフ表示枠出力: {s}", s=morph_cnt)
+
+        # その後、衣装側の表情を入れる
+        for morph in dress.morphs:
+            if morph.name not in dress_model.morphs:
+                continue
+            if [
+                reference
+                for reference in dress.display_slots["表情"].references
+                if reference.display_type == DisplayType.MORPH and reference.display_index == morph.index
+            ]:
+                display_index = (
+                    dress_model.morphs[morph.name].index
+                    if morph.name in dress_model.morphs
+                    else dress_model.morphs[f"Cos:{morph.name}"].index
+                )
+                dress_model.display_slots["表情"].references.append(
+                    DisplaySlotReference(display_type=DisplayType.MORPH, display_index=display_index)
+                )
+
+                morph_cnt += 1
+                if morph_cnt % 100 == 0:
+                    logger.info("-- モーフ表示枠出力: {s}", s=morph_cnt)
 
         dress_display_slot_indexes: dict[int, int] = {}
 
@@ -804,6 +898,12 @@ class SaveUsecase:
 
             if not bone.index % 100:
                 logger.info("-- ボーン表示枠出力: {s}", s=bone.index)
+
+        for bone in dress_model.bones:
+            if bone.is_ik and 0 > bone.ik.bone_index:
+                # IKターゲットが無い場合、出力対象外にする
+                dress_model.remove_bone(bone.name)
+                continue
 
         logger.info("モデル出力", decoration=MLogger.Decoration.LINE)
 
