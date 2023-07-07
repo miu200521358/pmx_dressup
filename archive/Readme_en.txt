@@ -41,6 +41,8 @@
 　【Notes】
 　　The weights of the costume models have been slightly altered to clean up the deformation.
 　　　This product is not available for costume models for which weight manipulation is not permitted.
+　　If the mesh of the costume has weights on it other than the quasi-standard, the deformation may not be clean
+
 
 ----------------------------------------------------------------
 Video distribution
@@ -56,6 +58,7 @@ Included files
 　Readme.txt ... Readme
 　VMD Sizing Wiki ... Link to Wiki
 　Content tree still image ... Link to content tree still image
+　prime_for_fitting ... Body for material compensation (made by VRoid)
 
 
 ----------------------------------------------------------------
@@ -63,6 +66,7 @@ Operating environment
 ----------------------------------------------------------------
 
 　Windows 10/11 64bit
+　CPU or GPU running OpenGL 4.4 or higher
 
 
 ----------------------------------------------------------------
@@ -74,6 +78,36 @@ Basically, you can start the exe as it is.
 The version with logging outputs a log file in the same location as the exe file path.
 
 The file history can be copied by placing "history.json" in the same hierarchy as the exe.
+
+
+----------------------------------------------------------------
+■　Basic Usage
+----------------------------------------------------------------
+
+ 1. in the File tab, specify the person model and costume model (motion is optional but heavy...)
+
+ 2. open the Settings tab
+    - Once you open the settings tab, you can press the output button. 3.
+
+ 3. In the Settings tab, the left side of the screen shows the model with basic fitting (height, build, etc.) done.
+    - In the upper right corner, you can specify whether or not the material will be output as opacity.
+       - Materials with opacity less than 1 will not be output, so please lower the opacity of materials you do not need.
+    - In the lower right corner, you can adjust each bone type.
+       - X ... Horizontal direction
+       - Y ... Vertical direction
+       - Z ... Depth direction
+    - If there is a mesh with the same bone name but with weights applied to both the person and the costume, the position of the mesh will basically be output according to the person's side.
+      However, if you check the box "Bone positions are aligned with costume model", you can force the output to be aligned with the bone positions on the costume side.
+      (Especially from the wrist to the tips of the fingers, no fitting is performed, so please select accordingly.
+
+ 4. When you have finished fitting, go back to the File tab and click the "Output Costume Model" button.
+    - The model will be output with the material, bones, rigid body, etc. adjusted accordingly.
+
+ Extra
+   The model data in the "prime_for_fitting" folder is an element model I created in VRoid Studio.
+   If the person model lacks mesh for areas such as the neck or above the elbows, this model can be loaded as a costume model,
+   The fitting results can then be output to use a person model with the necessary mesh filled in.
+   There are no restrictions, so please use it if you think it will work.
 
 
 ----------------------------------------------------------------
