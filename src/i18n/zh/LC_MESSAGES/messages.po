@@ -1071,3 +1071,9 @@ msgstr "适合"
 msgid "フィッティング"
 msgstr "适合"
 
+
+msgid "-- ボーン軸定義再設定: {s}"
+msgstr "--伯恩轴定义重新设置：{s}"
+
+msgid "-- 変形階層が正しくないため、修正を試みます ボーン名={b}, 変形階層=[{l1} -> {l2}]"
+msgstr "--试图纠正不正确的变形层次 Bone name={b}, deformation hierarchy=[{l1}->{l2}]"

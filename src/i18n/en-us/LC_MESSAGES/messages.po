@@ -1071,3 +1071,9 @@ msgstr "Fitting"
 msgid "フィッティング"
 msgstr "Fitting"
 
+
+msgid "-- ボーン軸定義再設定: {s}"
+msgstr "-- Bourne axis definition re-set: {s}"
+
+msgid "-- 変形階層が正しくないため、修正を試みます ボーン名={b}, 変形階層=[{l1} -> {l2}]"
+msgstr "-- Attempt to correct incorrect deformation hierarchy Bone name={b}, deformation hierarchy=[{l1} -> {l2}]"
