@@ -676,6 +676,8 @@ class LoadUsecase:
                 or not dress.bones[dress_bone.parent_index].is_standard
                 or "操作中心" == dress_bone.name
                 or "胸" in dress_bone.name
+                or "握" in dress_bone.name
+                or "拡散" in dress_bone.name
             ):
                 continue
 
