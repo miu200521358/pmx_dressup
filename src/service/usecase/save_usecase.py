@@ -1,6 +1,5 @@
 from PIL import Image
 from datetime import datetime
-from itertools import product
 import os
 import shutil
 from typing import Optional
