@@ -6,7 +6,7 @@ from typing import Optional
 import numpy as np
 
 from mlib.base.logger import MLogger
-from mlib.base.math import MMatrix4x4, MVector3D
+from mlib.base.math import MMatrix4x4, MVector3D, MVectorDict
 from mlib.base.part import Switch
 from mlib.pmx.pmx_collection import PmxModel
 from mlib.pmx.pmx_part import (
@@ -43,7 +43,9 @@ class SaveUsecase:
         dress_config_motion: Optional[VmdMotion],
         output_path: str,
         model_material_alphas: dict[str, float],
+        model_skin_materials: dict[str, bool],
         dress_material_alphas: dict[str, float],
+        dress_skin_materials: dict[str, bool],
         dress_scales: dict[str, MVector3D],
         dress_degrees: dict[str, MVector3D],
         dress_positions: dict[str, MVector3D],
@@ -464,6 +466,7 @@ class SaveUsecase:
 
         logger.info("材質出力", decoration=MLogger.Decoration.LINE)
 
+        model_skin_vertex_positions: dict[str, MVectorDict] = {}
         prev_faces_count = 0
         for material in model.materials:
             if 1 > model_material_alphas[material.name]:
@@ -486,6 +489,8 @@ class SaveUsecase:
 
             dress_model.materials.append(copy_material, is_sort=False)
             model_material_map[material.index] = copy_material.index
+            if model_skin_materials[material.name]:
+                model_skin_vertex_positions[material.name] = MVectorDict()
 
             for face_index in range(prev_faces_count, prev_faces_count + material.vertices_count // 3):
                 faces = []
@@ -502,6 +507,8 @@ class SaveUsecase:
                             bone_weight = model.vertices[vertex_index].deform.weights[n]
                             mat += model_matrixes[0, model.bones[bone_index].name].local_matrix.vector * bone_weight
                         copy_vertex.position = MMatrix4x4(*mat.flatten()) * copy_vertex.position
+                        if model_skin_materials[material.name]:
+                            model_skin_vertex_positions[material.name].append(vertex_index, copy_vertex.position.copy())
 
                         faces.append(len(dress_model.vertices))
                         model_vertex_map[vertex_index] = len(dress_model.vertices)
@@ -515,6 +522,15 @@ class SaveUsecase:
             if not len(dress_model.materials) % 10:
                 logger.info("-- 材質出力: {s}", s=len(dress_model.materials))
 
+        model_skin_positions = MVectorDict()
+        for model_material_name, is_model_skin_material in model_skin_materials.items():
+            if is_model_skin_material and model_skin_vertex_positions[model_material_name].keys():
+                model_skin_positions.append(
+                    model.materials[model_material_name].index,
+                    MVector3D(*model_skin_vertex_positions[model_material_name].mean_value()),
+                )
+
+        dress_skin_vertex_positions: dict[str, MVectorDict] = {}
         prev_faces_count = 0
         for material in dress.materials:
             if 1 > dress_material_alphas[material.name]:
@@ -523,6 +539,8 @@ class SaveUsecase:
             copy_material = material.copy()
             copy_material.name = f"Cos:{copy_material.name}"
             copy_material.index = len(dress_model.materials)
+            if dress_skin_materials[material.name]:
+                dress_skin_vertex_positions[material.name] = MVectorDict()
 
             if 0 <= material.texture_index:
                 copy_texture = self.copy_texture(dress_model, dress.textures[material.texture_index], dress.path, is_dress=True)
@@ -554,6 +572,8 @@ class SaveUsecase:
                             bone_weight = dress.vertices[vertex_index].deform.weights[n]
                             mat += dress_matrixes[0, dress.bones[bone_index].name].local_matrix.vector * bone_weight
                         copy_vertex.position = MMatrix4x4(*mat.flatten()) * copy_vertex.position
+                        if dress_skin_materials[material.name]:
+                            dress_skin_vertex_positions[material.name].append(vertex_index, copy_vertex.position.copy())
 
                         faces.append(len(dress_model.vertices))
                         dress_vertex_map[vertex_index] = len(dress_model.vertices)
@@ -563,6 +583,25 @@ class SaveUsecase:
                 dress_model.faces.append(Face(vertex_index0=faces[0], vertex_index1=faces[1], vertex_index2=faces[2]), is_sort=False)
 
             prev_faces_count += material.vertices_count // 3
+
+            if dress_skin_materials[material.name]:
+                # 肌材質の場合、人物側の肌材質から最も近い距離の材質の設定をコピーする
+                dress_mean_skin_position = MVector3D(*dress_skin_vertex_positions[material.name].mean_value())
+                model_skin_material_index = model_skin_positions.nearest_key(dress_mean_skin_position)
+
+                model_skin_material = dress_model.materials[model.materials[model_skin_material_index].name]
+                copy_material.diffuse = model_skin_material.diffuse.copy()
+                copy_material.specular = model_skin_material.specular.copy()
+                copy_material.specular_factor = model_skin_material.specular_factor
+                copy_material.ambient = model_skin_material.ambient.copy()
+                copy_material.draw_flg = model_skin_material.draw_flg
+                copy_material.edge_color = model_skin_material.edge_color.copy()
+                copy_material.edge_size = model_skin_material.edge_size
+                copy_material.texture_index = model_skin_material.texture_index
+                copy_material.sphere_texture_index = model_skin_material.sphere_texture_index
+                copy_material.sphere_mode = model_skin_material.sphere_mode
+                copy_material.toon_sharing_flg = model_skin_material.toon_sharing_flg
+                copy_material.toon_texture_index = model_skin_material.toon_texture_index
 
             if not len(dress_model.materials) % 10:
                 logger.info("-- 材質出力: {s}", s=len(dress_model.materials))

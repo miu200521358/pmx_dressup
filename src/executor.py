@@ -8,7 +8,7 @@ import wx
 from mlib.base.logger import LoggingMode, MLogger
 
 APP_NAME = "PmxDressup"
-VERSION_NAME = "1.00.00_β34"
+VERSION_NAME = "1.00.00_β35"
 
 # 指数表記なし、有効小数点桁数6、30を超えると省略あり、一行の文字数200
 np.set_printoptions(suppress=True, precision=6, threshold=30, linewidth=200)
@@ -41,7 +41,7 @@ if __name__ == "__main__":
     # アプリの起動
     app = wx.App(False)
     icon = wx.Icon(get_path("resources/pmx_dressup.ico"), wx.BITMAP_TYPE_ICO)
-    frame = MainFrame(app, f"{APP_NAME} {VERSION_NAME}", wx.Size(1000, 800))
+    frame = MainFrame(app, f"{APP_NAME} {VERSION_NAME}", wx.Size(1000, 840))
     frame.SetIcon(icon)
     frame.Show(True)
     app.MainLoop()

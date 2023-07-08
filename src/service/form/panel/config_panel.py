@@ -16,7 +16,7 @@ __ = logger.get_text
 
 class ConfigPanel(CanvasPanel):
     def __init__(self, frame: BaseFrame, tab_idx: int, *args, **kw) -> None:
-        super().__init__(frame, tab_idx, 630, 800, *args, **kw)
+        super().__init__(frame, tab_idx, 630, 840, *args, **kw)
 
         self._initialize_ui()
         self._initialize_event()
@@ -66,16 +66,11 @@ class ConfigPanel(CanvasPanel):
         # --------------
         # 材質非透過度
 
-        self.material_sizer = wx.StaticBoxSizer(wx.StaticBox(self.scrolled_window, wx.ID_ANY, __("材質非透過度")), orient=wx.VERTICAL)
+        self.model_material_ctrl = MaterialCtrlSet(self, self.scrolled_window, "人物")
+        self.window_sizer.Add(self.model_material_ctrl.sizer, 0, wx.ALL, 3)
 
-        self.model_material_ctrl = MaterialCtrlSet(self, self.scrolled_window, self.material_sizer, "人物")
-        self.dress_material_ctrl = MaterialCtrlSet(self, self.scrolled_window, self.material_sizer, "衣装")
-
-        self.material_sizer.SetMinSize((self.scrolled_window.GetSize()[0], -1))
-        self.material_sizer.Fit(self.scrolled_window)
-        self.material_sizer.SetSizeHints(self.scrolled_window)
-
-        self.window_sizer.Add(self.material_sizer, 0, wx.ALL, 3)
+        self.dress_material_ctrl = MaterialCtrlSet(self, self.scrolled_window, "衣装")
+        self.window_sizer.Add(self.dress_material_ctrl.sizer, 0, wx.ALL, 3)
 
         # --------------
         # ボーン調整

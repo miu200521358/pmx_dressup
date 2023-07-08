@@ -1,4 +1,3 @@
-# import logging
 import os
 
 import numpy as np
@@ -1317,7 +1316,7 @@ class LoadUsecase:
 
                 dress_local_scales[dress_bone.index] = dress_local_scales[dress_bone.parent_index].copy()
 
-        # if logger.total_level <= logging.DEBUG:
+        # if logger.total_level <= 10:
         #     # デバッグモードの時だけ結果出力
         #     from datetime import datetime
         #     from service.usecase.save_usecase import SaveUsecase
