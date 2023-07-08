@@ -473,9 +473,6 @@ class SaveUsecase:
         model_skin_vertex_positions: dict[str, MVectorDict] = {}
         prev_faces_count = 0
         for material in model.materials:
-            if 1 > model_material_alphas[material.name]:
-                prev_faces_count += material.vertices_count // 3
-                continue
             copy_material = material.copy()
             copy_material.index = len(dress_model.materials)
 
@@ -491,8 +488,9 @@ class SaveUsecase:
                 copy_texture = self.copy_texture(dress_model, model.textures[material.sphere_texture_index], model.path, is_dress=False)
                 copy_material.sphere_texture_index = copy_texture.index if copy_texture else -1
 
-            dress_model.materials.append(copy_material, is_sort=False)
-            model_material_map[material.index] = copy_material.index
+            if 1 == model_material_alphas[material.name]:
+                dress_model.materials.append(copy_material, is_sort=False)
+                model_material_map[material.index] = copy_material.index
             if model_skin_materials[material.name]:
                 model_skin_vertex_positions[material.name] = MVectorDict()
 
@@ -514,12 +512,15 @@ class SaveUsecase:
                         if model_skin_materials[material.name]:
                             model_skin_vertex_positions[material.name].append(vertex_index, copy_vertex.position.copy())
 
-                        faces.append(len(dress_model.vertices))
-                        model_vertex_map[vertex_index] = len(dress_model.vertices)
-                        dress_model.vertices.append(copy_vertex, is_sort=False)
+                        if 1 == model_material_alphas[material.name]:
+                            faces.append(len(dress_model.vertices))
+                            model_vertex_map[vertex_index] = len(dress_model.vertices)
+                            dress_model.vertices.append(copy_vertex, is_sort=False)
                     else:
                         faces.append(model_vertex_map[vertex_index])
-                dress_model.faces.append(Face(vertex_index0=faces[0], vertex_index1=faces[1], vertex_index2=faces[2]), is_sort=False)
+
+                if 1 == model_material_alphas[material.name]:
+                    dress_model.faces.append(Face(vertex_index0=faces[0], vertex_index1=faces[1], vertex_index2=faces[2]), is_sort=False)
 
             prev_faces_count += material.vertices_count // 3
 
@@ -537,12 +538,10 @@ class SaveUsecase:
         dress_skin_vertex_positions: dict[str, MVectorDict] = {}
         prev_faces_count = 0
         for material in dress.materials:
-            if 1 > dress_material_alphas[material.name]:
-                prev_faces_count += material.vertices_count // 3
-                continue
             copy_material = material.copy()
             copy_material.name = f"Cos:{copy_material.name}"
             copy_material.index = len(dress_model.materials)
+
             if dress_skin_materials[material.name]:
                 dress_skin_vertex_positions[material.name] = MVectorDict()
 
@@ -558,8 +557,9 @@ class SaveUsecase:
                 copy_texture = self.copy_texture(dress_model, dress.textures[material.sphere_texture_index], dress.path, is_dress=True)
                 copy_material.sphere_texture_index = copy_texture.index if copy_texture else -1
 
-            dress_model.materials.append(copy_material, is_sort=False)
-            dress_material_map[material.index] = copy_material.index
+            if 1 == dress_material_alphas[material.name]:
+                dress_model.materials.append(copy_material, is_sort=False)
+                dress_material_map[material.index] = copy_material.index
 
             for face_index in range(prev_faces_count, prev_faces_count + copy_material.vertices_count // 3):
                 faces = []
@@ -579,12 +579,14 @@ class SaveUsecase:
                         if dress_skin_materials[material.name]:
                             dress_skin_vertex_positions[material.name].append(vertex_index, copy_vertex.position.copy())
 
-                        faces.append(len(dress_model.vertices))
-                        dress_vertex_map[vertex_index] = len(dress_model.vertices)
-                        dress_model.vertices.append(copy_vertex, is_sort=False)
+                        if 1 == dress_material_alphas[material.name]:
+                            faces.append(len(dress_model.vertices))
+                            dress_vertex_map[vertex_index] = len(dress_model.vertices)
+                            dress_model.vertices.append(copy_vertex, is_sort=False)
                     else:
                         faces.append(dress_vertex_map[vertex_index])
-                dress_model.faces.append(Face(vertex_index0=faces[0], vertex_index1=faces[1], vertex_index2=faces[2]), is_sort=False)
+                if 1 == dress_material_alphas[material.name]:
+                    dress_model.faces.append(Face(vertex_index0=faces[0], vertex_index1=faces[1], vertex_index2=faces[2]), is_sort=False)
 
             prev_faces_count += material.vertices_count // 3
 
@@ -593,7 +595,7 @@ class SaveUsecase:
                 dress_mean_skin_position = MVector3D(*dress_skin_vertex_positions[material.name].mean_value())
                 model_skin_material_index = model_skin_positions.nearest_key(dress_mean_skin_position)
 
-                model_skin_material = dress_model.materials[model.materials[model_skin_material_index].name]
+                model_skin_material = model.materials[model_skin_material_index]
                 copy_material.diffuse = model_skin_material.diffuse.copy()
                 copy_material.specular = model_skin_material.specular.copy()
                 copy_material.specular_factor = model_skin_material.specular_factor
