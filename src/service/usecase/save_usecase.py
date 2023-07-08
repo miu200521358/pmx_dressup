@@ -1,3 +1,4 @@
+from PIL import Image
 from datetime import datetime
 import os
 import shutil
@@ -16,6 +17,7 @@ from mlib.pmx.pmx_part import (
     DisplayType,
     Face,
     GroupMorphOffset,
+    Material,
     MaterialMorphOffset,
     Morph,
     MorphType,
@@ -465,6 +467,7 @@ class SaveUsecase:
         dress_material_map: dict[int, int] = {-1: -1}
 
         logger.info("材質出力", decoration=MLogger.Decoration.LINE)
+        model.update_vertices_by_material()
 
         model_skin_vertex_positions: dict[str, MVectorDict] = {}
         prev_faces_count = 0
@@ -597,11 +600,15 @@ class SaveUsecase:
                 copy_material.draw_flg = model_skin_material.draw_flg
                 copy_material.edge_color = model_skin_material.edge_color.copy()
                 copy_material.edge_size = model_skin_material.edge_size
-                copy_material.texture_index = model_skin_material.texture_index
+                # texture_index はコピーしない
                 copy_material.sphere_texture_index = model_skin_material.sphere_texture_index
                 copy_material.sphere_mode = model_skin_material.sphere_mode
                 copy_material.toon_sharing_flg = model_skin_material.toon_sharing_flg
                 copy_material.toon_texture_index = model_skin_material.toon_texture_index
+
+                # テクスチャの色を補正
+                if 0 <= copy_material.texture_index and 0 <= model.materials[model_skin_material_index].texture_index:
+                    self.correct_texture(model, dress_model, model.materials[model_skin_material_index], copy_material)
 
             if not len(dress_model.materials) % 10:
                 logger.info("-- 材質出力: {s}", s=len(dress_model.materials))
@@ -947,6 +954,79 @@ class SaveUsecase:
         logger.info("モデル出力", decoration=MLogger.Decoration.LINE)
 
         PmxWriter(dress_model, output_path).save()
+
+    def correct_texture(self, model: PmxModel, dress: PmxModel, model_material: Material, dress_material: Material):
+        logger.info("肌テクスチャ色補正", decoration=MLogger.Decoration.LINE)
+        dress.update_vertices_by_material()
+
+        logger.info("人物(補正元)材質: {m} -> 衣装(補正先)材質: {d}", m=model_material.name, d=dress_material.name)
+
+        model_texture = model.textures[model_material.texture_index]
+        dress_texture = dress.textures[dress_material.texture_index]
+
+        model_image = np.array(model_texture.image, np.float64)
+        dress_image = np.copy(np.array(dress_texture.image, np.float64))
+
+        # 補正衣装画像
+        corrected_dress_image = np.asarray(np.copy(dress_image))
+        # 人物の指定材質に割り当てられた頂点INDEXリスト
+        model_vertex_indexes = model.vertices_by_materials[model_material.index]
+        # 衣装の指定材質に割り当てられた頂点INDEXリスト
+        dress_vertex_indexes = dress.vertices_by_materials[dress_material.index]
+
+        # 人物の指定材質に割り当てられた頂点INDEXが配置されている3次元頂点の位置
+        model_vertex_positions = MVectorDict()
+        for model_vertex_index in model_vertex_indexes:
+            model_vertex_positions.append(model_vertex_index, model.vertices[model_vertex_index].position)
+
+        # 衣装の指定材質に割り当てられた頂点INDEXが配置されている3次元頂点の位置
+        dress_vertex_positions = MVectorDict()
+        for dress_vertex_index in dress_vertex_indexes:
+            dress_vertex_positions.append(dress_vertex_index, dress.vertices[dress_vertex_index].position)
+
+        # 衣装の指定材質に割り当てられた頂点INDEXが配置されている3次元頂点の位置に最も近い人物頂点の色
+        model_vertex_colors: list[np.ndarray] = []
+        dress_vertex_colors: list[np.ndarray] = []
+
+        for i, dress_vertex_index in enumerate(dress_vertex_indexes):
+            logger.count("近似テクスチャ色取得", i, len(dress_vertex_indexes), display_block=500)
+
+            nearest_model_vertex_index = model_vertex_positions.nearest_key(dress.vertices[dress_vertex_index].position)
+            nearest_model_vertex = model.vertices[nearest_model_vertex_index]
+            # 人物の指定頂点に割り当てられたテクスチャとUVから、テクスチャの該当位置を取得する
+            model_vertex_colors.append(
+                model_image[
+                    max(0, min((1 - int(nearest_model_vertex.uv.y) * model_image.shape[0]), model_image.shape[0] - 1)),
+                    max(0, min(int(nearest_model_vertex.uv.x * model_image.shape[1]), model_image.shape[1] - 1)),
+                    :3,
+                ]
+            )
+
+            # 衣装の指定頂点に割り当てられたテクスチャとUVから、テクスチャの該当位置を取得する
+            dress_vertex = dress.vertices[dress_vertex_index]
+            dress_vertex_colors.append(
+                dress_image[
+                    max(0, min((1 - int(dress_vertex.uv.y) * dress_image.shape[0]), dress_image.shape[0] - 1)),
+                    max(0, min(int(dress_vertex.uv.x * dress_image.shape[1]), dress_image.shape[1] - 1)),
+                    :3,
+                ]
+            )
+
+        model_median_color = np.median(model_vertex_colors, axis=0)
+        dress_median_color = np.median(dress_vertex_colors, axis=0)
+
+        color_difference = dress_median_color - model_median_color
+
+        logger.info("肌テクスチャ色補正: {c}", c=np.round(color_difference, decimals=1))
+
+        corrected_dress_image[..., :3] += color_difference
+
+        # 補正後の色が0未満または255を超える場合、範囲内にクリップする
+        corrected_dress_image = np.clip(corrected_dress_image, 0, 255)
+
+        # 補正後のテクスチャを保存する
+        corrected_dress_output = Image.fromarray(corrected_dress_image.astype(np.uint8))
+        corrected_dress_output.save(os.path.abspath(os.path.join(os.path.dirname(dress.path), dress_texture.name)))
 
     def copy_texture(self, dest_model: PmxModel, texture: Texture, src_model_path: str, is_dress: bool) -> Optional[Texture]:
         copy_texture_name = os.path.join("Costume", texture.name) if is_dress else texture.name

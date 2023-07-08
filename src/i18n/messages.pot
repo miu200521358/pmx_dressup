@@ -1442,3 +1442,55 @@ msgstr ""
 msgid "このチェックをONにすると、肌メッシュの設定を人物モデルから受け取り、設定します"
 msgstr ""
 
+
+msgid "肌テクスチャ色補正"
+msgstr ""
+
+
+msgid "人物: 近似頂点選別"
+msgstr ""
+
+
+msgid "-- 人物: 近似頂点選別 [{i} ({p:.2f}%)]"
+msgstr ""
+
+
+msgid "衣装: 近似頂点選別"
+msgstr ""
+
+
+msgid "-- 衣装: 近似頂点選別 [{i} ({p:.2f}%)]"
+msgstr ""
+
+
+msgid "近似テクスチャUV取得"
+msgstr ""
+
+
+msgid "-- 近似テクスチャUV取得 [{i} ({p:.2f}%)]"
+msgstr ""
+
+
+msgid "-- 肌テクスチャ色補正 [{i} ({p:.2f}%)]"
+msgstr ""
+
+
+msgid "人物(補正元)材質: {m} -> 衣装(補正先)材質: {d}"
+msgstr ""
+
+
+msgid "人物(補正元)材質: {m} -> 衣装(補正先)材質: {d}, 補正値: {c}"
+msgstr ""
+
+
+msgid "近似テクスチャ色取得"
+msgstr ""
+
+
+msgid "-- 近似テクスチャ色取得 [{i} ({p:.2f}%)]"
+msgstr ""
+
+
+msgid "肌テクスチャ色補正: {c}"
+msgstr ""
+

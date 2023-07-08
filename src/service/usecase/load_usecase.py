@@ -897,6 +897,14 @@ class LoadUsecase:
                             (dress_bone.position - dress.bones[dress.bones[f"{dress_bone.name[0]}つま先ＩＫ"].ik.bone_index].position).length()
                             or 1
                         )
+                    # elif (dress_bone.name == "上半身2" and "上半身3" not in dress.bones) or dress_bone.name == "上半身3":
+                    #     # 上半身2の比率は首じゃなく頭までの距離とする
+                    #     if "頭" in model.bones and "頭" in dress.bones:
+                    #         dress_fit_length_scale = (model_bone.position - model.bones["頭"].position).length() / (
+                    #             (dress_bone.position - dress.bones["頭"].position).length() or 1
+                    #         )
+                    #     else:
+                    #         dress_fit_length_scale = 1
                     elif bone_setting.category == "手首":
                         # 手首の比率は手首ボーンから中指先ボーンまでの直線距離とする
                         middle3_name = f"{dress_bone.name[0]}中指３"
@@ -1001,37 +1009,42 @@ class LoadUsecase:
         # dress_category_global_scales: dict[str, MVector3D] = {}
         dress_category_local_scales: dict[str, float] = {}
 
-        for category in dress_local_positions.keys():
-            if category not in model_local_positions:
-                continue
+        if bone_setting.local_scalable:
+            for category in dress_local_positions.keys():
+                if category not in model_local_positions:
+                    continue
 
-            model_category_local_positions = model_local_positions[category]
-            dress_category_local_positions = dress_local_positions[category]
+                model_category_local_positions = model_local_positions[category]
+                dress_category_local_positions = dress_local_positions[category]
 
-            category_local_scales: list[np.ndarray] = []
-            for bone_name, dress_bone_local_positions in dress_category_local_positions.items():
-                if bone_name in model_category_local_positions:
-                    model_filtered_local_positions = filter_values(model_category_local_positions[bone_name])
-                    dress_filtered_local_positions = filter_values(dress_bone_local_positions)
+                category_local_scales: list[np.ndarray] = []
+                for bone_name, dress_bone_local_positions in dress_category_local_positions.items():
+                    if bone_name in model_category_local_positions:
+                        model_filtered_local_positions = filter_values(model_category_local_positions[bone_name])
+                        dress_filtered_local_positions = filter_values(dress_bone_local_positions)
 
-                    model_local_distance = np.max(model_filtered_local_positions, axis=0) - np.min(model_filtered_local_positions, axis=0)
-                    dress_local_distance = np.max(dress_filtered_local_positions, axis=0) - np.min(dress_filtered_local_positions, axis=0)
+                        model_local_distance = np.max(model_filtered_local_positions, axis=0) - np.min(
+                            model_filtered_local_positions, axis=0
+                        )
+                        dress_local_distance = np.max(dress_filtered_local_positions, axis=0) - np.min(
+                            dress_filtered_local_positions, axis=0
+                        )
 
-                    category_local_scale = MVector3D(*model_local_distance).one() / MVector3D(*dress_local_distance).one()
-                    category_local_scales.append(category_local_scale.vector)
+                        category_local_scale = MVector3D(*model_local_distance).one() / MVector3D(*dress_local_distance).one()
+                        category_local_scales.append(category_local_scale.vector)
 
-            local_scale = np.ones(3) if not category_local_scales else np.mean(category_local_scales, axis=0)
-            # Xスケール±αより大きくはしない
-            avg_x_scale = np.mean([np.max(dress_category_local_x_scales[category]), np.mean(dress_category_local_x_scales[category])])
-            local_scale_value = max(min(np.mean([local_scale[1], local_scale[2]]), avg_x_scale * 1.2), avg_x_scale * 0.9) - 1
-            dress_category_local_scales[category] = local_scale_value
+                local_scale = np.ones(3) if not category_local_scales else np.mean(category_local_scales, axis=0)
+                # Xスケール±αより大きくはしない
+                avg_x_scale = np.mean([np.max(dress_category_local_x_scales[category]), np.mean(dress_category_local_x_scales[category])])
+                local_scale_value = max(min(np.mean([local_scale[1], local_scale[2]]), avg_x_scale * 1.2), avg_x_scale * 0.9) - 1
+                dress_category_local_scales[category] = local_scale_value
 
-            logger.info("-- 厚み比率 [{b}][{s:.3f})]", b=category, s=(local_scale_value + 1))
+                logger.info("-- 厚み比率 [{b}][{s:.3f})]", b=category, s=(local_scale_value + 1))
 
-            logger.debug(
-                f"厚み比率 [{category}][{(local_scale_value + 1):.3f}][local_scale={local_scale}]"
-                + f"[category_local_scales={category_local_scales}]"
-            )
+                logger.debug(
+                    f"厚み比率 [{category}][{(local_scale_value + 1):.3f}][local_scale={local_scale}]"
+                    + f"[category_local_scales={category_local_scales}]"
+                )
 
         for i, (bone_name, bone_setting) in enumerate(DRESS_STANDARD_BONE_NAMES.items()):
             logger.count(

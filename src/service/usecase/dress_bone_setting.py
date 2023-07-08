@@ -121,7 +121,7 @@ class DressBoneSettings(Enum):
         # 回転はキャンセル用
         rotatable=True,
         local_scalable=False,
-        local_x_scalable=False,
+        local_x_scalable=True,
     )
     NECK = DressBoneSetting(
         setting=BoneSettings.NECK.value,
