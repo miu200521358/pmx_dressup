@@ -327,7 +327,7 @@ class LoadUsecase:
 
     def replace_upper3(self, model: PmxModel, dress: PmxModel) -> list[str]:
         """上半身3のボーン置き換え"""
-        replace_bone_names = ("上半身", "頭", "上半身3")
+        replace_bone_names = ("上半身2", "頭", "上半身3")
         if not (model.bones.exists(replace_bone_names) and dress.bones.exists(replace_bone_names)):
             return []
 
@@ -360,7 +360,7 @@ class LoadUsecase:
 
     def replace_shoulder(self, model: PmxModel, dress: PmxModel, direction: str) -> list[str]:
         """肩のボーン置き換え"""
-        replace_bone_names = ("頭", f"{direction}腕", f"{direction}肩")
+        replace_bone_names = ("首", f"{direction}腕", f"{direction}肩")
         if not (model.bones.exists(replace_bone_names) and dress.bones.exists(replace_bone_names)):
             return []
 
@@ -375,12 +375,15 @@ class LoadUsecase:
                 replaced_bone_names.append(f"{direction}肩P")
 
             if f"{direction}腕" in dress.bones:
-                dress.bones[f"{direction}腕"].position += diff / 2
+                dress.bones[f"{direction}腕"].position.y += diff.y
                 replaced_bone_names.append(f"{direction}腕")
 
             if f"{direction}肩C" in dress.bones:
                 dress.bones[f"{direction}肩C"].position = dress.bones[f"{direction}腕"].position.copy()
                 replaced_bone_names.append(f"{direction}肩C")
+
+            if "首根元" in dress.bones:
+                dress.bones["首根元"].position.y = dress.bones[f"{direction}腕"].position.y
 
         return replaced_bone_names
 
@@ -453,12 +456,12 @@ class LoadUsecase:
             # ボーンが足りなかったら追加しない
             return False, MVector3D()
 
-        model_from_pos = model.bones[from_name].position
-        model_replace_pos = model.bones[replace_name].position
-        model_to_pos = model.bones[to_name].position
-        dress_from_pos = dress.bones[from_name].position
-        dress_replace_pos = dress.bones[replace_name].position
-        dress_to_pos = dress.bones[to_name].position
+        model_from_pos = model.bones[from_name].position.copy()
+        model_replace_pos = model.bones[replace_name].position.copy()
+        model_to_pos = model.bones[to_name].position.copy()
+        dress_from_pos = dress.bones[from_name].position.copy()
+        dress_replace_pos = dress.bones[replace_name].position.copy()
+        dress_to_pos = dress.bones[to_name].position.copy()
 
         # 元ボーン-置換ボーン ベースで求めた時の位置 ---------------
 
@@ -468,7 +471,7 @@ class LoadUsecase:
         if is_fix_x_zero:
             dress_replace_diff_pos.x = 0
 
-        dress.bones[replace_name].position += dress_replace_diff_pos
+        dress.bones[replace_name].position = dress_replace_new_pos
         logger.info(
             "衣装: {r}: 位置再計算: {u} → {p} ({d})",
             r=replace_name,
@@ -897,14 +900,21 @@ class LoadUsecase:
                             (dress_bone.position - dress.bones[dress.bones[f"{dress_bone.name[0]}つま先ＩＫ"].ik.bone_index].position).length()
                             or 1
                         )
-                    # elif (dress_bone.name == "上半身2" and "上半身3" not in dress.bones) or dress_bone.name == "上半身3":
-                    #     # 上半身2の比率は首じゃなく頭までの距離とする
-                    #     if "頭" in model.bones and "頭" in dress.bones:
-                    #         dress_fit_length_scale = (model_bone.position - model.bones["頭"].position).length() / (
-                    #             (dress_bone.position - dress.bones["頭"].position).length() or 1
-                    #         )
-                    #     else:
-                    #         dress_fit_length_scale = 1
+                    elif dress_bone.name == "首根元":
+                        # 首根元は頭・腕の距離の最小値とする
+                        dress_fit_length_scales: list[float] = []
+                        for tail_bone_name in ("頭", "右腕", "左腕"):
+                            if tail_bone_name not in model.bones and tail_bone_name not in dress.bones:
+                                continue
+                            dress_fit_length_scales.append(
+                                (model_bone.position - model.bones[tail_bone_name].position).length()
+                                / ((dress_bone.position - dress.bones[tail_bone_name].position).length() or 1)
+                            )
+
+                        if dress_fit_length_scales:
+                            dress_fit_length_scale = np.min(dress_fit_length_scales)
+                        else:
+                            dress_fit_length_scale = 1
                     elif bone_setting.category == "手首":
                         # 手首の比率は手首ボーンから中指先ボーンまでの直線距離とする
                         middle3_name = f"{dress_bone.name[0]}中指３"
@@ -1116,6 +1126,12 @@ class LoadUsecase:
                     toe_ik_bone_name = f"{bone_name[0]}つま先ＩＫ"
 
                     dress_bone_fit_position = dress_matrixes[0, toe_ik_bone_name].position
+                    dress_bone_position = dress_matrixes[0, bone_name].position
+                elif bone_name in ("右肩", "左肩"):
+                    dress_bone_fit_position = dress_matrixes[0, f"{bone_name}P"].position
+                    dress_bone_position = dress_matrixes[0, bone_name].position
+                elif bone_name in ("右腕", "左腕"):
+                    dress_bone_fit_position = dress_matrixes[0, f"{bone_name[0]}肩C"].position
                     dress_bone_position = dress_matrixes[0, bone_name].position
                 else:
                     dress_bone_fit_position = model_matrixes[0, bone_name].position

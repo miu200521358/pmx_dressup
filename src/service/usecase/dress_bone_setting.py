@@ -167,7 +167,7 @@ class DressBoneSettings(Enum):
     RIGHT_BUST = DressBoneSetting(
         setting=BoneSettings.RIGHT_BUST.value,
         category="胸",
-        translatable=False,
+        translatable=True,
         rotatable=True,
         local_scalable=False,
         local_x_scalable=False,
@@ -177,14 +177,14 @@ class DressBoneSettings(Enum):
         setting=BoneSettings.RIGHT_SHOULDER_P.value,
         category="肩",
         translatable=True,
-        rotatable=False,
+        rotatable=True,
         local_scalable=False,
         local_x_scalable=False,
     )
     RIGHT_SHOULDER = DressBoneSetting(
         setting=BoneSettings.RIGHT_SHOULDER.value,
         category="肩",
-        translatable=False,
+        translatable=True,
         rotatable=True,
         local_scalable=True,
         local_x_scalable=True,
@@ -200,7 +200,7 @@ class DressBoneSettings(Enum):
     RIGHT_ARM = DressBoneSetting(
         setting=BoneSettings.RIGHT_ARM.value,
         category="腕",
-        translatable=False,
+        translatable=True,
         rotatable=True,
         local_scalable=True,
         local_x_scalable=True,
@@ -547,7 +547,7 @@ class DressBoneSettings(Enum):
     LEFT_BUST = DressBoneSetting(
         setting=BoneSettings.LEFT_BUST.value,
         category="胸",
-        translatable=False,
+        translatable=True,
         rotatable=True,
         local_scalable=False,
         local_x_scalable=False,
@@ -557,14 +557,14 @@ class DressBoneSettings(Enum):
         setting=BoneSettings.LEFT_SHOULDER_P.value,
         category="肩",
         translatable=True,
-        rotatable=False,
+        rotatable=True,
         local_scalable=False,
         local_x_scalable=False,
     )
     LEFT_SHOULDER = DressBoneSetting(
         setting=BoneSettings.LEFT_SHOULDER.value,
         category="肩",
-        translatable=False,
+        translatable=True,
         rotatable=True,
         local_scalable=True,
         local_x_scalable=True,
@@ -580,7 +580,7 @@ class DressBoneSettings(Enum):
     LEFT_ARM = DressBoneSetting(
         setting=BoneSettings.LEFT_ARM.value,
         category="腕",
-        translatable=False,
+        translatable=True,
         rotatable=True,
         local_scalable=True,
         local_x_scalable=True,

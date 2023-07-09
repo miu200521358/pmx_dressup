@@ -1494,3 +1494,7 @@ msgstr ""
 msgid "肌テクスチャ色補正: {c}"
 msgstr ""
 
+
+msgid "衣装: {r}: 位置再計算(2回目): {u} → {p} ({d})"
+msgstr ""
+
