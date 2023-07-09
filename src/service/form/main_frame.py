@@ -286,3 +286,7 @@ class MainFrame(BaseFrame):
     def change_bone(self, selected_bone_indexes: list[int]) -> None:
         self.config_panel.canvas.animations[1].selected_bone_indexes = selected_bone_indexes
         self.config_panel.canvas.Refresh()
+
+    def show_bone_weight(self, is_show_bone_weight: bool) -> None:
+        self.config_panel.canvas.animations[1].is_show_bone_weight = is_show_bone_weight
+        self.config_panel.canvas.Refresh()

@@ -1128,3 +1128,9 @@ msgstr "Skin texture color correction: {c}"
 
 msgid "衣装: {r}: 位置再計算(2回目): {u} → {p} ({d})"
 msgstr "Costume: {r}: Position recalculation (2nd time): {u} → {p} ({d})"
+
+msgid "このチェックをONにすると、選択ボーンのウェイト範囲をグラデーションで表示します"
+msgstr "Turn this check on to display the weight range of the selected bone as a gradient"
+
+msgid "ボーンウェイト表示"
+msgstr "Bone Weight Display"

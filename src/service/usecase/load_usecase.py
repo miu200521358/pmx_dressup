@@ -21,9 +21,9 @@ from mlib.vmd.vmd_part import VmdMorphFrame
 from mlib.vmd.vmd_tree import VmdBoneFrameTrees
 from service.usecase.dress_bone_setting import (
     DRESS_STANDARD_BONE_NAMES,
-    FIT_INDIVIDUAL_BONE_NAMES,
     DRESS_BONE_FITTING_NAME,
     DressBoneSetting,
+    FIT_INDIVIDUAL_MORPH_NAMES,
 )
 
 logger = MLogger(os.path.basename(__file__), level=1)
@@ -70,8 +70,8 @@ class LoadUsecase:
         }
 
         # 準標準ボーンで足りないボーン名を抽出
-        short_model_bone_names = set(list(DRESS_STANDARD_BONE_NAMES.keys())) - set(model.bones.names)
-        short_dress_bone_names = set(list(DRESS_STANDARD_BONE_NAMES.keys())) - set(dress.bones.names)
+        short_model_bone_names = set(list(DRESS_STANDARD_BONE_NAMES.keys())) - set(model.bones.names) - {"右目", "左目", "両目"}
+        short_dress_bone_names = set(list(DRESS_STANDARD_BONE_NAMES.keys())) - set(dress.bones.names) - {"右目", "左目", "両目"}
 
         # 両方の片方にしかないボーン名を抽出
         mismatch_bone_names = (short_model_bone_names ^ short_dress_bone_names) | add_bone_names
@@ -536,13 +536,8 @@ class LoadUsecase:
         individual_morph_names: list[str] = []
         individual_target_bone_indexes: list[list[int]] = []
 
-        for morph_name, (
-            target_bone_names,
-            move_target_bone_names,
-            child_scale_morph_names,
-            child_rotation_morph_names,
-        ) in FIT_INDIVIDUAL_BONE_NAMES.items():
-            if not [bone_name for bone_name in target_bone_names if bone_name in dress.bones]:
+        for morph_name, fitBoneSetting in FIT_INDIVIDUAL_MORPH_NAMES.items():
+            if not [bone_name for bone_name in fitBoneSetting.target_bone_names if bone_name in dress.bones]:
                 # 処理対象ボーンがなければスルー
                 continue
 
@@ -553,8 +548,8 @@ class LoadUsecase:
                 set(
                     [
                         child_bone_name
-                        for child_morph_name in child_scale_morph_names
-                        for child_bone_name in FIT_INDIVIDUAL_BONE_NAMES[child_morph_name][0]
+                        for child_morph_name in fitBoneSetting.child_scale_morph_names
+                        for child_bone_name in FIT_INDIVIDUAL_MORPH_NAMES[child_morph_name].target_bone_names
                         if child_bone_name in dress.bones
                     ]
                 )
@@ -564,8 +559,8 @@ class LoadUsecase:
                 set(
                     [
                         child_bone_name
-                        for child_morph_name in child_rotation_morph_names
-                        for child_bone_name in FIT_INDIVIDUAL_BONE_NAMES[child_morph_name][0]
+                        for child_morph_name in fitBoneSetting.child_rotation_morph_names
+                        for child_bone_name in FIT_INDIVIDUAL_MORPH_NAMES[child_morph_name].target_bone_names
                         if child_bone_name in dress.bones
                     ]
                 )
@@ -587,13 +582,13 @@ class LoadUsecase:
                 morph.is_system = True
                 morph.morph_type = MorphType.BONE
 
-                target_all_bone_names = list(target_bone_names)
+                target_all_bone_names = fitBoneSetting.target_bone_names
                 if "S" in axis_name:
                     # スケールの時だけ子どもを加味する
-                    target_all_bone_names = list(target_bone_names) + child_scale_bone_names
+                    target_all_bone_names = fitBoneSetting.target_bone_names + child_scale_bone_names
                 elif "M" in axis_name:
                     # 移動の場合はP系列も動かす
-                    target_all_bone_names = list(target_bone_names) + list(move_target_bone_names)
+                    target_all_bone_names = fitBoneSetting.target_bone_names + fitBoneSetting.move_target_bone_names
 
                 for bone_name in target_all_bone_names:
                     if bone_name in dress.bones:

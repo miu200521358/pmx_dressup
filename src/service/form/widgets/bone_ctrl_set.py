@@ -24,6 +24,12 @@ class BoneCtrlSet:
 
         self.bone_sizer = wx.BoxSizer(wx.HORIZONTAL)
 
+        bone_weight_tooltip = __("このチェックをONにすると、選択ボーンのウェイト範囲をグラデーションで表示します")
+        self.bone_weight_check_ctrl = wx.CheckBox(self.window, wx.ID_ANY, __("ボーンウェイト表示"), wx.Point(20, -1), wx.DefaultSize, 0)
+        self.bone_weight_check_ctrl.Bind(wx.EVT_CHECKBOX, self.on_show_bone_weight)
+        self.bone_weight_check_ctrl.SetToolTip(bone_weight_tooltip)
+        self.sizer.Add(self.bone_weight_check_ctrl, 0, wx.ALL, 3)
+
         self.left_btn_ctrl = wx.Button(
             self.window,
             wx.ID_ANY,
@@ -393,6 +399,12 @@ class BoneCtrlSet:
         self.parent.change_bone(self.individual_target_bone_indexes[self.bone_choice_ctrl.GetSelection()])
         self.parent.Enable(True)
 
+    def on_show_bone_weight(self, event: wx.Event) -> None:
+        self.parent.Enable(False)
+        # ボーンハイライトを変更
+        self.parent.show_bone_weight(self.bone_weight_check_ctrl.GetValue())
+        self.parent.Enable(True)
+
     def Enable(self, enable: bool) -> None:
         self.bone_choice_ctrl.Enable(enable)
         self.left_btn_ctrl.Enable(enable)
@@ -409,3 +421,4 @@ class BoneCtrlSet:
         self.clear_btn_ctrl.Enable(enable)
         self.scale_link_check_ctrl.Enable(enable)
         self.bone_target_dress_check_ctrl.Enable(enable)
+        self.bone_weight_check_ctrl.Enable(enable)

@@ -16,7 +16,7 @@ __ = logger.get_text
 
 class ConfigPanel(CanvasPanel):
     def __init__(self, frame: BaseFrame, tab_idx: int, *args, **kw) -> None:
-        super().__init__(frame, tab_idx, 630, 840, *args, **kw)
+        super().__init__(frame, tab_idx, 630, 850, *args, **kw)
 
         self._initialize_ui()
         self._initialize_event()
@@ -146,6 +146,9 @@ class ConfigPanel(CanvasPanel):
 
     def on_change(self, target_bone_name: Optional[str] = None, is_clear: bool = False) -> None:
         self.change_motion(True, target_bone_name)
+
+    def show_bone_weight(self, is_show_bone_weight: bool) -> None:
+        self.frame.show_bone_weight(is_show_bone_weight)
 
     def change_bone(self, selected_bone_indexes: list[int]) -> None:
         self.frame.change_bone(selected_bone_indexes)

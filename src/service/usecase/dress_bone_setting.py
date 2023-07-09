@@ -932,22 +932,249 @@ DRESS_STANDARD_BONE_NAMES: dict[str, DressBoneSetting] = dict([(bs.value.name, b
 """衣装用準標準ボーン名前とEnumのキーの辞書"""
 
 
-# IKはFKの後に指定する事
-"""個別フィッティング用ボーン設定"""
-FIT_INDIVIDUAL_BONE_NAMES = {
-    "腰": (("腰",), ("下半身", "上半身", "上半身2", "上半身3"), ("下半身", "上半身", "上半身2", "上半身3"), []),
-    "下半身": (("下半身",), [], ("足", "ひざ", "足首"), []),
-    "上半身": (("上半身",), [], ("上半身2", "上半身3"), []),
-    "上半身2": (("上半身2",), [], ("上半身3",), []),
-    "上半身3": (("上半身3",), [], [], []),
-    "胸": (("右胸", "左胸"), [], [], []),
-    "首": (("首",), [], [], []),
-    "頭": (("頭",), [], [], []),
-    "肩": (("右肩", "左肩"), ("右肩P", "左肩P"), ("腕", "ひじ", "手のひら"), ("腕", "ひじ", "手のひら")),
-    "腕": (("右腕", "左腕"), ("右肩C", "左肩C"), ("ひじ", "手のひら"), ("ひじ", "手のひら")),
-    "ひじ": (("右ひじ", "左ひじ"), ("手のひら",), ("手のひら",), ("手のひら",)),
-    "手のひら": (("右手首", "左手首"), [], [], []),
-    "足": (("右足", "左足", "右足D", "左足D"), ("腰キャンセル左", "腰キャンセル右"), ("ひざ",), []),
-    "ひざ": (("右ひざ", "左ひざ", "右ひざD", "左ひざD"), [], [], []),
-    "足首": (("右足首", "左足首", "右足首D", "左足首D"), [], [], []),
-}
+class FitMorphSetting:
+    def __init__(
+        self,
+        name: str,
+        target_bone_names: list[str],
+        move_target_bone_names: list[str],
+        child_move_morph_names: list[str],
+        child_rotation_morph_names: list[str],
+        child_scale_morph_names: list[str],
+        attend_weight_bone_names: list[str],
+    ) -> None:
+        """
+        name: モーフ名
+        target_bone_names: 処理対象ボーン名
+        move_target_bone_names: 移動対象ボーン名
+        child_move_morph_names: 一緒に移動するボーン名
+        child_rotation_morph_names: 一緒に回転するモーフ名
+        child_scale_morph_names: 一緒にスケーリングするモーフ名
+        attend_weight_bone_names: 付随して表示するボーン名
+        """
+        self.name = name
+        self.target_bone_names = target_bone_names
+        self.move_target_bone_names = move_target_bone_names
+        self.child_move_morph_names = child_move_morph_names
+        self.child_rotation_morph_names = child_rotation_morph_names
+        self.child_scale_morph_names = child_scale_morph_names
+        self.attend_weight_bone_names = attend_weight_bone_names
+
+
+class FitMorphSettings(Enum):
+    """個別フィッティング用ボーン設定"""
+
+    WAIST = FitMorphSetting(
+        name="腰",
+        target_bone_names=["腰"],
+        move_target_bone_names=[],
+        child_move_morph_names=["下半身", "上半身", "上半身2", "上半身3"],
+        child_rotation_morph_names=[],
+        child_scale_morph_names=["下半身", "上半身", "上半身2", "上半身3"],
+        attend_weight_bone_names=[],
+    )
+
+    LOWER = FitMorphSetting(
+        name="下半身",
+        target_bone_names=["下半身"],
+        move_target_bone_names=[],
+        child_move_morph_names=[],
+        child_rotation_morph_names=[],
+        child_scale_morph_names=[],
+        attend_weight_bone_names=[],
+    )
+
+    UPPER = FitMorphSetting(
+        name="上半身",
+        target_bone_names=["上半身"],
+        move_target_bone_names=[],
+        child_move_morph_names=[],
+        child_rotation_morph_names=[],
+        child_scale_morph_names=["上半身2", "上半身3"],
+        attend_weight_bone_names=[],
+    )
+
+    UPPER2 = FitMorphSetting(
+        name="上半身2",
+        target_bone_names=["上半身2"],
+        move_target_bone_names=[],
+        child_move_morph_names=[],
+        child_rotation_morph_names=[],
+        child_scale_morph_names=["上半身3"],
+        attend_weight_bone_names=[],
+    )
+
+    UPPER3 = FitMorphSetting(
+        name="上半身3",
+        target_bone_names=["上半身3"],
+        move_target_bone_names=[],
+        child_move_morph_names=[],
+        child_rotation_morph_names=[],
+        child_scale_morph_names=[],
+        attend_weight_bone_names=[],
+    )
+
+    BUST = FitMorphSetting(
+        name="胸",
+        target_bone_names=["右胸", "左胸"],
+        move_target_bone_names=[],
+        child_move_morph_names=[],
+        child_rotation_morph_names=[],
+        child_scale_morph_names=[],
+        attend_weight_bone_names=[],
+    )
+
+    NECK = FitMorphSetting(
+        name="首",
+        target_bone_names=["首"],
+        move_target_bone_names=[],
+        child_move_morph_names=[],
+        child_rotation_morph_names=[],
+        child_scale_morph_names=[],
+        attend_weight_bone_names=[],
+    )
+
+    HEAD = FitMorphSetting(
+        name="頭",
+        target_bone_names=["頭"],
+        move_target_bone_names=[],
+        child_move_morph_names=[],
+        child_rotation_morph_names=[],
+        child_scale_morph_names=[],
+        attend_weight_bone_names=[],
+    )
+
+    SHOULDER = FitMorphSetting(
+        name="肩",
+        target_bone_names=["右肩", "左肩"],
+        move_target_bone_names=["右肩P", "左肩P"],
+        child_move_morph_names=[],
+        child_rotation_morph_names=[],
+        child_scale_morph_names=[],
+        attend_weight_bone_names=[],
+    )
+
+    ARM = FitMorphSetting(
+        name="腕",
+        target_bone_names=["右腕", "左腕"],
+        move_target_bone_names=[
+            "右肩C",
+            "左肩C",
+            "左腕捩",
+            "左腕捩1",
+            "左腕捩2",
+            "左腕捩3",
+            "右腕捩",
+            "右腕捩1",
+            "右腕捩2",
+            "右腕捩3",
+        ],
+        child_move_morph_names=["ひじ", "手のひら"],
+        child_rotation_morph_names=[],
+        child_scale_morph_names=["ひじ", "手のひら"],
+        attend_weight_bone_names=[],
+    )
+
+    ELBOW = FitMorphSetting(
+        name="ひじ",
+        target_bone_names=["右ひじ", "左ひじ"],
+        move_target_bone_names=[
+            "左手捩",
+            "左手捩1",
+            "左手捩2",
+            "左手捩3",
+            "右手捩",
+            "右手捩1",
+            "右手捩2",
+            "右手捩3",
+        ],
+        child_move_morph_names=["手のひら"],
+        child_rotation_morph_names=[],
+        child_scale_morph_names=["手のひら"],
+        attend_weight_bone_names=[],
+    )
+
+    HAND = FitMorphSetting(
+        name="手のひら",
+        target_bone_names=["右手首", "左手首"],
+        move_target_bone_names=[
+            "左親指０",
+            "左親指１",
+            "左親指２",
+            "左親指先",
+            "左人指１",
+            "左人指２",
+            "左人指３",
+            "左人指先",
+            "左中指１",
+            "左中指２",
+            "左中指３",
+            "左中指先",
+            "左薬指１",
+            "左薬指２",
+            "左薬指３",
+            "左薬指先",
+            "左小指１",
+            "左小指２",
+            "左小指３",
+            "左小指先",
+            "右親指０",
+            "右親指１",
+            "右親指２",
+            "右親指先",
+            "右人指１",
+            "右人指２",
+            "右人指３",
+            "右人指先",
+            "右中指１",
+            "右中指２",
+            "右中指３",
+            "右中指先",
+            "右薬指１",
+            "右薬指２",
+            "右薬指３",
+            "右薬指先",
+            "右小指１",
+            "右小指２",
+            "右小指３",
+            "右小指先",
+        ],
+        child_move_morph_names=[],
+        child_scale_morph_names=[],
+        child_rotation_morph_names=[],
+        attend_weight_bone_names=[],
+    )
+
+    LEG = FitMorphSetting(
+        name="足",
+        target_bone_names=["右足", "左足", "右足D", "左足D"],
+        move_target_bone_names=["腰キャンセル左", "腰キャンセル右"],
+        child_move_morph_names=["ひざ"],
+        child_rotation_morph_names=[],
+        child_scale_morph_names=["ひざ"],
+        attend_weight_bone_names=[],
+    )
+
+    KNEE = FitMorphSetting(
+        name="ひざ",
+        target_bone_names=["右ひざ", "左ひざ", "右ひざD", "左ひざD"],
+        move_target_bone_names=[],
+        child_move_morph_names=[],
+        child_rotation_morph_names=[],
+        child_scale_morph_names=[],
+        attend_weight_bone_names=[],
+    )
+
+    ANKLE = FitMorphSetting(
+        name="足首",
+        target_bone_names=["右足首", "左足首", "右足首D", "左足首D"],
+        move_target_bone_names=["右足先EX", "左足先EX"],
+        child_move_morph_names=[],
+        child_rotation_morph_names=[],
+        child_scale_morph_names=[],
+        attend_weight_bone_names=[],
+    )
+
+
+FIT_INDIVIDUAL_MORPH_NAMES: dict[str, FitMorphSetting] = dict([(bs.value.name, bs.value) for bs in FitMorphSettings])
+"""個別調整用モーフ名とEnumのキーの辞書"""
