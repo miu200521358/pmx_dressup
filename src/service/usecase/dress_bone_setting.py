@@ -1112,8 +1112,9 @@ class FitMorphSettings(Enum):
 
     HAND = FitMorphSetting(
         name="手のひら",
-        target_bone_names=["右手首", "左手首"],
-        move_target_bone_names=[
+        target_bone_names=[
+            "右手首",
+            "左手首",
             "左親指０",
             "左親指１",
             "左親指２",
@@ -1155,6 +1156,7 @@ class FitMorphSettings(Enum):
             "右小指３",
             "右小指先",
         ],
+        move_target_bone_names=[],
         child_move_morph_names=[],
         child_scale_morph_names=[],
         child_rotation_morph_names=[],
