@@ -895,21 +895,29 @@ class LoadUsecase:
                             (dress_bone.position - dress.bones[dress.bones[f"{dress_bone.name[0]}つま先ＩＫ"].ik.bone_index].position).length()
                             or 1
                         )
-                    elif dress_bone.name == "首根元":
-                        # 首根元は頭・腕の距離の最小値とする
-                        dress_fit_length_scales: list[float] = []
-                        for tail_bone_name in ("頭", "右腕", "左腕"):
-                            if tail_bone_name not in model.bones and tail_bone_name not in dress.bones:
-                                continue
-                            dress_fit_length_scales.append(
-                                (model_bone.position - model.bones[tail_bone_name].position).length()
-                                / ((dress_bone.position - dress.bones[tail_bone_name].position).length() or 1)
-                            )
-
-                        if dress_fit_length_scales:
-                            dress_fit_length_scale = np.min(dress_fit_length_scales)
+                    elif dress_bone.name == "上半身2":
+                        # 上半身2はウェイトを全体的に覆ってるので、肩までの高さとする
+                        if model.bones.exists(("左肩", "右肩")) and dress.bones.exists(("左肩", "右肩")):
+                            dress_fit_length_scale = (
+                                (((model.bones["左肩"].position + model.bones["右肩"].position) / 2) - model_bone.position).y
+                            ) / ((((dress.bones["左肩"].position + dress.bones["右肩"].position) / 2) - dress_bone.position).y or 1)
                         else:
-                            dress_fit_length_scale = 1
+                            dress_fit_length_scale = 1.0
+                    # elif dress_bone.name == "首根元":
+                    #     # 首根元は首・肩の距離の最小値とする
+                    #     dress_fit_length_scales: list[float] = []
+                    #     for tail_bone_name in ("首", "右肩", "左肩"):
+                    #         if tail_bone_name not in model.bones and tail_bone_name not in dress.bones:
+                    #             continue
+                    #         dress_fit_length_scales.append(
+                    #             (model_bone.position - model.bones[tail_bone_name].position).length()
+                    #             / ((dress_bone.position - dress.bones[tail_bone_name].position).length() or 1)
+                    #         )
+
+                    #     if dress_fit_length_scales:
+                    #         dress_fit_length_scale = np.min(dress_fit_length_scales)
+                    #     else:
+                    #         dress_fit_length_scale = 1
                     elif bone_setting.category == "手首":
                         # 手首の比率は手首ボーンから中指先ボーンまでの直線距離とする
                         middle3_name = f"{dress_bone.name[0]}中指３"
@@ -1163,7 +1171,7 @@ class LoadUsecase:
                     "胸" in dress_bone.name
                     or "足首" in dress_bone.name
                     or "腰キャンセル" in dress_bone.name
-                    or "肩" in dress_bone.name
+                    or ("肩" in dress_bone.name and "肩根元" not in dress_bone.name)
                     or "ひじ" in dress_bone.name
                     or "手首" in dress_bone.name
                     or "指" in dress_bone.name
@@ -1180,11 +1188,14 @@ class LoadUsecase:
 
                         model_tail_position = model_matrixes[0, tail_bone_names[0]].position
                         dress_tail_position = dress_matrixes[0, tail_bone_names[0]].position
-                    else:
+                    elif 0 < dress_bone.tail_relative_position.length() and 0 < model_bone.tail_relative_position.length():
                         dress_bone_position = dress_matrixes[0, bone_name].position
                         dress_tail_position = dress_matrixes[0, bone_name].global_matrix * dress_bone.tail_relative_position
 
                         model_tail_position = model_matrixes[0, bone_name].global_matrix * model_bone.tail_relative_position
+                    else:
+                        # 先ボーンが見つからない場合、そのまま
+                        dress_offset_qq = MQuaternion()
 
                     # 衣装：自分の方向
                     dress_slope_qq = (dress_tail_position - dress_bone_position).to_local_matrix4x4().to_quaternion()

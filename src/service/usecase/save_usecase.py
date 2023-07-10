@@ -206,7 +206,7 @@ class SaveUsecase:
         dress_model_bones = DressBones()
         logger.info("ボーン出力", decoration=MLogger.Decoration.LINE)
 
-        for bone in model.bones.writable():
+        for bone in model.bones:
             if not (model.bone_trees.is_in_standard(bone.name) or bone.is_standard_extend):
                 # 準標準ではない場合、登録可否チェック
 
@@ -266,7 +266,7 @@ class SaveUsecase:
             if not len(dress_model_bones) % 100:
                 logger.info("-- ボーン出力: {s}", s=len(dress_model_bones))
 
-        for bone in dress.bones.writable():
+        for bone in dress.bones:
             if (bone.is_standard or bone.is_standard_extend) and bone.name in dress_model_bones:
                 # 既に登録済みの準標準ボーンは追加しない
                 dress_model_bones.dress_map[bone.index] = dress_model_bones[bone.name].index
@@ -419,7 +419,7 @@ class SaveUsecase:
 
             dress_model.bones.append(dress_model_bone.get_bone())
 
-            if 0 < bone.index and not bone.index % 100:
+            if 0 < len(dress_model.bones) and 0 == len(dress_model.bones) % 100:
                 logger.info("-- ボーン定義再設定: {s}", s=bone.index)
 
         for bone in dress_model.bones:
@@ -469,9 +469,14 @@ class SaveUsecase:
         logger.info("材質出力", decoration=MLogger.Decoration.LINE)
         model.update_vertices_by_material()
 
+        material_cnt = 0
         model_skin_vertex_positions: dict[str, MVectorDict] = {}
         prev_faces_count = 0
         for material in model.materials:
+            if not material_cnt % 10:
+                logger.info("-- 材質出力: {s}", s=material_cnt)
+            material_cnt += 1
+
             copy_material = material.copy()
             copy_material.index = len(dress_model.materials)
 
@@ -523,9 +528,6 @@ class SaveUsecase:
 
             prev_faces_count += material.vertices_count // 3
 
-            if not len(dress_model.materials) % 10:
-                logger.info("-- 材質出力: {s}", s=len(dress_model.materials))
-
         model_skin_positions = MVectorDict()
         for model_material_name, is_model_skin_material in model_skin_materials.items():
             if is_model_skin_material and model_skin_vertex_positions[model_material_name].keys():
@@ -537,6 +539,10 @@ class SaveUsecase:
         dress_skin_vertex_positions: dict[str, MVectorDict] = {}
         prev_faces_count = 0
         for material in dress.materials:
+            if not material_cnt % 10:
+                logger.info("-- 材質出力: {s}", s=material_cnt)
+            material_cnt += 1
+
             copy_material = material.copy()
             copy_material.name = f"Cos:{copy_material.name}"
             copy_material.index = len(dress_model.materials)
@@ -636,9 +642,6 @@ class SaveUsecase:
                 # テクスチャの色を補正
                 if 0 <= copy_material.texture_index and 0 <= model_skin_material.texture_index:
                     self.correct_texture(model, dress_model, model_skin_material, copy_material)
-
-            if not len(dress_model.materials) % 10:
-                logger.info("-- 材質出力: {s}", s=len(dress_model.materials))
 
         # ---------------------------------
 

@@ -173,6 +173,14 @@ class DressBoneSettings(Enum):
         local_x_scalable=False,
         global_scalable=True,
     )
+    RIGHT_SHOULDER_ROOT = DressBoneSetting(
+        setting=BoneSettings.RIGHT_SHOULDER_ROOT.value,
+        category="肩",
+        translatable=True,
+        rotatable=True,
+        local_scalable=False,
+        local_x_scalable=True,
+    )
     RIGHT_SHOULDER_P = DressBoneSetting(
         setting=BoneSettings.RIGHT_SHOULDER_P.value,
         category="肩",
@@ -552,6 +560,14 @@ class DressBoneSettings(Enum):
         local_scalable=False,
         local_x_scalable=False,
         global_scalable=True,
+    )
+    LEFT_SHOULDER_ROOT = DressBoneSetting(
+        setting=BoneSettings.LEFT_SHOULDER_ROOT.value,
+        category="肩",
+        translatable=True,
+        rotatable=True,
+        local_scalable=False,
+        local_x_scalable=True,
     )
     LEFT_SHOULDER_P = DressBoneSetting(
         setting=BoneSettings.LEFT_SHOULDER_P.value,
@@ -1070,7 +1086,7 @@ class FitMorphSettings(Enum):
             "右腕捩3",
         ],
         child_move_morph_names=["ひじ", "手のひら"],
-        child_rotation_morph_names=[],
+        child_rotation_morph_names=["ひじ", "手のひら"],
         child_scale_morph_names=["ひじ", "手のひら"],
         attend_weight_bone_names=[],
     )
@@ -1089,7 +1105,7 @@ class FitMorphSettings(Enum):
             "右手捩3",
         ],
         child_move_morph_names=["手のひら"],
-        child_rotation_morph_names=[],
+        child_rotation_morph_names=["手のひら"],
         child_scale_morph_names=["手のひら"],
         attend_weight_bone_names=[],
     )
@@ -1150,7 +1166,7 @@ class FitMorphSettings(Enum):
         target_bone_names=["右足", "左足", "右足D", "左足D"],
         move_target_bone_names=["腰キャンセル左", "腰キャンセル右"],
         child_move_morph_names=["ひざ"],
-        child_rotation_morph_names=[],
+        child_rotation_morph_names=["ひざ"],
         child_scale_morph_names=["ひざ"],
         attend_weight_bone_names=[],
     )

@@ -134,10 +134,6 @@ class LoadWorker(BaseWorker):
             logger.info("衣装: 追加セットアップ: フィッティングモーフ追加", decoration=MLogger.Decoration.BOX)
             usecase.create_dress_fit_morphs(model, dress)
 
-            # # 衣装のローカル軸再計算
-            # logger.info("衣装: 追加セットアップ: ローカル軸再計算", decoration=MLogger.Decoration.BOX)
-            # usecase.refit_local_axis(dress)
-
             is_dress_change = True
         elif file_panel.dress_ctrl.original_data:
             original_dress = file_panel.dress_ctrl.original_data
