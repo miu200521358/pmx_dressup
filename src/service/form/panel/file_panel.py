@@ -121,9 +121,8 @@ class FilePanel(BasePanel):
             self.dress_ctrl.read_name()
             self.output_pmx_ctrl.path = os.path.join(
                 model_dir_path,
-                dress_file_name,
-                f"{self.model_ctrl.name_ctrl.GetValue()[1:-1]}_{self.dress_ctrl.name_ctrl.GetValue()[1:-1]}"
-                + f"_{datetime.now():%Y%m%d_%H%M%S}{model_file_ext}",
+                f"{dress_file_name}_{datetime.now():%Y%m%d_%H%M%S}",
+                f"{self.model_ctrl.name_ctrl.GetValue()[1:-1]}_{self.dress_ctrl.name_ctrl.GetValue()[1:-1]}{model_file_ext}",
             )
 
     def Enable(self, enable: bool) -> None:
