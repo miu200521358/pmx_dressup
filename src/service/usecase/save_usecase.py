@@ -368,7 +368,7 @@ class SaveUsecase:
                     bone, is_dress=True, is_weight=True, position=dress_matrixes[0, bone.name].local_matrix * bone.position
                 )
 
-            if not len(dress_model_bones) % 100:
+            if 0 == len(dress_model_bones) % 100:
                 logger.info("-- ボーン出力: {s}", s=len(dress_model_bones))
 
         logger.info("ボーン定義再設定", decoration=MLogger.Decoration.LINE)
@@ -986,16 +986,19 @@ class SaveUsecase:
         PmxWriter(dress_model, output_path).save()
 
     def correct_texture(self, model: PmxModel, dress: PmxModel, model_material: Material, dress_material: Material):
-        logger.info("肌テクスチャ色補正", decoration=MLogger.Decoration.LINE)
-        dress.update_vertices_by_material()
-
         model_texture = model.textures[model_material.texture_index]
         dress_texture = dress.textures[dress_material.texture_index]
 
+        if not (model_texture.valid and dress_texture.valid):
+            return
+
+        logger.info("肌テクスチャ色補正", decoration=MLogger.Decoration.LINE)
+        dress.update_vertices_by_material()
+
         logger.info("人物(補正元)材質: {m} -> 衣装(補正先)材質: {d}", m=model_material.name, d=dress_material.name)
 
-        model_image = np.array(model_texture.image, np.float64)
-        dress_image = np.copy(np.array(dress_texture.image, np.float64))
+        model_image = np.array(Image.open(model_texture.path).convert("RGBA"), np.float64)
+        dress_image = np.array(Image.open(dress_texture.path).convert("RGBA"), np.float64)
         # 補正衣装画像
         corrected_dress_image = np.asarray(np.copy(dress_image))
 
@@ -1020,41 +1023,54 @@ class SaveUsecase:
         model_vertex_colors: list[np.ndarray] = []
         dress_vertex_colors: list[np.ndarray] = []
 
+        dress_us: list[int] = []
+        dress_vs: list[int] = []
+
         for i, dress_vertex_index in enumerate(dress_vertex_indexes):
             logger.count("近似テクスチャ色取得", i, len(dress_vertex_indexes), display_block=500)
 
             nearest_model_vertex_index = model_vertex_positions.nearest_key(dress.vertices[dress_vertex_index].position)
             nearest_model_vertex = model.vertices[nearest_model_vertex_index]
+
             # 人物の指定頂点に割り当てられたテクスチャとUVから、テクスチャの該当位置を取得する
-            model_vertex_colors.append(
-                model_image[
-                    max(0, min((1 - int(nearest_model_vertex.uv.y) * model_image.shape[0]), model_image.shape[0] - 1)),
-                    max(0, min(int(nearest_model_vertex.uv.x * model_image.shape[1]), model_image.shape[1] - 1)),
-                    :3,
-                ]
-            )
+            mu = max(0, min(int(nearest_model_vertex.uv.x * model_image.shape[1]), model_image.shape[1] - 1))
+            mv = max(0, min(int(nearest_model_vertex.uv.y * model_image.shape[0]), model_image.shape[0] - 1))
+
+            model_vertex_colors.append(model_image[mv, mu, :3])
 
             # 衣装の指定頂点に割り当てられたテクスチャとUVから、テクスチャの該当位置を取得する
             dress_vertex = dress.vertices[dress_vertex_index]
-            dress_vertex_colors.append(
-                dress_image[
-                    max(0, min((1 - int(dress_vertex.uv.y) * dress_image.shape[0]), dress_image.shape[0] - 1)),
-                    max(0, min(int(dress_vertex.uv.x * dress_image.shape[1]), dress_image.shape[1] - 1)),
-                    :3,
-                ]
-            )
+
+            du = max(0, min(int(dress_vertex.uv.x * dress_image.shape[1]), dress_image.shape[1] - 1))
+            dv = max(0, min(int(dress_vertex.uv.y * dress_image.shape[0]), dress_image.shape[0] - 1))
+
+            dress_vertex_colors.append(dress_image[dv, du, :3])
+
+            dress_us.append(du)
+            dress_vs.append(dv)
 
         model_median_color = np.median(model_vertex_colors, axis=0)
         dress_median_color = np.median(dress_vertex_colors, axis=0)
 
         color_difference = model_median_color - dress_median_color
 
-        logger.info("肌テクスチャ色補正: {c}", c=np.round(color_difference, decimals=1))
+        logger.info(
+            "肌テクスチャ色補正: {c} (人物[{m}], 衣装[{d}]) u[{u1:04d}:{u2:04d}], v[{v1:04d},{v2:04d}]",
+            c=np.round(color_difference, decimals=1),
+            m=np.round(model_median_color, decimals=1),
+            d=np.round(dress_median_color, decimals=1),
+            u1=np.min(dress_us),
+            u2=np.max(dress_us) + 1,
+            v1=np.min(dress_vs),
+            v2=np.max(dress_vs) + 1,
+        )
 
-        corrected_dress_image[..., :3] += color_difference
+        # 該当UV範囲内だけ補正
+        corrected_dress_image[np.min(dress_vs) : np.max(dress_vs) + 1, np.min(dress_us) : np.max(dress_us) + 1, :3] += color_difference
 
         # 補正後の色が0未満または255を超える場合、範囲内にクリップする
         corrected_dress_image = np.clip(corrected_dress_image, 0, 255)
+        # 上下反転
 
         # 補正後のテクスチャを保存する
         corrected_dress_output = Image.fromarray(corrected_dress_image.astype(np.uint8))
