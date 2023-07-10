@@ -603,14 +603,39 @@ class SaveUsecase:
                 copy_material.edge_color = model_skin_material.edge_color.copy()
                 copy_material.edge_size = model_skin_material.edge_size
                 # texture_index はコピーしない
-                copy_material.sphere_texture_index = model_skin_material.sphere_texture_index
-                copy_material.sphere_mode = model_skin_material.sphere_mode
                 copy_material.toon_sharing_flg = model_skin_material.toon_sharing_flg
-                copy_material.toon_texture_index = model_skin_material.toon_texture_index
+                if model_skin_material.toon_sharing_flg == ToonSharing.INDIVIDUAL and 0 <= model_skin_material.toon_texture_index:
+                    if model.textures[model_skin_material.toon_texture_index].name not in dress_model.textures:
+                        # コピー対象外でテクスチャを複製してなかった場合、テクスチャをコピーする
+                        copy_texture = self.copy_texture(
+                            dress_model, model.textures[material.toon_texture_index], model.path, is_dress=False
+                        )
+                        copy_material.toon_texture_index = copy_texture.index if copy_texture else -1
+                    else:
+                        copy_material.toon_texture_index = dress_model.textures[
+                            model.textures[model_skin_material.toon_texture_index].name
+                        ].index
+                else:
+                    copy_material.toon_texture_index = model_skin_material.toon_texture_index
+
+                if model_skin_material.sphere_mode != SphereMode.INVALID and 0 < model_skin_material.sphere_texture_index:
+                    if model.textures[model_skin_material.sphere_texture_index].name not in dress_model.textures:
+                        # コピー対象外でテクスチャを複製してなかった場合、テクスチャをコピーする
+                        copy_texture = self.copy_texture(
+                            dress_model, model.textures[material.sphere_texture_index], model.path, is_dress=False
+                        )
+                        copy_material.sphere_texture_index = copy_texture.index if copy_texture else -1
+                    else:
+                        copy_material.sphere_texture_index = dress_model.textures[
+                            model.textures[model_skin_material.sphere_texture_index].name
+                        ].index
+                else:
+                    copy_material.sphere_texture_index = -1
+                copy_material.sphere_mode = model_skin_material.sphere_mode
 
                 # テクスチャの色を補正
-                if 0 <= copy_material.texture_index and 0 <= model.materials[model_skin_material_index].texture_index:
-                    self.correct_texture(model, dress_model, model.materials[model_skin_material_index], copy_material)
+                if 0 <= copy_material.texture_index and 0 <= model_skin_material.texture_index:
+                    self.correct_texture(model, dress_model, model_skin_material, copy_material)
 
             if not len(dress_model.materials) % 10:
                 logger.info("-- 材質出力: {s}", s=len(dress_model.materials))
