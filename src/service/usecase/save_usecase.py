@@ -28,6 +28,7 @@ from mlib.pmx.pmx_part import (
     VertexMorphOffset,
 )
 from mlib.pmx.pmx_writer import PmxWriter
+from mlib.utils.file_utils import separate_path
 from mlib.vmd.vmd_collection import VmdMotion
 from mlib.vmd.vmd_part import VmdMorphFrame
 from service.usecase.dress_bone import DressBones
@@ -601,7 +602,8 @@ class SaveUsecase:
                 model_skin_material_index = model_skin_positions.nearest_key(dress_mean_skin_position)
 
                 model_skin_material = model.materials[model_skin_material_index]
-                copy_material.diffuse = model_skin_material.diffuse.copy()
+                # 非透過度はコピーしない
+                copy_material.diffuse.xyz = model_skin_material.diffuse.xyz.copy()
                 copy_material.specular = model_skin_material.specular.copy()
                 copy_material.specular_factor = model_skin_material.specular_factor
                 copy_material.ambient = model_skin_material.ambient.copy()
@@ -997,8 +999,8 @@ class SaveUsecase:
 
         logger.info("人物(補正元)材質: {m} -> 衣装(補正先)材質: {d}", m=model_material.name, d=dress_material.name)
 
-        model_image = np.array(Image.open(model_texture.path).convert("RGBA"), np.float64)
-        dress_image = np.array(Image.open(dress_texture.path).convert("RGBA"), np.float64)
+        model_image = np.array(model_texture.image, np.float64)
+        dress_image = np.array(dress_texture.image, np.float64)
         # 補正衣装画像
         corrected_dress_image = np.asarray(np.copy(dress_image))
 
@@ -1023,9 +1025,6 @@ class SaveUsecase:
         model_vertex_colors: list[np.ndarray] = []
         dress_vertex_colors: list[np.ndarray] = []
 
-        dress_us: list[int] = []
-        dress_vs: list[int] = []
-
         for i, dress_vertex_index in enumerate(dress_vertex_indexes):
             logger.count("近似テクスチャ色取得", i, len(dress_vertex_indexes), display_block=500)
 
@@ -1046,35 +1045,37 @@ class SaveUsecase:
 
             dress_vertex_colors.append(dress_image[dv, du, :3])
 
-            dress_us.append(du)
-            dress_vs.append(dv)
-
         model_median_color = np.median(model_vertex_colors, axis=0)
         dress_median_color = np.median(dress_vertex_colors, axis=0)
 
         color_difference = model_median_color - dress_median_color
 
         logger.info(
-            "肌テクスチャ色補正: {c} (人物[{m}], 衣装[{d}]) u[{u1:04d}:{u2:04d}], v[{v1:04d},{v2:04d}]",
+            "肌テクスチャ色補正: {c} (人物[{m}], 衣装[{d}])",
             c=np.round(color_difference, decimals=1),
             m=np.round(model_median_color, decimals=1),
             d=np.round(dress_median_color, decimals=1),
-            u1=np.min(dress_us),
-            u2=np.max(dress_us) + 1,
-            v1=np.min(dress_vs),
-            v2=np.max(dress_vs) + 1,
         )
 
         # 該当UV範囲内だけ補正
-        corrected_dress_image[np.min(dress_vs) : np.max(dress_vs) + 1, np.min(dress_us) : np.max(dress_us) + 1, :3] += color_difference
+        corrected_dress_image[..., :3] += color_difference
 
         # 補正後の色が0未満または255を超える場合、範囲内にクリップする
         corrected_dress_image = np.clip(corrected_dress_image, 0, 255)
-        # 上下反転
+
+        # 補正したテクスチャ画像フルパスを材質別に保存
+        texture_dir_path, texture_file_name, texture_file_ext = separate_path(dress_texture.name)
+        # Cos:を除いてパス生成
+        texture_path = os.path.join(texture_dir_path, f"{texture_file_name}_{dress_material.name[4:]}{texture_file_ext}")
+        dress_correct_image_path = os.path.abspath(os.path.join(os.path.dirname(dress.path), texture_path))
+
+        corrected_dress_texture = Texture(name=texture_path)
+        dress.textures.append(corrected_dress_texture)
+        dress_material.texture_index = corrected_dress_texture.index
 
         # 補正後のテクスチャを保存する
         corrected_dress_output = Image.fromarray(corrected_dress_image.astype(np.uint8))
-        corrected_dress_output.save(os.path.abspath(os.path.join(os.path.dirname(dress.path), dress_texture.name)))
+        corrected_dress_output.save(dress_correct_image_path)
 
         # # 人物の指定材質に割り当てられた面INDEXリスト
         # model_face_indexes = model.faces_by_materials[model_material.index]
