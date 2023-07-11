@@ -1098,7 +1098,7 @@ class LoadUsecase:
                 continue
 
             # 自分までのボーンツリーの中で準標準である最後のボーン
-            parent_standard_bones = dress.bone_trees[bone_name].get_standard()
+            parent_standard_bones = [b for b in dress.bone_trees[bone_name].get_standard() if b.name in model.bones]
 
             if not parent_standard_bones:
                 # 準標準にまったく紐付いてない場合スルー
@@ -1302,17 +1302,17 @@ class LoadUsecase:
                 model_parent_bone_position = model_matrixes[0, dress_parent_standard_bone.name].position
 
                 dress_bone_position = dress_matrixes[0, dress_bone.name].position
+                dress_relative_position = dress_bone_position - dress_parent_bone_position
+
                 # 人物で親ボーンを基準として相対位置からどこにあるべきかを求め直す
-                model_deformed_position = model_matrixes[0, dress_parent_standard_bone.name].global_matrix * (
-                    dress_bone_position - dress_parent_bone_position
-                )
+                model_deformed_position = model_matrixes[0, dress_parent_standard_bone.name].global_matrix * dress_relative_position
 
                 if tail_bone_names:
                     model_tail_position = model_matrixes[0, tail_bone_names[0]].position
                     dress_tail_position = dress_matrixes[0, tail_bone_names[0]].position
                 else:
-                    model_tail_position = model_matrixes[0, dress_bone.name].global_matrix * model_bone.tail_relative_position
-                    dress_tail_position = dress_matrixes[0, dress_bone.name].global_matrix * dress_bone.tail_relative_position
+                    model_tail_position = model_matrixes[0, dress_parent_standard_bone.name].global_matrix * dress_relative_position
+                    dress_tail_position = dress_matrixes[0, dress_parent_standard_bone.name].global_matrix * dress_relative_position
 
                 dress_bone_fit_position = align_triangle(
                     dress_parent_bone_position,
