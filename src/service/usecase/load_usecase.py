@@ -1310,11 +1310,17 @@ class LoadUsecase:
 
                 dress_offset_position = deformed_new_bone_position - deformed_bone_position
 
-                # 回転補正
-                original_slope_qq = (deformed_new_bone_position - deformed_parent_position).to_local_matrix4x4().to_quaternion()
-                deformed_slope_qq = (deformed_bone_position - deformed_parent_position).to_local_matrix4x4().to_quaternion()
+                original_slope_vector = deformed_new_bone_position - deformed_parent_position
+                deformed_slope_vector = deformed_new_bone_position - deformed_parent_position
 
-                dress_offset_qq = original_slope_qq * deformed_slope_qq.inverse()
+                if 0 < original_slope_vector.length() and 0 < deformed_slope_vector.length():
+                    # 子ボーンとの距離がある場合のみ、回転補正
+                    original_slope_qq = original_slope_vector.to_local_matrix4x4().to_quaternion()
+                    deformed_slope_qq = deformed_slope_vector.to_local_matrix4x4().to_quaternion()
+
+                    dress_offset_qq = original_slope_qq * deformed_slope_qq.inverse()
+                else:
+                    dress_offset_qq = MQuaternion()
 
                 dress.morphs[DRESS_BONE_FITTING_NAME].offsets.append(
                     BoneMorphOffset(
@@ -1351,24 +1357,26 @@ class LoadUsecase:
 
                 dress_local_scales[dress_bone.index] = dress_local_scales[dress_bone.parent_index].copy()
 
-        # if logger.total_level <= 10:
-        #     # デバッグモードの時だけ結果出力
-        #     from datetime import datetime
-        #     from service.usecase.save_usecase import SaveUsecase
+        # # ----- 変形結果 -------------
+        # from datetime import datetime
+        # from service.usecase.save_usecase import SaveUsecase
 
-        #     SaveUsecase().save(
-        #         model,
-        #         dress,
-        #         VmdMotion(),
-        #         dress_motion,
-        #         os.path.join("E:/MMD/Dressup/output", f"{datetime.now():%Y%m%d_%H%M%S}_dress.pmx"),
-        #         dict([(m.name, 0.0) for m in model.materials]),
-        #         dict([(m.name, 1.0) for m in dress.materials]),
-        #         {},
-        #         {},
-        #         {},
-        #         {},
-        #     )
+        # SaveUsecase().save(
+        #     model,
+        #     dress,
+        #     VmdMotion(),
+        #     dress_motion,
+        #     os.path.join("E:/MMD/Dressup/output", f"{datetime.now():%Y%m%d_%H%M%S}_dress.pmx"),
+        #     dict([(m.name, 0.0) for m in model.materials]),
+        #     dict([(m.name, False) for m in model.materials]),
+        #     dict([(m.name, 1.0) for m in dress.materials]),
+        #     dict([(m.name, False) for m in dress.materials]),
+        #     {},
+        #     {},
+        #     {},
+        #     {},
+        # )
+        # # ----- 変形結果 -------------
 
         return dress_local_scales, dress_global_scales, dress_offset_positions, dress_offset_qqs
 
