@@ -1105,6 +1105,8 @@ class LoadUsecase:
                 continue
 
             dress_parent_standard_bone = parent_standard_bones[-1]
+            dress_parent_bone_setting = DRESS_STANDARD_BONE_NAMES[dress_parent_standard_bone.name]
+
             dress_bone_parent_scale = MVector3D()
 
             if not dress_bone.is_standard and not dress.bone_trees.has_standard_child(dress_bone.name):
@@ -1286,36 +1288,65 @@ class LoadUsecase:
 
             else:
                 # 準標準外、もしくは準標準でもボーンが揃ってない場合、準標準外フィッティング
-
                 dress_offset_position = MVector3D()
                 dress_offset_qq = MQuaternion()
 
-                if 0 <= dress_bone.parent_index and dress_bone.parent_index in dress.bones:
-                    dress_parent_bone = dress.bones[dress_bone.parent_index]
+                # 子ボーン
+                tail_bone_names = [
+                    tail_bone_name
+                    for tail_bone_name in dress_parent_bone_setting.tails
+                    if tail_bone_name in dress.bones and tail_bone_name in model.bones
+                ]
 
-                    # 親ボーンのフィッティング位置
-                    dress_parent_bone_position = dress_matrixes[0, dress_parent_bone.name].position
+                dress_parent_bone_position = dress_matrixes[0, dress_parent_standard_bone.name].position
+                model_parent_bone_position = model_matrixes[0, dress_parent_standard_bone.name].position
 
-                    # 親までフィッティングさせた時の自身の位置
-                    dress_bone_position = dress_matrixes[0, bone_name].position
-                    # 親までフィッティングさせた場合の親と自身の距離差
-                    dress_bone_relative_position = dress_bone_position - dress_parent_bone_position
-                    # 元々の親との距離差(スケール加味)
-                    dress_bone_original_relative_position = (dress_bone.position - dress_parent_bone.position) * (
-                        dress_bone_parent_scale + MVector3D(1, 1, 1)
-                    )
+                dress_bone_position = dress_matrixes[0, dress_bone.name].position
+                # 人物で親ボーンを基準として相対位置からどこにあるべきかを求め直す
+                model_deformed_position = model_matrixes[0, dress_parent_standard_bone.name].global_matrix * (
+                    dress_bone_position - dress_parent_bone_position
+                )
 
-                    dress_offset_position = dress_bone_relative_position - dress_bone_original_relative_position
+                if tail_bone_names:
+                    model_tail_position = model_matrixes[0, tail_bone_names[0]].position
+                    dress_tail_position = dress_matrixes[0, tail_bone_names[0]].position
+                else:
+                    model_tail_position = model_matrixes[0, dress_bone.name].global_matrix * model_bone.tail_relative_position
+                    dress_tail_position = dress_matrixes[0, dress_bone.name].global_matrix * dress_bone.tail_relative_position
 
-                    logger.debug(
-                        f"-- -- 移動オフセット[{dress_bone.name}][{dress_offset_position}]"
-                        + f"[original={dress_bone_original_relative_position}][dress={dress_bone_relative_position}]"
-                    )
+                dress_bone_fit_position = align_triangle(
+                    dress_parent_bone_position,
+                    dress_tail_position,
+                    dress_bone_position,
+                    model_parent_bone_position,
+                    model_tail_position,
+                )
 
-                # 角度は元々の向きと同じにする自分より親は逆回転させる
-                for tree_bone_index in reversed(dress.bone_trees[dress_bone.name].indexes[:-1]):
+                dress_offset_position = dress_bone_fit_position - model_deformed_position
+
+                if dress_parent_bone_setting.category not in ("上半身", "下半身", "体幹"):
+                    # 体幹以外は子ボーンの位置を合わせるよう回転させる
+                    original_slope_vector = dress_bone_fit_position - dress_parent_bone_position
+                    deformed_slope_vector = model_deformed_position - dress_parent_bone_position
+
+                    if 0 < original_slope_vector.length() and 0 < deformed_slope_vector.length():
+                        # 子ボーンとの距離がある場合のみ、回転補正
+                        original_slope_qq = original_slope_vector.to_local_matrix4x4().to_quaternion()
+                        deformed_slope_qq = deformed_slope_vector.to_local_matrix4x4().to_quaternion()
+                        dress_offset_qq = original_slope_qq * deformed_slope_qq.inverse()
+
+                # 角度は元々の向きと同じにする親準標準より親は逆回転させる
+                for tree_bone_index in reversed(
+                    dress.bone_trees[dress_bone.name]
+                    .filter(start_bone_name=dress.bone_trees[dress_bone.name].names[0], end_bone_name=dress_parent_standard_bone.name)
+                    .indexes[:-1]
+                ):
                     dress_offset_qq *= dress_offset_qqs.get(tree_bone_index, MQuaternion()).inverse()
 
+                logger.debug(
+                    f"-- -- 移動オフセット[{dress_bone.name}][{dress_offset_position}]"
+                    + f"[fit={dress_bone_fit_position}][dress={model_deformed_position}]"
+                )
                 logger.debug(f"-- -- 回転オフセット[{dress_bone.name}][{dress_offset_qq.to_euler_degrees()}]")
 
                 dress_offset_positions[dress_bone.index] = dress_offset_position
