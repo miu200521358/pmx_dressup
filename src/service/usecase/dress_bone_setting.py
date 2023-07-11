@@ -134,7 +134,6 @@ class DressBoneSettings(Enum):
         translatable=True,
         rotatable=True,
         rotate_cancel=True,
-        global_scalable=True,
     )
     RIGHT_SHOULDER_ROOT = DressBoneSetting(
         setting=BoneSettings.RIGHT_SHOULDER_ROOT.value,
@@ -239,7 +238,6 @@ class DressBoneSettings(Enum):
         translatable=True,
         rotatable=True,
         local_x_scalable=True,
-        global_scalable=True,
     )
     RIGHT_THUMB0 = DressBoneSetting(
         setting=BoneSettings.RIGHT_THUMB0.value,
@@ -380,7 +378,6 @@ class DressBoneSettings(Enum):
         rotatable=True,
         rotate_cancel=True,
         local_x_scalable=True,
-        global_scalable=True,
     )
     RIGHT_TOE_EX = DressBoneSetting(
         setting=BoneSettings.RIGHT_TOE_EX.value,
@@ -410,7 +407,6 @@ class DressBoneSettings(Enum):
         translatable=True,
         rotatable=True,
         rotate_cancel=True,
-        global_scalable=True,
     )
     LEFT_SHOULDER_ROOT = DressBoneSetting(
         setting=BoneSettings.LEFT_SHOULDER_ROOT.value,
@@ -515,7 +511,6 @@ class DressBoneSettings(Enum):
         translatable=True,
         rotatable=True,
         local_x_scalable=True,
-        global_scalable=True,
     )
     LEFT_THUMB0 = DressBoneSetting(
         setting=BoneSettings.LEFT_THUMB0.value,
@@ -656,7 +651,6 @@ class DressBoneSettings(Enum):
         rotatable=True,
         rotate_cancel=True,
         local_x_scalable=True,
-        global_scalable=True,
     )
     LEFT_TOE_EX = DressBoneSetting(
         setting=BoneSettings.LEFT_TOE_EX.value,

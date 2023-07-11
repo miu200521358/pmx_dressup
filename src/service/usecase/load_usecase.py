@@ -69,9 +69,55 @@ class LoadUsecase:
             "左足先EX",
         }
 
+        not_target_bone_names = {
+            "右目",
+            "左目",
+            "両目",
+            "左親指０",
+            "左親指１",
+            "左親指２",
+            "左親指先",
+            "左人指１",
+            "左人指２",
+            "左人指３",
+            "左人指先",
+            "左中指１",
+            "左中指２",
+            "左中指３",
+            "左中指先",
+            "左薬指１",
+            "左薬指２",
+            "左薬指３",
+            "左薬指先",
+            "左小指１",
+            "左小指２",
+            "左小指３",
+            "左小指先",
+            "右親指０",
+            "右親指１",
+            "右親指２",
+            "右親指先",
+            "右人指１",
+            "右人指２",
+            "右人指３",
+            "右人指先",
+            "右中指１",
+            "右中指２",
+            "右中指３",
+            "右中指先",
+            "右薬指１",
+            "右薬指２",
+            "右薬指３",
+            "右薬指先",
+            "右小指１",
+            "右小指２",
+            "右小指３",
+            "右小指先",
+        }
+
         # 準標準ボーンで足りないボーン名を抽出
-        short_model_bone_names = set(list(DRESS_STANDARD_BONE_NAMES.keys())) - set(model.bones.names) - {"右目", "左目", "両目"}
-        short_dress_bone_names = set(list(DRESS_STANDARD_BONE_NAMES.keys())) - set(dress.bones.names) - {"右目", "左目", "両目"}
+        short_model_bone_names = set(list(DRESS_STANDARD_BONE_NAMES.keys())) - set(model.bones.names) - not_target_bone_names
+        short_dress_bone_names = set(list(DRESS_STANDARD_BONE_NAMES.keys())) - set(dress.bones.names) - not_target_bone_names
 
         # 両方の片方にしかないボーン名を抽出
         mismatch_bone_names = (short_model_bone_names ^ short_dress_bone_names) | add_bone_names
@@ -1127,6 +1173,7 @@ class LoadUsecase:
             if dress_bone.is_standard and bone_name in dress.bones and bone_name in model.bones:
                 # 準標準かつ人物・衣装の両方にボーンがある場合、準標準フィッティング
                 bone_setting = DRESS_STANDARD_BONE_NAMES[bone_name]
+                model_bone = model.bones[bone_name]
 
                 if bone_setting.translatable:
                     # 移動計算 ------------------
