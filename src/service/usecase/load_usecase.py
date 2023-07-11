@@ -950,7 +950,7 @@ class LoadUsecase:
                             ) / ((((dress.bones["左肩"].position + dress.bones["右肩"].position) / 2) - dress_bone.position).y or 1)
                         else:
                             dress_fit_length_scale = 1.0
-                    elif bone_setting.category == "手首":
+                    elif "手首" in dress_bone.name:
                         # 手首の比率は手首ボーンから中指先ボーンまでの直線距離とする
                         middle3_name = f"{dress_bone.name[0]}中指３"
                         if middle3_name in model.bones and middle3_name in dress.bones:
@@ -989,6 +989,9 @@ class LoadUsecase:
                         dress_fit_length_scale = (model_tail_position - model_bone_position).length() / (
                             (dress_tail_position - dress_bone_position).length() or 1
                         )
+
+                    if np.isclose(dress_fit_length_scale, 0.0):
+                        dress_fit_length_scale = 1.0
 
                     if bone_setting.category not in dress_category_local_x_scales:
                         dress_category_local_x_scales[bone_setting.category] = []
