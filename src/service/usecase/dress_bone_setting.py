@@ -93,21 +93,12 @@ class DressBoneSettings(Enum):
         local_scalable=True,
         local_x_scalable=True,
     )
-    UPPER3 = DressBoneSetting(
-        setting=BoneSettings.UPPER3.value,
-        category="体幹",
-        translatable=True,
-        rotatable=True,
-        local_scalable=True,
-        local_x_scalable=True,
-    )
     ARM_CENTER = DressBoneSetting(
         setting=BoneSettings.ARM_CENTER.value,
         category="体幹",
         translatable=True,
         rotatable=True,
         rotate_cancel=True,
-        local_x_scalable=True,
     )
     NECK = DressBoneSetting(
         setting=BoneSettings.NECK.value,
@@ -151,7 +142,6 @@ class DressBoneSettings(Enum):
         translatable=True,
         rotatable=True,
         rotate_cancel=True,
-        local_x_scalable=True,
     )
     RIGHT_SHOULDER_P = DressBoneSetting(
         setting=BoneSettings.RIGHT_SHOULDER_P.value,
@@ -428,7 +418,6 @@ class DressBoneSettings(Enum):
         translatable=True,
         rotatable=True,
         rotate_cancel=True,
-        local_x_scalable=True,
     )
     LEFT_SHOULDER_P = DressBoneSetting(
         setting=BoneSettings.LEFT_SHOULDER_P.value,
@@ -735,9 +724,9 @@ class FitMorphSettings(Enum):
         name="腰",
         target_bone_names=["腰"],
         move_target_bone_names=[],
-        child_move_morph_names=["下半身", "上半身", "上半身2", "上半身3"],
+        child_move_morph_names=["下半身", "上半身", "上半身2"],
         child_rotation_morph_names=[],
-        child_scale_morph_names=["下半身", "上半身", "上半身2", "上半身3"],
+        child_scale_morph_names=["下半身", "上半身", "上半身2"],
         attend_weight_bone_names=[],
     )
 
@@ -757,23 +746,13 @@ class FitMorphSettings(Enum):
         move_target_bone_names=[],
         child_move_morph_names=[],
         child_rotation_morph_names=[],
-        child_scale_morph_names=["上半身2", "上半身3"],
+        child_scale_morph_names=["上半身2"],
         attend_weight_bone_names=[],
     )
 
     UPPER2 = FitMorphSetting(
         name="上半身2",
         target_bone_names=["上半身2"],
-        move_target_bone_names=[],
-        child_move_morph_names=[],
-        child_rotation_morph_names=[],
-        child_scale_morph_names=["上半身3"],
-        attend_weight_bone_names=[],
-    )
-
-    UPPER3 = FitMorphSetting(
-        name="上半身3",
-        target_bone_names=["上半身3"],
         move_target_bone_names=[],
         child_move_morph_names=[],
         child_rotation_morph_names=[],

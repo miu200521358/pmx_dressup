@@ -896,7 +896,7 @@ class LoadUsecase:
                             (dress_bone.position - dress.bones[dress.bones[f"{dress_bone.name[0]}つま先ＩＫ"].ik.bone_index].position).length()
                             or 1
                         )
-                    elif dress_bone.name == "上半身2":
+                    elif dress_bone.name == "上半身2" and "上半身3" not in dress.bones:
                         # 上半身2はウェイトを全体的に覆ってるので、肩までの高さとする
                         if model.bones.exists(("左肩", "右肩")) and dress.bones.exists(("左肩", "右肩")):
                             dress_fit_length_scale = (
@@ -904,21 +904,6 @@ class LoadUsecase:
                             ) / ((((dress.bones["左肩"].position + dress.bones["右肩"].position) / 2) - dress_bone.position).y or 1)
                         else:
                             dress_fit_length_scale = 1.0
-                    # elif dress_bone.name == "首根元":
-                    #     # 首根元は首・肩の距離の最小値とする
-                    #     dress_fit_length_scales: list[float] = []
-                    #     for tail_bone_name in ("首", "右肩", "左肩"):
-                    #         if tail_bone_name not in model.bones and tail_bone_name not in dress.bones:
-                    #             continue
-                    #         dress_fit_length_scales.append(
-                    #             (model_bone.position - model.bones[tail_bone_name].position).length()
-                    #             / ((dress_bone.position - dress.bones[tail_bone_name].position).length() or 1)
-                    #         )
-
-                    #     if dress_fit_length_scales:
-                    #         dress_fit_length_scale = np.min(dress_fit_length_scales)
-                    #     else:
-                    #         dress_fit_length_scale = 1
                     elif bone_setting.category == "手首":
                         # 手首の比率は手首ボーンから中指先ボーンまでの直線距離とする
                         middle3_name = f"{dress_bone.name[0]}中指３"
@@ -1120,9 +1105,10 @@ class LoadUsecase:
                 continue
 
             dress_parent_standard_bone = parent_standard_bones[-1]
+            dress_bone_parent_scale = MVector3D()
 
-            if not dress_bone.is_standard:
-                # 準標準では無い場合、親のスケールをそのまま流用
+            if not dress_bone.is_standard and not dress.bone_trees.has_standard_child(dress_bone.name):
+                # 準標準では無く、子どもに準標準がいない場合、親のスケールをそのまま流用
                 dress_bone_parent_scale_x = dress_local_scales.get(dress_parent_standard_bone.index, MVector3D()).x
                 dress_bone_parent_scale = MVector3D(dress_bone_parent_scale_x, dress_bone_parent_scale_x, dress_bone_parent_scale_x)
 
