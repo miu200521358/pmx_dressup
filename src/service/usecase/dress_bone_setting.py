@@ -10,10 +10,10 @@ class DressBoneSetting(BoneSetting):
         self,
         setting: BoneSetting,
         category: str,
-        translatable: bool,
-        rotatable: bool,
-        local_scalable: bool,
-        local_x_scalable: bool,
+        translatable: bool = False,
+        rotatable: bool = False,
+        local_scalable: bool = False,
+        local_x_scalable: bool = False,
         global_scalable: bool = False,
         rotate_cancel: bool = False,
     ) -> None:
@@ -46,34 +46,21 @@ class DressBoneSettings(Enum):
     ROOT = DressBoneSetting(
         setting=BoneSettings.ROOT.value,
         category="全ての親",
-        translatable=False,
-        rotatable=False,
-        local_scalable=False,
-        local_x_scalable=False,
     )
     CENTER = DressBoneSetting(
         setting=BoneSettings.CENTER.value,
         category="センター",
         translatable=True,
-        rotatable=False,
-        local_scalable=False,
-        local_x_scalable=False,
     )
     GROOVE = DressBoneSetting(
         setting=BoneSettings.GROOVE.value,
         category="グルーブ",
         translatable=True,
-        rotatable=False,
-        local_scalable=False,
-        local_x_scalable=False,
     )
     WAIST = DressBoneSetting(
         setting=BoneSettings.WAIST.value,
         category="体幹",
         translatable=True,
-        rotatable=False,
-        local_scalable=False,
-        local_x_scalable=False,
     )
     LOWER = DressBoneSetting(
         setting=BoneSettings.LOWER.value,
@@ -89,8 +76,6 @@ class DressBoneSettings(Enum):
         translatable=True,
         rotatable=True,
         rotate_cancel=True,
-        local_scalable=False,
-        local_x_scalable=False,
     )
     UPPER = DressBoneSetting(
         setting=BoneSettings.UPPER.value,
@@ -122,7 +107,6 @@ class DressBoneSettings(Enum):
         translatable=True,
         rotatable=True,
         rotate_cancel=True,
-        local_scalable=False,
         local_x_scalable=True,
     )
     NECK = DressBoneSetting(
@@ -139,32 +123,18 @@ class DressBoneSettings(Enum):
         translatable=True,
         rotatable=True,
         rotate_cancel=True,
-        local_scalable=False,
-        local_x_scalable=False,
     )
     EYES = DressBoneSetting(
         setting=BoneSettings.EYES.value,
         category="頭",
-        translatable=False,
-        rotatable=False,
-        local_scalable=False,
-        local_x_scalable=False,
     )
     LEFT_EYE = DressBoneSetting(
         setting=BoneSettings.LEFT_EYE.value,
         category="頭",
-        translatable=False,
-        rotatable=False,
-        local_scalable=False,
-        local_x_scalable=False,
     )
     RIGHT_EYE = DressBoneSetting(
         setting=BoneSettings.RIGHT_EYE.value,
         category="頭",
-        translatable=False,
-        rotatable=False,
-        local_scalable=False,
-        local_x_scalable=False,
     )
 
     RIGHT_BUST = DressBoneSetting(
@@ -173,8 +143,6 @@ class DressBoneSettings(Enum):
         translatable=True,
         rotatable=True,
         rotate_cancel=True,
-        local_scalable=False,
-        local_x_scalable=False,
         global_scalable=True,
     )
     RIGHT_SHOULDER_ROOT = DressBoneSetting(
@@ -183,16 +151,12 @@ class DressBoneSettings(Enum):
         translatable=True,
         rotatable=True,
         rotate_cancel=True,
-        local_scalable=False,
         local_x_scalable=True,
     )
     RIGHT_SHOULDER_P = DressBoneSetting(
         setting=BoneSettings.RIGHT_SHOULDER_P.value,
         category="肩",
         translatable=True,
-        rotatable=False,
-        local_scalable=False,
-        local_x_scalable=False,
     )
     RIGHT_SHOULDER = DressBoneSetting(
         setting=BoneSettings.RIGHT_SHOULDER.value,
@@ -207,9 +171,6 @@ class DressBoneSettings(Enum):
         setting=BoneSettings.RIGHT_SHOULDER_C.value,
         category="腕",
         translatable=True,
-        rotatable=False,
-        local_scalable=False,
-        local_x_scalable=False,
     )
     RIGHT_ARM = DressBoneSetting(
         setting=BoneSettings.RIGHT_ARM.value,
@@ -232,25 +193,19 @@ class DressBoneSettings(Enum):
         setting=BoneSettings.RIGHT_ARM_TWIST1.value,
         category="腕",
         translatable=True,
-        rotatable=False,
         local_scalable=True,
-        local_x_scalable=False,
     )
     RIGHT_ARM_TWIST2 = DressBoneSetting(
         setting=BoneSettings.RIGHT_ARM_TWIST2.value,
         category="腕",
         translatable=True,
-        rotatable=False,
         local_scalable=True,
-        local_x_scalable=False,
     )
     RIGHT_ARM_TWIST3 = DressBoneSetting(
         setting=BoneSettings.RIGHT_ARM_TWIST3.value,
         category="腕",
         translatable=True,
-        rotatable=False,
         local_scalable=True,
-        local_x_scalable=False,
     )
     RIGHT_ELBOW = DressBoneSetting(
         setting=BoneSettings.RIGHT_ELBOW.value,
@@ -274,194 +229,107 @@ class DressBoneSettings(Enum):
         setting=BoneSettings.RIGHT_HAND_TWIST1.value,
         category="腕",
         translatable=True,
-        rotatable=False,
         local_scalable=True,
-        local_x_scalable=False,
     )
     RIGHT_HAND_TWIST2 = DressBoneSetting(
         setting=BoneSettings.RIGHT_HAND_TWIST2.value,
         category="腕",
         translatable=True,
-        rotatable=False,
         local_scalable=True,
-        local_x_scalable=False,
     )
     RIGHT_HAND_TWIST3 = DressBoneSetting(
         setting=BoneSettings.RIGHT_HAND_TWIST3.value,
         category="腕",
         translatable=True,
-        rotatable=False,
         local_scalable=True,
-        local_x_scalable=False,
     )
     RIGHT_WRIST = DressBoneSetting(
         setting=BoneSettings.RIGHT_WRIST.value,
         category="腕",
         translatable=True,
         rotatable=True,
-        local_scalable=False,
         local_x_scalable=True,
         global_scalable=True,
     )
     RIGHT_THUMB0 = DressBoneSetting(
         setting=BoneSettings.RIGHT_THUMB0.value,
         category="指",
-        translatable=False,
-        rotatable=False,
-        local_scalable=False,
-        local_x_scalable=False,
     )
     RIGHT_THUMB1 = DressBoneSetting(
         setting=BoneSettings.RIGHT_THUMB1.value,
         category="指",
-        translatable=False,
-        rotatable=False,
-        local_scalable=False,
-        local_x_scalable=False,
     )
     RIGHT_THUMB2 = DressBoneSetting(
         setting=BoneSettings.RIGHT_THUMB2.value,
         category="指",
-        translatable=False,
-        rotatable=False,
-        local_scalable=False,
-        local_x_scalable=False,
     )
     RIGHT_THUMB_TAIL = DressBoneSetting(
         setting=BoneSettings.RIGHT_THUMB_TAIL.value,
         category="指",
-        translatable=False,
-        rotatable=False,
-        local_scalable=False,
-        local_x_scalable=False,
     )
     RIGHT_INDEX0 = DressBoneSetting(
         setting=BoneSettings.RIGHT_INDEX0.value,
         category="指",
-        translatable=False,
-        rotatable=False,
-        local_scalable=False,
-        local_x_scalable=False,
     )
     RIGHT_INDEX1 = DressBoneSetting(
         setting=BoneSettings.RIGHT_INDEX1.value,
         category="指",
-        translatable=False,
-        rotatable=False,
-        local_scalable=False,
-        local_x_scalable=False,
     )
     RIGHT_INDEX2 = DressBoneSetting(
         setting=BoneSettings.RIGHT_INDEX2.value,
         category="指",
-        translatable=False,
-        rotatable=False,
-        local_scalable=False,
-        local_x_scalable=False,
     )
     RIGHT_INDEX_TAIL = DressBoneSetting(
         setting=BoneSettings.RIGHT_INDEX_TAIL.value,
         category="指",
-        translatable=False,
-        rotatable=False,
-        local_scalable=False,
-        local_x_scalable=False,
     )
     RIGHT_MIDDLE0 = DressBoneSetting(
         setting=BoneSettings.RIGHT_MIDDLE0.value,
         category="指",
-        translatable=False,
-        rotatable=False,
-        local_scalable=False,
-        local_x_scalable=False,
     )
     RIGHT_MIDDLE1 = DressBoneSetting(
         setting=BoneSettings.RIGHT_MIDDLE1.value,
         category="指",
-        translatable=False,
-        rotatable=False,
-        local_scalable=False,
-        local_x_scalable=False,
     )
     RIGHT_MIDDLE2 = DressBoneSetting(
         setting=BoneSettings.RIGHT_MIDDLE2.value,
         category="指",
-        translatable=False,
-        rotatable=False,
-        local_scalable=False,
-        local_x_scalable=False,
     )
     RIGHT_MIDDLE_TAIL = DressBoneSetting(
         setting=BoneSettings.RIGHT_MIDDLE_TAIL.value,
         category="指",
-        translatable=False,
-        rotatable=False,
-        local_scalable=False,
-        local_x_scalable=False,
     )
     RIGHT_RING0 = DressBoneSetting(
         setting=BoneSettings.RIGHT_RING0.value,
         category="指",
-        translatable=False,
-        rotatable=False,
-        local_scalable=False,
-        local_x_scalable=False,
     )
     RIGHT_RING1 = DressBoneSetting(
         setting=BoneSettings.RIGHT_RING1.value,
         category="指",
-        translatable=False,
-        rotatable=False,
-        local_scalable=False,
-        local_x_scalable=False,
     )
     RIGHT_RING2 = DressBoneSetting(
         setting=BoneSettings.RIGHT_RING2.value,
         category="指",
-        translatable=False,
-        rotatable=False,
-        local_scalable=False,
-        local_x_scalable=False,
     )
     RIGHT_RING_TAIL = DressBoneSetting(
         setting=BoneSettings.RIGHT_RING_TAIL.value,
         category="指",
-        translatable=False,
-        rotatable=False,
-        local_scalable=False,
-        local_x_scalable=False,
     )
     RIGHT_PINKY0 = DressBoneSetting(
         setting=BoneSettings.RIGHT_PINKY0.value,
         category="指",
-        translatable=False,
-        rotatable=False,
-        local_scalable=False,
-        local_x_scalable=False,
     )
     RIGHT_PINKY1 = DressBoneSetting(
         setting=BoneSettings.RIGHT_PINKY1.value,
         category="指",
-        translatable=False,
-        rotatable=False,
-        local_scalable=False,
-        local_x_scalable=False,
     )
     RIGHT_PINKY2 = DressBoneSetting(
         setting=BoneSettings.RIGHT_PINKY2.value,
         category="指",
-        translatable=False,
-        rotatable=False,
-        local_scalable=False,
-        local_x_scalable=False,
     )
     RIGHT_PINKY_TAIL = DressBoneSetting(
         setting=BoneSettings.RIGHT_PINKY_TAIL.value,
         category="指",
-        translatable=False,
-        rotatable=False,
-        local_scalable=False,
-        local_x_scalable=False,
     )
     RIGHT_WAIST_CANCEL = DressBoneSetting(
         setting=BoneSettings.RIGHT_WAIST_CANCEL.value,
@@ -469,8 +337,6 @@ class DressBoneSettings(Enum):
         translatable=True,
         rotatable=True,
         rotate_cancel=True,
-        local_scalable=False,
-        local_x_scalable=False,
     )
     RIGHT_LEG = DressBoneSetting(
         setting=BoneSettings.RIGHT_LEG.value,
@@ -494,16 +360,12 @@ class DressBoneSettings(Enum):
         translatable=True,
         rotatable=True,
         rotate_cancel=True,
-        local_scalable=False,
         local_x_scalable=True,
     )
     RIGHT_TOE = DressBoneSetting(
         setting=BoneSettings.RIGHT_TOE.value,
         category="足首",
         translatable=True,
-        rotatable=False,
-        local_scalable=False,
-        local_x_scalable=False,
     )
     RIGHT_LEG_D = DressBoneSetting(
         setting=BoneSettings.RIGHT_LEG_D.value,
@@ -527,40 +389,28 @@ class DressBoneSettings(Enum):
         translatable=True,
         rotatable=True,
         rotate_cancel=True,
-        local_scalable=False,
         local_x_scalable=True,
         global_scalable=True,
     )
     RIGHT_TOE_EX = DressBoneSetting(
         setting=BoneSettings.RIGHT_TOE_EX.value,
         category="足首",
-        translatable=False,
-        rotatable=False,
-        local_scalable=False,
-        local_x_scalable=False,
     )
     RIGHT_LEG_IK_PARENT = DressBoneSetting(
         setting=BoneSettings.RIGHT_LEG_IK_PARENT.value,
         category="足IK親",
         translatable=True,
-        rotatable=False,
-        local_scalable=False,
-        local_x_scalable=False,
     )
     RIGHT_LEG_IK = DressBoneSetting(
         setting=BoneSettings.RIGHT_LEG_IK.value,
         category="足ＩＫ",
         translatable=True,
-        rotatable=False,
-        local_scalable=False,
         local_x_scalable=True,
     )
     RIGHT_TOE_IK = DressBoneSetting(
         setting=BoneSettings.RIGHT_TOE_IK.value,
         category="つま先ＩＫ",
         translatable=True,
-        rotatable=False,
-        local_scalable=False,
         local_x_scalable=True,
     )
 
@@ -570,8 +420,6 @@ class DressBoneSettings(Enum):
         translatable=True,
         rotatable=True,
         rotate_cancel=True,
-        local_scalable=False,
-        local_x_scalable=False,
         global_scalable=True,
     )
     LEFT_SHOULDER_ROOT = DressBoneSetting(
@@ -580,16 +428,12 @@ class DressBoneSettings(Enum):
         translatable=True,
         rotatable=True,
         rotate_cancel=True,
-        local_scalable=False,
         local_x_scalable=True,
     )
     LEFT_SHOULDER_P = DressBoneSetting(
         setting=BoneSettings.LEFT_SHOULDER_P.value,
         category="肩",
         translatable=True,
-        rotatable=False,
-        local_scalable=False,
-        local_x_scalable=False,
     )
     LEFT_SHOULDER = DressBoneSetting(
         setting=BoneSettings.LEFT_SHOULDER.value,
@@ -604,9 +448,6 @@ class DressBoneSettings(Enum):
         setting=BoneSettings.LEFT_SHOULDER_C.value,
         category="腕",
         translatable=True,
-        rotatable=False,
-        local_scalable=False,
-        local_x_scalable=False,
     )
     LEFT_ARM = DressBoneSetting(
         setting=BoneSettings.LEFT_ARM.value,
@@ -629,25 +470,19 @@ class DressBoneSettings(Enum):
         setting=BoneSettings.LEFT_ARM_TWIST1.value,
         category="腕",
         translatable=True,
-        rotatable=False,
         local_scalable=True,
-        local_x_scalable=False,
     )
     LEFT_ARM_TWIST2 = DressBoneSetting(
         setting=BoneSettings.LEFT_ARM_TWIST2.value,
         category="腕",
         translatable=True,
-        rotatable=False,
         local_scalable=True,
-        local_x_scalable=False,
     )
     LEFT_ARM_TWIST3 = DressBoneSetting(
         setting=BoneSettings.LEFT_ARM_TWIST3.value,
         category="腕",
         translatable=True,
-        rotatable=False,
         local_scalable=True,
-        local_x_scalable=False,
     )
     LEFT_ELBOW = DressBoneSetting(
         setting=BoneSettings.LEFT_ELBOW.value,
@@ -671,194 +506,107 @@ class DressBoneSettings(Enum):
         setting=BoneSettings.LEFT_HAND_TWIST1.value,
         category="腕",
         translatable=True,
-        rotatable=False,
         local_scalable=True,
-        local_x_scalable=False,
     )
     LEFT_HAND_TWIST2 = DressBoneSetting(
         setting=BoneSettings.LEFT_HAND_TWIST2.value,
         category="腕",
         translatable=True,
-        rotatable=False,
         local_scalable=True,
-        local_x_scalable=False,
     )
     LEFT_HAND_TWIST3 = DressBoneSetting(
         setting=BoneSettings.LEFT_HAND_TWIST3.value,
         category="腕",
         translatable=True,
-        rotatable=False,
         local_scalable=True,
-        local_x_scalable=False,
     )
     LEFT_WRIST = DressBoneSetting(
         setting=BoneSettings.LEFT_WRIST.value,
         category="腕",
         translatable=True,
         rotatable=True,
-        local_scalable=False,
         local_x_scalable=True,
         global_scalable=True,
     )
     LEFT_THUMB0 = DressBoneSetting(
         setting=BoneSettings.LEFT_THUMB0.value,
         category="指",
-        translatable=False,
-        rotatable=False,
-        local_scalable=False,
-        local_x_scalable=False,
     )
     LEFT_THUMB1 = DressBoneSetting(
         setting=BoneSettings.LEFT_THUMB1.value,
         category="指",
-        translatable=False,
-        rotatable=False,
-        local_scalable=False,
-        local_x_scalable=False,
     )
     LEFT_THUMB2 = DressBoneSetting(
         setting=BoneSettings.LEFT_THUMB2.value,
         category="指",
-        translatable=False,
-        rotatable=False,
-        local_scalable=False,
-        local_x_scalable=False,
     )
     LEFT_THUMB_TAIL = DressBoneSetting(
         setting=BoneSettings.LEFT_THUMB_TAIL.value,
         category="指",
-        translatable=False,
-        rotatable=False,
-        local_scalable=False,
-        local_x_scalable=False,
     )
     LEFT_INDEX0 = DressBoneSetting(
         setting=BoneSettings.LEFT_INDEX0.value,
         category="指",
-        translatable=False,
-        rotatable=False,
-        local_scalable=False,
-        local_x_scalable=False,
     )
     LEFT_INDEX1 = DressBoneSetting(
         setting=BoneSettings.LEFT_INDEX1.value,
         category="指",
-        translatable=False,
-        rotatable=False,
-        local_scalable=False,
-        local_x_scalable=False,
     )
     LEFT_INDEX2 = DressBoneSetting(
         setting=BoneSettings.LEFT_INDEX2.value,
         category="指",
-        translatable=False,
-        rotatable=False,
-        local_scalable=False,
-        local_x_scalable=False,
     )
     LEFT_INDEX_TAIL = DressBoneSetting(
         setting=BoneSettings.LEFT_INDEX_TAIL.value,
         category="指",
-        translatable=False,
-        rotatable=False,
-        local_scalable=False,
-        local_x_scalable=False,
     )
     LEFT_MIDDLE0 = DressBoneSetting(
         setting=BoneSettings.LEFT_MIDDLE0.value,
         category="指",
-        translatable=False,
-        rotatable=False,
-        local_scalable=False,
-        local_x_scalable=False,
     )
     LEFT_MIDDLE1 = DressBoneSetting(
         setting=BoneSettings.LEFT_MIDDLE1.value,
         category="指",
-        translatable=False,
-        rotatable=False,
-        local_scalable=False,
-        local_x_scalable=False,
     )
     LEFT_MIDDLE2 = DressBoneSetting(
         setting=BoneSettings.LEFT_MIDDLE2.value,
         category="指",
-        translatable=False,
-        rotatable=False,
-        local_scalable=False,
-        local_x_scalable=False,
     )
     LEFT_MIDDLE_TAIL = DressBoneSetting(
         setting=BoneSettings.LEFT_MIDDLE_TAIL.value,
         category="指",
-        translatable=False,
-        rotatable=False,
-        local_scalable=False,
-        local_x_scalable=False,
     )
     LEFT_RING0 = DressBoneSetting(
         setting=BoneSettings.LEFT_RING0.value,
         category="指",
-        translatable=False,
-        rotatable=False,
-        local_scalable=False,
-        local_x_scalable=False,
     )
     LEFT_RING1 = DressBoneSetting(
         setting=BoneSettings.LEFT_RING1.value,
         category="指",
-        translatable=False,
-        rotatable=False,
-        local_scalable=False,
-        local_x_scalable=False,
     )
     LEFT_RING2 = DressBoneSetting(
         setting=BoneSettings.LEFT_RING2.value,
         category="指",
-        translatable=False,
-        rotatable=False,
-        local_scalable=False,
-        local_x_scalable=False,
     )
     LEFT_RING_TAIL = DressBoneSetting(
         setting=BoneSettings.LEFT_RING_TAIL.value,
         category="指",
-        translatable=False,
-        rotatable=False,
-        local_scalable=False,
-        local_x_scalable=False,
     )
     LEFT_PINKY0 = DressBoneSetting(
         setting=BoneSettings.LEFT_PINKY0.value,
         category="指",
-        translatable=False,
-        rotatable=False,
-        local_scalable=False,
-        local_x_scalable=False,
     )
     LEFT_PINKY1 = DressBoneSetting(
         setting=BoneSettings.LEFT_PINKY1.value,
         category="指",
-        translatable=False,
-        rotatable=False,
-        local_scalable=False,
-        local_x_scalable=False,
     )
     LEFT_PINKY2 = DressBoneSetting(
         setting=BoneSettings.LEFT_PINKY2.value,
         category="指",
-        translatable=False,
-        rotatable=False,
-        local_scalable=False,
-        local_x_scalable=False,
     )
     LEFT_PINKY_TAIL = DressBoneSetting(
         setting=BoneSettings.LEFT_PINKY_TAIL.value,
         category="指",
-        translatable=False,
-        rotatable=False,
-        local_scalable=False,
-        local_x_scalable=False,
     )
     LEFT_WAIST_CANCEL = DressBoneSetting(
         setting=BoneSettings.LEFT_WAIST_CANCEL.value,
@@ -866,8 +614,6 @@ class DressBoneSettings(Enum):
         translatable=True,
         rotatable=True,
         rotate_cancel=True,
-        local_scalable=False,
-        local_x_scalable=False,
     )
     LEFT_LEG = DressBoneSetting(
         setting=BoneSettings.LEFT_LEG.value,
@@ -891,16 +637,12 @@ class DressBoneSettings(Enum):
         translatable=True,
         rotatable=True,
         rotate_cancel=True,
-        local_scalable=False,
         local_x_scalable=True,
     )
     LEFT_TOE = DressBoneSetting(
         setting=BoneSettings.LEFT_TOE.value,
         category="足首",
         translatable=True,
-        rotatable=False,
-        local_scalable=False,
-        local_x_scalable=False,
     )
     LEFT_LEG_D = DressBoneSetting(
         setting=BoneSettings.LEFT_LEG_D.value,
@@ -924,40 +666,28 @@ class DressBoneSettings(Enum):
         translatable=True,
         rotatable=True,
         rotate_cancel=True,
-        local_scalable=False,
         local_x_scalable=True,
         global_scalable=True,
     )
     LEFT_TOE_EX = DressBoneSetting(
         setting=BoneSettings.LEFT_TOE_EX.value,
         category="足首",
-        translatable=False,
-        rotatable=False,
-        local_scalable=False,
-        local_x_scalable=False,
     )
     LEFT_LEG_IK_PARENT = DressBoneSetting(
         setting=BoneSettings.LEFT_LEG_IK_PARENT.value,
         category="足IK親",
         translatable=True,
-        rotatable=False,
-        local_scalable=False,
-        local_x_scalable=False,
     )
     LEFT_LEG_IK = DressBoneSetting(
         setting=BoneSettings.LEFT_LEG_IK.value,
         category="足ＩＫ",
         translatable=True,
-        rotatable=False,
-        local_scalable=False,
         local_x_scalable=True,
     )
     LEFT_TOE_IK = DressBoneSetting(
         setting=BoneSettings.LEFT_TOE_IK.value,
         category="つま先ＩＫ",
         translatable=True,
-        rotatable=False,
-        local_scalable=False,
         local_x_scalable=True,
     )
 
