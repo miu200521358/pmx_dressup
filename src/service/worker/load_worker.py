@@ -86,9 +86,6 @@ class LoadWorker(BaseWorker):
             # 上半身2の再設定
             replaced_bone_names += usecase.replace_upper2(model, dress)
 
-            # 上半身3の再設定
-            replaced_bone_names += usecase.replace_upper3(model, dress)
-
             # 胸の再設定
             replaced_bust_bone_names = usecase.replace_bust(model, dress)
 
