@@ -90,6 +90,7 @@ class SaveUsecase:
             + VERSION_NAME
             + ")"
             + "\r\n"
+            + "\r\n"
             + __("人物モデル")
             + "\r\n"
             + model.comment
@@ -105,6 +106,7 @@ class SaveUsecase:
             + " ("
             + VERSION_NAME
             + ")"
+            + "\r\n"
             + "\r\n"
             + __("人物モデル")
             + "\r\n"
