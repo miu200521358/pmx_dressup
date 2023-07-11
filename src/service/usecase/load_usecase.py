@@ -909,6 +909,8 @@ class LoadUsecase:
         dress_local_positions: dict[str, dict[str, np.ndarray]] = {}
         dress_category_local_x_scales: dict[str, list[float]] = {}
 
+        logger.info("ボーン距離比率")
+
         for i, dress_bone in enumerate(dress.bones):
             logger.count(
                 "ボーン距離比率",
@@ -1054,6 +1056,8 @@ class LoadUsecase:
                     )
                 )
 
+        logger.info("厚み比率")
+
         # dress_category_global_scales: dict[str, MVector3D] = {}
         dress_category_local_scales: dict[str, float] = {}
 
@@ -1107,6 +1111,10 @@ class LoadUsecase:
                     dress_bone_fit_position = model_matrixes[0, bone_name].position
                     dress_bone_position = dress_matrixes[0, bone_name].position
 
+                    if "つま先ＩＫ" in dress_bone.name:
+                        # つま先ＩＫは Y=0 に固定する
+                        dress_bone_fit_position.y = 0
+
                     dress_offset_position = dress_bone_fit_position - dress_bone_position
                     dress.morphs[DRESS_BONE_FITTING_NAME].offsets.append(
                         BoneMorphOffset(
@@ -1129,6 +1137,8 @@ class LoadUsecase:
                         dress_local_scale.y = dress_local_thick_scale_value
                         dress_local_scale.z = dress_local_thick_scale_value
                         dress_local_scales[dress_bone.index] = dress_local_scale
+
+        logger.info("ボーンフィッティング")
 
         # 変形順序に合わせて、フィッティングを行う
         for i, dress_bone_index in enumerate(dress.bones.bone_link_indexes):
