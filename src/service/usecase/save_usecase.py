@@ -5,6 +5,7 @@ import shutil
 from typing import Optional
 
 import numpy as np
+from executor import APP_NAME, VERSION_NAME
 
 from mlib.base.logger import MLogger
 from mlib.base.math import MMatrix4x4, MVector3D, MVectorDict
@@ -83,7 +84,13 @@ class SaveUsecase:
         dress_model.english_name = model.english_name + "(" + dress.english_name + ")"
         dress_model.extended_uv_count = max(model.extended_uv_count, dress.extended_uv_count)
         dress_model.comment = (
-            __("人物モデル")
+            __("着替え: ")
+            + APP_NAME
+            + " ("
+            + VERSION_NAME
+            + ")"
+            + "\r\n"
+            + __("人物モデル")
             + "\r\n"
             + model.comment
             + "\r\n\r\n------------------\r\n\r\n"
@@ -93,7 +100,13 @@ class SaveUsecase:
             + "\r\n\r\n------------------\r\n\r\n"
         )
         dress_model.english_name = (
-            __("人物モデル")
+            __("着替え: ")
+            + APP_NAME
+            + " ("
+            + VERSION_NAME
+            + ")"
+            + "\r\n"
+            + __("人物モデル")
             + "\r\n"
             + model.english_comment
             + "\r\n\r\n------------------\r\n\r\n"

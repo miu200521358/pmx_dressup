@@ -15,6 +15,7 @@ class DressBoneSetting(BoneSetting):
         local_scalable: bool,
         local_x_scalable: bool,
         global_scalable: bool = False,
+        rotate_cancel: bool = False,
     ) -> None:
         """
         category : 種類名
@@ -36,6 +37,7 @@ class DressBoneSetting(BoneSetting):
         self.local_x_scalable = local_x_scalable
         self.local_scalable = local_scalable
         self.global_scalable = global_scalable
+        self.rotate_cancel = rotate_cancel
 
 
 class DressBoneSettings(Enum):
@@ -85,8 +87,8 @@ class DressBoneSettings(Enum):
         setting=BoneSettings.LEG_CENTER.value,
         category="体幹",
         translatable=True,
-        # 回転はキャンセル用
         rotatable=True,
+        rotate_cancel=True,
         local_scalable=False,
         local_x_scalable=False,
     )
@@ -118,8 +120,8 @@ class DressBoneSettings(Enum):
         setting=BoneSettings.ARM_CENTER.value,
         category="体幹",
         translatable=True,
-        # 回転はキャンセル用
         rotatable=True,
+        rotate_cancel=True,
         local_scalable=False,
         local_x_scalable=True,
     )
@@ -136,6 +138,7 @@ class DressBoneSettings(Enum):
         category="頭",
         translatable=True,
         rotatable=True,
+        rotate_cancel=True,
         local_scalable=False,
         local_x_scalable=False,
     )
@@ -169,6 +172,7 @@ class DressBoneSettings(Enum):
         category="胸",
         translatable=True,
         rotatable=True,
+        rotate_cancel=True,
         local_scalable=False,
         local_x_scalable=False,
         global_scalable=True,
@@ -178,6 +182,7 @@ class DressBoneSettings(Enum):
         category="肩",
         translatable=True,
         rotatable=True,
+        rotate_cancel=True,
         local_scalable=False,
         local_x_scalable=True,
     )
@@ -185,7 +190,7 @@ class DressBoneSettings(Enum):
         setting=BoneSettings.RIGHT_SHOULDER_P.value,
         category="肩",
         translatable=True,
-        rotatable=True,
+        rotatable=False,
         local_scalable=False,
         local_x_scalable=False,
     )
@@ -194,6 +199,7 @@ class DressBoneSettings(Enum):
         category="肩",
         translatable=True,
         rotatable=True,
+        rotate_cancel=True,
         local_scalable=True,
         local_x_scalable=True,
     )
@@ -201,7 +207,7 @@ class DressBoneSettings(Enum):
         setting=BoneSettings.RIGHT_SHOULDER_C.value,
         category="腕",
         translatable=True,
-        rotatable=True,
+        rotatable=False,
         local_scalable=False,
         local_x_scalable=False,
     )
@@ -218,6 +224,7 @@ class DressBoneSettings(Enum):
         category="腕",
         translatable=True,
         rotatable=True,
+        rotate_cancel=True,
         local_scalable=True,
         local_x_scalable=True,
     )
@@ -250,6 +257,7 @@ class DressBoneSettings(Enum):
         category="腕",
         translatable=True,
         rotatable=True,
+        rotate_cancel=True,
         local_scalable=True,
         local_x_scalable=True,
     )
@@ -258,6 +266,7 @@ class DressBoneSettings(Enum):
         category="腕",
         translatable=True,
         rotatable=True,
+        rotate_cancel=True,
         local_scalable=True,
         local_x_scalable=True,
     )
@@ -459,6 +468,7 @@ class DressBoneSettings(Enum):
         category="足",
         translatable=True,
         rotatable=True,
+        rotate_cancel=True,
         local_scalable=False,
         local_x_scalable=False,
     )
@@ -468,30 +478,6 @@ class DressBoneSettings(Enum):
         translatable=True,
         rotatable=True,
         local_scalable=True,
-        local_x_scalable=True,
-    )
-    RIGHT_LEG_IK_PARENT = DressBoneSetting(
-        setting=BoneSettings.RIGHT_LEG_IK_PARENT.value,
-        category="足IK親",
-        translatable=True,
-        rotatable=False,
-        local_scalable=False,
-        local_x_scalable=False,
-    )
-    RIGHT_LEG_IK = DressBoneSetting(
-        setting=BoneSettings.RIGHT_LEG_IK.value,
-        category="足ＩＫ",
-        translatable=True,
-        rotatable=False,
-        local_scalable=False,
-        local_x_scalable=True,
-    )
-    RIGHT_TOE_IK = DressBoneSetting(
-        setting=BoneSettings.RIGHT_TOE_IK.value,
-        category="つま先ＩＫ",
-        translatable=True,
-        rotatable=False,
-        local_scalable=False,
         local_x_scalable=True,
     )
     RIGHT_KNEE = DressBoneSetting(
@@ -507,6 +493,7 @@ class DressBoneSettings(Enum):
         category="足首",
         translatable=True,
         rotatable=True,
+        rotate_cancel=True,
         local_scalable=False,
         local_x_scalable=True,
     )
@@ -539,6 +526,7 @@ class DressBoneSettings(Enum):
         category="足首",
         translatable=True,
         rotatable=True,
+        rotate_cancel=True,
         local_scalable=False,
         local_x_scalable=True,
         global_scalable=True,
@@ -551,12 +539,37 @@ class DressBoneSettings(Enum):
         local_scalable=False,
         local_x_scalable=False,
     )
+    RIGHT_LEG_IK_PARENT = DressBoneSetting(
+        setting=BoneSettings.RIGHT_LEG_IK_PARENT.value,
+        category="足IK親",
+        translatable=True,
+        rotatable=False,
+        local_scalable=False,
+        local_x_scalable=False,
+    )
+    RIGHT_LEG_IK = DressBoneSetting(
+        setting=BoneSettings.RIGHT_LEG_IK.value,
+        category="足ＩＫ",
+        translatable=True,
+        rotatable=False,
+        local_scalable=False,
+        local_x_scalable=True,
+    )
+    RIGHT_TOE_IK = DressBoneSetting(
+        setting=BoneSettings.RIGHT_TOE_IK.value,
+        category="つま先ＩＫ",
+        translatable=True,
+        rotatable=False,
+        local_scalable=False,
+        local_x_scalable=True,
+    )
 
     LEFT_BUST = DressBoneSetting(
         setting=BoneSettings.LEFT_BUST.value,
         category="胸",
         translatable=True,
         rotatable=True,
+        rotate_cancel=True,
         local_scalable=False,
         local_x_scalable=False,
         global_scalable=True,
@@ -566,6 +579,7 @@ class DressBoneSettings(Enum):
         category="肩",
         translatable=True,
         rotatable=True,
+        rotate_cancel=True,
         local_scalable=False,
         local_x_scalable=True,
     )
@@ -573,7 +587,7 @@ class DressBoneSettings(Enum):
         setting=BoneSettings.LEFT_SHOULDER_P.value,
         category="肩",
         translatable=True,
-        rotatable=True,
+        rotatable=False,
         local_scalable=False,
         local_x_scalable=False,
     )
@@ -582,6 +596,7 @@ class DressBoneSettings(Enum):
         category="肩",
         translatable=True,
         rotatable=True,
+        rotate_cancel=True,
         local_scalable=True,
         local_x_scalable=True,
     )
@@ -589,7 +604,7 @@ class DressBoneSettings(Enum):
         setting=BoneSettings.LEFT_SHOULDER_C.value,
         category="腕",
         translatable=True,
-        rotatable=True,
+        rotatable=False,
         local_scalable=False,
         local_x_scalable=False,
     )
@@ -606,6 +621,7 @@ class DressBoneSettings(Enum):
         category="腕",
         translatable=True,
         rotatable=True,
+        rotate_cancel=True,
         local_scalable=True,
         local_x_scalable=True,
     )
@@ -638,6 +654,7 @@ class DressBoneSettings(Enum):
         category="腕",
         translatable=True,
         rotatable=True,
+        rotate_cancel=True,
         local_scalable=True,
         local_x_scalable=True,
     )
@@ -646,6 +663,7 @@ class DressBoneSettings(Enum):
         category="腕",
         translatable=True,
         rotatable=True,
+        rotate_cancel=True,
         local_scalable=True,
         local_x_scalable=True,
     )
@@ -847,6 +865,7 @@ class DressBoneSettings(Enum):
         category="足",
         translatable=True,
         rotatable=True,
+        rotate_cancel=True,
         local_scalable=False,
         local_x_scalable=False,
     )
@@ -856,30 +875,6 @@ class DressBoneSettings(Enum):
         translatable=True,
         rotatable=True,
         local_scalable=True,
-        local_x_scalable=True,
-    )
-    LEFT_LEG_IK_PARENT = DressBoneSetting(
-        setting=BoneSettings.LEFT_LEG_IK_PARENT.value,
-        category="足IK親",
-        translatable=True,
-        rotatable=False,
-        local_scalable=False,
-        local_x_scalable=False,
-    )
-    LEFT_LEG_IK = DressBoneSetting(
-        setting=BoneSettings.LEFT_LEG_IK.value,
-        category="足ＩＫ",
-        translatable=True,
-        rotatable=False,
-        local_scalable=False,
-        local_x_scalable=True,
-    )
-    LEFT_TOE_IK = DressBoneSetting(
-        setting=BoneSettings.LEFT_TOE_IK.value,
-        category="つま先ＩＫ",
-        translatable=True,
-        rotatable=False,
-        local_scalable=False,
         local_x_scalable=True,
     )
     LEFT_KNEE = DressBoneSetting(
@@ -895,6 +890,7 @@ class DressBoneSettings(Enum):
         category="足首",
         translatable=True,
         rotatable=True,
+        rotate_cancel=True,
         local_scalable=False,
         local_x_scalable=True,
     )
@@ -927,6 +923,7 @@ class DressBoneSettings(Enum):
         category="足首",
         translatable=True,
         rotatable=True,
+        rotate_cancel=True,
         local_scalable=False,
         local_x_scalable=True,
         global_scalable=True,
@@ -938,6 +935,30 @@ class DressBoneSettings(Enum):
         rotatable=False,
         local_scalable=False,
         local_x_scalable=False,
+    )
+    LEFT_LEG_IK_PARENT = DressBoneSetting(
+        setting=BoneSettings.LEFT_LEG_IK_PARENT.value,
+        category="足IK親",
+        translatable=True,
+        rotatable=False,
+        local_scalable=False,
+        local_x_scalable=False,
+    )
+    LEFT_LEG_IK = DressBoneSetting(
+        setting=BoneSettings.LEFT_LEG_IK.value,
+        category="足ＩＫ",
+        translatable=True,
+        rotatable=False,
+        local_scalable=False,
+        local_x_scalable=True,
+    )
+    LEFT_TOE_IK = DressBoneSetting(
+        setting=BoneSettings.LEFT_TOE_IK.value,
+        category="つま先ＩＫ",
+        translatable=True,
+        rotatable=False,
+        local_scalable=False,
+        local_x_scalable=True,
     )
 
 

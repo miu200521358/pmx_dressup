@@ -1510,3 +1510,7 @@ msgstr ""
 msgid "肌テクスチャ色補正: {c} (人物[{m}], 衣装[{d}]) u[{u1:04d}:{u2:04d}], v[{v1:04d},{v2:04d}]"
 msgstr ""
 
+
+msgid "着替え: "
+msgstr ""
+
