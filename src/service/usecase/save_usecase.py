@@ -1268,6 +1268,14 @@ class SaveUsecase:
                 new_texture_path = os.path.join(os.path.dirname(dest_model.path), copy_texture_name)
             else:
                 new_texture_path = os.path.join(os.path.dirname(dest_model.path), texture.name)
+            if texture_path == new_texture_path:
+                logger.warning(
+                    "お着替え後モデル出力先のパス設定が、人物もしくは衣装モデルのテクスチャを上書きする設定となっていたため、テクスチャのコピー処理を中断しました。"
+                    + "\n"
+                    + "お着替え後モデル出力先パスをデフォルトから変更される場合、人物や衣装と同じ階層には設定しないようにしてください。",
+                    decoration=MLogger.Decoration.BOX,
+                )
+                return None
             os.makedirs(os.path.dirname(new_texture_path), exist_ok=True)
             shutil.copyfile(texture_path, new_texture_path)
         else:

@@ -1158,3 +1158,9 @@ msgstr "Obtain costume texture color"
 
 msgid "-- 衣装テクスチャ色取得 [{i} ({p:.2f}%)]"
 msgstr "-- Get Costume Texture Color [{i} ({p:.2f}%)]"
+
+msgid "衣装テクスチャ色取得"
+msgstr "Obtain costume texture color"
+
+msgid "お着替え後モデル出力先のパス設定が、人物もしくは衣装モデルのテクスチャを上書きする設定となっていたため、テクスチャのコピー処理を中断しました。\nお着替え後モデル出力先パスをデフォルトから変更される場合、人物や衣装と同じ階層には設定しないようにしてください。"
+msgstr "The texture copy process was interrupted because the path setting for the post-changing model output destination was set to overwrite the person or costume model's textures. \If you change the path setting for the output destination for the model after changing from the default, please do not set it to the same hierarchy as the person or costume"
