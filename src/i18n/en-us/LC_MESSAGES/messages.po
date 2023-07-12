@@ -1140,3 +1140,9 @@ msgstr "Skin Texture Color Correction: {c} (Person [{m}], Costume [{d}]) u[{u1:0
 
 msgid "着替え: "
 msgstr "Change of clothes:"
+
+msgid "衣装初期姿勢計算"
+msgstr "Initial Costume Attitude Calculation"
+
+msgid "厚み比率"
+msgstr "Thickness Ratio"

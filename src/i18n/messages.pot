@@ -1514,3 +1514,11 @@ msgstr ""
 msgid "着替え: "
 msgstr ""
 
+
+msgid "衣装初期姿勢計算"
+msgstr ""
+
+
+msgid "厚み比率"
+msgstr ""
+

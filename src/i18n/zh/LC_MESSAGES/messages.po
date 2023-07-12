@@ -1140,3 +1140,9 @@ msgstr "皮肤纹理颜色校正：{c}（人[{m}]，服装[{d}]）u[{u1:04d}:{u2
 
 msgid "着替え: "
 msgstr "换衣服
+
+msgid "衣装初期姿勢計算"
+msgstr "初始服装态势计算"
+
+msgid "厚み比率"
+msgstr "厚度比
