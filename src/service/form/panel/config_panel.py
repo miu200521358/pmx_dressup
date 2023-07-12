@@ -148,6 +148,12 @@ class ConfigPanel(CanvasPanel):
         self.change_motion(True, target_bone_name)
 
     def show_bone_weight(self, is_show_bone_weight: bool) -> None:
+        # 人物側も薄くする
+        model_tr_ratio = 0.3 if is_show_bone_weight else 1.0
+        model_bone_ratio = 0.2 if is_show_bone_weight else 0.5
+        self.frame.set_model_motion_morphs({__("全材質"): model_tr_ratio})
+        self.frame.fit_model_motion(bone_alpha=model_bone_ratio, is_bone_deform=False)
+
         self.frame.show_bone_weight(is_show_bone_weight)
 
     def change_bone(self, selected_bone_indexes: list[int]) -> None:
