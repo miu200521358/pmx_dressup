@@ -418,10 +418,9 @@ class SaveUsecase:
                 dress_model_bone.ik.unit_rotation = dress_model_bone.bone.ik.unit_rotation
                 if 0 <= dress_model_bone.bone.ik.bone_index and dress_matrixes.exists(0, dress_model_bone.bone.name):
                     # IKターゲットとその位置を修正
-                    dress_model_bone.position = dress_matrixes[0, dress_model_bone.bone.name].position.copy()
-                    dress_model_bones[dress_model_bone.ik.bone_index].position = dress_matrixes[
-                        0, dress_model_bone.bone.name
-                    ].position.copy()
+                    ik_target_position = dress_matrixes[0, dress_model_bones[dress_model_bone.ik.bone_index].name].position
+                    dress_model_bone.position = ik_target_position.copy()
+                    dress_model_bones[dress_model_bone.ik.bone_index].position = ik_target_position.copy()
 
                     if "つま先ＩＫ" in dress_model_bone.name:
                         dress_model_bone.position.y = 0
