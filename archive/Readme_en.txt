@@ -27,7 +27,7 @@
 　If the opacity of the material is set to less than 1, it will not be used as a changeable model.
 
 　The following bones will be created for the changeover model
-　　All parents, upper body 2, right arm twist, left arm twist, right hand twist, left hand twist, right leg D, left leg D, right knee D, left knee D, right ankle D, left ankle D, right toe EX, left toe EX
+　　All parents, upper body 2, arm twist, hand twist, foot D, knee D, ankle D, toes EX
 
 　[Work required in advance]
 　　If there are vertices in the same material that you want to output and those that you do not want to output, please separate the materials.
@@ -41,7 +41,7 @@
 　【Notes】
 　　The weights of the costume models have been slightly altered to clean up the deformation.
 　　　This product is not available for costume models for which weight manipulation is not permitted.
-　　If the mesh of the costume has weights on it other than the quasi-standard, the deformation may not be clean
+　　If the mesh on the arms or other body-covering positions of the costume is weighted with weights other than the quasi-standard bones, it will not be eligible for support
 
 
 ----------------------------------------------------------------
@@ -58,7 +58,7 @@ Included files
 　Readme.txt ... Readme
 　VMD Sizing Wiki ... Link to Wiki
 　Content tree still image ... Link to content tree still image
-　prime_for_fitting ... Body for material compensation (made by VRoid)
+　Body for mesh filling ... Body (made by VRoid)
 
 
 ----------------------------------------------------------------
@@ -104,10 +104,11 @@ The file history can be copied by placing "history.json" in the same hierarchy a
     - The model will be output with the material, bones, rigid body, etc. adjusted accordingly.
 
  Extra
-   The model data in the "prime_for_fitting" folder is an element model I created in VRoid Studio.
+   The model data in the folder "Mesh Compensating Elements" is an element model that I created in VRoid Studio.
    If the person model lacks mesh for areas such as the neck or above the elbows, this model can be loaded as a costume model,
    The fitting results can then be output to use a person model with the necessary mesh filled in.
    There are no restrictions, so please use it if you think it will work.
+   If the mesh of the arms or other parts of the costume are weighted with weights other than the semi-standard bones, they are not eligible for support.
 
 
 ----------------------------------------------------------------

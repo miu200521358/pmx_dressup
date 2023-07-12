@@ -16,7 +16,7 @@ __ = logger.get_text
 
 class ConfigPanel(CanvasPanel):
     def __init__(self, frame: BaseFrame, tab_idx: int, *args, **kw) -> None:
-        super().__init__(frame, tab_idx, 630, 800, *args, **kw)
+        super().__init__(frame, tab_idx, 630, 850, *args, **kw)
 
         self._initialize_ui()
         self._initialize_event()
@@ -66,16 +66,11 @@ class ConfigPanel(CanvasPanel):
         # --------------
         # 材質非透過度
 
-        self.material_sizer = wx.StaticBoxSizer(wx.StaticBox(self.scrolled_window, wx.ID_ANY, __("材質非透過度")), orient=wx.VERTICAL)
+        self.model_material_ctrl = MaterialCtrlSet(self, self.scrolled_window, "人物")
+        self.window_sizer.Add(self.model_material_ctrl.sizer, 0, wx.ALL, 3)
 
-        self.model_material_ctrl = MaterialCtrlSet(self, self.scrolled_window, self.material_sizer, "人物")
-        self.dress_material_ctrl = MaterialCtrlSet(self, self.scrolled_window, self.material_sizer, "衣装")
-
-        self.material_sizer.SetMinSize((self.scrolled_window.GetSize()[0], -1))
-        self.material_sizer.Fit(self.scrolled_window)
-        self.material_sizer.SetSizeHints(self.scrolled_window)
-
-        self.window_sizer.Add(self.material_sizer, 0, wx.ALL, 3)
+        self.dress_material_ctrl = MaterialCtrlSet(self, self.scrolled_window, "衣装")
+        self.window_sizer.Add(self.dress_material_ctrl.sizer, 0, wx.ALL, 3)
 
         # --------------
         # ボーン調整
@@ -151,6 +146,15 @@ class ConfigPanel(CanvasPanel):
 
     def on_change(self, target_bone_name: Optional[str] = None, is_clear: bool = False) -> None:
         self.change_motion(True, target_bone_name)
+
+    def show_bone_weight(self, is_show_bone_weight: bool) -> None:
+        # 人物側も薄くする
+        model_tr_ratio = 0.3 if is_show_bone_weight else 1.0
+        model_bone_ratio = 0.2 if is_show_bone_weight else 0.5
+        self.frame.set_model_motion_morphs({__("全材質"): model_tr_ratio})
+        self.frame.fit_model_motion(bone_alpha=model_bone_ratio, is_bone_deform=False)
+
+        self.frame.show_bone_weight(is_show_bone_weight)
 
     def change_bone(self, selected_bone_indexes: list[int]) -> None:
         self.frame.change_bone(selected_bone_indexes)

@@ -1,12 +1,14 @@
+from PIL import Image
 from datetime import datetime
 import os
 import shutil
 from typing import Optional
 
 import numpy as np
+from executor import APP_NAME, VERSION_NAME
 
 from mlib.base.logger import MLogger
-from mlib.base.math import MMatrix4x4, MVector3D
+from mlib.base.math import MMatrix4x4, MVector3D, MVectorDict
 from mlib.base.part import Switch
 from mlib.pmx.pmx_collection import PmxModel
 from mlib.pmx.pmx_part import (
@@ -16,6 +18,7 @@ from mlib.pmx.pmx_part import (
     DisplayType,
     Face,
     GroupMorphOffset,
+    Material,
     MaterialMorphOffset,
     Morph,
     MorphType,
@@ -26,6 +29,7 @@ from mlib.pmx.pmx_part import (
     VertexMorphOffset,
 )
 from mlib.pmx.pmx_writer import PmxWriter
+from mlib.utils.file_utils import separate_path
 from mlib.vmd.vmd_collection import VmdMotion
 from mlib.vmd.vmd_part import VmdMorphFrame
 from service.usecase.dress_bone import DressBones
@@ -43,7 +47,9 @@ class SaveUsecase:
         dress_config_motion: Optional[VmdMotion],
         output_path: str,
         model_material_alphas: dict[str, float],
+        model_skin_materials: dict[str, bool],
         dress_material_alphas: dict[str, float],
+        dress_skin_materials: dict[str, bool],
         dress_scales: dict[str, MVector3D],
         dress_degrees: dict[str, MVector3D],
         dress_positions: dict[str, MVector3D],
@@ -78,7 +84,14 @@ class SaveUsecase:
         dress_model.english_name = model.english_name + "(" + dress.english_name + ")"
         dress_model.extended_uv_count = max(model.extended_uv_count, dress.extended_uv_count)
         dress_model.comment = (
-            __("人物モデル")
+            __("着替え: ")
+            + APP_NAME
+            + " ("
+            + VERSION_NAME
+            + ")"
+            + "\r\n"
+            + "\r\n"
+            + __("人物モデル")
             + "\r\n"
             + model.comment
             + "\r\n\r\n------------------\r\n\r\n"
@@ -88,7 +101,14 @@ class SaveUsecase:
             + "\r\n\r\n------------------\r\n\r\n"
         )
         dress_model.english_name = (
-            __("人物モデル")
+            __("着替え: ")
+            + APP_NAME
+            + " ("
+            + VERSION_NAME
+            + ")"
+            + "\r\n"
+            + "\r\n"
+            + __("人物モデル")
             + "\r\n"
             + model.english_comment
             + "\r\n\r\n------------------\r\n\r\n"
@@ -202,7 +222,7 @@ class SaveUsecase:
         dress_model_bones = DressBones()
         logger.info("ボーン出力", decoration=MLogger.Decoration.LINE)
 
-        for bone in model.bones.writable():
+        for bone in model.bones:
             if not (model.bone_trees.is_in_standard(bone.name) or bone.is_standard_extend):
                 # 準標準ではない場合、登録可否チェック
 
@@ -262,7 +282,7 @@ class SaveUsecase:
             if not len(dress_model_bones) % 100:
                 logger.info("-- ボーン出力: {s}", s=len(dress_model_bones))
 
-        for bone in dress.bones.writable():
+        for bone in dress.bones:
             if (bone.is_standard or bone.is_standard_extend) and bone.name in dress_model_bones:
                 # 既に登録済みの準標準ボーンは追加しない
                 dress_model_bones.dress_map[bone.index] = dress_model_bones[bone.name].index
@@ -364,7 +384,7 @@ class SaveUsecase:
                     bone, is_dress=True, is_weight=True, position=dress_matrixes[0, bone.name].local_matrix * bone.position
                 )
 
-            if not len(dress_model_bones) % 100:
+            if 0 == len(dress_model_bones) % 100:
                 logger.info("-- ボーン出力: {s}", s=len(dress_model_bones))
 
         logger.info("ボーン定義再設定", decoration=MLogger.Decoration.LINE)
@@ -396,12 +416,18 @@ class SaveUsecase:
                 )
                 dress_model_bone.ik.loop_count = dress_model_bone.bone.ik.loop_count
                 dress_model_bone.ik.unit_rotation = dress_model_bone.bone.ik.unit_rotation
-                if 0 <= dress_model_bone.bone.ik.bone_index and dress_matrixes.exists(0, dress_model_bone.bone.name):
+                if 0 <= dress_model_bone.bone.ik.bone_index and dress_matrixes.exists(
+                    0, dress_model_bones[dress_model_bone.ik.bone_index].name
+                ):
                     # IKターゲットとその位置を修正
-                    dress_model_bone.position = dress_matrixes[0, dress_model_bone.bone.name].position.copy()
-                    dress_model_bones[dress_model_bone.ik.bone_index].position = dress_matrixes[
-                        0, dress_model_bone.bone.name
-                    ].position.copy()
+                    ik_target_position = dress_matrixes[0, dress_model_bones[dress_model_bone.ik.bone_index].name].position
+                    dress_model_bone.position = ik_target_position.copy()
+                    dress_model_bones[dress_model_bone.ik.bone_index].position = ik_target_position.copy()
+
+                    if "つま先ＩＫ" in dress_model_bone.name:
+                        dress_model_bone.position.y = 0
+                        dress_model_bones[dress_model_bone.ik.bone_index].position.y = 0
+
                 for link in dress_model_bone.bone.ik.links:
                     dress_link = link.copy()
                     dress_link.bone_index = dress_model_bones.get_index_by_map(link.bone_index, dress_model_bone.is_dress)
@@ -415,7 +441,7 @@ class SaveUsecase:
 
             dress_model.bones.append(dress_model_bone.get_bone())
 
-            if 0 < bone.index and not bone.index % 100:
+            if 0 < len(dress_model.bones) and 0 == len(dress_model.bones) % 100:
                 logger.info("-- ボーン定義再設定: {s}", s=bone.index)
 
         for bone in dress_model.bones:
@@ -463,12 +489,16 @@ class SaveUsecase:
         dress_material_map: dict[int, int] = {-1: -1}
 
         logger.info("材質出力", decoration=MLogger.Decoration.LINE)
+        model.update_vertices_by_material()
 
+        material_cnt = 0
+        model_skin_vertex_positions: dict[str, MVectorDict] = {}
         prev_faces_count = 0
         for material in model.materials:
-            if 1 > model_material_alphas[material.name]:
-                prev_faces_count += material.vertices_count // 3
-                continue
+            if not material_cnt % 10:
+                logger.info("-- 材質出力: {s}", s=material_cnt)
+            material_cnt += 1
+
             copy_material = material.copy()
             copy_material.index = len(dress_model.materials)
 
@@ -484,8 +514,11 @@ class SaveUsecase:
                 copy_texture = self.copy_texture(dress_model, model.textures[material.sphere_texture_index], model.path, is_dress=False)
                 copy_material.sphere_texture_index = copy_texture.index if copy_texture else -1
 
-            dress_model.materials.append(copy_material, is_sort=False)
-            model_material_map[material.index] = copy_material.index
+            if 1 == model_material_alphas[material.name]:
+                dress_model.materials.append(copy_material, is_sort=False)
+                model_material_map[material.index] = copy_material.index
+            if model_skin_materials[material.name]:
+                model_skin_vertex_positions[material.name] = MVectorDict()
 
             for face_index in range(prev_faces_count, prev_faces_count + material.vertices_count // 3):
                 faces = []
@@ -502,27 +535,42 @@ class SaveUsecase:
                             bone_weight = model.vertices[vertex_index].deform.weights[n]
                             mat += model_matrixes[0, model.bones[bone_index].name].local_matrix.vector * bone_weight
                         copy_vertex.position = MMatrix4x4(*mat.flatten()) * copy_vertex.position
+                        if model_skin_materials[material.name]:
+                            model_skin_vertex_positions[material.name].append(vertex_index, copy_vertex.position.copy())
 
-                        faces.append(len(dress_model.vertices))
-                        model_vertex_map[vertex_index] = len(dress_model.vertices)
-                        dress_model.vertices.append(copy_vertex, is_sort=False)
+                        if 1 == model_material_alphas[material.name]:
+                            faces.append(len(dress_model.vertices))
+                            model_vertex_map[vertex_index] = len(dress_model.vertices)
+                            dress_model.vertices.append(copy_vertex, is_sort=False)
                     else:
                         faces.append(model_vertex_map[vertex_index])
-                dress_model.faces.append(Face(vertex_index0=faces[0], vertex_index1=faces[1], vertex_index2=faces[2]), is_sort=False)
+
+                if 1 == model_material_alphas[material.name]:
+                    dress_model.faces.append(Face(vertex_index0=faces[0], vertex_index1=faces[1], vertex_index2=faces[2]), is_sort=False)
 
             prev_faces_count += material.vertices_count // 3
 
-            if not len(dress_model.materials) % 10:
-                logger.info("-- 材質出力: {s}", s=len(dress_model.materials))
+        model_skin_positions = MVectorDict()
+        for model_material_name, is_model_skin_material in model_skin_materials.items():
+            if is_model_skin_material and model_skin_vertex_positions[model_material_name].keys():
+                model_skin_positions.append(
+                    model.materials[model_material_name].index,
+                    MVector3D(*model_skin_vertex_positions[model_material_name].mean_value()),
+                )
 
+        dress_skin_vertex_positions: dict[str, MVectorDict] = {}
         prev_faces_count = 0
         for material in dress.materials:
-            if 1 > dress_material_alphas[material.name]:
-                prev_faces_count += material.vertices_count // 3
-                continue
+            if not material_cnt % 10:
+                logger.info("-- 材質出力: {s}", s=material_cnt)
+            material_cnt += 1
+
             copy_material = material.copy()
             copy_material.name = f"Cos:{copy_material.name}"
             copy_material.index = len(dress_model.materials)
+
+            if dress_skin_materials[material.name]:
+                dress_skin_vertex_positions[material.name] = MVectorDict()
 
             if 0 <= material.texture_index:
                 copy_texture = self.copy_texture(dress_model, dress.textures[material.texture_index], dress.path, is_dress=True)
@@ -536,8 +584,9 @@ class SaveUsecase:
                 copy_texture = self.copy_texture(dress_model, dress.textures[material.sphere_texture_index], dress.path, is_dress=True)
                 copy_material.sphere_texture_index = copy_texture.index if copy_texture else -1
 
-            dress_model.materials.append(copy_material, is_sort=False)
-            dress_material_map[material.index] = copy_material.index
+            if 1 == dress_material_alphas[material.name]:
+                dress_model.materials.append(copy_material, is_sort=False)
+                dress_material_map[material.index] = copy_material.index
 
             for face_index in range(prev_faces_count, prev_faces_count + copy_material.vertices_count // 3):
                 faces = []
@@ -554,18 +603,68 @@ class SaveUsecase:
                             bone_weight = dress.vertices[vertex_index].deform.weights[n]
                             mat += dress_matrixes[0, dress.bones[bone_index].name].local_matrix.vector * bone_weight
                         copy_vertex.position = MMatrix4x4(*mat.flatten()) * copy_vertex.position
+                        if dress_skin_materials[material.name]:
+                            dress_skin_vertex_positions[material.name].append(vertex_index, copy_vertex.position.copy())
 
-                        faces.append(len(dress_model.vertices))
-                        dress_vertex_map[vertex_index] = len(dress_model.vertices)
-                        dress_model.vertices.append(copy_vertex, is_sort=False)
+                        if 1 == dress_material_alphas[material.name]:
+                            faces.append(len(dress_model.vertices))
+                            dress_vertex_map[vertex_index] = len(dress_model.vertices)
+                            dress_model.vertices.append(copy_vertex, is_sort=False)
                     else:
                         faces.append(dress_vertex_map[vertex_index])
-                dress_model.faces.append(Face(vertex_index0=faces[0], vertex_index1=faces[1], vertex_index2=faces[2]), is_sort=False)
+                if 1 == dress_material_alphas[material.name]:
+                    dress_model.faces.append(Face(vertex_index0=faces[0], vertex_index1=faces[1], vertex_index2=faces[2]), is_sort=False)
 
             prev_faces_count += material.vertices_count // 3
 
-            if not len(dress_model.materials) % 10:
-                logger.info("-- 材質出力: {s}", s=len(dress_model.materials))
+            if dress_skin_materials[material.name]:
+                # 肌材質の場合、人物側の肌材質から最も近い距離の材質の設定をコピーする
+                dress_mean_skin_position = MVector3D(*dress_skin_vertex_positions[material.name].mean_value())
+                model_skin_material_index = model_skin_positions.nearest_key(dress_mean_skin_position)
+
+                model_skin_material = model.materials[model_skin_material_index]
+                # 非透過度はコピーしない
+                copy_material.diffuse.xyz = model_skin_material.diffuse.xyz.copy()
+                copy_material.specular = model_skin_material.specular.copy()
+                copy_material.specular_factor = model_skin_material.specular_factor
+                copy_material.ambient = model_skin_material.ambient.copy()
+                copy_material.draw_flg = model_skin_material.draw_flg
+                copy_material.edge_color = model_skin_material.edge_color.copy()
+                copy_material.edge_size = model_skin_material.edge_size
+                # texture_index はコピーしない
+                copy_material.toon_sharing_flg = model_skin_material.toon_sharing_flg
+                if model_skin_material.toon_sharing_flg == ToonSharing.INDIVIDUAL and 0 <= model_skin_material.toon_texture_index:
+                    if model.textures[model_skin_material.toon_texture_index].name not in dress_model.textures:
+                        # コピー対象外でテクスチャを複製してなかった場合、テクスチャをコピーする
+                        copy_texture = self.copy_texture(
+                            dress_model, model.textures[material.toon_texture_index], model.path, is_dress=False
+                        )
+                        copy_material.toon_texture_index = copy_texture.index if copy_texture else -1
+                    else:
+                        copy_material.toon_texture_index = dress_model.textures[
+                            model.textures[model_skin_material.toon_texture_index].name
+                        ].index
+                else:
+                    copy_material.toon_texture_index = model_skin_material.toon_texture_index
+
+                if model_skin_material.sphere_mode != SphereMode.INVALID and 0 < model_skin_material.sphere_texture_index:
+                    if model.textures[model_skin_material.sphere_texture_index].name not in dress_model.textures:
+                        # コピー対象外でテクスチャを複製してなかった場合、テクスチャをコピーする
+                        copy_texture = self.copy_texture(
+                            dress_model, model.textures[material.sphere_texture_index], model.path, is_dress=False
+                        )
+                        copy_material.sphere_texture_index = copy_texture.index if copy_texture else -1
+                    else:
+                        copy_material.sphere_texture_index = dress_model.textures[
+                            model.textures[model_skin_material.sphere_texture_index].name
+                        ].index
+                else:
+                    copy_material.sphere_texture_index = -1
+                copy_material.sphere_mode = model_skin_material.sphere_mode
+
+                # テクスチャの色を補正
+                if 0 <= copy_material.texture_index and 0 <= model_skin_material.texture_index:
+                    self.correct_texture(model, dress_model, model_skin_material, copy_material)
 
         # ---------------------------------
 
@@ -909,6 +1008,250 @@ class SaveUsecase:
 
         PmxWriter(dress_model, output_path).save()
 
+    def correct_texture(self, model: PmxModel, dress: PmxModel, model_material: Material, dress_material: Material):
+        model_texture = model.textures[model_material.texture_index]
+        dress_texture = dress.textures[dress_material.texture_index]
+
+        if not (model_texture.valid and dress_texture.valid):
+            return
+
+        logger.info("肌テクスチャ色補正", decoration=MLogger.Decoration.LINE)
+        dress.update_vertices_by_material()
+
+        logger.info("人物(補正元)材質: {m} -> 衣装(補正先)材質: {d}", m=model_material.name, d=dress_material.name)
+
+        model_image = np.array(model_texture.image, np.float64)
+        dress_image = np.array(dress_texture.image, np.float64)
+        # 補正衣装画像
+        corrected_dress_image = np.asarray(np.copy(dress_image))
+
+        # 人物の指定材質に割り当てられた頂点INDEXリスト
+        model_vertex_indexes = model.vertices_by_materials[model_material.index]
+        # 衣装の指定材質に割り当てられた頂点INDEXリスト
+        dress_vertex_indexes = dress.vertices_by_materials[dress_material.index]
+
+        logger.info("人物テクスチャ色取得")
+
+        # 人物の指定材質に割り当てられた頂点INDEXが配置されている3次元頂点の位置
+        model_vertex_colors: list[np.ndarray] = []
+        for i, model_vertex_index in enumerate(model_vertex_indexes):
+            logger.count("人物テクスチャ色取得", i, len(model_vertex_indexes), display_block=500)
+
+            model_vertex = model.vertices[model_vertex_index]
+
+            # 人物の指定頂点に割り当てられたテクスチャとUVから、テクスチャの該当位置を取得する
+            mu = max(0, min(int(model_vertex.uv.x * model_image.shape[1]), model_image.shape[1] - 1))
+            mv = max(0, min(int(model_vertex.uv.y * model_image.shape[0]), model_image.shape[0] - 1))
+
+            model_vertex_colors.append(model_image[mv, mu, :3])
+
+        logger.info("衣装テクスチャ色取得")
+
+        # 衣装の指定材質に割り当てられた頂点INDEXが配置されている3次元頂点の位置
+        dress_vertex_colors: list[np.ndarray] = []
+        for i, dress_vertex_index in enumerate(dress_vertex_indexes):
+            logger.count("衣装テクスチャ色取得", i, len(dress_vertex_indexes), display_block=500)
+
+            dress_vertex = dress.vertices[dress_vertex_index]
+
+            # 衣装の指定頂点に割り当てられたテクスチャとUVから、テクスチャの該当位置を取得する
+            du = max(0, min(int(dress_vertex.uv.x * dress_image.shape[1]), dress_image.shape[1] - 1))
+            dv = max(0, min(int(dress_vertex.uv.y * dress_image.shape[0]), dress_image.shape[0] - 1))
+
+            dress_vertex_colors.append(dress_image[dv, du, :3])
+
+        model_median_color = np.median(model_vertex_colors, axis=0)
+        dress_median_color = np.median(dress_vertex_colors, axis=0)
+
+        color_difference = model_median_color - dress_median_color
+
+        logger.info(
+            "肌テクスチャ色補正: {c} (人物[{m}], 衣装[{d}])",
+            c=np.round(color_difference, decimals=1),
+            m=np.round(model_median_color, decimals=1),
+            d=np.round(dress_median_color, decimals=1),
+        )
+
+        # テクスチャ全体を補正（テクスチャ自体を複製）
+        corrected_dress_image[..., :3] += color_difference
+
+        # 補正後の色が0未満または255を超える場合、範囲内にクリップする
+        corrected_dress_image = np.clip(corrected_dress_image, 0, 255)
+
+        # 補正したテクスチャ画像フルパスを材質別に保存
+        texture_dir_path, texture_file_name, texture_file_ext = separate_path(dress_texture.name)
+        # Cos:を除いてパス生成
+        texture_path = os.path.join(texture_dir_path, f"{texture_file_name}_{dress_material.name[4:]}{texture_file_ext}")
+        dress_correct_image_path = os.path.abspath(os.path.join(os.path.dirname(dress.path), texture_path))
+
+        corrected_dress_texture = Texture(name=texture_path)
+        dress.textures.append(corrected_dress_texture)
+        dress_material.texture_index = corrected_dress_texture.index
+
+        # 補正後のテクスチャを保存する
+        corrected_dress_output = Image.fromarray(corrected_dress_image.astype(np.uint8))
+        corrected_dress_output.save(dress_correct_image_path)
+
+        # # 人物の指定材質に割り当てられた面INDEXリスト
+        # model_face_indexes = model.faces_by_materials[model_material.index]
+        # # 衣装の指定材質に割り当てられた面INDEXリスト
+        # dress_face_indexes = dress.faces_by_materials[dress_material.index]
+
+        # # 人物の頂点に紐付く面の構成頂点INDEXがmodel_vertex_indexesの何番目に存在しているかのリスト
+        # model_near_vertices: dict[int, list[int]] = {}
+        # for i, model_face_index in enumerate(model_face_indexes):
+        #     logger.count("人物: 近似頂点選別", i, len(model_face_indexes), display_block=100)
+
+        #     for vertex_index in model.faces[model_face_index].vertices:
+        #         if vertex_index not in model_near_vertices:
+        #             model_near_vertices[vertex_index] = []
+        #         for near_vertex_index in model.faces[model_face_index].vertices:
+        #             if near_vertex_index in model_vertex_indexes:
+        #                 model_near_vertices[vertex_index].append(
+        #                     [vi for (vi, vidx) in enumerate(model_vertex_indexes) if vidx == near_vertex_index][0]
+        #                 )
+
+        # logger.info("衣装: 近似頂点選別")
+
+        # # 衣装の頂点に紐付く面の構成頂点INDEXがdress_vertex_indexesの何番目に存在しているかのリスト
+        # dress_near_vertices: dict[int, list[int]] = {}
+        # for i, dress_face_index in enumerate(dress_face_indexes):
+        #     logger.count("衣装: 近似頂点選別", i, len(dress_face_indexes), display_block=100)
+
+        #     for vertex_index in dress.faces[dress_face_index].vertices:
+        #         if vertex_index not in dress_near_vertices:
+        #             dress_near_vertices[vertex_index] = []
+        #         for near_vertex_index in dress.faces[dress_face_index].vertices:
+        #             if near_vertex_index in dress_vertex_indexes:
+        #                 dress_near_vertices[vertex_index].append(
+        #                     [vi for (vi, vidx) in enumerate(dress_vertex_indexes) if vidx == near_vertex_index][0]
+        #                 )
+
+        # # 人物の指定材質に割り当てられた面INDEXリスト
+        # model_face_indexes = model.faces_by_materials[model_material.index]
+        # # 衣装の指定材質に割り当てられた面INDEXリスト
+        # dress_face_indexes = dress.faces_by_materials[dress_material.index]
+
+        # logger.info("人物: 近似頂点選別")
+
+        # # 人物の頂点に紐付く面の構成頂点INDEXがmodel_vertex_indexesの何番目に存在しているかのリスト
+        # model_near_vertices: dict[int, list[int]] = {}
+        # for i, model_face_index in enumerate(model_face_indexes):
+        #     logger.count("人物: 近似頂点選別", i, len(model_face_indexes), display_block=100)
+
+        #     for vertex_index in model.faces[model_face_index].vertices:
+        #         if vertex_index not in model_near_vertices:
+        #             model_near_vertices[vertex_index] = []
+        #         for near_vertex_index in model.faces[model_face_index].vertices:
+        #             if near_vertex_index in model_vertex_indexes:
+        #                 model_near_vertices[vertex_index].append(
+        #                     [vi for (vi, vidx) in enumerate(model_vertex_indexes) if vidx == near_vertex_index][0]
+        #                 )
+
+        # logger.info("衣装: 近似頂点選別")
+
+        # # 衣装の頂点に紐付く面の構成頂点INDEXがdress_vertex_indexesの何番目に存在しているかのリスト
+        # dress_near_vertices: dict[int, list[int]] = {}
+        # for i, dress_face_index in enumerate(dress_face_indexes):
+        #     logger.count("衣装: 近似頂点選別", i, len(dress_face_indexes), display_block=100)
+
+        #     for vertex_index in dress.faces[dress_face_index].vertices:
+        #         if vertex_index not in dress_near_vertices:
+        #             dress_near_vertices[vertex_index] = []
+        #         for near_vertex_index in dress.faces[dress_face_index].vertices:
+        #             if near_vertex_index in dress_vertex_indexes:
+        #                 dress_near_vertices[vertex_index].append(
+        #                     [vi for (vi, vidx) in enumerate(dress_vertex_indexes) if vidx == near_vertex_index][0]
+        #                 )
+
+        # # 人物の指定材質に割り当てられた頂点INDEXが配置されている3次元頂点の位置
+        # model_vertex_positions = MVectorDict()
+        # for model_vertex_index in model_vertex_indexes:
+        #     model_vertex_positions.append(model_vertex_index, model.vertices[model_vertex_index].position)
+
+        # # 衣装の指定材質に割り当てられた頂点INDEXが配置されている3次元頂点の位置
+        # dress_vertex_positions = MVectorDict()
+        # for dress_vertex_index in dress_vertex_indexes:
+        #     dress_vertex_positions.append(dress_vertex_index, dress.vertices[dress_vertex_index].position)
+
+        # # 衣装の指定材質に割り当てられた頂点INDEXが配置されている3次元頂点の位置に最も近い人物頂点を見つける
+        # model_vertex_uv_list: list[np.ndarray] = []
+        # dress_vertex_uv_list: list[np.ndarray] = []
+
+        # # 面を構成している頂点（近似頂点）のリスト
+        # model_vertices_by_face: list[list[int]] = []
+        # dress_vertices_by_face: list[list[int]] = []
+
+        # # 材質に割り当てられたテクスチャの色のRGBだけを取り出す
+        # model_image_colors = np.copy(model_image[..., :3])
+        # dress_image_colors = np.copy(dress_image[..., :3])
+
+        # logger.info("近似テクスチャUV取得")
+
+        # for i, dress_vertex_index in enumerate(dress_vertex_indexes):
+        #     logger.count("近似テクスチャUV取得", i, len(dress_vertex_indexes), display_block=500)
+
+        #     nearest_model_vertex_index = model_vertex_positions.nearest_key(dress.vertices[dress_vertex_index].position)
+        #     nearest_model_vertex = model.vertices[nearest_model_vertex_index]
+        #     # 人物の指定頂点に割り当てられたテクスチャとUVから、テクスチャの該当位置を取得する
+        #     model_vertex_uv_list.append(
+        #         np.array([int(nearest_model_vertex.uv.x * model_image.shape[0]), int(nearest_model_vertex.uv.y * model_image.shape[1])])
+        #     )
+        #     # 面を構成している頂点（近似頂点）を求めておく
+        #     model_vertices_by_face.append(model_near_vertices[nearest_model_vertex_index])
+
+        #     # 衣装の指定頂点に割り当てられたテクスチャとUVから、テクスチャの該当位置を取得する
+        #     dress_vertex = dress.vertices[dress_vertex_index]
+        #     dress_vertex_uv_list.append(
+        #         np.array([int(dress_vertex.uv.x * dress_image.shape[0]), int(dress_vertex.uv.y * dress_image.shape[1])])
+        #     )
+        #     dress_vertices_by_face.append(dress_near_vertices[dress_vertex_index])
+
+        # model_vertex_uvs = np.array(model_vertex_uv_list)
+        # dress_vertex_uvs = np.array(dress_vertex_uv_list)
+
+        # filled_dress_image = np.zeros(dress_image.shape)
+
+        # logger.info("肌テクスチャ色補正")
+
+        # for fidx, (model_near_vertices_by_face, dress_near_vertices_by_face) in enumerate(
+        #     zip(model_vertices_by_face, dress_vertices_by_face)
+        # ):
+        #     logger.count("肌テクスチャ色補正", fidx, len(model_vertices_by_face), display_block=500)
+
+        #     model_near_vertex_uvs = model_vertex_uvs[np.array(model_near_vertices_by_face)]
+        #     model_near_vertex_uvs[:, 0] = np.clip(model_near_vertex_uvs[:, 0], 0, model_image_colors.shape[0] - 1)
+        #     model_near_vertex_uvs[:, 1] = np.clip(model_near_vertex_uvs[:, 1], 0, model_image_colors.shape[1] - 1)
+
+        #     model_vertex_mean_color = np.mean(model_image_colors[model_near_vertex_uvs[:, 0], model_near_vertex_uvs[:, 1], :], axis=0)
+
+        #     dress_near_vertex_uvs = dress_vertex_uvs[np.array(dress_near_vertices_by_face)]
+        #     dress_near_vertex_uvs[:, 0] = np.clip(dress_near_vertex_uvs[:, 0], 0, dress_image_colors.shape[0] - 1)
+        #     dress_near_vertex_uvs[:, 1] = np.clip(dress_near_vertex_uvs[:, 1], 0, dress_image_colors.shape[1] - 1)
+
+        #     dress_vertex_mean_color = np.mean(dress_image_colors[dress_near_vertex_uvs[:, 0], dress_near_vertex_uvs[:, 1], :], axis=0)
+
+        #     dress_min_uv = np.min(dress_near_vertex_uvs, axis=0)
+        #     dress_max_uv = np.max(dress_near_vertex_uvs, axis=0)
+
+        #     # 人物と衣装の該当UV位置にある色の差分を取得する
+        #     color_difference = model_vertex_mean_color - dress_vertex_mean_color
+
+        #     # テクスチャの処理対象領域内でまだ補正されていない箇所だけ補正する
+        #     for u, v in product(
+        #         [u for u in range(dress_min_uv[1], (dress_max_uv[1] + 1))], [v for v in range(dress_min_uv[0], (dress_max_uv[0] + 1))]
+        #     ):
+        #         if np.sum(filled_dress_image[u, v]) == 0:
+        #             corrected_dress_image[u, v, :3] += color_difference
+        #             filled_dress_image[u, v, :3] = np.where(color_difference == 0, 1, color_difference)
+
+        # # 補正後の色が0未満または255を超える場合、範囲内にクリップする
+        # corrected_dress_image = np.clip(corrected_dress_image, 0, 255)
+
+        # # 補正後のテクスチャを保存する
+        # corrected_dress_output = Image.fromarray(corrected_dress_image.astype(np.uint8))
+        # corrected_dress_output.save(os.path.abspath(os.path.join(os.path.dirname(dress.path), dress_texture.name)))
+
     def copy_texture(self, dest_model: PmxModel, texture: Texture, src_model_path: str, is_dress: bool) -> Optional[Texture]:
         copy_texture_name = os.path.join("Costume", texture.name) if is_dress else texture.name
 
@@ -925,6 +1268,14 @@ class SaveUsecase:
                 new_texture_path = os.path.join(os.path.dirname(dest_model.path), copy_texture_name)
             else:
                 new_texture_path = os.path.join(os.path.dirname(dest_model.path), texture.name)
+            if texture_path == new_texture_path:
+                logger.warning(
+                    "お着替え後モデル出力先のパス設定が、人物もしくは衣装モデルのテクスチャを上書きする設定となっていたため、テクスチャのコピー処理を中断しました。"
+                    + "\n"
+                    + "お着替え後モデル出力先パスをデフォルトから変更される場合、人物や衣装と同じ階層には設定しないようにしてください。",
+                    decoration=MLogger.Decoration.BOX,
+                )
+                return None
             os.makedirs(os.path.dirname(new_texture_path), exist_ok=True)
             shutil.copyfile(texture_path, new_texture_path)
         else:

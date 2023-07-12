@@ -213,7 +213,7 @@ class MainFrame(BaseFrame):
         mf.ratio = abs(material_alphas.get(__("全材質"), 1.0) - 1)
         self.model_motion.morphs[mf.name].append(mf)
 
-        self.file_panel.create_output_path()
+        # self.file_panel.create_output_path()
 
     def set_dress_motion_morphs(
         self,
@@ -271,7 +271,7 @@ class MainFrame(BaseFrame):
             # mf.ratio = 1
             # self.dress_motion.morphs[mf.name].append(mf)
 
-        self.file_panel.create_output_path()
+        # self.file_panel.create_output_path()
 
     def fit_model_motion(self, bone_alpha: float = 1.0, is_bone_deform: bool = True) -> None:
         self.config_panel.canvas.model_sets[0].motion = self.model_motion
@@ -285,4 +285,8 @@ class MainFrame(BaseFrame):
 
     def change_bone(self, selected_bone_indexes: list[int]) -> None:
         self.config_panel.canvas.animations[1].selected_bone_indexes = selected_bone_indexes
+        self.config_panel.canvas.Refresh()
+
+    def show_bone_weight(self, is_show_bone_weight: bool) -> None:
+        self.config_panel.canvas.animations[1].is_show_bone_weight = is_show_bone_weight
         self.config_panel.canvas.Refresh()

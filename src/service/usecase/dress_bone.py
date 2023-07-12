@@ -45,6 +45,7 @@ class DressBone(BaseIndexNameModel):
         new_bone.local_z_vector = self.local_z_vector or self.bone.local_z_vector
         new_bone.external_key = self.external_key
         new_bone.ik = self.ik
+        new_bone.is_system = self.bone.is_system
 
         return new_bone
 

@@ -86,9 +86,6 @@ class LoadWorker(BaseWorker):
             # 上半身2の再設定
             replaced_bone_names += usecase.replace_upper2(model, dress)
 
-            # 上半身3の再設定
-            replaced_bone_names += usecase.replace_upper3(model, dress)
-
             # 胸の再設定
             replaced_bust_bone_names = usecase.replace_bust(model, dress)
 
@@ -133,10 +130,6 @@ class LoadWorker(BaseWorker):
             # 衣装にフィッティングボーンモーフを入れる
             logger.info("衣装: 追加セットアップ: フィッティングモーフ追加", decoration=MLogger.Decoration.BOX)
             usecase.create_dress_fit_morphs(model, dress)
-
-            # # 衣装のローカル軸再計算
-            # logger.info("衣装: 追加セットアップ: ローカル軸再計算", decoration=MLogger.Decoration.BOX)
-            # usecase.refit_local_axis(dress)
 
             is_dress_change = True
         elif file_panel.dress_ctrl.original_data:

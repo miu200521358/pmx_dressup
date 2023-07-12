@@ -1077,3 +1077,90 @@ msgstr "-- Bourne axis definition re-set: {s}"
 
 msgid "-- 変形階層が正しくないため、修正を試みます ボーン名={b}, 変形階層=[{l1} -> {l2}]"
 msgstr "-- Attempt to correct incorrect deformation hierarchy Bone name={b}, deformation hierarchy=[{l1} -> {l2}]"
+
+msgid "肌材質として設定を共有する"
+msgstr "Share settings as skin material"
+
+msgid "このチェックをONにすると、肌メッシュの設定を衣装モデル側に適用します"
+msgstr "When this checkbox is turned on, the skin mesh settings are applied to the costume model side"
+
+msgid "このチェックをONにすると、肌メッシュの設定を人物モデルから受け取り、設定します"
+msgstr "When this checkbox is turned on, the skin mesh settings are received from the person model and set"
+
+msgid "肌テクスチャ色補正"
+msgstr "Skin Texture Color Correction"
+
+msgid "人物: 近似頂点選別"
+msgstr "person: approximate vertex sorting"
+
+msgid "-- 人物: 近似頂点選別 [{i} ({p:.2f}%)]"
+msgstr "-- Person: approximate vertex sorting [{i} ({p:.2f}%)]"
+
+msgid "衣装: 近似頂点選別"
+msgstr "Costume: Approximate Vertex Sorting"
+
+msgid "-- 衣装: 近似頂点選別 [{i} ({p:.2f}%)]"
+msgstr "-- Costume: approximate vertex sorting [{i} ({p:.2f}%)]"
+
+msgid "近似テクスチャUV取得"
+msgstr "Get approximate texture UV"
+
+msgid "-- 近似テクスチャUV取得 [{i} ({p:.2f}%)]"
+msgstr "-- Get Approximate Texture UV [{i} ({p:.2f}%)]"
+
+msgid "-- 肌テクスチャ色補正 [{i} ({p:.2f}%)]"
+msgstr "-- Skin Texture Color Correction [{i} ({p:.2f}%)]"
+
+msgid "人物(補正元)材質: {m} -> 衣装(補正先)材質: {d}"
+msgstr "Person (source) Material: {m} -> Costume (destination) Material: {d}"
+
+msgid "人物(補正元)材質: {m} -> 衣装(補正先)材質: {d}, 補正値: {c}"
+msgstr "Person (source) material: {m} -> Costume (destination) material: {d}, correction value: {c}"
+
+msgid "近似テクスチャ色取得"
+msgstr "Get approximate texture color"
+
+msgid "-- 近似テクスチャ色取得 [{i} ({p:.2f}%)]"
+msgstr "-- Get Approximate Texture Color [{i} ({p:.2f}%)]"
+
+msgid "肌テクスチャ色補正: {c}"
+msgstr "Skin texture color correction: {c}"
+
+msgid "衣装: {r}: 位置再計算(2回目): {u} → {p} ({d})"
+msgstr "Costume: {r}: Position recalculation (2nd time): {u} → {p} ({d})"
+
+msgid "このチェックをONにすると、選択ボーンのウェイト範囲をグラデーションで表示します"
+msgstr "Turn this check on to display the weight range of the selected bone as a gradient"
+
+msgid "ボーンウェイト表示"
+msgstr "Bone Weight Display"
+
+msgid "肌テクスチャ色補正: {c} (人物[{m}], 衣装[{d}]) u[{u1:04d}:{u2:04d}], v[{v1:04d},{v2:04d}]"
+msgstr "Skin Texture Color Correction: {c} (Person [{m}], Costume [{d}]) u[{u1:04d}:{u2:04d}], v[{v1:04d},{v2:04d}]"
+
+msgid "着替え: "
+msgstr "Change of clothes:"
+
+msgid "衣装初期姿勢計算"
+msgstr "Initial Costume Attitude Calculation"
+
+msgid "厚み比率"
+msgstr "Thickness Ratio"
+
+msgid "人物テクスチャ色取得"
+msgstr "Get person texture color"
+
+msgid "-- 人物テクスチャ色取得 [{i} ({p:.2f}%)]"
+msgstr "-- Get Person Texture Color [{i} ({p:.2f}%)]"
+
+msgid "衣装テクスチャ色取得"
+msgstr "Obtain costume texture color"
+
+msgid "-- 衣装テクスチャ色取得 [{i} ({p:.2f}%)]"
+msgstr "-- Get Costume Texture Color [{i} ({p:.2f}%)]"
+
+msgid "衣装テクスチャ色取得"
+msgstr "Obtain costume texture color"
+
+msgid "お着替え後モデル出力先のパス設定が、人物もしくは衣装モデルのテクスチャを上書きする設定となっていたため、テクスチャのコピー処理を中断しました。\nお着替え後モデル出力先パスをデフォルトから変更される場合、人物や衣装と同じ階層には設定しないようにしてください。"
+msgstr "The texture copy process was interrupted because the path setting for the post-changing model output destination was set to overwrite the person or costume model's textures. \If you change the path setting for the output destination for the model after changing from the default, please do not set it to the same hierarchy as the person or costume"

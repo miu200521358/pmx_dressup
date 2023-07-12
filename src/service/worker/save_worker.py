@@ -30,6 +30,8 @@ class SaveWorker(BaseWorker):
         if not file_panel.dress_ctrl.data:
             raise MApplicationException("衣装モデルデータが読み込まれていません")
 
+        os.makedirs(os.path.dirname(file_panel.output_pmx_ctrl.path), exist_ok=True)
+
         if not file_panel.output_pmx_ctrl.path or not os.path.exists(os.path.dirname(file_panel.output_pmx_ctrl.path)):
             logger.warning(__("出力ファイルパスが有効なパスではないため、デフォルトの出力ファイルパスを再設定します。"))
             model_dir_path, model_file_name, model_file_ext = separate_path(file_panel.model_ctrl.path)
@@ -37,6 +39,8 @@ class SaveWorker(BaseWorker):
             file_panel.output_pmx_ctrl.path = os.path.join(
                 model_dir_path, dress_file_name, f"{model_file_name}_{dress_file_name}_{datetime.now():%Y%m%d_%H%M%S}{model_file_ext}"
             )
+
+            os.makedirs(os.path.dirname(file_panel.output_pmx_ctrl.path), exist_ok=True)
 
         logger.info("お着替えモデル出力開始", decoration=MLogger.Decoration.BOX)
 
@@ -47,7 +51,9 @@ class SaveWorker(BaseWorker):
             self.frame.dress_motion,
             file_panel.output_pmx_ctrl.path,
             config_panel.model_material_ctrl.alphas,
+            config_panel.model_material_ctrl.skin_materials,
             config_panel.dress_material_ctrl.alphas,
+            config_panel.dress_material_ctrl.skin_materials,
             config_panel.dress_bone_ctrl.scales,
             config_panel.dress_bone_ctrl.degrees,
             config_panel.dress_bone_ctrl.positions,

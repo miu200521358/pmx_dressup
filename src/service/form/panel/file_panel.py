@@ -85,7 +85,7 @@ class FilePanel(BasePanel):
         self.exec_btn_sizer.Add(self.exec_btn_ctrl, 0, wx.ALL, 3)
         self.root_sizer.Add(self.exec_btn_sizer, 0, wx.ALIGN_CENTER | wx.SHAPED, 5)
 
-        self.console_ctrl = ConsoleCtrl(self.frame, self, rows=450)
+        self.console_ctrl = ConsoleCtrl(self.frame, self, rows=490)
         self.console_ctrl.set_parent_sizer(self.root_sizer)
 
         self.root_sizer.Add(wx.StaticLine(self, wx.ID_ANY), wx.GROW)
@@ -121,9 +121,8 @@ class FilePanel(BasePanel):
             self.dress_ctrl.read_name()
             self.output_pmx_ctrl.path = os.path.join(
                 model_dir_path,
-                dress_file_name,
-                f"{self.model_ctrl.name_ctrl.GetValue()[1:-1]}_{self.dress_ctrl.name_ctrl.GetValue()[1:-1]}"
-                + f"_{datetime.now():%Y%m%d_%H%M%S}{model_file_ext}",
+                f"{dress_file_name}_{datetime.now():%Y%m%d_%H%M%S}",
+                f"{self.model_ctrl.name_ctrl.GetValue()[1:-1]}_{self.dress_ctrl.name_ctrl.GetValue()[1:-1]}{model_file_ext}",
             )
 
     def Enable(self, enable: bool) -> None:

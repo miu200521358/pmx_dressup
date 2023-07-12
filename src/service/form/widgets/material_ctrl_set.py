@@ -11,17 +11,15 @@ __ = logger.get_text
 
 
 class MaterialCtrlSet:
-    def __init__(self, parent: BasePanel, window: wx.ScrolledWindow, sizer: wx.Sizer, type_name: str) -> None:
-        self.sizer = sizer
+    def __init__(self, parent: BasePanel, window: wx.ScrolledWindow, type_name: str) -> None:
         self.parent = parent
         self.window = window
         self.type_name = type_name
         self.is_only: bool = False
         self.alphas: dict[str, float] = {}
+        self.skin_materials: dict[str, bool] = {}
 
-        self.title_ctrl = wx.StaticText(self.window, wx.ID_ANY, __(f"{type_name}モデル"), wx.DefaultPosition, wx.DefaultSize, 0)
-        self.title_ctrl.SetToolTip(__(f"{type_name}の材質プルダウンから選択した材質の非透過度を下のスライダーで調整できます。"))
-        self.sizer.Add(self.title_ctrl, 0, wx.ALL, 3)
+        self.sizer = wx.StaticBoxSizer(wx.StaticBox(self.window, wx.ID_ANY, __(type_name) + ": " + __("材質非透過度")), orient=wx.VERTICAL)
 
         self.material_sizer = wx.BoxSizer(wx.HORIZONTAL)
 
@@ -125,32 +123,49 @@ class MaterialCtrlSet:
 
         self.sizer.Add(self.slider_sizer, 0, wx.ALL, 3)
 
+        self.skin_material_check_ctrl = wx.CheckBox(self.window, wx.ID_ANY, __("肌材質として設定を共有する"), wx.Point(20, -1), wx.DefaultSize, 0)
+        skin_material_tooltip = (
+            __("このチェックをONにすると、肌メッシュの設定を衣装モデル側に適用します") if type_name == "人物" else __("このチェックをONにすると、肌メッシュの設定を人物モデルから受け取り、設定します")
+        )
+        self.skin_material_check_ctrl.Bind(wx.EVT_CHECKBOX, self.on_change_skin_material)
+        self.skin_material_check_ctrl.SetToolTip(skin_material_tooltip)
+        self.sizer.Add(self.skin_material_check_ctrl, 0, wx.ALL, 3)
+
     def initialize(self, material_names: list[str]) -> None:
         self.material_choice_ctrl.Clear()
         self.alphas = {}
         for material_name in material_names:
             self.material_choice_ctrl.Append(material_name)
             self.alphas[material_name] = 1.0
+            self.skin_materials[material_name] = False
         # ボーンの非透過度も調整出来るようにしておく
         self.material_choice_ctrl.Append(__("ボーンライン"))
         self.alphas[__("ボーンライン")] = 0.5
+        self.skin_materials[__("ボーンライン")] = False
         # 全材質の非透過度も調整出来るようにしておく
         self.material_choice_ctrl.Append(__("全材質"))
         self.alphas[__("全材質")] = 1.0
+        self.skin_materials[__("全材質")] = False
         self.material_choice_ctrl.SetSelection(0)
         self.slider.ChangeValue(1.0)
+
+    def on_change_skin_material(self, event: wx.Event) -> None:
+        material_name = self.material_choice_ctrl.GetStringSelection()
+        self.skin_materials[material_name] = self.skin_material_check_ctrl.GetValue()
 
     def on_change_material(self, event: wx.Event) -> None:
         if self.is_only:
             self.on_change_morph(event)
         material_name = self.material_choice_ctrl.GetStringSelection()
         self.slider.ChangeValue(self.alphas[material_name])
+        self.skin_material_check_ctrl.SetValue(self.skin_materials[material_name])
 
     def on_change_morph(self, event: wx.Event) -> None:
         self.is_only = False
         alpha = self.slider.GetValue()
         material_name = self.material_choice_ctrl.GetStringSelection()
         self.alphas[material_name] = float(alpha)
+        self.skin_materials[material_name] = self.skin_material_check_ctrl.GetValue()
 
         self.parent.Enable(False)
         self.parent.on_change_morph()
@@ -207,3 +222,4 @@ class MaterialCtrlSet:
         self.zero_btn_ctrl.Enable(enable)
         self.one_btn_ctrl.Enable(enable)
         self.only_btn_ctrl.Enable(enable)
+        self.skin_material_check_ctrl.Enable(enable)
