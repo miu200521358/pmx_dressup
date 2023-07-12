@@ -416,7 +416,9 @@ class SaveUsecase:
                 )
                 dress_model_bone.ik.loop_count = dress_model_bone.bone.ik.loop_count
                 dress_model_bone.ik.unit_rotation = dress_model_bone.bone.ik.unit_rotation
-                if 0 <= dress_model_bone.bone.ik.bone_index and dress_matrixes.exists(0, dress_model_bone.bone.name):
+                if 0 <= dress_model_bone.bone.ik.bone_index and dress_matrixes.exists(
+                    0, dress_model_bones[dress_model_bone.ik.bone_index].name
+                ):
                     # IKターゲットとその位置を修正
                     ik_target_position = dress_matrixes[0, dress_model_bones[dress_model_bone.ik.bone_index].name].position
                     dress_model_bone.position = ik_target_position.copy()
