@@ -1522,3 +1522,19 @@ msgstr ""
 msgid "厚み比率"
 msgstr ""
 
+
+msgid "人物テクスチャ色取得"
+msgstr ""
+
+
+msgid "-- 人物テクスチャ色取得 [{i} ({p:.2f}%)]"
+msgstr ""
+
+
+msgid "衣装テクスチャ色取得"
+msgstr ""
+
+
+msgid "-- 衣装テクスチャ色取得 [{i} ({p:.2f}%)]"
+msgstr ""
+

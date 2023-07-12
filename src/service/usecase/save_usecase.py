@@ -1029,37 +1029,31 @@ class SaveUsecase:
         # 衣装の指定材質に割り当てられた頂点INDEXリスト
         dress_vertex_indexes = dress.vertices_by_materials[dress_material.index]
 
-        logger.info("人物: 近似頂点選別")
+        logger.info("人物テクスチャ色取得")
 
         # 人物の指定材質に割り当てられた頂点INDEXが配置されている3次元頂点の位置
-        model_vertex_positions = MVectorDict()
-        for model_vertex_index in model_vertex_indexes:
-            model_vertex_positions.append(model_vertex_index, model.vertices[model_vertex_index].position)
-
-        # 衣装の指定材質に割り当てられた頂点INDEXが配置されている3次元頂点の位置
-        dress_vertex_positions = MVectorDict()
-        for dress_vertex_index in dress_vertex_indexes:
-            dress_vertex_positions.append(dress_vertex_index, dress.vertices[dress_vertex_index].position)
-
-        # 衣装の指定材質に割り当てられた頂点INDEXが配置されている3次元頂点の位置に最も近い人物頂点の色
         model_vertex_colors: list[np.ndarray] = []
-        dress_vertex_colors: list[np.ndarray] = []
+        for i, model_vertex_index in enumerate(model_vertex_indexes):
+            logger.count("人物テクスチャ色取得", i, len(model_vertex_indexes), display_block=500)
 
-        for i, dress_vertex_index in enumerate(dress_vertex_indexes):
-            logger.count("近似テクスチャ色取得", i, len(dress_vertex_indexes), display_block=500)
-
-            nearest_model_vertex_index = model_vertex_positions.nearest_key(dress.vertices[dress_vertex_index].position)
-            nearest_model_vertex = model.vertices[nearest_model_vertex_index]
+            model_vertex = model.vertices[model_vertex_index]
 
             # 人物の指定頂点に割り当てられたテクスチャとUVから、テクスチャの該当位置を取得する
-            mu = max(0, min(int(nearest_model_vertex.uv.x * model_image.shape[1]), model_image.shape[1] - 1))
-            mv = max(0, min(int(nearest_model_vertex.uv.y * model_image.shape[0]), model_image.shape[0] - 1))
+            mu = max(0, min(int(model_vertex.uv.x * model_image.shape[1]), model_image.shape[1] - 1))
+            mv = max(0, min(int(model_vertex.uv.y * model_image.shape[0]), model_image.shape[0] - 1))
 
             model_vertex_colors.append(model_image[mv, mu, :3])
 
-            # 衣装の指定頂点に割り当てられたテクスチャとUVから、テクスチャの該当位置を取得する
+        logger.info("衣装テクスチャ色取得")
+
+        # 衣装の指定材質に割り当てられた頂点INDEXが配置されている3次元頂点の位置
+        dress_vertex_colors: list[np.ndarray] = []
+        for i, dress_vertex_index in enumerate(dress_vertex_indexes):
+            logger.count("衣装テクスチャ色取得", i, len(dress_vertex_indexes), display_block=500)
+
             dress_vertex = dress.vertices[dress_vertex_index]
 
+            # 衣装の指定頂点に割り当てられたテクスチャとUVから、テクスチャの該当位置を取得する
             du = max(0, min(int(dress_vertex.uv.x * dress_image.shape[1]), dress_image.shape[1] - 1))
             dv = max(0, min(int(dress_vertex.uv.y * dress_image.shape[0]), dress_image.shape[0] - 1))
 
@@ -1077,7 +1071,7 @@ class SaveUsecase:
             d=np.round(dress_median_color, decimals=1),
         )
 
-        # 該当UV範囲内だけ補正
+        # テクスチャ全体を補正（テクスチャ自体を複製）
         corrected_dress_image[..., :3] += color_difference
 
         # 補正後の色が0未満または255を超える場合、範囲内にクリップする

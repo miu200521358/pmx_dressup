@@ -1146,3 +1146,15 @@ msgstr "Initial Costume Attitude Calculation"
 
 msgid "厚み比率"
 msgstr "Thickness Ratio"
+
+msgid "人物テクスチャ色取得"
+msgstr "Get person texture color"
+
+msgid "-- 人物テクスチャ色取得 [{i} ({p:.2f}%)]"
+msgstr "-- Get Person Texture Color [{i} ({p:.2f}%)]"
+
+msgid "衣装テクスチャ色取得"
+msgstr "Obtain costume texture color"
+
+msgid "-- 衣装テクスチャ色取得 [{i} ({p:.2f}%)]"
+msgstr "-- Get Costume Texture Color [{i} ({p:.2f}%)]"
