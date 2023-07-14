@@ -1103,7 +1103,7 @@ class LoadUsecase:
             if tail_bone_name in dress.bones:
                 for bone_name in dress.bone_trees[tail_bone_name].names:
                     dress_bone = dress.bones[bone_name]
-                    if dress_bone.index in dress_offset_positions:
+                    if dress_bone.index in dress_offset_positions or not model_matrixes.exists(0, bone_name):
                         continue
 
                     dress_matrixes = dress_motion.animate_bone([0], dress, [tail_bone_name], append_ik=False)
