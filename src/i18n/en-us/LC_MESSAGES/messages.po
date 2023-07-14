@@ -1179,3 +1179,12 @@ msgstr "I am trying to output a change of clothes model PMX file in the same fol
 
 msgid "処理が継続できないため、中断しました\n----------------\nお着替えモデル出力結果が元モデルデータを上書きする危険性があるため、出力を中断します\nお着替えモデル出力ファイルパスを変更してください"
 msgstr "Aborted because the process cannot be continued!\n----------------\nThe output of the ddressing model output is in danger of overwriting the original model data, so please abort the output and change the ddressing model output file path"
+
+msgid "出力ファイルパスが有効なパスではないため、デフォルトの出力ファイルパスを再設定します。"
+msgstr "The output file path is not a valid path, reset the default output file path"
+
+msgid "{t}のチェックに失敗しました。以下の原因が考えられます。\n・{t}が255文字を超えている\n・{t}に使えない文字列が含まれている（例) \\ / : * ? " < > |）\n・{t}の親フォルダに書き込み権限がない\n・{t}に書き込み権限がない\n"
+msgstr "Failed to check {t}. The following causes are possible. \n・{t} exceeds 255 characters\n・{t} contains unusable character strings (e.g.) \ \n} / : * ? " < > |) Parent folder of \n・{t} does not have write permission \n・{t} does not have write permission.
+
+msgid "ファイルパス保存可否チェック: {p}"
+msgstr "File path preservation availability check: {p}"
