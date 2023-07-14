@@ -46,19 +46,31 @@ class SaveUsecase:
         output_path: str,
     ) -> bool:
         if os.path.abspath(model.path) == os.path.abspath(output_path):
-            logger.error("人物モデルPMXと同じファイルパス上にお着替えモデルPMXファイルを出力しようとしています。\nPMXデータが上書きされる危険性があります。", decoration=MLogger.Decoration.BOX)
+            logger.error(
+                "人物モデルPMXと同じファイルパス上にお着替えモデルPMXファイルを出力しようとしています。\nPMXデータが上書きされる危険性があります。",
+                decoration=MLogger.Decoration.BOX,
+            )
             return False
 
         if os.path.abspath(dress.path) == os.path.abspath(output_path):
-            logger.error("衣装モデルPMXと同じファイルパス上にお着替えモデルPMXファイルを出力しようとしています。\nPMXデータが上書きされる危険性があります。", decoration=MLogger.Decoration.BOX)
+            logger.error(
+                "衣装モデルPMXと同じファイルパス上にお着替えモデルPMXファイルを出力しようとしています。\nPMXデータが上書きされる危険性があります。",
+                decoration=MLogger.Decoration.BOX,
+            )
             return False
 
         if os.path.abspath(os.path.dirname(model.path)) == os.path.abspath(os.path.dirname(output_path)):
-            logger.error("人物モデルPMXと同じフォルダ階層にお着替えモデルPMXファイルを出力しようとしています。\nテクスチャが上書きされる危険性があります。", decoration=MLogger.Decoration.BOX)
+            logger.error(
+                "人物モデルPMXと同じフォルダ階層にお着替えモデルPMXファイルを出力しようとしています。\nテクスチャが上書きされる危険性があります。",
+                decoration=MLogger.Decoration.BOX,
+            )
             return False
 
         if os.path.abspath(os.path.dirname(dress.path)) == os.path.abspath(os.path.dirname(output_path)):
-            logger.error("衣装モデルPMXと同じフォルダ階層にお着替えモデルPMXファイルを出力しようとしています。\nテクスチャが上書きされる危険性があります。", decoration=MLogger.Decoration.BOX)
+            logger.error(
+                "衣装モデルPMXと同じフォルダ階層にお着替えモデルPMXファイルを出力しようとしています。\nテクスチャが上書きされる危険性があります。",
+                decoration=MLogger.Decoration.BOX,
+            )
             return False
 
         return True
