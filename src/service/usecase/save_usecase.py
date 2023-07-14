@@ -39,6 +39,30 @@ __ = logger.get_text
 
 
 class SaveUsecase:
+    def valid_output_path(
+        self,
+        model: PmxModel,
+        dress: PmxModel,
+        output_path: str,
+    ) -> bool:
+        if os.path.abspath(model.path) == os.path.abspath(output_path):
+            logger.error("人物モデルPMXと同じファイルパス上にお着替えモデルPMXファイルを出力しようとしています。\nPMXデータが上書きされる危険性があります。", decoration=MLogger.Decoration.BOX)
+            return False
+
+        if os.path.abspath(dress.path) == os.path.abspath(output_path):
+            logger.error("衣装モデルPMXと同じファイルパス上にお着替えモデルPMXファイルを出力しようとしています。\nPMXデータが上書きされる危険性があります。", decoration=MLogger.Decoration.BOX)
+            return False
+
+        if os.path.abspath(os.path.dirname(model.path)) == os.path.abspath(os.path.dirname(output_path)):
+            logger.error("人物モデルPMXと同じフォルダ階層にお着替えモデルPMXファイルを出力しようとしています。\nテクスチャが上書きされる危険性があります。", decoration=MLogger.Decoration.BOX)
+            return False
+
+        if os.path.abspath(os.path.dirname(dress.path)) == os.path.abspath(os.path.dirname(output_path)):
+            logger.error("衣装モデルPMXと同じフォルダ階層にお着替えモデルPMXファイルを出力しようとしています。\nテクスチャが上書きされる危険性があります。", decoration=MLogger.Decoration.BOX)
+            return False
+
+        return True
+
     def save(
         self,
         model: PmxModel,
@@ -1270,9 +1294,9 @@ class SaveUsecase:
                 new_texture_path = os.path.join(os.path.dirname(dest_model.path), texture.name)
             if texture_path == new_texture_path:
                 logger.warning(
-                    "お着替え後モデル出力先のパス設定が、人物もしくは衣装モデルのテクスチャを上書きする設定となっていたため、テクスチャのコピー処理を中断しました。"
+                    "お着替えモデル出力先のパス設定が、人物もしくは衣装モデルのテクスチャを上書きする設定となっていたため、テクスチャのコピー処理を中断しました。"
                     + "\n"
-                    + "お着替え後モデル出力先パスをデフォルトから変更される場合、人物や衣装と同じ階層には設定しないようにしてください。",
+                    + "お着替えモデル出力先パスをデフォルトから変更される場合、人物や衣装と同じ階層には設定しないようにしてください。",
                     decoration=MLogger.Decoration.BOX,
                 )
                 return None

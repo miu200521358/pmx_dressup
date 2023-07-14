@@ -1,5 +1,4 @@
 import os
-from datetime import datetime
 
 import wx
 
@@ -7,7 +6,7 @@ from mlib.base.exception import MApplicationException
 from mlib.base.logger import MLogger
 from mlib.service.base_worker import BaseWorker
 from mlib.service.form.base_frame import BaseFrame
-from mlib.utils.file_utils import get_root_dir, separate_path
+from mlib.utils.file_utils import get_root_dir
 from service.form.panel.config_panel import ConfigPanel
 from service.form.panel.file_panel import FilePanel
 from service.usecase.save_usecase import SaveUsecase
@@ -30,17 +29,12 @@ class SaveWorker(BaseWorker):
         if not file_panel.dress_ctrl.data:
             raise MApplicationException("衣装モデルデータが読み込まれていません")
 
-        os.makedirs(os.path.dirname(file_panel.output_pmx_ctrl.path), exist_ok=True)
-
-        if not file_panel.output_pmx_ctrl.path or not os.path.exists(os.path.dirname(file_panel.output_pmx_ctrl.path)):
-            logger.warning(__("出力ファイルパスが有効なパスではないため、デフォルトの出力ファイルパスを再設定します。"))
-            model_dir_path, model_file_name, model_file_ext = separate_path(file_panel.model_ctrl.path)
-            dress_dir_path, dress_file_name, dress_file_ext = separate_path(file_panel.dress_ctrl.path)
-            file_panel.output_pmx_ctrl.path = os.path.join(
-                model_dir_path, dress_file_name, f"{model_file_name}_{dress_file_name}_{datetime.now():%Y%m%d_%H%M%S}{model_file_ext}"
-            )
-
-            os.makedirs(os.path.dirname(file_panel.output_pmx_ctrl.path), exist_ok=True)
+        if not SaveUsecase().valid_output_path(
+            file_panel.model_ctrl.data,
+            file_panel.dress_ctrl.data,
+            file_panel.output_pmx_ctrl.path,
+        ):
+            raise MApplicationException("お着替えモデル出力結果が元モデルデータを上書きする危険性があるため、出力を中断します\nお着替えモデル出力ファイルパスを変更してください")
 
         logger.info("お着替えモデル出力開始", decoration=MLogger.Decoration.BOX)
 

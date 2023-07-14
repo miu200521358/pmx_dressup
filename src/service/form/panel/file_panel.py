@@ -64,7 +64,7 @@ class FilePanel(BasePanel):
         self.output_pmx_ctrl = MPmxFilePickerCtrl(
             self.frame,
             self,
-            title="お着替え後モデル出力先",
+            title="お着替えモデル出力先",
             is_show_name=False,
             is_save=True,
             tooltip="お着替え後のモデルの出力ファイルパスです\n任意の値に変更可能です",
