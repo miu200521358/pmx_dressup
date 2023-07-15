@@ -237,6 +237,8 @@ class DressBoneSettings(Enum):
         category="腕",
         translatable=True,
         rotatable=True,
+        rotate_cancel=True,
+        local_scalable=True,
         local_x_scalable=True,
     )
     RIGHT_THUMB0 = DressBoneSetting(
@@ -510,6 +512,8 @@ class DressBoneSettings(Enum):
         category="腕",
         translatable=True,
         rotatable=True,
+        rotate_cancel=True,
+        local_scalable=True,
         local_x_scalable=True,
     )
     LEFT_THUMB0 = DressBoneSetting(
