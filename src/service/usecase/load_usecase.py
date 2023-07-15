@@ -953,14 +953,17 @@ class LoadUsecase:
                     #     else:
                     #         dress_fit_length_scale = 1.0
                     elif "手首" in dress_bone.name:
-                        # 手首の比率は手首ボーンから中指１ボーンまでの直線距離とする
-                        finger_middle_name = f"{dress_bone.name[0]}中指１"
-                        if finger_middle_name in model.bones and finger_middle_name in dress.bones:
-                            dress_fit_length_scale = (model_bone.position - model.bones[finger_middle_name].position).length() / (
-                                (dress_bone.position - dress.bones[finger_middle_name].position).length() or 1
-                            )
-                        else:
-                            dress_fit_length_scale = 1
+                        # 手首の比率は手首ボーンから各指１ボーンまでの直線距離の最小とする
+                        finger_lengths: list[float] = []
+                        for finger_name in ("親指０", "人指１", "中指１", "薬指１", "小指１"):
+                            finger_bone_name = f"{dress_bone.name[0]}{finger_name}"
+                            if finger_bone_name in model.bones and finger_bone_name in dress.bones:
+                                finger_lengths.append(
+                                    (model_bone.position - model.bones[finger_bone_name].position).length()
+                                    / ((dress_bone.position - dress.bones[finger_bone_name].position).length() or 1)
+                                )
+
+                        dress_fit_length_scale = 1.0 if not finger_lengths else np.min(finger_lengths)
                     else:
                         tail_bone_names = [
                             tail_bone_name
@@ -1126,7 +1129,7 @@ class LoadUsecase:
                 avg_x_scale = np.mean([np.max(dress_category_local_x_scales[category]), np.mean(dress_category_local_x_scales[category])])
                 if "指" == category:
                     # 指はあんまり太くしない
-                    avg_x_scale *= 0.7
+                    avg_x_scale *= 0.6
                 local_scale_value = max(min(np.mean([local_scale[1], local_scale[2]]), avg_x_scale * 1.2), avg_x_scale * 0.9) - 1
                 dress_category_local_scales[category] = local_scale_value
 
@@ -1207,7 +1210,10 @@ class LoadUsecase:
 
             dress_bone_parent_scale = MVector3D()
 
-            if not dress_bone.is_standard and not dress.bone_trees.has_standard_child(dress_bone.name):
+            # 準標準の子ボーン名
+            standard_child_names = [b.name for b in dress.bone_trees.get_standard_children(dress_bone.name) if b.name in model.bones]
+
+            if not dress_bone.is_standard and not standard_child_names:
                 # 準標準では無く、子どもに準標準がいない場合、親のスケールをそのまま流用
                 dress_bone_parent_scale_x = dress_local_scales.get(dress_parent_standard_bone.index, MVector3D()).x
                 dress_bone_parent_scale = MVector3D(dress_bone_parent_scale_x, dress_bone_parent_scale_x, dress_bone_parent_scale_x)
@@ -1334,8 +1340,34 @@ class LoadUsecase:
                         if tail_bone_names:
                             dress_bone_position = dress_matrixes[0, bone_name].position
 
-                            model_tail_position = model_matrixes[0, tail_bone_names[0]].position
-                            dress_tail_position = dress_matrixes[0, tail_bone_names[0]].position
+                            if "手首" in bone_name:
+                                dress_wrist_offset_qqs: list[MQuaternion] = []
+
+                                for tail_bone_name in tail_bone_names:
+                                    model_tail_position = model_matrixes[0, tail_bone_name].position
+                                    dress_tail_position = dress_matrixes[0, tail_bone_name].position
+
+                                    model_tail_vector = model_tail_position - model_bone_position
+                                    dress_tail_vector = dress_tail_position - dress_bone_position
+
+                                    if 0 < model_tail_vector.length() and 0 < dress_tail_vector.length():
+                                        # 衣装：自分の方向
+                                        dress_slope_qq = (dress_tail_position - dress_bone_position).to_local_matrix4x4().to_quaternion()
+
+                                        # 人物：自分の方向
+                                        model_slope_qq = (model_tail_position - model_bone_position).to_local_matrix4x4().to_quaternion()
+
+                                        dress_offset_qq = model_slope_qq * dress_slope_qq.inverse()
+
+                                        dress_wrist_offset_qqs.append(dress_offset_qq)
+
+                                if dress_wrist_offset_qqs:
+                                    dress_offset_qq = dress_wrist_offset_qqs[0]
+                                    for qq in dress_wrist_offset_qqs[1:]:
+                                        dress_offset_qq = MQuaternion.slerp(dress_offset_qq, qq, 0.5)
+                            else:
+                                model_tail_position = model_matrixes[0, tail_bone_names[0]].position
+                                dress_tail_position = dress_matrixes[0, tail_bone_names[0]].position
                         else:
                             dress_bone_position = dress_matrixes[0, bone_name].position
                             dress_tail_position = dress_matrixes[0, bone_name].global_matrix * dress_bone.tail_relative_position
@@ -1392,11 +1424,15 @@ class LoadUsecase:
 
                 if dress_parent_bone_setting.category not in ("上半身", "下半身", "体幹", "首", "頭"):
                     # 子ボーン
-                    tail_bone_names = [
-                        tail_bone_name
-                        for tail_bone_name in dress_parent_bone_setting.tails
-                        if tail_bone_name in dress.bones and tail_bone_name in model.bones
-                    ]
+                    tail_bone_names = (
+                        [
+                            tail_bone_name
+                            for tail_bone_name in dress_parent_bone_setting.tails
+                            if tail_bone_name in dress.bones and tail_bone_name in model.bones
+                        ]
+                        if not standard_child_names
+                        else standard_child_names
+                    )
 
                     dress_parent_bone_position = dress_matrixes[0, dress_parent_standard_bone.name].position
                     model_parent_bone_position = model_matrixes[0, dress_parent_standard_bone.name].position
