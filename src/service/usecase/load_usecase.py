@@ -1070,49 +1070,49 @@ class LoadUsecase:
 
                                 model_local_positions[bone_setting.category][model_bone.name] = model_deformed_local_positions
 
-        # logger.info("厚み比率")
-
         # # dress_category_global_scales: dict[str, MVector3D] = {}
         dress_category_local_scales: dict[str, float] = {}
 
-        # for category in dress_local_positions.keys():
-        #     if category not in model_local_positions:
-        #         continue
+        logger.info("厚み比率")
 
-        #     model_category_local_positions = model_local_positions[category]
-        #     dress_category_local_positions = dress_local_positions[category]
+        for category in dress_local_positions.keys():
+            if category not in model_local_positions:
+                continue
 
-        #     category_local_scales: list[np.ndarray] = []
-        #     for bone_name, dress_bone_local_positions in dress_category_local_positions.items():
-        #         if bone_name in model_category_local_positions:
-        #             model_filtered_local_positions = filter_values(model_category_local_positions[bone_name])
-        #             dress_filtered_local_positions = filter_values(dress_bone_local_positions)
+            model_category_local_positions = model_local_positions[category]
+            dress_category_local_positions = dress_local_positions[category]
 
-        #             model_local_distance = np.max(model_filtered_local_positions, axis=0) - np.min(model_filtered_local_positions, axis=0)
-        #             dress_local_distance = np.max(dress_filtered_local_positions, axis=0) - np.min(dress_filtered_local_positions, axis=0)
+            category_local_scales: list[np.ndarray] = []
+            for bone_name, dress_bone_local_positions in dress_category_local_positions.items():
+                if bone_name in model_category_local_positions:
+                    model_filtered_local_positions = filter_values(model_category_local_positions[bone_name])
+                    dress_filtered_local_positions = filter_values(dress_bone_local_positions)
 
-        #             category_local_scale = MVector3D(*model_local_distance).one() / MVector3D(*dress_local_distance).one()
-        #             category_local_scales.append(category_local_scale.vector)
+                    model_local_distance = np.max(model_filtered_local_positions, axis=0) - np.min(model_filtered_local_positions, axis=0)
+                    dress_local_distance = np.max(dress_filtered_local_positions, axis=0) - np.min(dress_filtered_local_positions, axis=0)
 
-        #     local_scale = np.ones(3) if not category_local_scales else np.mean(category_local_scales, axis=0)
-        #     # Xスケール±αより大きくはしない
-        #     avg_x_scale = np.mean([np.max(dress_category_local_x_scales[category]), np.mean(dress_category_local_x_scales[category])])
-        #     if "指" == category:
-        #         # 指はあんまり太くしない
-        #         avg_x_scale *= 0.6
-        #     local_scale_value = max(min(np.mean([local_scale[1], local_scale[2]]), avg_x_scale * 1.2), avg_x_scale * 0.9) - 1
-        #     dress_category_local_scales[category] = local_scale_value
+                    category_local_scale = MVector3D(*model_local_distance).one() / MVector3D(*dress_local_distance).one()
+                    category_local_scales.append(category_local_scale.vector)
 
-        #     logger.info("-- 厚み比率 [{b}][{s:.3f})]", b=category, s=(local_scale_value + 1))
+            local_scale = np.ones(3) if not category_local_scales else np.mean(category_local_scales, axis=0)
+            # Xスケール±αより大きくはしない
+            avg_x_scale = np.mean([np.max(dress_category_local_x_scales[category]), np.mean(dress_category_local_x_scales[category])])
+            if "指" == category:
+                # 指はあんまり太くしない
+                avg_x_scale *= 0.6
+            local_scale_value = max(min(np.mean([local_scale[1], local_scale[2]]), avg_x_scale * 1.2), avg_x_scale * 0.9) - 1
+            dress_category_local_scales[category] = local_scale_value
 
-        #     logger.debug(
-        #         f"厚み比率 [{category}][{(local_scale_value + 1):.3f}][local_scale={local_scale}]"
-        #         + f"[category_local_scales={category_local_scales}]"
-        #     )
+            logger.info("-- 厚み比率 [{b}][{s:.3f})]", b=category, s=(local_scale_value + 1))
 
-        #     if "腕" == category and "肩" not in dress_category_local_scales:
-        #         # 腕だけ比率が分かってて、肩が無い場合、腕の比率をコピーする
-        #         dress_category_local_scales["肩"] = local_scale_value
+            logger.debug(
+                f"厚み比率 [{category}][{(local_scale_value + 1):.3f}][local_scale={local_scale}]"
+                + f"[category_local_scales={category_local_scales}]"
+            )
+
+            if "腕" == category and "肩" not in dress_category_local_scales:
+                # 腕だけ比率が分かってて、肩が無い場合、腕の比率をコピーする
+                dress_category_local_scales["肩"] = local_scale_value
 
         logger.info("ボーンフィッティング")
 
