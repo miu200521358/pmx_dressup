@@ -960,25 +960,28 @@ class LoadUsecase:
                             for tail_bone_name in bone_setting.tails
                             if tail_bone_name in dress.bones
                             and tail_bone_name in model.bones
-                            and 0.1 < dress.bones[tail_bone_name].position.distance(dress_bone.position)
+                            and 0.01 < dress.bones[tail_bone_name].position.distance(dress_bone.position)
                         ]
 
-                        if tail_far_bone_names:
+                        if tail_far_bone_names and "指先" not in tail_far_bone_names[0]:
                             model_bone_position = model_matrixes[0, dress_bone.name].position
                             model_tail_position = model_matrixes[0, tail_far_bone_names[0]].position
 
                             dress_bone_position = dress_matrixes[0, dress_bone.name].position
                             dress_tail_position = dress_matrixes[0, tail_far_bone_names[0]].position
-                        else:
-                            model_bone_position = model_matrixes[0, dress_bone.name].position
-                            model_tail_position = model_matrixes[0, dress_bone.name].global_matrix * model_bone.tail_relative_position
 
-                            dress_bone_position = dress_matrixes[0, dress_bone.name].position
-                            dress_tail_position = dress_matrixes[0, dress_bone.name].global_matrix * dress_bone.tail_relative_position
+                            dress_fit_length_scale = (model_tail_position - model_bone_position).length() / (
+                                (dress_tail_position - dress_bone_position).length() or 1
+                            )
+                        elif dress_bone.parent_index in dress_local_scales:
+                            # 先がボーンが見つからない場合、親ボーンの比率と親ボーンとの長さ比から求め直す
+                            dress_parent_fit_length_scale = dress_local_scales[dress_bone.parent_index].x + 1
 
-                        dress_fit_length_scale = (model_tail_position - model_bone_position).length() / (
-                            (dress_tail_position - dress_bone_position).length() or 1
-                        )
+                            dress_fit_length_scale = (
+                                dress_parent_fit_length_scale
+                                * dress_bone.tail_relative_position.length()
+                                / dress.bones[dress_bone.parent_index].tail_relative_position.length()
+                            )
 
                     if np.isclose(dress_fit_length_scale, 0.0):
                         dress_fit_length_scale = 1.0
@@ -1227,7 +1230,7 @@ class LoadUsecase:
                     for tail_bone_name in bone_setting.tails
                     if tail_bone_name in dress.bones
                     and tail_bone_name in model.bones
-                    and 0.1 < dress.bones[tail_bone_name].position.distance(dress_bone.position)
+                    and 0.01 < dress.bones[tail_bone_name].position.distance(dress_bone.position)
                 ]
 
                 # parent_far_bone_names = [
@@ -1235,7 +1238,7 @@ class LoadUsecase:
                 #     for parent_bone_name in bone_setting.parents
                 #     if parent_bone_name in dress.bones
                 #     and parent_bone_name in model.bones
-                #     and 0.1 < dress.bones[parent_bone_name].position.distance(dress_bone.position)
+                #     and 0.01 < dress.bones[parent_bone_name].position.distance(dress_bone.position)
                 # ]
 
                 if bone_setting.translatable:
@@ -1451,10 +1454,16 @@ class LoadUsecase:
                 if bone_setting.local_scalable:
                     dress_local_thick_scale_value = dress_category_local_scales.get(bone_setting.category, 0.0)
 
-                    # ローカルスケール自体はひとまとめにしたもの
-                    dress_local_scale = dress_local_scales.get(dress_bone.index, MVector3D())
-                    dress_local_scale.y = dress_local_thick_scale_value
-                    dress_local_scale.z = dress_local_thick_scale_value
+                    if bone_setting.category == "指":
+                        # 指は厚みと同じだけの長さスケールにする
+                        dress_local_scale = MVector3D(
+                            dress_local_thick_scale_value, dress_local_thick_scale_value, dress_local_thick_scale_value
+                        )
+                    else:
+                        # ローカルスケール自体はひとまとめにしたもの
+                        dress_local_scale = dress_local_scales.get(dress_bone.index, MVector3D())
+                        dress_local_scale.y = dress_local_thick_scale_value
+                        dress_local_scale.z = dress_local_thick_scale_value
                     dress_local_scales[dress_bone.index] = dress_local_scale
 
                     dress.morphs[DRESS_BONE_FITTING_NAME].offsets.append(
