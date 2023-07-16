@@ -986,6 +986,9 @@ class LoadUsecase:
                     if np.isclose(dress_fit_length_scale, 0.0):
                         dress_fit_length_scale = 1.0
 
+                    # ちょっとだけ縮める
+                    dress_fit_length_scale *= 0.97
+
                     if bone_setting.category not in dress_category_local_x_scales:
                         dress_category_local_x_scales[bone_setting.category] = []
                     dress_category_local_x_scales[bone_setting.category].append(dress_fit_length_scale)
@@ -1551,26 +1554,26 @@ class LoadUsecase:
                     )
                 )
 
-        # # ----- 変形結果 -------------
-        # from datetime import datetime
-        # from service.usecase.save_usecase import SaveUsecase
+        # ----- 変形結果 -------------
+        from datetime import datetime
+        from service.usecase.save_usecase import SaveUsecase
 
-        # SaveUsecase().save(
-        #     model,
-        #     dress,
-        #     VmdMotion(),
-        #     dress_motion,
-        #     os.path.join("E:/MMD/Dressup/output", f"{datetime.now():%Y%m%d_%H%M%S}_dress.pmx"),
-        #     dict([(m.name, 0.0) for m in model.materials]),
-        #     dict([(m.name, False) for m in model.materials]),
-        #     dict([(m.name, 1.0) for m in dress.materials]),
-        #     dict([(m.name, False) for m in dress.materials]),
-        #     {},
-        #     {},
-        #     {},
-        #     {},
-        # )
-        # # ----- 変形結果 -------------
+        SaveUsecase().save(
+            model,
+            dress,
+            VmdMotion(),
+            dress_motion,
+            os.path.join("E:/MMD/Dressup/output", f"{datetime.now():%Y%m%d_%H%M%S}_dress.pmx"),
+            dict([(m.name, 0.0) for m in model.materials]),
+            dict([(m.name, False) for m in model.materials]),
+            dict([(m.name, 1.0) for m in dress.materials]),
+            dict([(m.name, False) for m in dress.materials]),
+            {},
+            {},
+            {},
+            {},
+        )
+        # ----- 変形結果 -------------
 
         return dress_local_scales, dress_global_scales, dress_offset_positions, dress_offset_qqs
 
