@@ -27,7 +27,7 @@ class DressBoneSetting(BoneSetting):
         """
         self.name = setting.name
         self.parents = setting.parents
-        self.relatives = setting.relatives
+        self.display_tail = setting.display_tail
         self.tails = setting.tails
         self.flag = setting.flag
         self.category = category
@@ -91,13 +91,6 @@ class DressBoneSettings(Enum):
         rotatable=True,
         local_scalable=True,
         local_x_scalable=True,
-    )
-    ARM_CENTER = DressBoneSetting(
-        setting=BoneSettings.ARM_CENTER.value,
-        category="体幹",
-        translatable=True,
-        rotatable=True,
-        rotate_cancel=True,
     )
     NECK = DressBoneSetting(
         setting=BoneSettings.NECK.value,

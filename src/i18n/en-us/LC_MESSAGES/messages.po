@@ -1188,3 +1188,6 @@ msgstr "Failed to check {t}. The following causes are possible. \n・{t} exceeds
 
 msgid "ファイルパス保存可否チェック: {p}"
 msgstr "File path preservation availability check: {p}"
+
+msgid "手首"
+msgstr "Wrist"

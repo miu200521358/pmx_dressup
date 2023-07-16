@@ -1578,3 +1578,7 @@ msgstr ""
 msgid "ファイルパス保存可否チェック: {p}"
 msgstr ""
 
+
+msgid "手首"
+msgstr ""
+
