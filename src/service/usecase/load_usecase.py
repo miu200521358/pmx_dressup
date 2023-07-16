@@ -1092,45 +1092,44 @@ class LoadUsecase:
         # dress_category_global_scales: dict[str, MVector3D] = {}
         dress_category_local_scales: dict[str, float] = {}
 
-        if bone_setting.local_scalable:
-            for category in dress_local_positions.keys():
-                if category not in model_local_positions:
-                    continue
+        for category in dress_local_positions.keys():
+            if category not in model_local_positions:
+                continue
 
-                model_category_local_positions = model_local_positions[category]
-                dress_category_local_positions = dress_local_positions[category]
+            model_category_local_positions = model_local_positions[category]
+            dress_category_local_positions = dress_local_positions[category]
 
-                category_local_scales: list[np.ndarray] = []
-                for bone_name, dress_bone_local_positions in dress_category_local_positions.items():
-                    if bone_name in model_category_local_positions:
-                        model_filtered_local_positions = filter_values(model_category_local_positions[bone_name])
-                        dress_filtered_local_positions = filter_values(dress_bone_local_positions)
+            category_local_scales: list[np.ndarray] = []
+            for bone_name, dress_bone_local_positions in dress_category_local_positions.items():
+                if bone_name in model_category_local_positions:
+                    model_filtered_local_positions = filter_values(model_category_local_positions[bone_name])
+                    dress_filtered_local_positions = filter_values(dress_bone_local_positions)
 
-                        model_local_distance = np.max(model_filtered_local_positions, axis=0) - np.min(
-                            model_filtered_local_positions, axis=0
-                        )
-                        dress_local_distance = np.max(dress_filtered_local_positions, axis=0) - np.min(
-                            dress_filtered_local_positions, axis=0
-                        )
+                    model_local_distance = np.max(model_filtered_local_positions, axis=0) - np.min(model_filtered_local_positions, axis=0)
+                    dress_local_distance = np.max(dress_filtered_local_positions, axis=0) - np.min(dress_filtered_local_positions, axis=0)
 
-                        category_local_scale = MVector3D(*model_local_distance).one() / MVector3D(*dress_local_distance).one()
-                        category_local_scales.append(category_local_scale.vector)
+                    category_local_scale = MVector3D(*model_local_distance).one() / MVector3D(*dress_local_distance).one()
+                    category_local_scales.append(category_local_scale.vector)
 
-                local_scale = np.ones(3) if not category_local_scales else np.mean(category_local_scales, axis=0)
-                # Xスケール±αより大きくはしない
-                avg_x_scale = np.mean([np.max(dress_category_local_x_scales[category]), np.mean(dress_category_local_x_scales[category])])
-                if "指" == category:
-                    # 指はあんまり太くしない
-                    avg_x_scale *= 0.6
-                local_scale_value = max(min(np.mean([local_scale[1], local_scale[2]]), avg_x_scale * 1.2), avg_x_scale * 0.9) - 1
-                dress_category_local_scales[category] = local_scale_value
+            local_scale = np.ones(3) if not category_local_scales else np.mean(category_local_scales, axis=0)
+            # Xスケール±αより大きくはしない
+            avg_x_scale = np.mean([np.max(dress_category_local_x_scales[category]), np.mean(dress_category_local_x_scales[category])])
+            if "指" == category:
+                # 指はあんまり太くしない
+                avg_x_scale *= 0.6
+            local_scale_value = max(min(np.mean([local_scale[1], local_scale[2]]), avg_x_scale * 1.2), avg_x_scale * 0.9) - 1
+            dress_category_local_scales[category] = local_scale_value
 
-                logger.info("-- 厚み比率 [{b}][{s:.3f})]", b=category, s=(local_scale_value + 1))
+            logger.info("-- 厚み比率 [{b}][{s:.3f})]", b=category, s=(local_scale_value + 1))
 
-                logger.debug(
-                    f"厚み比率 [{category}][{(local_scale_value + 1):.3f}][local_scale={local_scale}]"
-                    + f"[category_local_scales={category_local_scales}]"
-                )
+            logger.debug(
+                f"厚み比率 [{category}][{(local_scale_value + 1):.3f}][local_scale={local_scale}]"
+                + f"[category_local_scales={category_local_scales}]"
+            )
+
+            if "腕" == category and "肩" not in dress_category_local_scales:
+                # 腕だけ比率が分かってて、肩が無い場合、腕の比率をコピーする
+                dress_category_local_scales["肩"] = local_scale_value
 
         logger.info("ボーンフィッティング")
 
@@ -1290,6 +1289,28 @@ class LoadUsecase:
 
                         dress_bone_fit_position = dress_matrixes[0, toe_ik_bone_name].position
                         dress_bone_position = dress_matrixes[0, bone_name].position
+                    elif "肩P" in bone_name:
+                        # 肩はボーンに合わせるフィッティングではなく、相対位置合わせを行う
+                        arm_bone_name = f"{bone_name[0]}腕"
+                        upper_bone_name = "上半身2"
+
+                        model_arm_position = model_matrixes[0, arm_bone_name].position
+                        model_shoulder_position = model_matrixes[0, bone_name].position
+                        model_upper_position = model_matrixes[0, upper_bone_name].position
+
+                        dress_shoulder_position = dress_matrixes[0, bone_name].position
+                        dress_upper_position = dress_matrixes[0, upper_bone_name].position
+
+                        shoulder_new_position = align_triangle(
+                            model_arm_position,
+                            model_upper_position,
+                            model_shoulder_position,
+                            model_arm_position,
+                            dress_upper_position,
+                        )
+
+                        dress_bone_fit_position = shoulder_new_position
+                        dress_bone_position = dress_shoulder_position
                     elif bone_name in ("右肩", "左肩"):
                         dress_bone_fit_position = dress_matrixes[0, f"{bone_name}P"].position
                         dress_bone_position = dress_matrixes[0, bone_name].position

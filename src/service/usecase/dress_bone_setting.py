@@ -131,22 +131,17 @@ class DressBoneSettings(Enum):
         setting=BoneSettings.RIGHT_SHOULDER_ROOT.value,
         category="肩",
         translatable=True,
-        rotatable=True,
-        rotate_cancel=True,
     )
     RIGHT_SHOULDER_P = DressBoneSetting(
         setting=BoneSettings.RIGHT_SHOULDER_P.value,
         category="肩",
         translatable=True,
-        rotatable=True,
-        rotate_cancel=True,
     )
     RIGHT_SHOULDER = DressBoneSetting(
         setting=BoneSettings.RIGHT_SHOULDER.value,
         category="肩",
         translatable=True,
         rotatable=True,
-        rotate_cancel=True,
         local_scalable=True,
         local_x_scalable=True,
     )
@@ -451,22 +446,17 @@ class DressBoneSettings(Enum):
         setting=BoneSettings.LEFT_SHOULDER_ROOT.value,
         category="肩",
         translatable=True,
-        rotatable=True,
-        rotate_cancel=True,
     )
     LEFT_SHOULDER_P = DressBoneSetting(
         setting=BoneSettings.LEFT_SHOULDER_P.value,
         category="肩",
         translatable=True,
-        rotatable=True,
-        rotate_cancel=True,
     )
     LEFT_SHOULDER = DressBoneSetting(
         setting=BoneSettings.LEFT_SHOULDER.value,
         category="肩",
         translatable=True,
         rotatable=True,
-        rotate_cancel=True,
         local_scalable=True,
         local_x_scalable=True,
     )
