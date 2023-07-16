@@ -991,20 +991,8 @@ class LoadUsecase:
                         dress_global_scales[dress_bone.index] = (
                             MVector3D(dress_fit_length_scale, dress_fit_length_scale, dress_fit_length_scale) - 1
                         )
-                        dress.morphs[DRESS_BONE_FITTING_NAME].offsets.append(
-                            BoneMorphOffset(
-                                dress_bone.index,
-                                scale=dress_global_scales[dress_bone.index],
-                            )
-                        )
                     else:
                         dress_local_scales[dress_bone.index] = MVector3D(dress_fit_length_scale - 1, 0, 0)
-                        dress.morphs[DRESS_BONE_FITTING_NAME].offsets.append(
-                            BoneMorphOffset(
-                                dress_bone.index,
-                                local_scale=dress_local_scales[dress_bone.index],
-                            )
-                        )
 
                     logger.debug(f"ボーン距離比率 [{dress_bone.name}][{dress_fit_length_scale:.3f}]")
 
@@ -1040,13 +1028,6 @@ class LoadUsecase:
                             model_local_positions[bone_setting.category][model_bone.name] = model_deformed_local_positions
 
             else:
-                dress.morphs[DRESS_BONE_FITTING_NAME].offsets.append(
-                    BoneMorphOffset(
-                        dress_bone.index,
-                        local_scale=dress_local_scales.get(dress_bone.parent_index, MVector3D()),
-                    )
-                )
-
                 if (
                     0 <= dress_bone.parent_index
                     and dress_bone.parent_index in dress.bones
@@ -1089,49 +1070,49 @@ class LoadUsecase:
 
                                 model_local_positions[bone_setting.category][model_bone.name] = model_deformed_local_positions
 
-        logger.info("厚み比率")
+        # logger.info("厚み比率")
 
-        # dress_category_global_scales: dict[str, MVector3D] = {}
+        # # dress_category_global_scales: dict[str, MVector3D] = {}
         dress_category_local_scales: dict[str, float] = {}
 
-        for category in dress_local_positions.keys():
-            if category not in model_local_positions:
-                continue
+        # for category in dress_local_positions.keys():
+        #     if category not in model_local_positions:
+        #         continue
 
-            model_category_local_positions = model_local_positions[category]
-            dress_category_local_positions = dress_local_positions[category]
+        #     model_category_local_positions = model_local_positions[category]
+        #     dress_category_local_positions = dress_local_positions[category]
 
-            category_local_scales: list[np.ndarray] = []
-            for bone_name, dress_bone_local_positions in dress_category_local_positions.items():
-                if bone_name in model_category_local_positions:
-                    model_filtered_local_positions = filter_values(model_category_local_positions[bone_name])
-                    dress_filtered_local_positions = filter_values(dress_bone_local_positions)
+        #     category_local_scales: list[np.ndarray] = []
+        #     for bone_name, dress_bone_local_positions in dress_category_local_positions.items():
+        #         if bone_name in model_category_local_positions:
+        #             model_filtered_local_positions = filter_values(model_category_local_positions[bone_name])
+        #             dress_filtered_local_positions = filter_values(dress_bone_local_positions)
 
-                    model_local_distance = np.max(model_filtered_local_positions, axis=0) - np.min(model_filtered_local_positions, axis=0)
-                    dress_local_distance = np.max(dress_filtered_local_positions, axis=0) - np.min(dress_filtered_local_positions, axis=0)
+        #             model_local_distance = np.max(model_filtered_local_positions, axis=0) - np.min(model_filtered_local_positions, axis=0)
+        #             dress_local_distance = np.max(dress_filtered_local_positions, axis=0) - np.min(dress_filtered_local_positions, axis=0)
 
-                    category_local_scale = MVector3D(*model_local_distance).one() / MVector3D(*dress_local_distance).one()
-                    category_local_scales.append(category_local_scale.vector)
+        #             category_local_scale = MVector3D(*model_local_distance).one() / MVector3D(*dress_local_distance).one()
+        #             category_local_scales.append(category_local_scale.vector)
 
-            local_scale = np.ones(3) if not category_local_scales else np.mean(category_local_scales, axis=0)
-            # Xスケール±αより大きくはしない
-            avg_x_scale = np.mean([np.max(dress_category_local_x_scales[category]), np.mean(dress_category_local_x_scales[category])])
-            if "指" == category:
-                # 指はあんまり太くしない
-                avg_x_scale *= 0.6
-            local_scale_value = max(min(np.mean([local_scale[1], local_scale[2]]), avg_x_scale * 1.2), avg_x_scale * 0.9) - 1
-            dress_category_local_scales[category] = local_scale_value
+        #     local_scale = np.ones(3) if not category_local_scales else np.mean(category_local_scales, axis=0)
+        #     # Xスケール±αより大きくはしない
+        #     avg_x_scale = np.mean([np.max(dress_category_local_x_scales[category]), np.mean(dress_category_local_x_scales[category])])
+        #     if "指" == category:
+        #         # 指はあんまり太くしない
+        #         avg_x_scale *= 0.6
+        #     local_scale_value = max(min(np.mean([local_scale[1], local_scale[2]]), avg_x_scale * 1.2), avg_x_scale * 0.9) - 1
+        #     dress_category_local_scales[category] = local_scale_value
 
-            logger.info("-- 厚み比率 [{b}][{s:.3f})]", b=category, s=(local_scale_value + 1))
+        #     logger.info("-- 厚み比率 [{b}][{s:.3f})]", b=category, s=(local_scale_value + 1))
 
-            logger.debug(
-                f"厚み比率 [{category}][{(local_scale_value + 1):.3f}][local_scale={local_scale}]"
-                + f"[category_local_scales={category_local_scales}]"
-            )
+        #     logger.debug(
+        #         f"厚み比率 [{category}][{(local_scale_value + 1):.3f}][local_scale={local_scale}]"
+        #         + f"[category_local_scales={category_local_scales}]"
+        #     )
 
-            if "腕" == category and "肩" not in dress_category_local_scales:
-                # 腕だけ比率が分かってて、肩が無い場合、腕の比率をコピーする
-                dress_category_local_scales["肩"] = local_scale_value
+        #     if "腕" == category and "肩" not in dress_category_local_scales:
+        #         # 腕だけ比率が分かってて、肩が無い場合、腕の比率をコピーする
+        #         dress_category_local_scales["肩"] = local_scale_value
 
         logger.info("ボーンフィッティング")
 
@@ -1166,14 +1147,21 @@ class LoadUsecase:
                         + f"[fit={dress_bone_fit_position}][dress={dress_bone_position}]"
                     )
 
-                    if bone_setting.local_scalable and bone_setting.category in dress_category_local_scales:
-                        dress_local_thick_scale_value = dress_category_local_scales[bone_setting.category]
+                    if bone_setting.local_scalable:
+                        dress_local_thick_scale_value = dress_category_local_scales.get(bone_setting.category, 0.0)
 
                         # ローカルスケール自体はひとまとめにしたもの
                         dress_local_scale = dress_local_scales.get(dress_bone.index, MVector3D())
                         dress_local_scale.y = dress_local_thick_scale_value
                         dress_local_scale.z = dress_local_thick_scale_value
                         dress_local_scales[dress_bone.index] = dress_local_scale
+
+                        dress.morphs[DRESS_BONE_FITTING_NAME].offsets.append(
+                            BoneMorphOffset(
+                                dress_bone.index,
+                                local_scale=dress_local_scale,
+                            )
+                        )
 
         # 変形順序に合わせて、フィッティングを行う
         for i, dress_bone_index in enumerate(dress.bones.bone_link_indexes):
@@ -1332,10 +1320,12 @@ class LoadUsecase:
                     #         dress_parent_position,
                     #     )
                     else:
-                        dress_bone_fit_position = (
-                            dress_matrixes[0, bone_name].global_matrix.inverse() * model_matrixes[0, bone_name].position
-                        )
-                        dress_bone_position = MVector3D()
+                        dress_bone_fit_position = model_matrixes[0, bone_name].position
+                        dress_bone_position = dress_matrixes[0, bone_name].position
+                        # dress_bone_fit_position = (
+                        #     dress_matrixes[0, bone_name].global_matrix.inverse() * model_matrixes[0, bone_name].position
+                        # )
+                        # dress_bone_position = MVector3D()
 
                     dress_offset_position = dress_bone_fit_position - dress_bone_position
                     dress.morphs[DRESS_BONE_FITTING_NAME].offsets.append(
@@ -1371,8 +1361,8 @@ class LoadUsecase:
                             dress_tail_offset_qqs: list[MQuaternion] = []
 
                             for i, tail_bone_name in enumerate(tail_far_bone_names):
-                                model_tail_vector = model_matrixes[0, tail_bone_name].global_matrix.inverse() * model_bone_position
-                                dress_tail_vector = dress_matrixes[0, tail_bone_name].global_matrix.inverse() * dress_bone_position
+                                model_tail_vector = model_matrixes[0, tail_bone_name].position - model_bone_position
+                                dress_tail_vector = dress_matrixes[0, tail_bone_name].position - dress_bone_position
 
                                 if 0 < model_tail_vector.length() and 0 < dress_tail_vector.length():
                                     # 衣装：自分の方向
@@ -1458,8 +1448,8 @@ class LoadUsecase:
 
                     logger.debug(f"-- -- 回転オフセット[{dress_bone.name}][{dress_offset_qq.to_euler_degrees()}]")
 
-                if bone_setting.local_scalable and bone_setting.category in dress_category_local_scales:
-                    dress_local_thick_scale_value = dress_category_local_scales[bone_setting.category]
+                if bone_setting.local_scalable:
+                    dress_local_thick_scale_value = dress_category_local_scales.get(bone_setting.category, 0.0)
 
                     # ローカルスケール自体はひとまとめにしたもの
                     dress_local_scale = dress_local_scales.get(dress_bone.index, MVector3D())
@@ -1467,11 +1457,10 @@ class LoadUsecase:
                     dress_local_scale.z = dress_local_thick_scale_value
                     dress_local_scales[dress_bone.index] = dress_local_scale
 
-                    # ローカルスケールYZだけ付与（ローカルXは距離比率時に与えている）
                     dress.morphs[DRESS_BONE_FITTING_NAME].offsets.append(
                         BoneMorphOffset(
                             dress_bone.index,
-                            local_scale=MVector3D(0, dress_local_thick_scale_value, dress_local_thick_scale_value),
+                            local_scale=dress_local_scale,
                         )
                     )
 
