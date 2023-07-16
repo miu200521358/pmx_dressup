@@ -89,8 +89,8 @@ class LoadWorker(BaseWorker):
             # 胸の再設定
             replaced_bust_bone_names = usecase.replace_bust(model, dress)
 
-            # 首の再設定
-            replaced_bone_names += usecase.replace_neck(model, dress)
+            # # 首の再設定
+            # replaced_bone_names += usecase.replace_neck(model, dress)
 
             # 左肩の再設定
             replaced_bone_names += usecase.replace_shoulder(model, dress, "左")
@@ -98,11 +98,11 @@ class LoadWorker(BaseWorker):
             # 右肩の再設定
             replaced_bone_names += usecase.replace_shoulder(model, dress, "右")
 
-            # 左足先EXの再設定
-            replaced_bone_names += usecase.replace_toe_ex(model, dress, "左")
+            # # 左足先EXの再設定
+            # replaced_bone_names += usecase.replace_toe_ex(model, dress, "左")
 
-            # 右足先EXの再設定
-            replaced_bone_names += usecase.replace_toe_ex(model, dress, "右")
+            # # 右足先EXの再設定
+            # replaced_bone_names += usecase.replace_toe_ex(model, dress, "右")
 
             # 捩りの再設定
             replaced_bone_names += usecase.replace_twist(model, dress, replaced_bone_names)

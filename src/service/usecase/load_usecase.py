@@ -396,7 +396,7 @@ class LoadUsecase:
 
     def replace_shoulder(self, model: PmxModel, dress: PmxModel, direction: str) -> list[str]:
         """肩のボーン置き換え"""
-        replace_bone_names = ("首", f"{direction}腕", f"{direction}肩")
+        replace_bone_names = ("上半身2", f"{direction}腕", f"{direction}肩")
         if not (model.bones.exists(replace_bone_names) and dress.bones.exists(replace_bone_names)):
             return []
 
@@ -410,17 +410,17 @@ class LoadUsecase:
                 dress.bones[f"{direction}肩P"].position = dress.bones[f"{direction}肩"].position.copy()
                 replaced_bone_names.append(f"{direction}肩P")
 
-            if f"{direction}腕" in dress.bones:
-                dress.bones[f"{direction}腕"].position += diff / 2
-                replaced_bone_names.append(f"{direction}腕")
+            # if f"{direction}腕" in dress.bones:
+            #     dress.bones[f"{direction}腕"].position += diff / 2
+            #     replaced_bone_names.append(f"{direction}腕")
 
-            if f"{direction}肩C" in dress.bones:
-                dress.bones[f"{direction}肩C"].position = dress.bones[f"{direction}腕"].position.copy()
-                replaced_bone_names.append(f"{direction}肩C")
+            # if f"{direction}肩C" in dress.bones:
+            #     dress.bones[f"{direction}肩C"].position = dress.bones[f"{direction}腕"].position.copy()
+            #     replaced_bone_names.append(f"{direction}肩C")
 
-            for root_bone_name in ("左肩根元", "右肩根元"):
-                if root_bone_name in dress.bones:
-                    dress.bones[root_bone_name].position = (dress.bones["右腕"].position + dress.bones["左腕"].position) / 2
+            # for root_bone_name in ("左肩根元", "右肩根元"):
+            #     if root_bone_name in dress.bones:
+            #         dress.bones[root_bone_name].position = (dress.bones["右腕"].position + dress.bones["左腕"].position) / 2
 
         return replaced_bone_names
 

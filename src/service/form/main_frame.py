@@ -215,6 +215,10 @@ class MainFrame(BaseFrame):
 
         # self.file_panel.create_output_path()
 
+    def clear_model_opacity(self):
+        if self.model_motion and self.model_motion.morphs:
+            del self.model_motion.morphs["全材質TR"]
+
     def set_dress_motion_morphs(
         self,
         material_alphas: dict[str, float] = {},
