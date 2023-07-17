@@ -295,6 +295,16 @@ class LoadUsecase:
                     )
                 v.deform.normalize(align=True)
 
+    def replace_neck_root_weights(self, model: PmxModel) -> None:
+        """首根元に上半身の一部を割り振る"""
+        if "首根元" not in model.bones:
+            return
+
+        model.update_vertices_by_bone()
+        parent_bone = model.bones[model.bones["首根元"].parent_index]
+        to_tail_y = model.bones["首根元"].position.y - parent_bone.position.y
+        model.separate_weights(parent_bone.name, "首根元", "首", 0.3, 0.0, (parent_bone.name,), to_tail_pos=MVector3D(0, to_tail_y, 0))
+
     def insert_bust(self, model: PmxModel, bust_bone_name: str) -> bool:
         """胸ボーンの追加"""
         # 上半身1, 2, 3 のウェイト位置取得
@@ -396,31 +406,56 @@ class LoadUsecase:
 
     def replace_shoulder(self, model: PmxModel, dress: PmxModel, direction: str) -> list[str]:
         """肩のボーン置き換え"""
-        replace_bone_names = ("上半身2", f"{direction}腕", f"{direction}肩")
+        replace_bone_names = ("頭", "右腕", "左腕", f"{direction}肩")
         if not (model.bones.exists(replace_bone_names) and dress.bones.exists(replace_bone_names)):
             return []
 
-        is_add, diff = self.replace_bone_position(model, dress, *replace_bone_names)
-        replaced_bone_names = []
+        model_from_pos = model.bones["頭"].position.copy()
+        model_right_replace_pos = model.bones["右肩"].position.copy()
+        model_left_replace_pos = model.bones["左肩"].position.copy()
+        model_right_to_pos = model.bones["右腕"].position.copy()
+        model_left_to_pos = model.bones["左腕"].position.copy()
+        dress_from_pos = dress.bones["頭"].position.copy()
+        dress_right_replace_pos = dress.bones["右肩"].position.copy()
+        dress_left_replace_pos = dress.bones["左肩"].position.copy()
+        dress_right_to_pos = dress.bones["右腕"].position.copy()
+        dress_left_to_pos = dress.bones["左腕"].position.copy()
 
-        if is_add:
-            replaced_bone_names.append(f"{direction}肩")
+        # 元ボーン-置換ボーン ベースで求めた時の位置 ---------------
 
-            if f"{direction}肩P" in dress.bones:
-                dress.bones[f"{direction}肩P"].position = dress.bones[f"{direction}肩"].position.copy()
-                replaced_bone_names.append(f"{direction}肩P")
+        dress_right_replace_new_pos = align_triangle(
+            model_from_pos, model_right_to_pos, model_right_replace_pos, dress_from_pos, dress_right_to_pos
+        )
+        dress_left_replace_new_pos = align_triangle(
+            model_from_pos, model_left_to_pos, model_left_replace_pos, dress_from_pos, dress_left_to_pos
+        )
 
-            # if f"{direction}腕" in dress.bones:
-            #     dress.bones[f"{direction}腕"].position += diff / 2
-            #     replaced_bone_names.append(f"{direction}腕")
+        sign_vector = (
+            MVector3D(*np.sign(dress_right_replace_new_pos.vector))
+            if "右" == direction
+            else MVector3D(*np.sign(dress_left_replace_new_pos.vector))
+        )
 
-            # if f"{direction}肩C" in dress.bones:
-            #     dress.bones[f"{direction}肩C"].position = dress.bones[f"{direction}腕"].position.copy()
-            #     replaced_bone_names.append(f"{direction}肩C")
+        # 衣装の置換ボーンの位置を求め直す
+        dress_replace_pos = dress_right_replace_pos if "右" == direction else dress_left_replace_pos
+        dress_replace_new_pos = (dress_right_replace_new_pos.abs() + dress_left_replace_new_pos.abs()) / 2 * sign_vector
 
-            # for root_bone_name in ("左肩根元", "右肩根元"):
-            #     if root_bone_name in dress.bones:
-            #         dress.bones[root_bone_name].position = (dress.bones["右腕"].position + dress.bones["左腕"].position) / 2
+        dress_replace_diff_pos = dress_replace_new_pos - dress_replace_pos
+
+        dress.bones[f"{direction}肩"].position = dress_replace_new_pos
+        logger.info(
+            "衣装: {r}: 位置再計算: {u} → {p} ({d})",
+            r=f"{direction}肩",
+            u=dress_replace_pos,
+            p=dress_replace_new_pos,
+            d=dress_replace_diff_pos,
+        )
+
+        replaced_bone_names = [f"{direction}肩"]
+
+        if f"{direction}肩P" in dress.bones:
+            dress.bones[f"{direction}肩P"].position = dress.bones[f"{direction}肩"].position.copy()
+            replaced_bone_names.append(f"{direction}肩P")
 
         return replaced_bone_names
 
@@ -1077,7 +1112,7 @@ class LoadUsecase:
                                 model_local_positions[bone_setting.category][model_bone.name] = model_deformed_local_positions
 
         # # dress_category_global_scales: dict[str, MVector3D] = {}
-        dress_category_local_scales: dict[str, float] = {}
+        dress_category_local_scales: dict[str, MVector3D] = {}
 
         logger.info("厚み比率")
 
@@ -1106,19 +1141,21 @@ class LoadUsecase:
             if "指" == category:
                 # 指はあんまり太くしない
                 avg_x_scale *= 0.6
-            local_scale_value = max(min(np.mean([local_scale[1], local_scale[2]]), avg_x_scale * 1.2), avg_x_scale * 0.9) - 1
-            dress_category_local_scales[category] = local_scale_value
 
-            logger.info("-- 厚み比率 [{b}][{s:.3f})]", b=category, s=(local_scale_value + 1))
-
-            logger.debug(
-                f"厚み比率 [{category}][{(local_scale_value + 1):.3f}][local_scale={local_scale}]"
-                + f"[category_local_scales={category_local_scales}]"
-            )
+            if category in ("体幹", "首根元"):
+                # 体幹系はYZ別々にスケーリングする
+                local_scale_y = max(min(local_scale[1], avg_x_scale * 1.2), avg_x_scale * 0.9) - 1
+                local_scale_z = max(min(local_scale[2], avg_x_scale * 1.2), avg_x_scale * 0.9) - 1
+                dress_category_local_scales[category] = MVector3D(0, local_scale_y, local_scale_z)
+                logger.info("-- 厚み比率 [{b}][y={y:.3f})][z={z:.3f})]", b=category, y=(local_scale_y + 1), z=(local_scale_z + 1))
+            else:
+                local_scale_value = max(min(np.mean([local_scale[1], local_scale[2]]), avg_x_scale * 1.2), avg_x_scale * 0.9) - 1
+                dress_category_local_scales[category] = MVector3D(0, local_scale_value, local_scale_value)
+                logger.info("-- 厚み比率 [{b}][y={s:.3f})][z={s:.3f})]", b=category, s=(local_scale_value + 1))
 
             if "腕" == category and "肩" not in dress_category_local_scales:
                 # 腕だけ比率が分かってて、肩が無い場合、腕の比率をコピーする
-                dress_category_local_scales["肩"] = local_scale_value
+                dress_category_local_scales["肩"] = MVector3D(0, local_scale_value, local_scale_value)
 
         logger.info("ボーンフィッティング")
 
@@ -1154,13 +1191,10 @@ class LoadUsecase:
                     )
 
                     if bone_setting.local_scalable:
-                        dress_local_thick_scale_value = dress_category_local_scales.get(bone_setting.category, 0.0)
-
                         # ローカルスケール自体はひとまとめにしたもの
+                        dress_local_thick_scale = dress_category_local_scales.get(bone_setting.category, MVector3D())
                         dress_local_scale = dress_local_scales.get(dress_bone.index, MVector3D())
-                        dress_local_scale.y = dress_local_thick_scale_value
-                        dress_local_scale.z = dress_local_thick_scale_value
-                        dress_local_scales[dress_bone.index] = dress_local_scale
+                        dress_local_scales[dress_bone.index] = dress_local_scale + dress_local_thick_scale
 
                         dress.morphs[DRESS_BONE_FITTING_NAME].offsets.append(
                             BoneMorphOffset(
@@ -1455,18 +1489,14 @@ class LoadUsecase:
                     logger.debug(f"-- -- 回転オフセット[{dress_bone.name}][{dress_offset_qq.to_euler_degrees()}]")
 
                 if bone_setting.local_scalable:
-                    dress_local_thick_scale_value = dress_category_local_scales.get(bone_setting.category, 0.0)
+                    dress_local_thick_scale = dress_category_local_scales.get(bone_setting.category, MVector3D())
 
                     if bone_setting.category == "指":
                         # 指は厚みと同じだけの長さスケールにする
-                        dress_local_scale = MVector3D(
-                            dress_local_thick_scale_value, dress_local_thick_scale_value, dress_local_thick_scale_value
-                        )
+                        dress_local_scale = MVector3D(dress_local_thick_scale.y, dress_local_thick_scale.y, dress_local_thick_scale.y)
                     else:
                         # ローカルスケール自体はひとまとめにしたもの
-                        dress_local_scale = dress_local_scales.get(dress_bone.index, MVector3D())
-                        dress_local_scale.y = dress_local_thick_scale_value
-                        dress_local_scale.z = dress_local_thick_scale_value
+                        dress_local_scale = dress_local_scales.get(dress_bone.index, MVector3D()) + dress_local_thick_scale
                     dress_local_scales[dress_bone.index] = dress_local_scale
 
                     dress.morphs[DRESS_BONE_FITTING_NAME].offsets.append(

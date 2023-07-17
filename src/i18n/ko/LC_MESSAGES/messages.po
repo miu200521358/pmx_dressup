@@ -1191,3 +1191,12 @@ msgstr "파일 경로 저장 가능 여부 확인: {p}"
 
 msgid "手首"
 msgstr "손목"
+
+msgid "首根元"
+msgstr "목덜미"
+
+msgid "-- 厚み比率 [{b}][y={y:.3f})][z={z:.3f})]"
+msgstr "-- 두께 비율 [{b}][y={y:.3f})][z={z:.3f})]"
+
+msgid "-- 厚み比率 [{b}][y={s:.3f})][z={s:.3f})]"
+msgstr "-- 두께 비율 [{b}][y={s:.3f})][z={s:.3f})]"

@@ -1582,3 +1582,15 @@ msgstr ""
 msgid "手首"
 msgstr ""
 
+
+msgid "首根元"
+msgstr ""
+
+
+msgid "-- 厚み比率 [{b}][y={y:.3f})][z={z:.3f})]"
+msgstr ""
+
+
+msgid "-- 厚み比率 [{b}][y={s:.3f})][z={s:.3f})]"
+msgstr ""
+

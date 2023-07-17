@@ -1191,3 +1191,12 @@ msgstr "文件路径保存可用性检查：{p}"
 
 msgid "手首"
 msgstr 手腕
+
+msgid "首根元"
+msgstr 颈根
+
+msgid "-- 厚み比率 [{b}][y={y:.3f})][z={z:.3f})]"
+msgstr "--厚度比[{b}][y={y:.3f})][z={z:.3f})]"
+
+msgid "-- 厚み比率 [{b}][y={s:.3f})][z={s:.3f})]"
+msgstr "--厚度比[{b}][y={s:.3f})][z={s:.3f})]"

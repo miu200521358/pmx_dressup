@@ -1191,3 +1191,12 @@ msgstr "File path preservation availability check: {p}"
 
 msgid "手首"
 msgstr "Wrist"
+
+msgid "首根元"
+msgstr "Root of the neck"
+
+msgid "-- 厚み比率 [{b}][y={y:.3f})][z={z:.3f})]"
+msgstr "-- Thickness ratio [{b}][y={y:.3f})][z={z:.3f})]"
+
+msgid "-- 厚み比率 [{b}][y={s:.3f})][z={s:.3f})]"
+msgstr "-- Thickness ratio [{b}][y={s:.3f})][z={s:.3f})]"
