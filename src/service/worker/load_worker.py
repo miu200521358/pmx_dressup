@@ -92,11 +92,8 @@ class LoadWorker(BaseWorker):
             # 首の再設定
             replaced_bone_names += usecase.replace_neck(model, dress)
 
-            # 左肩の再設定
-            replaced_bone_names += usecase.replace_shoulder(model, dress, "左")
-
-            # 右肩の再設定
-            replaced_bone_names += usecase.replace_shoulder(model, dress, "右")
+            # 肩と腕の再設定
+            replaced_bone_names += usecase.replace_shoulder_arm(model, dress)
 
             # # 左足先EXの再設定
             # replaced_bone_names += usecase.replace_toe_ex(model, dress, "左")

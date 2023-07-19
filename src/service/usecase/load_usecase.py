@@ -404,58 +404,139 @@ class LoadUsecase:
 
         return ["首"] if is_add else []
 
-    def replace_shoulder(self, model: PmxModel, dress: PmxModel, direction: str) -> list[str]:
-        """肩のボーン置き換え"""
-        replace_bone_names = ("頭", "右腕", "左腕", f"{direction}肩")
+    def replace_shoulder_arm(self, model: PmxModel, dress: PmxModel) -> list[str]:
+        """肩と腕のボーン置き換え"""
+        replace_bone_names = ("上半身2", "右肩", "左肩", "右腕", "左腕", "右ひじ", "左ひじ")
         if not (model.bones.exists(replace_bone_names) and dress.bones.exists(replace_bone_names)):
             return []
 
-        model_from_pos = model.bones["頭"].position.copy()
-        model_right_replace_pos = model.bones["右肩"].position.copy()
-        model_left_replace_pos = model.bones["左肩"].position.copy()
-        model_right_to_pos = model.bones["右腕"].position.copy()
-        model_left_to_pos = model.bones["左腕"].position.copy()
-        dress_from_pos = dress.bones["頭"].position.copy()
-        dress_right_replace_pos = dress.bones["右肩"].position.copy()
-        dress_left_replace_pos = dress.bones["左肩"].position.copy()
-        dress_right_to_pos = dress.bones["右腕"].position.copy()
-        dress_left_to_pos = dress.bones["左腕"].position.copy()
+        model_upper_pos = model.bones["上半身2"].position.copy()
+        model_right_shoulder_pos = model.bones["右肩"].position.copy()
+        model_left_shoulder_pos = model.bones["左肩"].position.copy()
+        model_right_arm_pos = model.bones["右腕"].position.copy()
+        model_left_arm_pos = model.bones["左腕"].position.copy()
+        model_right_elbow_pos = model.bones["右ひじ"].position.copy()
+        model_left_elbow_pos = model.bones["左ひじ"].position.copy()
 
-        # 元ボーン-置換ボーン ベースで求めた時の位置 ---------------
+        dress_upper_pos = dress.bones["上半身2"].position.copy()
+        dress_right_shoulder_pos = dress.bones["右肩"].position.copy()
+        dress_left_shoulder_pos = dress.bones["左肩"].position.copy()
+        dress_right_arm_pos = dress.bones["右腕"].position.copy()
+        dress_left_arm_pos = dress.bones["左腕"].position.copy()
+        dress_right_elbow_pos = dress.bones["右ひじ"].position.copy()
+        dress_left_elbow_pos = dress.bones["左ひじ"].position.copy()
 
-        dress_right_replace_new_pos = align_triangle(
-            model_from_pos, model_right_to_pos, model_right_replace_pos, dress_from_pos, dress_right_to_pos
+        # 元ボーン-置換ボーン ベースで求めた時の肩の位置 ---------------
+
+        dress_right_shoulder_new_pos = align_triangle(
+            model_upper_pos, model_right_arm_pos, model_right_shoulder_pos, dress_upper_pos, dress_right_arm_pos
         )
-        dress_left_replace_new_pos = align_triangle(
-            model_from_pos, model_left_to_pos, model_left_replace_pos, dress_from_pos, dress_left_to_pos
-        )
-
-        sign_vector = (
-            MVector3D(*np.sign(dress_right_replace_new_pos.vector))
-            if "右" == direction
-            else MVector3D(*np.sign(dress_left_replace_new_pos.vector))
+        dress_left_shoulder_new_pos = align_triangle(
+            model_upper_pos, model_left_arm_pos, model_left_shoulder_pos, dress_upper_pos, dress_left_arm_pos
         )
 
         # 衣装の置換ボーンの位置を求め直す
-        dress_replace_pos = dress_right_replace_pos if "右" == direction else dress_left_replace_pos
-        dress_replace_new_pos = (dress_right_replace_new_pos.abs() + dress_left_replace_new_pos.abs()) / 2 * sign_vector
+        dress_replace_right_shoulder_new_pos = (
+            (dress_right_shoulder_new_pos.abs() + dress_left_shoulder_new_pos.abs())
+            / 2
+            * MVector3D(*np.sign(dress_right_shoulder_new_pos.vector))
+        )
+        dress_replace_right_shoulder_diff_pos = dress_replace_right_shoulder_new_pos - dress_right_shoulder_pos
 
-        dress_replace_diff_pos = dress_replace_new_pos - dress_replace_pos
-
-        dress.bones[f"{direction}肩"].position = dress_replace_new_pos
+        dress.bones["右肩"].position = dress_replace_right_shoulder_new_pos
         logger.info(
             "衣装: {r}: 位置再計算: {u} → {p} ({d})",
-            r=f"{direction}肩",
-            u=dress_replace_pos,
-            p=dress_replace_new_pos,
-            d=dress_replace_diff_pos,
+            r="右肩",
+            u=dress_right_shoulder_pos,
+            p=dress_replace_right_shoulder_new_pos,
+            d=dress_replace_right_shoulder_diff_pos,
         )
 
-        replaced_bone_names = [f"{direction}肩"]
+        dress_replace_left_shoulder_new_pos = (
+            (dress_right_shoulder_new_pos.abs() + dress_left_shoulder_new_pos.abs())
+            / 2
+            * MVector3D(*np.sign(dress_left_shoulder_new_pos.vector))
+        )
+        dress_replace_left_shoulder_diff_pos = dress_replace_left_shoulder_new_pos - dress_left_shoulder_pos
 
-        if f"{direction}肩P" in dress.bones:
-            dress.bones[f"{direction}肩P"].position = dress.bones[f"{direction}肩"].position.copy()
-            replaced_bone_names.append(f"{direction}肩P")
+        dress.bones["左肩"].position = dress_replace_left_shoulder_new_pos
+        logger.info(
+            "衣装: {r}: 位置再計算: {u} → {p} ({d})",
+            r="左肩",
+            u=dress_left_shoulder_pos,
+            p=dress_replace_left_shoulder_new_pos,
+            d=dress_replace_left_shoulder_diff_pos,
+        )
+
+        replaced_bone_names = ["右肩", "左肩"]
+
+        if "右肩P" in dress.bones:
+            dress.bones["右肩P"].position = dress.bones["右肩"].position.copy()
+            replaced_bone_names.append("右肩P")
+
+        if "左肩P" in dress.bones:
+            dress.bones["左肩P"].position = dress.bones["左肩"].position.copy()
+            replaced_bone_names.append("左肩P")
+
+        # 元ボーン-置換ボーン ベースで求めた時の腕の位置 ---------------
+        # 肩は再計算した位置を使用する
+
+        dress_right_arm_new_pos = align_triangle(
+            model_right_shoulder_pos,
+            model_right_elbow_pos,
+            model_right_arm_pos,
+            dress_replace_right_shoulder_new_pos,
+            dress_right_elbow_pos,
+        )
+        dress_left_arm_new_pos = align_triangle(
+            model_left_shoulder_pos,
+            model_left_elbow_pos,
+            model_left_arm_pos,
+            dress_replace_left_shoulder_new_pos,
+            dress_left_elbow_pos,
+        )
+
+        # 衣装の置換ボーンの位置を求め直す
+        dress_replace_right_arm_new_pos = (
+            (dress_right_arm_new_pos.abs() + dress_left_arm_new_pos.abs()) / 2 * MVector3D(*np.sign(dress_right_arm_new_pos.vector))
+        )
+        dress_replace_right_arm_diff_pos = dress_replace_right_arm_new_pos - dress_right_arm_pos
+
+        dress.bones["右腕"].position = dress_replace_right_arm_new_pos
+
+        logger.info(
+            "衣装: {r}: 位置再計算: {u} → {p} ({d})",
+            r="右腕",
+            u=dress_right_arm_pos,
+            p=dress_replace_right_arm_new_pos,
+            d=dress_replace_right_arm_diff_pos,
+        )
+
+        dress_replace_left_arm_new_pos = (
+            (dress_right_arm_new_pos.abs() + dress_left_arm_new_pos.abs()) / 2 * MVector3D(*np.sign(dress_left_arm_new_pos.vector))
+        )
+        dress_replace_left_arm_diff_pos = dress_replace_left_arm_new_pos - dress_left_arm_pos
+
+        dress.bones["左腕"].position = dress_replace_left_arm_new_pos
+
+        logger.info(
+            "衣装: {r}: 位置再計算: {u} → {p} ({d})",
+            r="左腕",
+            u=dress_left_arm_pos,
+            p=dress_replace_left_arm_new_pos,
+            d=dress_replace_left_arm_diff_pos,
+        )
+
+        replaced_bone_names.append("右腕")
+        replaced_bone_names.append("左腕")
+
+        if "右肩C" in dress.bones:
+            dress.bones["右肩C"].position = dress.bones["右腕"].position.copy()
+            replaced_bone_names.append("右肩C")
+
+        if "左肩C" in dress.bones:
+            dress.bones["左肩C"].position = dress.bones["左腕"].position.copy()
+            replaced_bone_names.append("左肩C")
 
         return replaced_bone_names
 
