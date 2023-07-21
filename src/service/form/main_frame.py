@@ -12,6 +12,7 @@ from mlib.vmd.vmd_collection import VmdMotion
 from mlib.vmd.vmd_part import VmdMorphFrame
 from service.form.panel.config_panel import ConfigPanel
 from service.form.panel.file_panel import FilePanel
+from service.usecase.dress_bone_setting import DRESS_BONE_FITTING_NAME, DRESS_VERTEX_FITTING_NAME
 from service.worker.load_motion_worker import LoadMotionWorker
 from service.worker.load_worker import LoadWorker
 from service.worker.save_worker import SaveWorker
@@ -235,11 +236,11 @@ class MainFrame(BaseFrame):
         self.dress_motion.path = "fit motion"
 
         # フィッティングモーフは常に適用
-        bmf = VmdMorphFrame(0, "BoneFitting")
+        bmf = VmdMorphFrame(0, DRESS_BONE_FITTING_NAME)
         bmf.ratio = 1
         self.dress_motion.morphs[bmf.name].append(bmf)
 
-        vmf = VmdMorphFrame(0, "VertexFitting")
+        vmf = VmdMorphFrame(0, DRESS_VERTEX_FITTING_NAME)
         vmf.ratio = 1
         self.dress_motion.morphs[vmf.name].append(vmf)
 

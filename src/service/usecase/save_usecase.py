@@ -33,6 +33,7 @@ from mlib.utils.file_utils import separate_path
 from mlib.vmd.vmd_collection import VmdMotion
 from mlib.vmd.vmd_part import VmdMorphFrame
 from service.usecase.dress_bone import DressBones
+from service.usecase.dress_bone_setting import DRESS_VERTEX_FITTING_NAME
 
 logger = MLogger(os.path.basename(__file__), level=1)
 __ = logger.get_text
@@ -594,6 +595,8 @@ class SaveUsecase:
                     MVector3D(*model_skin_vertex_positions[model_material_name].mean_value()),
                 )
 
+        after_vertex_offsets = dict([(o.vertex_index, o.position) for o in dress.morphs[DRESS_VERTEX_FITTING_NAME].offsets])
+
         dress_skin_vertex_positions: dict[str, MVectorDict] = {}
         prev_faces_count = 0
         for material in dress.materials:
@@ -639,6 +642,7 @@ class SaveUsecase:
                             bone_weight = dress.vertices[vertex_index].deform.weights[n]
                             mat += dress_matrixes[0, dress.bones[bone_index].name].local_matrix.vector * bone_weight
                         copy_vertex.position = MMatrix4x4(*mat.flatten()) * copy_vertex.position
+                        copy_vertex.position += after_vertex_offsets.get(vertex_index, MVector3D())
                         if dress_skin_materials[material.name]:
                             dress_skin_vertex_positions[material.name].append(vertex_index, copy_vertex.position.copy())
 

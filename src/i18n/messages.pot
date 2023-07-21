@@ -1594,3 +1594,27 @@ msgstr ""
 msgid "-- 厚み比率 [{b}][y={s:.3f})][z={s:.3f})]"
 msgstr ""
 
+
+msgid "ボーンフィッティング設定"
+msgstr ""
+
+
+msgid "頂点フィッティング"
+msgstr ""
+
+
+msgid "-- 頂点フィッティング [{i} ({p:.2f}%)]"
+msgstr ""
+
+
+msgid "頂点位置"
+msgstr ""
+
+
+msgid "-- 頂点位置 [{i} ({p:.2f}%)]"
+msgstr ""
+
+
+msgid "-- ボーン位置 [{i} ({p:.2f}%)]"
+msgstr ""
+

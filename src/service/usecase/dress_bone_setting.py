@@ -726,6 +726,9 @@ class DressBoneSettings(Enum):
 
 
 DRESS_BONE_FITTING_NAME = "BoneFitting"
+"""衣装フィッティング用ボーンモーフ名"""
+
+DRESS_VERTEX_FITTING_NAME = "VertexFitting"
 """衣装フィッティング用ボーン"""
 
 DRESS_STANDARD_BONE_NAMES: dict[str, DressBoneSetting] = dict([(bs.value.name, bs.value) for bs in DressBoneSettings])

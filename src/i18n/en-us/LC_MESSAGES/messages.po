@@ -1200,3 +1200,21 @@ msgstr "-- Thickness ratio [{b}][y={y:.3f})][z={z:.3f})]"
 
 msgid "-- 厚み比率 [{b}][y={s:.3f})][z={s:.3f})]"
 msgstr "-- Thickness ratio [{b}][y={s:.3f})][z={s:.3f})]"
+
+msgid "ボーンフィッティング設定"
+msgstr "Bone Fitting Settings"
+
+msgid "頂点フィッティング"
+msgstr "Vertex fitting"
+
+msgid "-- 頂点フィッティング [{i} ({p:.2f}%)]"
+msgstr "-- Vertex fitting [{i} ({p:.2f}%)]"
+
+msgid "頂点位置"
+msgstr "Apex position"
+
+msgid "-- 頂点位置 [{i} ({p:.2f}%)]"
+msgstr "-- Vertex position [{i} ({p:.2f}%)]"
+
+msgid "-- ボーン位置 [{i} ({p:.2f}%)]"
+msgstr "-- Bone position [{i} ({p:.2f}%)]"
