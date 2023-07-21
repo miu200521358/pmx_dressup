@@ -89,11 +89,11 @@ class LoadWorker(BaseWorker):
             # 胸の再設定
             replaced_bust_bone_names = usecase.replace_bust(model, dress)
 
-            # # 首の再設定
-            # replaced_bone_names += usecase.replace_neck(model, dress)
+            # 首の再設定
+            usecase.replace_neck(model, dress)
 
-            # # 肩と腕の再設定
-            # replaced_bone_names += usecase.replace_shoulder_arm(model, dress)
+            # 肩と腕の再設定
+            usecase.replace_shoulder_arm(model, dress)
 
             # # 左足先EXの再設定
             # replaced_bone_names += usecase.replace_toe_ex(model, dress, "左")
@@ -101,8 +101,8 @@ class LoadWorker(BaseWorker):
             # # 右足先EXの再設定
             # replaced_bone_names += usecase.replace_toe_ex(model, dress, "右")
 
-            # # 捩りの再設定
-            # replaced_bone_names += usecase.replace_twist(model, dress, replaced_bone_names)
+            # 捩りの再設定
+            usecase.replace_twist(model, dress, replaced_bone_names)
 
             logger.info("衣装: ウェイト調整", decoration=MLogger.Decoration.LINE)
 

@@ -1218,3 +1218,27 @@ msgstr "-- Vertex position [{i} ({p:.2f}%)]"
 
 msgid "-- ボーン位置 [{i} ({p:.2f}%)]"
 msgstr "-- Bone position [{i} ({p:.2f}%)]"
+
+msgid "面フィッティング"
+msgstr "Surface fitting"
+
+msgid "-- 面フィッティング [{i} ({p:.2f}%)]"
+msgstr "-- Surface fitting [{i} ({p:.2f}%)]"
+
+msgid "ボーン位置取得"
+msgstr "Bone position acquisition"
+
+msgid "ボーン基準再変形"
+msgstr "Bourne Criteria Re-Deformation"
+
+msgid "-- 再変形 [{i} ({p:.2f}%)]"
+msgstr "-- Re-transformation [{i} ({p:.2f}%)]"
+
+msgid "ローカルスケーリングフィッティング"
+msgstr "Local scaling fitting"
+
+msgid "ローカルスケール設定"
+msgstr "Local Scale Settings"
+
+msgid "-- ローカルスケール設定 [{i} ({p:.2f}%)]"
+msgstr "-- Local scale setting [{i} ({p:.2f}%)]"

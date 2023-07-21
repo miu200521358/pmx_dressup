@@ -1618,3 +1618,35 @@ msgstr ""
 msgid "-- ボーン位置 [{i} ({p:.2f}%)]"
 msgstr ""
 
+
+msgid "面フィッティング"
+msgstr ""
+
+
+msgid "-- 面フィッティング [{i} ({p:.2f}%)]"
+msgstr ""
+
+
+msgid "ボーン位置取得"
+msgstr ""
+
+
+msgid "ボーン基準再変形"
+msgstr ""
+
+
+msgid "-- 再変形 [{i} ({p:.2f}%)]"
+msgstr ""
+
+
+msgid "ローカルスケーリングフィッティング"
+msgstr ""
+
+
+msgid "ローカルスケール設定"
+msgstr ""
+
+
+msgid "-- ローカルスケール設定 [{i} ({p:.2f}%)]"
+msgstr ""
+
