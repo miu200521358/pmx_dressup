@@ -101,8 +101,8 @@ class LoadWorker(BaseWorker):
             # # 右足先EXの再設定
             # replaced_bone_names += usecase.replace_toe_ex(model, dress, "右")
 
-            # 捩りの再設定
-            replaced_bone_names += usecase.replace_twist(model, dress, replaced_bone_names)
+            # # 捩りの再設定
+            # replaced_bone_names += usecase.replace_twist(model, dress, replaced_bone_names)
 
             logger.info("衣装: ウェイト調整", decoration=MLogger.Decoration.LINE)
 
@@ -114,8 +114,8 @@ class LoadWorker(BaseWorker):
                 dress.setup()
                 dress.replace_standard_weights(replaced_bone_names)
 
-            # # 首根元にウェイトを振る
-            # usecase.replace_neck_root_weights(dress)
+            # 首根元にウェイトを振る
+            usecase.replace_neck_root_weights(dress)
             dress.update_vertices_by_bone()
 
             # 衣装に材質透明モーフを入れる

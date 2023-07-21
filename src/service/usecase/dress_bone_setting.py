@@ -96,7 +96,6 @@ class DressBoneSettings(Enum):
         setting=BoneSettings.NECK_ROOT.value,
         category="首根元",
         translatable=True,
-        rotatable=True,
         local_scalable=True,
         local_x_scalable=True,
     )
@@ -139,7 +138,6 @@ class DressBoneSettings(Enum):
         setting=BoneSettings.RIGHT_SHOULDER_ROOT.value,
         category="肩",
         translatable=True,
-        rotatable=True,
     )
     RIGHT_SHOULDER_P = DressBoneSetting(
         setting=BoneSettings.RIGHT_SHOULDER_P.value,
@@ -171,7 +169,6 @@ class DressBoneSettings(Enum):
         setting=BoneSettings.RIGHT_ARM_TWIST.value,
         category="腕",
         translatable=True,
-        rotatable=True,
         local_scalable=True,
         local_x_scalable=True,
     )
@@ -205,7 +202,6 @@ class DressBoneSettings(Enum):
         setting=BoneSettings.RIGHT_HAND_TWIST.value,
         category="腕",
         translatable=True,
-        rotatable=True,
         local_scalable=True,
         local_x_scalable=True,
     )
@@ -437,7 +433,6 @@ class DressBoneSettings(Enum):
         setting=BoneSettings.LEFT_SHOULDER_ROOT.value,
         category="肩",
         translatable=True,
-        rotatable=True,
     )
     LEFT_SHOULDER_P = DressBoneSetting(
         setting=BoneSettings.LEFT_SHOULDER_P.value,
@@ -469,7 +464,6 @@ class DressBoneSettings(Enum):
         setting=BoneSettings.LEFT_ARM_TWIST.value,
         category="腕",
         translatable=True,
-        rotatable=True,
         local_scalable=True,
         local_x_scalable=True,
     )
@@ -503,7 +497,6 @@ class DressBoneSettings(Enum):
         setting=BoneSettings.LEFT_HAND_TWIST.value,
         category="腕",
         translatable=True,
-        rotatable=True,
         local_scalable=True,
         local_x_scalable=True,
     )

@@ -1654,7 +1654,7 @@ class LoadUsecase:
                     # 回転計算 ------------------
                     # if bone_name in ("右腕", "左腕") and f"{bone_name[0]}手首" in dress.bones and f"{bone_name[0]}手首" in model.bones:
                     #     # 腕だけは手首を参照する（直線角度を測る）
-                    #     tail_bone_names = [f"{bone_name[0]}手首"]
+                    #     tail_far_bone_names = [f"{bone_name[0]}手首"]
 
                     dress_offset_qq = MQuaternion()
 
@@ -1682,7 +1682,10 @@ class LoadUsecase:
 
                                     dress_offset_qq = model_slope_qq * dress_slope_qq.inverse()
 
-                                    dress_tail_offset_qqs.append(dress_offset_qq)
+                                    _, _, _, dress_offset_yz_qq = dress_offset_qq.separate_by_axis(dress_bone.local_axis)
+
+                                    # X軸（捩り）成分を除去した値のみ保持
+                                    dress_tail_offset_qqs.append(dress_offset_yz_qq)
 
                                     if "手首" not in bone_name:
                                         # 手首以外は最初の一件だけで終了
