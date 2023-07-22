@@ -1242,3 +1242,41 @@ msgstr "Local Scale Settings"
 
 msgid "-- ローカルスケール設定 [{i} ({p:.2f}%)]"
 msgstr "-- Local scale setting [{i} ({p:.2f}%)]"
+
+msgid "色補正あり"
+msgstr "Color Corrected"
+msgid "このチェックをONにすると指定された色でテクスチャを補正します"
+msgstr "Turn this check box on to correct the texture with the specified color"
+
+msgid "補正する色はインクアイコンをクリックした状態でプレビュー画面内を左クリックするか、パレットアイコンから直接定義できます"
+msgstr "The color to be corrected can be defined by left-clicking in the preview screen with the ink icon clicked, or directly from the palette icon"
+
+msgid "ボタンをクリックした状態でプレビュー画面上で左クリックすると、該当箇所の色を抽出できます"
+msgstr "Left-click on the preview screen with the button clicked to extract the color in the corresponding area"
+
+msgid "（クリックしたままドラッグして、抽出する色を変える事もできます）"
+msgstr "(You can also click and hold and drag to change the color to be extracted)"
+
+msgid "もう一度ボタンをクリックすると、色抽出機能を停止します"
+msgstr "Click the button again to stop the color extraction function"
+
+msgid "色をクリックすると、カラーピッカーから任意の色を定義出来ます"
+msgstr "Click on a color to define any color from the color picker"
+
+msgid "他の材質の設定を、選択されている材質の設定に上書きする事ができます"
+msgstr "You can override the settings of another material with the settings of the selected material"
+
+msgid "上書き元の材質名"
+msgstr "Name of material to be overwritten"
+
+msgid "上書き元の材質を選んでください。先頭の空行を選ぶと、上書き設定をクリアできます。"
+msgstr "Select the material from which you want to overwrite. Select a leading blank line to clear the overwrite setting"
+
+msgid "テクスチャ色補正 [{t}]"
+msgstr "Texture color correction [{t}]"
+
+msgid "テクスチャ色範囲取得"
+msgstr "Get texture color range"
+
+msgid "テクスチャ色補正: {c} (補正色[{m}], 材質UV範囲内中央色[{d}])"
+msgstr "Texture color correction: {c} (corrected color [{m}], center color in material UV range [{d}])"
