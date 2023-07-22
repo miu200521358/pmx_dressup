@@ -119,9 +119,16 @@ class MainFrame(BaseFrame):
         # 衣装モーションにモーフを適用
         self.set_dress_motion_morphs()
 
+        # 材質名リストを保持する
+        all_material_names = (
+            [""]
+            + [__("人物") + ":" + material_name for material_name in model.materials.names]
+            + [__("衣装") + ":" + material_name for material_name in dress.materials.names]
+        )
+
         # 材質の選択肢を入れ替える
-        self.config_panel.model_material_ctrl.initialize(model.materials.names)
-        self.config_panel.dress_material_ctrl.initialize(dress.materials.names)
+        self.config_panel.model_material_ctrl.initialize(model.materials.names, all_material_names)
+        self.config_panel.dress_material_ctrl.initialize(dress.materials.names, all_material_names)
         # ボーン調整の選択肢を入れ替える
         self.config_panel.dress_bone_ctrl.initialize(individual_morph_names, individual_target_bone_indexes)
 

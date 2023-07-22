@@ -16,7 +16,7 @@ __ = logger.get_text
 
 class ConfigPanel(CanvasPanel):
     def __init__(self, frame: BaseFrame, tab_idx: int, *args, **kw) -> None:
-        super().__init__(frame, tab_idx, 630, 850, *args, **kw)
+        super().__init__(frame, tab_idx, 630, 880, *args, **kw)
 
         self._initialize_ui()
         self._initialize_event()
@@ -72,6 +72,8 @@ class ConfigPanel(CanvasPanel):
         self.dress_material_ctrl = MaterialCtrlSet(self, self.scrolled_window, "衣装")
         self.window_sizer.Add(self.dress_material_ctrl.sizer, 0, wx.ALL, 3)
 
+        self.canvas.color_changed_event = self.on_change_color
+
         # --------------
         # ボーン調整
 
@@ -111,6 +113,18 @@ class ConfigPanel(CanvasPanel):
         else:
             self.start_play()
         self.canvas.on_play(event)
+
+    def on_change_color(self):
+        if self.dress_material_ctrl.is_dropper:
+            # 衣装の色抽出中のみピックアップ
+            self.dress_material_ctrl.color_picker_ctrl.SetColour(wx.Colour(*self.canvas.color))
+            self.dress_material_ctrl.color_picker_ctrl.Refresh()
+            self.dress_material_ctrl.picked_override_color(wx.EVT_COLOUR_CHANGED)
+        elif self.model_material_ctrl.is_dropper:
+            # 人物の色抽出中のみピックアップ
+            self.model_material_ctrl.color_picker_ctrl.SetColour(wx.Colour(*self.canvas.color))
+            self.model_material_ctrl.color_picker_ctrl.Refresh()
+            self.model_material_ctrl.picked_override_color(wx.EVT_COLOUR_CHANGED)
 
     @property
     def fno(self) -> int:
