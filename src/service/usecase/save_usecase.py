@@ -1100,7 +1100,7 @@ class SaveUsecase:
         model.update_vertices_by_material()
 
         # 上書き元のテクスチャ画像
-        copied_image = np.array(copied_texture.image, np.float64)
+        copied_image = np.array(Image.open(copied_texture.path).convert("RGBA"), np.float64)
         # 補正テクスチャ画像
         corrected_image = np.asarray(np.copy(copied_image))
 

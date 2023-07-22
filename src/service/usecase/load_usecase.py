@@ -1185,24 +1185,36 @@ class LoadUsecase:
                     # X方向のスケーリングがOKで、人物に同名ボーンがある場合、比率を測る
                     model_bone = model.bones[dress_bone.name]
 
-                    if bone_setting.category == "足ＩＫ":
+                    if (
+                        bone_setting.category == "足ＩＫ"
+                        and f"{dress_bone.name[0]}足" in model.bones
+                        and f"{dress_bone.name[0]}足" in dress.bones
+                    ):
                         # 足IKの比率は足ボーンから足IKボーンまでの直線距離とする
                         dress_fit_length_scale = (model_bone.position - model.bones[f"{dress_bone.name[0]}足"].position).length() / (
                             (dress_bone.position - dress.bones[f"{dress_bone.name[0]}足"].position).length() or 1
                         )
-                    elif bone_setting.category == "つま先ＩＫ":
+                    elif (
+                        bone_setting.category == "つま先ＩＫ"
+                        and f"{dress_bone.name[0]}足ＩＫ" in model.bones
+                        and f"{dress_bone.name[0]}足ＩＫ" in dress.bones
+                    ):
                         # つま先IKの比率はグローバルZ方向だけ合わせる
                         dress_fit_length_scale = (model_bone.position - model.bones[f"{dress_bone.name[0]}足ＩＫ"].position).length() / (
                             (dress_bone.position - dress.bones[f"{dress_bone.name[0]}足ＩＫ"].position).length() or 1
                         )
-                    elif bone_setting.category == "足首":
+                    elif (
+                        bone_setting.category == "足首"
+                        and f"{dress_bone.name[0]}つま先ＩＫ" in model.bones
+                        and f"{dress_bone.name[0]}つま先ＩＫ" in dress.bones
+                    ):
                         dress_fit_length_scale = (
                             model_bone.position - model.bones[model.bones[f"{dress_bone.name[0]}つま先ＩＫ"].ik.bone_index].position
                         ).length() / (
                             (dress_bone.position - dress.bones[dress.bones[f"{dress_bone.name[0]}つま先ＩＫ"].ik.bone_index].position).length()
                             or 1
                         )
-                    elif dress_bone.name == "首根元":
+                    elif dress_bone.name == "首根元" and "上半身2" in dress.bones:
                         # 首根元は上半身2のスケールを流用する
                         dress_fit_length_scale = (dress_local_scales[dress.bones["上半身2"].index].x / 0.97) + 1
                     # elif dress_bone.name == "上半身2" and "上半身3" not in dress.bones:
