@@ -227,26 +227,19 @@ class DressBoneSettings(Enum):
         setting=BoneSettings.RIGHT_WRIST.value,
         category="腕",
         rotatable=True,
-        local_scalable=True,
-        local_x_scalable=True,
+        global_scalable=True,
     )
     RIGHT_THUMB0 = DressBoneSetting(
         setting=BoneSettings.RIGHT_THUMB0.value,
         category="指",
-        local_scalable=True,
-        local_x_scalable=True,
     )
     RIGHT_THUMB1 = DressBoneSetting(
         setting=BoneSettings.RIGHT_THUMB1.value,
         category="指",
-        local_scalable=True,
-        local_x_scalable=True,
     )
     RIGHT_THUMB2 = DressBoneSetting(
         setting=BoneSettings.RIGHT_THUMB2.value,
         category="指",
-        local_scalable=True,
-        local_x_scalable=True,
     )
     RIGHT_THUMB_TAIL = DressBoneSetting(
         setting=BoneSettings.RIGHT_THUMB_TAIL.value,
@@ -255,20 +248,14 @@ class DressBoneSettings(Enum):
     RIGHT_INDEX0 = DressBoneSetting(
         setting=BoneSettings.RIGHT_INDEX0.value,
         category="指",
-        local_scalable=True,
-        local_x_scalable=True,
     )
     RIGHT_INDEX1 = DressBoneSetting(
         setting=BoneSettings.RIGHT_INDEX1.value,
         category="指",
-        local_scalable=True,
-        local_x_scalable=True,
     )
     RIGHT_INDEX2 = DressBoneSetting(
         setting=BoneSettings.RIGHT_INDEX2.value,
         category="指",
-        local_scalable=True,
-        local_x_scalable=True,
     )
     RIGHT_INDEX_TAIL = DressBoneSetting(
         setting=BoneSettings.RIGHT_INDEX_TAIL.value,
@@ -277,20 +264,14 @@ class DressBoneSettings(Enum):
     RIGHT_MIDDLE0 = DressBoneSetting(
         setting=BoneSettings.RIGHT_MIDDLE0.value,
         category="指",
-        local_scalable=True,
-        local_x_scalable=True,
     )
     RIGHT_MIDDLE1 = DressBoneSetting(
         setting=BoneSettings.RIGHT_MIDDLE1.value,
         category="指",
-        local_scalable=True,
-        local_x_scalable=True,
     )
     RIGHT_MIDDLE2 = DressBoneSetting(
         setting=BoneSettings.RIGHT_MIDDLE2.value,
         category="指",
-        local_scalable=True,
-        local_x_scalable=True,
     )
     RIGHT_MIDDLE_TAIL = DressBoneSetting(
         setting=BoneSettings.RIGHT_MIDDLE_TAIL.value,
@@ -299,20 +280,14 @@ class DressBoneSettings(Enum):
     RIGHT_RING0 = DressBoneSetting(
         setting=BoneSettings.RIGHT_RING0.value,
         category="指",
-        local_scalable=True,
-        local_x_scalable=True,
     )
     RIGHT_RING1 = DressBoneSetting(
         setting=BoneSettings.RIGHT_RING1.value,
         category="指",
-        local_scalable=True,
-        local_x_scalable=True,
     )
     RIGHT_RING2 = DressBoneSetting(
         setting=BoneSettings.RIGHT_RING2.value,
         category="指",
-        local_scalable=True,
-        local_x_scalable=True,
     )
     RIGHT_RING_TAIL = DressBoneSetting(
         setting=BoneSettings.RIGHT_RING_TAIL.value,
@@ -321,20 +296,14 @@ class DressBoneSettings(Enum):
     RIGHT_PINKY0 = DressBoneSetting(
         setting=BoneSettings.RIGHT_PINKY0.value,
         category="指",
-        local_scalable=True,
-        local_x_scalable=True,
     )
     RIGHT_PINKY1 = DressBoneSetting(
         setting=BoneSettings.RIGHT_PINKY1.value,
         category="指",
-        local_scalable=True,
-        local_x_scalable=True,
     )
     RIGHT_PINKY2 = DressBoneSetting(
         setting=BoneSettings.RIGHT_PINKY2.value,
         category="指",
-        local_scalable=True,
-        local_x_scalable=True,
     )
     RIGHT_PINKY_TAIL = DressBoneSetting(
         setting=BoneSettings.RIGHT_PINKY_TAIL.value,
@@ -522,26 +491,19 @@ class DressBoneSettings(Enum):
         setting=BoneSettings.LEFT_WRIST.value,
         category="腕",
         rotatable=True,
-        local_scalable=True,
-        local_x_scalable=True,
+        global_scalable=True,
     )
     LEFT_THUMB0 = DressBoneSetting(
         setting=BoneSettings.LEFT_THUMB0.value,
         category="指",
-        local_scalable=True,
-        local_x_scalable=True,
     )
     LEFT_THUMB1 = DressBoneSetting(
         setting=BoneSettings.LEFT_THUMB1.value,
         category="指",
-        local_scalable=True,
-        local_x_scalable=True,
     )
     LEFT_THUMB2 = DressBoneSetting(
         setting=BoneSettings.LEFT_THUMB2.value,
         category="指",
-        local_scalable=True,
-        local_x_scalable=True,
     )
     LEFT_THUMB_TAIL = DressBoneSetting(
         setting=BoneSettings.LEFT_THUMB_TAIL.value,
@@ -550,20 +512,14 @@ class DressBoneSettings(Enum):
     LEFT_INDEX0 = DressBoneSetting(
         setting=BoneSettings.LEFT_INDEX0.value,
         category="指",
-        local_scalable=True,
-        local_x_scalable=True,
     )
     LEFT_INDEX1 = DressBoneSetting(
         setting=BoneSettings.LEFT_INDEX1.value,
         category="指",
-        local_scalable=True,
-        local_x_scalable=True,
     )
     LEFT_INDEX2 = DressBoneSetting(
         setting=BoneSettings.LEFT_INDEX2.value,
         category="指",
-        local_scalable=True,
-        local_x_scalable=True,
     )
     LEFT_INDEX_TAIL = DressBoneSetting(
         setting=BoneSettings.LEFT_INDEX_TAIL.value,
@@ -572,20 +528,14 @@ class DressBoneSettings(Enum):
     LEFT_MIDDLE0 = DressBoneSetting(
         setting=BoneSettings.LEFT_MIDDLE0.value,
         category="指",
-        local_scalable=True,
-        local_x_scalable=True,
     )
     LEFT_MIDDLE1 = DressBoneSetting(
         setting=BoneSettings.LEFT_MIDDLE1.value,
         category="指",
-        local_scalable=True,
-        local_x_scalable=True,
     )
     LEFT_MIDDLE2 = DressBoneSetting(
         setting=BoneSettings.LEFT_MIDDLE2.value,
         category="指",
-        local_scalable=True,
-        local_x_scalable=True,
     )
     LEFT_MIDDLE_TAIL = DressBoneSetting(
         setting=BoneSettings.LEFT_MIDDLE_TAIL.value,
@@ -594,20 +544,14 @@ class DressBoneSettings(Enum):
     LEFT_RING0 = DressBoneSetting(
         setting=BoneSettings.LEFT_RING0.value,
         category="指",
-        local_scalable=True,
-        local_x_scalable=True,
     )
     LEFT_RING1 = DressBoneSetting(
         setting=BoneSettings.LEFT_RING1.value,
         category="指",
-        local_scalable=True,
-        local_x_scalable=True,
     )
     LEFT_RING2 = DressBoneSetting(
         setting=BoneSettings.LEFT_RING2.value,
         category="指",
-        local_scalable=True,
-        local_x_scalable=True,
     )
     LEFT_RING_TAIL = DressBoneSetting(
         setting=BoneSettings.LEFT_RING_TAIL.value,
@@ -616,20 +560,14 @@ class DressBoneSettings(Enum):
     LEFT_PINKY0 = DressBoneSetting(
         setting=BoneSettings.LEFT_PINKY0.value,
         category="指",
-        local_scalable=True,
-        local_x_scalable=True,
     )
     LEFT_PINKY1 = DressBoneSetting(
         setting=BoneSettings.LEFT_PINKY1.value,
         category="指",
-        local_scalable=True,
-        local_x_scalable=True,
     )
     LEFT_PINKY2 = DressBoneSetting(
         setting=BoneSettings.LEFT_PINKY2.value,
         category="指",
-        local_scalable=True,
-        local_x_scalable=True,
     )
     LEFT_PINKY_TAIL = DressBoneSetting(
         setting=BoneSettings.LEFT_PINKY_TAIL.value,
