@@ -12,6 +12,7 @@ from mlib.vmd.vmd_collection import VmdMotion
 from mlib.vmd.vmd_part import VmdMorphFrame
 from service.form.panel.config_panel import ConfigPanel
 from service.form.panel.file_panel import FilePanel
+from service.usecase.dress_bone_setting import DRESS_BONE_FITTING_NAME, DRESS_VERTEX_FITTING_NAME
 from service.worker.load_motion_worker import LoadMotionWorker
 from service.worker.load_worker import LoadWorker
 from service.worker.save_worker import SaveWorker
@@ -118,9 +119,16 @@ class MainFrame(BaseFrame):
         # 衣装モーションにモーフを適用
         self.set_dress_motion_morphs()
 
+        # 材質名リストを保持する
+        all_material_names = (
+            [""]
+            + [__("人物") + ":" + material_name for material_name in model.materials.names]
+            + [__("衣装") + ":" + material_name for material_name in dress.materials.names]
+        )
+
         # 材質の選択肢を入れ替える
-        self.config_panel.model_material_ctrl.initialize(model.materials.names)
-        self.config_panel.dress_material_ctrl.initialize(dress.materials.names)
+        self.config_panel.model_material_ctrl.initialize(model.materials.names, all_material_names)
+        self.config_panel.dress_material_ctrl.initialize(dress.materials.names, all_material_names)
         # ボーン調整の選択肢を入れ替える
         self.config_panel.dress_bone_ctrl.initialize(individual_morph_names, individual_target_bone_indexes)
 
@@ -215,6 +223,10 @@ class MainFrame(BaseFrame):
 
         # self.file_panel.create_output_path()
 
+    def clear_model_opacity(self):
+        if self.model_motion and self.model_motion.morphs:
+            del self.model_motion.morphs["全材質TR"]
+
     def set_dress_motion_morphs(
         self,
         material_alphas: dict[str, float] = {},
@@ -231,11 +243,11 @@ class MainFrame(BaseFrame):
         self.dress_motion.path = "fit motion"
 
         # フィッティングモーフは常に適用
-        bmf = VmdMorphFrame(0, "BoneFitting")
+        bmf = VmdMorphFrame(0, DRESS_BONE_FITTING_NAME)
         bmf.ratio = 1
         self.dress_motion.morphs[bmf.name].append(bmf)
 
-        vmf = VmdMorphFrame(0, "VertexFitting")
+        vmf = VmdMorphFrame(0, DRESS_VERTEX_FITTING_NAME)
         vmf.ratio = 1
         self.dress_motion.morphs[vmf.name].append(vmf)
 

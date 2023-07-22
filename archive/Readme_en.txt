@@ -98,10 +98,12 @@ The file history can be copied by placing "history.json" in the same hierarchy a
        - Z ... Depth direction
     - If there is a mesh with the same bone name but with weights applied to both the person and the costume, the position of the mesh will basically be output according to the person's side.
       However, if you check the box "Bone positions are aligned with costume model", you can force the output to be aligned with the bone positions on the costume side.
-      (Especially from the wrist to the tips of the fingers, no fitting is performed, so please select accordingly.
+      (Especially from the wrist to the tips of the fingers, no fitting is performed, so please select accordingly.)
+    - If the "Share settings as skin material" checkbox is checked for both the person and costume skin material, the person's skin material settings will be copied to the costume and the texture color will be matched.
 
  4. When you have finished fitting, go back to the File tab and click the "Output Costume Model" button.
     - The model will be output with the material, bones, rigid body, etc. adjusted accordingly.
+    - If there is a risk of overwriting files, textures, etc. of the original model with the result of the changeover, the output will be aborted.
 
  Extra
    The model data in the folder "Mesh Compensating Elements" is an element model that I created in VRoid Studio.

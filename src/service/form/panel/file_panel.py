@@ -64,7 +64,7 @@ class FilePanel(BasePanel):
         self.output_pmx_ctrl = MPmxFilePickerCtrl(
             self.frame,
             self,
-            title="お着替え後モデル出力先",
+            title="お着替えモデル出力先",
             is_show_name=False,
             is_save=True,
             tooltip="お着替え後のモデルの出力ファイルパスです\n任意の値に変更可能です",
@@ -85,7 +85,7 @@ class FilePanel(BasePanel):
         self.exec_btn_sizer.Add(self.exec_btn_ctrl, 0, wx.ALL, 3)
         self.root_sizer.Add(self.exec_btn_sizer, 0, wx.ALIGN_CENTER | wx.SHAPED, 5)
 
-        self.console_ctrl = ConsoleCtrl(self.frame, self, rows=490)
+        self.console_ctrl = ConsoleCtrl(self.frame, self, rows=550)
         self.console_ctrl.set_parent_sizer(self.root_sizer)
 
         self.root_sizer.Add(wx.StaticLine(self, wx.ID_ANY), wx.GROW)

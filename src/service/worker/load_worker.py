@@ -43,6 +43,9 @@ class LoadWorker(BaseWorker):
             usecase.valid_model(original_model, "人物")
 
             model = original_model.copy()
+
+            # 首根元にウェイトを振る
+            usecase.replace_neck_root_weights(model)
             model.update_vertices_by_bone()
 
             # 人物に材質透明モーフを入れる
@@ -90,22 +93,19 @@ class LoadWorker(BaseWorker):
             replaced_bust_bone_names = usecase.replace_bust(model, dress)
 
             # 首の再設定
-            replaced_bone_names += usecase.replace_neck(model, dress)
+            usecase.replace_neck(model, dress)
 
-            # 左肩の再設定
-            replaced_bone_names += usecase.replace_shoulder(model, dress, "左")
+            # 肩と腕の再設定
+            usecase.replace_shoulder_arm(model, dress)
 
-            # 右肩の再設定
-            replaced_bone_names += usecase.replace_shoulder(model, dress, "右")
+            # # 左足先EXの再設定
+            # replaced_bone_names += usecase.replace_toe_ex(model, dress, "左")
 
-            # 左足先EXの再設定
-            replaced_bone_names += usecase.replace_toe_ex(model, dress, "左")
-
-            # 右足先EXの再設定
-            replaced_bone_names += usecase.replace_toe_ex(model, dress, "右")
+            # # 右足先EXの再設定
+            # replaced_bone_names += usecase.replace_toe_ex(model, dress, "右")
 
             # 捩りの再設定
-            replaced_bone_names += usecase.replace_twist(model, dress, replaced_bone_names)
+            usecase.replace_twist(model, dress, replaced_bone_names)
 
             logger.info("衣装: ウェイト調整", decoration=MLogger.Decoration.LINE)
 
@@ -117,6 +117,8 @@ class LoadWorker(BaseWorker):
                 dress.setup()
                 dress.replace_standard_weights(replaced_bone_names)
 
+            # 首根元にウェイトを振る
+            usecase.replace_neck_root_weights(dress)
             dress.update_vertices_by_bone()
 
             # 衣装に材質透明モーフを入れる

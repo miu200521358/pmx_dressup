@@ -27,10 +27,9 @@ class DressBoneSetting(BoneSetting):
         """
         self.name = setting.name
         self.parents = setting.parents
-        self.relatives = setting.relatives
+        self.display_tail = setting.display_tail
         self.tails = setting.tails
         self.flag = setting.flag
-        self.axis = setting.axis
         self.category = category
         self.translatable = translatable
         self.rotatable = rotatable
@@ -93,12 +92,12 @@ class DressBoneSettings(Enum):
         local_scalable=True,
         local_x_scalable=True,
     )
-    ARM_CENTER = DressBoneSetting(
-        setting=BoneSettings.ARM_CENTER.value,
+    NECK_ROOT = DressBoneSetting(
+        setting=BoneSettings.NECK_ROOT.value,
         category="体幹",
         translatable=True,
-        rotatable=True,
-        rotate_cancel=True,
+        local_scalable=True,
+        local_x_scalable=True,
     )
     NECK = DressBoneSetting(
         setting=BoneSettings.NECK.value,
@@ -139,8 +138,6 @@ class DressBoneSettings(Enum):
         setting=BoneSettings.RIGHT_SHOULDER_ROOT.value,
         category="肩",
         translatable=True,
-        rotatable=True,
-        rotate_cancel=True,
     )
     RIGHT_SHOULDER_P = DressBoneSetting(
         setting=BoneSettings.RIGHT_SHOULDER_P.value,
@@ -152,7 +149,6 @@ class DressBoneSettings(Enum):
         category="肩",
         translatable=True,
         rotatable=True,
-        rotate_cancel=True,
         local_scalable=True,
         local_x_scalable=True,
     )
@@ -173,8 +169,6 @@ class DressBoneSettings(Enum):
         setting=BoneSettings.RIGHT_ARM_TWIST.value,
         category="腕",
         translatable=True,
-        rotatable=True,
-        rotate_cancel=True,
         local_scalable=True,
         local_x_scalable=True,
     )
@@ -201,7 +195,6 @@ class DressBoneSettings(Enum):
         category="腕",
         translatable=True,
         rotatable=True,
-        rotate_cancel=True,
         local_scalable=True,
         local_x_scalable=True,
     )
@@ -209,8 +202,6 @@ class DressBoneSettings(Enum):
         setting=BoneSettings.RIGHT_HAND_TWIST.value,
         category="腕",
         translatable=True,
-        rotatable=True,
-        rotate_cancel=True,
         local_scalable=True,
         local_x_scalable=True,
     )
@@ -235,9 +226,8 @@ class DressBoneSettings(Enum):
     RIGHT_WRIST = DressBoneSetting(
         setting=BoneSettings.RIGHT_WRIST.value,
         category="腕",
-        translatable=True,
         rotatable=True,
-        local_x_scalable=True,
+        global_scalable=True,
     )
     RIGHT_THUMB0 = DressBoneSetting(
         setting=BoneSettings.RIGHT_THUMB0.value,
@@ -412,8 +402,6 @@ class DressBoneSettings(Enum):
         setting=BoneSettings.LEFT_SHOULDER_ROOT.value,
         category="肩",
         translatable=True,
-        rotatable=True,
-        rotate_cancel=True,
     )
     LEFT_SHOULDER_P = DressBoneSetting(
         setting=BoneSettings.LEFT_SHOULDER_P.value,
@@ -425,7 +413,6 @@ class DressBoneSettings(Enum):
         category="肩",
         translatable=True,
         rotatable=True,
-        rotate_cancel=True,
         local_scalable=True,
         local_x_scalable=True,
     )
@@ -446,8 +433,6 @@ class DressBoneSettings(Enum):
         setting=BoneSettings.LEFT_ARM_TWIST.value,
         category="腕",
         translatable=True,
-        rotatable=True,
-        rotate_cancel=True,
         local_scalable=True,
         local_x_scalable=True,
     )
@@ -474,7 +459,6 @@ class DressBoneSettings(Enum):
         category="腕",
         translatable=True,
         rotatable=True,
-        rotate_cancel=True,
         local_scalable=True,
         local_x_scalable=True,
     )
@@ -482,8 +466,6 @@ class DressBoneSettings(Enum):
         setting=BoneSettings.LEFT_HAND_TWIST.value,
         category="腕",
         translatable=True,
-        rotatable=True,
-        rotate_cancel=True,
         local_scalable=True,
         local_x_scalable=True,
     )
@@ -508,9 +490,8 @@ class DressBoneSettings(Enum):
     LEFT_WRIST = DressBoneSetting(
         setting=BoneSettings.LEFT_WRIST.value,
         category="腕",
-        translatable=True,
         rotatable=True,
-        local_x_scalable=True,
+        global_scalable=True,
     )
     LEFT_THUMB0 = DressBoneSetting(
         setting=BoneSettings.LEFT_THUMB0.value,
@@ -676,6 +657,9 @@ class DressBoneSettings(Enum):
 
 
 DRESS_BONE_FITTING_NAME = "BoneFitting"
+"""衣装フィッティング用ボーンモーフ名"""
+
+DRESS_VERTEX_FITTING_NAME = "VertexFitting"
 """衣装フィッティング用ボーン"""
 
 DRESS_STANDARD_BONE_NAMES: dict[str, DressBoneSetting] = dict([(bs.value.name, bs.value) for bs in DressBoneSettings])
@@ -718,9 +702,9 @@ class FitMorphSettings(Enum):
         name="腰",
         target_bone_names=["腰"],
         move_target_bone_names=[],
-        child_move_morph_names=["下半身", "上半身", "上半身2"],
+        child_move_morph_names=["下半身", "上半身", "上半身2", "首根元", "胸"],
         child_rotation_morph_names=[],
-        child_scale_morph_names=["下半身", "上半身", "上半身2"],
+        child_scale_morph_names=["下半身", "上半身", "上半身2", "首根元"],
         attend_weight_bone_names=[],
     )
 
@@ -738,9 +722,9 @@ class FitMorphSettings(Enum):
         name="上半身",
         target_bone_names=["上半身"],
         move_target_bone_names=[],
-        child_move_morph_names=[],
+        child_move_morph_names=["胸", "上半身2", "首根元"],
         child_rotation_morph_names=[],
-        child_scale_morph_names=["上半身2"],
+        child_scale_morph_names=["上半身2", "首根元"],
         attend_weight_bone_names=[],
     )
 
@@ -748,15 +732,25 @@ class FitMorphSettings(Enum):
         name="上半身2",
         target_bone_names=["上半身2"],
         move_target_bone_names=[],
-        child_move_morph_names=[],
+        child_move_morph_names=["胸", "首根元"],
         child_rotation_morph_names=[],
-        child_scale_morph_names=[],
+        child_scale_morph_names=["首根元"],
         attend_weight_bone_names=[],
     )
 
     BUST = FitMorphSetting(
         name="胸",
         target_bone_names=["右胸", "左胸"],
+        move_target_bone_names=[],
+        child_move_morph_names=[],
+        child_rotation_morph_names=[],
+        child_scale_morph_names=[],
+        attend_weight_bone_names=[],
+    )
+
+    NECK_ROOT = FitMorphSetting(
+        name="首根元",
+        target_bone_names=["首根元"],
         move_target_bone_names=[],
         child_move_morph_names=[],
         child_rotation_morph_names=[],
@@ -809,9 +803,9 @@ class FitMorphSettings(Enum):
             "右腕捩2",
             "右腕捩3",
         ],
-        child_move_morph_names=["ひじ", "手のひら"],
-        child_rotation_morph_names=["ひじ", "手のひら"],
-        child_scale_morph_names=["ひじ", "手のひら"],
+        child_move_morph_names=["ひじ", "手首"],
+        child_rotation_morph_names=["ひじ", "手首"],
+        child_scale_morph_names=["ひじ", "手首"],
         attend_weight_bone_names=[],
     )
 
@@ -828,57 +822,55 @@ class FitMorphSettings(Enum):
             "右手捩2",
             "右手捩3",
         ],
-        child_move_morph_names=["手のひら"],
-        child_rotation_morph_names=["手のひら"],
-        child_scale_morph_names=["手のひら"],
+        child_move_morph_names=["手首"],
+        child_rotation_morph_names=["手首"],
+        child_scale_morph_names=["手首"],
         attend_weight_bone_names=[],
     )
 
-    HAND = FitMorphSetting(
-        name="手のひら",
+    WRIST = FitMorphSetting(
+        name="手首",
+        target_bone_names=["右手首", "左手首"],
+        move_target_bone_names=[],
+        child_move_morph_names=[],
+        child_scale_morph_names=[],
+        child_rotation_morph_names=[],
+        attend_weight_bone_names=[],
+    )
+
+    FINGER = FitMorphSetting(
+        name="指",
         target_bone_names=[
-            "右手首",
-            "左手首",
             "左親指０",
             "左親指１",
             "左親指２",
-            "左親指先",
             "左人指１",
             "左人指２",
             "左人指３",
-            "左人指先",
             "左中指１",
             "左中指２",
             "左中指３",
-            "左中指先",
             "左薬指１",
             "左薬指２",
             "左薬指３",
-            "左薬指先",
             "左小指１",
             "左小指２",
             "左小指３",
-            "左小指先",
             "右親指０",
             "右親指１",
             "右親指２",
-            "右親指先",
             "右人指１",
             "右人指２",
             "右人指３",
-            "右人指先",
             "右中指１",
             "右中指２",
             "右中指３",
-            "右中指先",
             "右薬指１",
             "右薬指２",
             "右薬指３",
-            "右薬指先",
             "右小指１",
             "右小指２",
             "右小指３",
-            "右小指先",
         ],
         move_target_bone_names=[],
         child_move_morph_names=[],

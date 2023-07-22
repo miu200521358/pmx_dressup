@@ -144,7 +144,7 @@ msgstr "Please specify the costume model you would like to change into"
 msgid "任意でVMDモーションデータを指定する事ができます。\n空欄の場合、人物と衣装は初期状態で表示します。"
 msgstr "You can optionally specify VMD motion data. \If ɑn is left blank, the person and costume will be displayed in their initial state"
 
-msgid "お着替え後モデル出力先"
+msgid "お着替えモデル出力先"
 msgstr "Model output destination after change of clothes"
 
 msgid "お着替え後のモデルの出力ファイルパスです。\n任意の値に変更可能です。"
@@ -1162,5 +1162,121 @@ msgstr "-- Get Costume Texture Color [{i} ({p:.2f}%)]"
 msgid "衣装テクスチャ色取得"
 msgstr "Obtain costume texture color"
 
-msgid "お着替え後モデル出力先のパス設定が、人物もしくは衣装モデルのテクスチャを上書きする設定となっていたため、テクスチャのコピー処理を中断しました。\nお着替え後モデル出力先パスをデフォルトから変更される場合、人物や衣装と同じ階層には設定しないようにしてください。"
+msgid "お着替えモデル出力先のパス設定が、人物もしくは衣装モデルのテクスチャを上書きする設定となっていたため、テクスチャのコピー処理を中断しました。\nお着替えモデル出力先パスをデフォルトから変更される場合、人物や衣装と同じ階層には設定しないようにしてください。"
 msgstr "The texture copy process was interrupted because the path setting for the post-changing model output destination was set to overwrite the person or costume model's textures. \If you change the path setting for the output destination for the model after changing from the default, please do not set it to the same hierarchy as the person or costume"
+
+msgid "人物モデルPMXと同じファイルパス上にお着替えモデルPMXファイルを出力しようとしています。\nPMXデータが上書きされる危険性があります。"
+msgstr "I am trying to output a change of clothes model PMX file on the same file path as the person model PMX. \There is a risk of overwriting your ߋnPMX data"
+
+msgid "衣装モデルPMXと同じファイルパス上にお着替えモデルPMXファイルを出力しようとしています。\nPMXデータが上書きされる危険性があります。"
+msgstr "I am trying to output a change of clothes model PMX file on the same file path as the costume model PMX. \There is a risk of overwriting the ߋnPMX data"
+
+msgid "人物モデルPMXと同じフォルダ階層にお着替えモデルPMXファイルを出力しようとしています。\nテクスチャが上書きされる危険性があります。"
+msgstr "I am trying to output a change of clothes model PMX file in the same folder hierarchy as the person model PMX. \There is a risk of overwriting the ߋn textures"
+
+msgid "衣装モデルPMXと同じフォルダ階層にお着替えモデルPMXファイルを出力しようとしています。\nテクスチャが上書きされる危険性があります。"
+msgstr "I am trying to output a change of clothes model PMX file in the same folder hierarchy as the costume model PMX. \There is a risk of overwriting the ߋn textures"
+
+msgid "処理が継続できないため、中断しました\n----------------\nお着替えモデル出力結果が元モデルデータを上書きする危険性があるため、出力を中断します\nお着替えモデル出力ファイルパスを変更してください"
+msgstr "Aborted because the process cannot be continued!\n----------------\nThe output of the ddressing model output is in danger of overwriting the original model data, so please abort the output and change the ddressing model output file path"
+
+msgid "出力ファイルパスが有効なパスではないため、デフォルトの出力ファイルパスを再設定します。"
+msgstr "The output file path is not a valid path, reset the default output file path"
+
+msgid "{t}のチェックに失敗しました。以下の原因が考えられます。\n・{t}が255文字を超えている\n・{t}に使えない文字列が含まれている（例) \\ / : * ? " < > |）\n・{t}の親フォルダに書き込み権限がない\n・{t}に書き込み権限がない\n"
+msgstr "Failed to check {t}. The following causes are possible. \n・{t} exceeds 255 characters\n・{t} contains unusable character strings (e.g.) \ \n} / : * ? " < > |) Parent folder of \n・{t} does not have write permission \n・{t} does not have write permission.
+
+msgid "ファイルパス保存可否チェック: {p}"
+msgstr "File path preservation availability check: {p}"
+
+msgid "手首"
+msgstr "Wrist"
+
+msgid "首根元"
+msgstr "Root of the neck"
+
+msgid "-- 厚み比率 [{b}][y={y:.3f})][z={z:.3f})]"
+msgstr "-- Thickness ratio [{b}][y={y:.3f})][z={z:.3f})]"
+
+msgid "-- 厚み比率 [{b}][y={s:.3f})][z={s:.3f})]"
+msgstr "-- Thickness ratio [{b}][y={s:.3f})][z={s:.3f})]"
+
+msgid "ボーンフィッティング設定"
+msgstr "Bone Fitting Settings"
+
+msgid "頂点フィッティング"
+msgstr "Vertex fitting"
+
+msgid "-- 頂点フィッティング [{i} ({p:.2f}%)]"
+msgstr "-- Vertex fitting [{i} ({p:.2f}%)]"
+
+msgid "頂点位置"
+msgstr "Apex position"
+
+msgid "-- 頂点位置 [{i} ({p:.2f}%)]"
+msgstr "-- Vertex position [{i} ({p:.2f}%)]"
+
+msgid "-- ボーン位置 [{i} ({p:.2f}%)]"
+msgstr "-- Bone position [{i} ({p:.2f}%)]"
+
+msgid "面フィッティング"
+msgstr "Surface fitting"
+
+msgid "-- 面フィッティング [{i} ({p:.2f}%)]"
+msgstr "-- Surface fitting [{i} ({p:.2f}%)]"
+
+msgid "ボーン位置取得"
+msgstr "Bone position acquisition"
+
+msgid "ボーン基準再変形"
+msgstr "Bourne Criteria Re-Deformation"
+
+msgid "-- 再変形 [{i} ({p:.2f}%)]"
+msgstr "-- Re-transformation [{i} ({p:.2f}%)]"
+
+msgid "ローカルスケーリングフィッティング"
+msgstr "Local scaling fitting"
+
+msgid "ローカルスケール設定"
+msgstr "Local Scale Settings"
+
+msgid "-- ローカルスケール設定 [{i} ({p:.2f}%)]"
+msgstr "-- Local scale setting [{i} ({p:.2f}%)]"
+
+msgid "色補正あり"
+msgstr "Color Corrected"
+msgid "このチェックをONにすると指定された色でテクスチャを補正します"
+msgstr "Turn this check box on to correct the texture with the specified color"
+
+msgid "補正する色はインクアイコンをクリックした状態でプレビュー画面内を左クリックするか、パレットアイコンから直接定義できます"
+msgstr "The color to be corrected can be defined by left-clicking in the preview screen with the ink icon clicked, or directly from the palette icon"
+
+msgid "ボタンをクリックした状態でプレビュー画面上で左クリックすると、該当箇所の色を抽出できます"
+msgstr "Left-click on the preview screen with the button clicked to extract the color in the corresponding area"
+
+msgid "（クリックしたままドラッグして、抽出する色を変える事もできます）"
+msgstr "(You can also click and hold and drag to change the color to be extracted)"
+
+msgid "もう一度ボタンをクリックすると、色抽出機能を停止します"
+msgstr "Click the button again to stop the color extraction function"
+
+msgid "色をクリックすると、カラーピッカーから任意の色を定義出来ます"
+msgstr "Click on a color to define any color from the color picker"
+
+msgid "他の材質の設定を、選択されている材質の設定に上書きする事ができます"
+msgstr "You can override the settings of another material with the settings of the selected material"
+
+msgid "上書き元の材質名"
+msgstr "Name of material to be overwritten"
+
+msgid "上書き元の材質を選んでください。先頭の空行を選ぶと、上書き設定をクリアできます。"
+msgstr "Select the material from which you want to overwrite. Select a leading blank line to clear the overwrite setting"
+
+msgid "テクスチャ色補正 [{t}]"
+msgstr "Texture color correction [{t}]"
+
+msgid "テクスチャ色範囲取得"
+msgstr "Get texture color range"
+
+msgid "テクスチャ色補正: {c} (補正色[{m}], 材質UV範囲内中央色[{d}])"
+msgstr "Texture color correction: {c} (corrected color [{m}], center color in material UV range [{d}])"

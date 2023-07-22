@@ -16,7 +16,7 @@ __ = logger.get_text
 
 class ConfigPanel(CanvasPanel):
     def __init__(self, frame: BaseFrame, tab_idx: int, *args, **kw) -> None:
-        super().__init__(frame, tab_idx, 630, 850, *args, **kw)
+        super().__init__(frame, tab_idx, 0.6, 1.0, *args, **kw)
 
         self._initialize_ui()
         self._initialize_event()
@@ -29,26 +29,6 @@ class ConfigPanel(CanvasPanel):
         # --------------
         # 右に設定
         self.right_sizer = wx.BoxSizer(wx.VERTICAL)
-        self.header_sizer = wx.BoxSizer(wx.VERTICAL)
-
-        self.play_sizer = wx.BoxSizer(wx.HORIZONTAL)
-
-        frame_tooltip = __("モーションを指定している場合、任意のキーフレの結果の表示や再生ができます")
-
-        self.frame_title_ctrl = wx.StaticText(self, wx.ID_ANY, __("モーション"), wx.DefaultPosition, wx.DefaultSize, 0)
-        self.frame_title_ctrl.SetToolTip(frame_tooltip)
-        self.play_sizer.Add(self.frame_title_ctrl, 0, wx.ALL, 3)
-
-        self.frame_ctrl = WheelSpinCtrl(self, initial=0, min=0, max=10000, size=wx.Size(70, -1), change_event=self.on_frame_change)
-        self.frame_ctrl.SetToolTip(frame_tooltip)
-        self.play_sizer.Add(self.frame_ctrl, 0, wx.ALL, 3)
-
-        self.play_ctrl = wx.Button(self, wx.ID_ANY, __("再生"), wx.DefaultPosition, wx.Size(80, -1))
-        self.play_ctrl.SetToolTip(__("モーションを指定している場合、再生することができます"))
-        self.play_sizer.Add(self.play_ctrl, 0, wx.ALL, 3)
-
-        self.header_sizer.Add(self.play_sizer, 0, wx.ALL, 3)
-        self.right_sizer.Add(self.play_sizer, 0, wx.ALL, 0)
 
         # --------------
 
@@ -64,6 +44,29 @@ class ConfigPanel(CanvasPanel):
         self.window_sizer = wx.BoxSizer(wx.VERTICAL)
 
         # --------------
+        # 再生
+
+        self.play_sizer = wx.BoxSizer(wx.HORIZONTAL)
+
+        frame_tooltip = __("モーションを指定している場合、任意のキーフレの結果の表示や再生ができます")
+
+        self.frame_title_ctrl = wx.StaticText(self.scrolled_window, wx.ID_ANY, __("モーション"), wx.DefaultPosition, wx.DefaultSize, 0)
+        self.frame_title_ctrl.SetToolTip(frame_tooltip)
+        self.play_sizer.Add(self.frame_title_ctrl, 0, wx.ALL, 3)
+
+        self.frame_ctrl = WheelSpinCtrl(
+            self.scrolled_window, initial=0, min=0, max=10000, size=wx.Size(70, -1), change_event=self.on_frame_change
+        )
+        self.frame_ctrl.SetToolTip(frame_tooltip)
+        self.play_sizer.Add(self.frame_ctrl, 0, wx.ALL, 3)
+
+        self.play_ctrl = wx.Button(self.scrolled_window, wx.ID_ANY, __("再生"), wx.DefaultPosition, wx.Size(80, -1))
+        self.play_ctrl.SetToolTip(__("モーションを指定している場合、再生することができます"))
+        self.play_sizer.Add(self.play_ctrl, 0, wx.ALL, 3)
+
+        self.window_sizer.Add(self.play_sizer, 0, wx.ALL, 3)
+
+        # --------------
         # 材質非透過度
 
         self.model_material_ctrl = MaterialCtrlSet(self, self.scrolled_window, "人物")
@@ -71,6 +74,8 @@ class ConfigPanel(CanvasPanel):
 
         self.dress_material_ctrl = MaterialCtrlSet(self, self.scrolled_window, "衣装")
         self.window_sizer.Add(self.dress_material_ctrl.sizer, 0, wx.ALL, 3)
+
+        self.canvas.color_changed_event = self.on_change_color
 
         # --------------
         # ボーン調整
@@ -93,12 +98,13 @@ class ConfigPanel(CanvasPanel):
         self.config_sizer.Add(self.right_sizer, 1, wx.ALL | wx.EXPAND | wx.FIXED_MINSIZE, 0)
         self.root_sizer.Add(self.config_sizer, 0, wx.ALL, 0)
 
+        self.SetSizer(self.root_sizer)
         self.fit()
 
     def fit(self) -> None:
         self.scrolled_window.Layout()
-        self.SetSizer(self.root_sizer)
         self.Layout()
+        self.frame.fit()
 
     def _initialize_event(self) -> None:
         self.play_ctrl.Bind(wx.EVT_BUTTON, self.on_play)
@@ -111,6 +117,18 @@ class ConfigPanel(CanvasPanel):
         else:
             self.start_play()
         self.canvas.on_play(event)
+
+    def on_change_color(self):
+        if self.dress_material_ctrl.is_dropper:
+            # 衣装の色抽出中のみピックアップ
+            self.dress_material_ctrl.color_picker_ctrl.SetColour(wx.Colour(*self.canvas.color))
+            self.dress_material_ctrl.color_picker_ctrl.Refresh()
+            self.dress_material_ctrl.picked_override_color(wx.EVT_COLOUR_CHANGED)
+        elif self.model_material_ctrl.is_dropper:
+            # 人物の色抽出中のみピックアップ
+            self.model_material_ctrl.color_picker_ctrl.SetColour(wx.Colour(*self.canvas.color))
+            self.model_material_ctrl.color_picker_ctrl.Refresh()
+            self.model_material_ctrl.picked_override_color(wx.EVT_COLOUR_CHANGED)
 
     @property
     def fno(self) -> int:
@@ -129,6 +147,12 @@ class ConfigPanel(CanvasPanel):
         self.Enable(False)
         # 停止ボタンだけは有効
         self.play_ctrl.Enable(True)
+
+    def on_resize(self) -> None:
+        frame_w, frame_h = self.frame.GetClientSize()
+        self.scrolled_window.SetPosition(wx.Point(self.canvas.size.width, 0))
+        self.scrolled_window.SetSize(wx.Size(frame_w - self.canvas.size.width, frame_h))
+        self.fit()
 
     def Enable(self, enable: bool):
         self.frame_ctrl.Enable(enable)
@@ -149,9 +173,12 @@ class ConfigPanel(CanvasPanel):
 
     def show_bone_weight(self, is_show_bone_weight: bool) -> None:
         # 人物側も薄くする
-        model_tr_ratio = 0.3 if is_show_bone_weight else 1.0
         model_bone_ratio = 0.2 if is_show_bone_weight else 0.5
-        self.frame.set_model_motion_morphs({__("全材質"): model_tr_ratio})
+        if is_show_bone_weight:
+            self.frame.set_model_motion_morphs({__("全材質"): 0.3})
+        else:
+            self.frame.clear_model_opacity()
+
         self.frame.fit_model_motion(bone_alpha=model_bone_ratio, is_bone_deform=False)
 
         self.frame.show_bone_weight(is_show_bone_weight)
