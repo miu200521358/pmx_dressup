@@ -43,6 +43,9 @@ class LoadWorker(BaseWorker):
             usecase.valid_model(original_model, "人物")
 
             model = original_model.copy()
+
+            # 首根元にウェイトを振る
+            usecase.replace_neck_root_weights(model)
             model.update_vertices_by_bone()
 
             # 人物に材質透明モーフを入れる

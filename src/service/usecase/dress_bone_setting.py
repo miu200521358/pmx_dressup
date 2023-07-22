@@ -94,7 +94,7 @@ class DressBoneSettings(Enum):
     )
     NECK_ROOT = DressBoneSetting(
         setting=BoneSettings.NECK_ROOT.value,
-        category="首根元",
+        category="体幹",
         translatable=True,
         local_scalable=True,
         local_x_scalable=True,

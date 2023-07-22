@@ -1202,6 +1202,9 @@ class LoadUsecase:
                             (dress_bone.position - dress.bones[dress.bones[f"{dress_bone.name[0]}つま先ＩＫ"].ik.bone_index].position).length()
                             or 1
                         )
+                    elif dress_bone.name == "首根元":
+                        # 首根元は上半身2のスケールを流用する
+                        dress_fit_length_scale = (dress_local_scales[dress.bones["上半身2"].index].x / 0.97) + 1
                     # elif dress_bone.name == "上半身2" and "上半身3" not in dress.bones:
                     #     # 上半身2はウェイトを全体的に覆ってるので、肩までの高さとする
                     #     if model.bones.exists(("左肩", "右肩")) and dress.bones.exists(("左肩", "右肩")):
