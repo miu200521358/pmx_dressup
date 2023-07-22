@@ -16,7 +16,7 @@ __ = logger.get_text
 
 class ConfigPanel(CanvasPanel):
     def __init__(self, frame: BaseFrame, tab_idx: int, *args, **kw) -> None:
-        super().__init__(frame, tab_idx, 630, 880, *args, **kw)
+        super().__init__(frame, tab_idx, 0.6, 1.0, *args, **kw)
 
         self._initialize_ui()
         self._initialize_event()
@@ -29,26 +29,6 @@ class ConfigPanel(CanvasPanel):
         # --------------
         # 右に設定
         self.right_sizer = wx.BoxSizer(wx.VERTICAL)
-        self.header_sizer = wx.BoxSizer(wx.VERTICAL)
-
-        self.play_sizer = wx.BoxSizer(wx.HORIZONTAL)
-
-        frame_tooltip = __("モーションを指定している場合、任意のキーフレの結果の表示や再生ができます")
-
-        self.frame_title_ctrl = wx.StaticText(self, wx.ID_ANY, __("モーション"), wx.DefaultPosition, wx.DefaultSize, 0)
-        self.frame_title_ctrl.SetToolTip(frame_tooltip)
-        self.play_sizer.Add(self.frame_title_ctrl, 0, wx.ALL, 3)
-
-        self.frame_ctrl = WheelSpinCtrl(self, initial=0, min=0, max=10000, size=wx.Size(70, -1), change_event=self.on_frame_change)
-        self.frame_ctrl.SetToolTip(frame_tooltip)
-        self.play_sizer.Add(self.frame_ctrl, 0, wx.ALL, 3)
-
-        self.play_ctrl = wx.Button(self, wx.ID_ANY, __("再生"), wx.DefaultPosition, wx.Size(80, -1))
-        self.play_ctrl.SetToolTip(__("モーションを指定している場合、再生することができます"))
-        self.play_sizer.Add(self.play_ctrl, 0, wx.ALL, 3)
-
-        self.header_sizer.Add(self.play_sizer, 0, wx.ALL, 3)
-        self.right_sizer.Add(self.play_sizer, 0, wx.ALL, 0)
 
         # --------------
 
@@ -62,6 +42,29 @@ class ConfigPanel(CanvasPanel):
         self.scrolled_window.SetScrollRate(5, 5)
 
         self.window_sizer = wx.BoxSizer(wx.VERTICAL)
+
+        # --------------
+        # 再生
+
+        self.play_sizer = wx.BoxSizer(wx.HORIZONTAL)
+
+        frame_tooltip = __("モーションを指定している場合、任意のキーフレの結果の表示や再生ができます")
+
+        self.frame_title_ctrl = wx.StaticText(self.scrolled_window, wx.ID_ANY, __("モーション"), wx.DefaultPosition, wx.DefaultSize, 0)
+        self.frame_title_ctrl.SetToolTip(frame_tooltip)
+        self.play_sizer.Add(self.frame_title_ctrl, 0, wx.ALL, 3)
+
+        self.frame_ctrl = WheelSpinCtrl(
+            self.scrolled_window, initial=0, min=0, max=10000, size=wx.Size(70, -1), change_event=self.on_frame_change
+        )
+        self.frame_ctrl.SetToolTip(frame_tooltip)
+        self.play_sizer.Add(self.frame_ctrl, 0, wx.ALL, 3)
+
+        self.play_ctrl = wx.Button(self.scrolled_window, wx.ID_ANY, __("再生"), wx.DefaultPosition, wx.Size(80, -1))
+        self.play_ctrl.SetToolTip(__("モーションを指定している場合、再生することができます"))
+        self.play_sizer.Add(self.play_ctrl, 0, wx.ALL, 3)
+
+        self.window_sizer.Add(self.play_sizer, 0, wx.ALL, 3)
 
         # --------------
         # 材質非透過度
@@ -95,12 +98,13 @@ class ConfigPanel(CanvasPanel):
         self.config_sizer.Add(self.right_sizer, 1, wx.ALL | wx.EXPAND | wx.FIXED_MINSIZE, 0)
         self.root_sizer.Add(self.config_sizer, 0, wx.ALL, 0)
 
+        self.SetSizer(self.root_sizer)
         self.fit()
 
     def fit(self) -> None:
         self.scrolled_window.Layout()
-        self.SetSizer(self.root_sizer)
         self.Layout()
+        self.frame.fit()
 
     def _initialize_event(self) -> None:
         self.play_ctrl.Bind(wx.EVT_BUTTON, self.on_play)
@@ -143,6 +147,12 @@ class ConfigPanel(CanvasPanel):
         self.Enable(False)
         # 停止ボタンだけは有効
         self.play_ctrl.Enable(True)
+
+    def on_resize(self) -> None:
+        frame_w, frame_h = self.frame.GetClientSize()
+        self.scrolled_window.SetPosition(wx.Point(self.canvas.size.width, 0))
+        self.scrolled_window.SetSize(wx.Size(frame_w - self.canvas.size.width, frame_h))
+        self.fit()
 
     def Enable(self, enable: bool):
         self.frame_ctrl.Enable(enable)
