@@ -1181,7 +1181,7 @@ class LoadUsecase:
                 dress_matrixes = dress_motion.animate_bone([0], dress, append_ik=False)
 
                 bone_setting = DRESS_STANDARD_BONE_NAMES[dress_bone.name]
-                if bone_setting.local_x_scalable and dress_bone.name in model.bones:
+                if (bone_setting.global_scalable or bone_setting.local_x_scalable) and dress_bone.name in model.bones:
                     # X方向のスケーリングがOKで、人物に同名ボーンがある場合、比率を測る
                     model_bone = model.bones[dress_bone.name]
 
@@ -1243,7 +1243,7 @@ class LoadUsecase:
                             for tail_bone_name in bone_setting.tails
                             if tail_bone_name in dress.bones
                             and tail_bone_name in model.bones
-                            and 0.01 < dress.bones[tail_bone_name].position.distance(dress_bone.position)
+                            and 0.0001 < dress.bones[tail_bone_name].position.distance(dress_bone.position)
                         ]
 
                         if tail_far_bone_names and "指先" not in tail_far_bone_names[0]:
@@ -1515,7 +1515,7 @@ class LoadUsecase:
                     for tail_bone_name in bone_setting.tails
                     if tail_bone_name in dress.bones
                     and tail_bone_name in model.bones
-                    and 0.01 < dress.bones[tail_bone_name].position.distance(dress_bone.position)
+                    and 0.0001 < dress.bones[tail_bone_name].position.distance(dress_bone.position)
                 ]
 
                 # parent_far_bone_names = [
@@ -1523,7 +1523,7 @@ class LoadUsecase:
                 #     for parent_bone_name in bone_setting.parents
                 #     if parent_bone_name in dress.bones
                 #     and parent_bone_name in model.bones
-                #     and 0.01 < dress.bones[parent_bone_name].position.distance(dress_bone.position)
+                #     and 0.0001 < dress.bones[parent_bone_name].position.distance(dress_bone.position)
                 # ]
 
                 if bone_setting.translatable:
@@ -1739,99 +1739,234 @@ class LoadUsecase:
 
                     logger.debug(f"-- -- 回転オフセット[{dress_bone.name}][{dress_offset_qq.to_euler_degrees()}]")
 
-                if bone_setting.local_scalable:
+                if (bone_setting.global_scalable or bone_setting.local_x_scalable) and dress_bone.name in model.bones:
+                    # X方向のスケーリングがOKで、人物に同名ボーンがある場合、比率を測る
+                    dress_matrixes = dress_motion.animate_bone([0], dress, append_ik=False)
+                    model_bone = model.bones[dress_bone.name]
+
+                    if (
+                        bone_setting.category == "足ＩＫ"
+                        and f"{dress_bone.name[0]}足" in model.bones
+                        and f"{dress_bone.name[0]}足" in dress.bones
+                    ):
+                        # 足IKの比率は足ボーンから足IKボーンまでの直線距離とする
+                        dress_fit_length_scale = (model_bone.position - model.bones[f"{dress_bone.name[0]}足"].position).length() / (
+                            (dress_bone.position - dress.bones[f"{dress_bone.name[0]}足"].position).length() or 1
+                        )
+                    elif (
+                        bone_setting.category == "つま先ＩＫ"
+                        and f"{dress_bone.name[0]}足ＩＫ" in model.bones
+                        and f"{dress_bone.name[0]}足ＩＫ" in dress.bones
+                    ):
+                        # つま先IKの比率はグローバルZ方向だけ合わせる
+                        dress_fit_length_scale = (model_bone.position - model.bones[f"{dress_bone.name[0]}足ＩＫ"].position).length() / (
+                            (dress_bone.position - dress.bones[f"{dress_bone.name[0]}足ＩＫ"].position).length() or 1
+                        )
+                    elif (
+                        bone_setting.category == "足首"
+                        and f"{dress_bone.name[0]}つま先ＩＫ" in model.bones
+                        and f"{dress_bone.name[0]}つま先ＩＫ" in dress.bones
+                    ):
+                        dress_fit_length_scale = (
+                            model_bone.position - model.bones[model.bones[f"{dress_bone.name[0]}つま先ＩＫ"].ik.bone_index].position
+                        ).length() / (
+                            (dress_bone.position - dress.bones[dress.bones[f"{dress_bone.name[0]}つま先ＩＫ"].ik.bone_index].position).length()
+                            or 1
+                        )
+                    elif dress_bone.name == "首根元" and "上半身2" in dress.bones:
+                        # 首根元は上半身2のスケールを流用する
+                        dress_fit_length_scale = (dress_local_scales[dress.bones["上半身2"].index].x / 0.97) + 1
+                    elif "手首" in dress_bone.name:
+                        # 手首の比率は手首ボーンから各指１ボーンまでの直線距離の最小とする
+                        finger_lengths: list[float] = []
+                        for finger_name in ("親指０", "人指１", "中指１", "薬指１", "小指１"):
+                            finger_bone_name = f"{dress_bone.name[0]}{finger_name}"
+                            if finger_bone_name in model.bones and finger_bone_name in dress.bones:
+                                finger_lengths.append(
+                                    (model_bone.position - model.bones[finger_bone_name].position).length()
+                                    / ((dress_bone.position - dress.bones[finger_bone_name].position).length() or 1)
+                                )
+
+                        dress_fit_length_scale = 1.0 if not finger_lengths else np.min(finger_lengths)
+                    else:
+                        tail_far_bone_names = [
+                            tail_bone_name
+                            for tail_bone_name in bone_setting.tails
+                            if tail_bone_name in dress.bones
+                            and tail_bone_name in model.bones
+                            and 0.0001 < dress.bones[tail_bone_name].position.distance(dress_bone.position)
+                        ]
+
+                        if tail_far_bone_names and "指先" not in tail_far_bone_names[0]:
+                            model_bone_position = model_matrixes[0, dress_bone.name].position
+                            model_tail_position = model_matrixes[0, tail_far_bone_names[0]].position
+
+                            dress_bone_position = dress_matrixes[0, dress_bone.name].position
+                            dress_tail_position = dress_matrixes[0, tail_far_bone_names[0]].position
+
+                            dress_fit_length_scale = (model_tail_position - model_bone_position).length() / (
+                                (dress_tail_position - dress_bone_position).length() or 1
+                            )
+                        elif dress_bone.parent_index in dress_local_scales:
+                            # 先がボーンが見つからない場合、親ボーンの比率と親ボーンとの長さ比から求め直す
+                            dress_parent_fit_length_scale = dress_local_scales[dress_bone.parent_index].x + 1
+
+                            dress_fit_length_scale = (
+                                dress_parent_fit_length_scale
+                                * dress_bone.tail_relative_position.length()
+                                / dress.bones[dress_bone.parent_index].tail_relative_position.length()
+                            )
+
+                    if np.isclose(dress_fit_length_scale, 0.0):
+                        dress_fit_length_scale = 1.0
+
+                    # ちょっとだけ縮める
+                    dress_fit_length_scale *= 0.97
                     dress_local_thick_scale = dress_category_local_scales.get(bone_setting.category, MVector3D())
 
-                    if bone_setting.category == "指":
-                        # 指は厚みと同じだけの長さスケールにする
-                        dress_local_scale = MVector3D(dress_local_thick_scale.y, dress_local_thick_scale.y, dress_local_thick_scale.y)
-                    else:
-                        # ローカルスケール自体はひとまとめにしたもの
-                        dress_local_scale = dress_local_scales.get(dress_bone.index, MVector3D()) + dress_local_thick_scale
-                    dress_local_scales[dress_bone.index] = dress_local_scale
-
-                    dress.morphs[DRESS_BONE_FITTING_NAME].offsets.append(
-                        BoneMorphOffset(
-                            dress_bone.index,
-                            local_scale=dress_local_scale,
+                    if bone_setting.global_scalable:
+                        dress_global_scales[dress_bone.index] = (
+                            MVector3D(dress_fit_length_scale, dress_fit_length_scale, dress_fit_length_scale) - 1
                         )
-                    )
+
+                        dress.morphs[DRESS_BONE_FITTING_NAME].offsets.append(
+                            BoneMorphOffset(
+                                dress_bone.index,
+                                scale=dress_global_scales[dress_bone.index],
+                            )
+                        )
+
+                        logger.debug(f"ボーングローバル距離比率 [{dress_bone.name}][{dress_global_scales[dress_bone.index]}]")
+                    else:
+                        if bone_setting.category == "指":
+                            # 指は厚みと同じだけの長さスケールにする
+                            dress_local_scales[dress_bone.index] = MVector3D(
+                                dress_local_thick_scale.y, dress_local_thick_scale.y, dress_local_thick_scale.y
+                            )
+                        else:
+                            dress_local_scales[dress_bone.index] = MVector3D(
+                                dress_fit_length_scale - 1, dress_local_thick_scale.y, dress_local_thick_scale.z
+                            )
+
+                        dress.morphs[DRESS_BONE_FITTING_NAME].offsets.append(
+                            BoneMorphOffset(
+                                dress_bone.index,
+                                local_scale=dress_local_scales[dress_bone.index],
+                            )
+                        )
+
+                        logger.debug(f"ボーンローカル距離比率 [{dress_bone.name}][{dress_local_scales[dress_bone.index]}]")
+
+                # if bone_setting.local_x_scalable or bone_setting.local_scalable:
+                #     dress_local_thick_scale = dress_category_local_scales.get(bone_setting.category, MVector3D())
+
+                #     if bone_setting.category == "指":
+                #         # 指は厚みと同じだけの長さスケールにする
+                #         dress_local_scale = MVector3D(dress_local_thick_scale.y, dress_local_thick_scale.y, dress_local_thick_scale.y)
+                #     else:
+                #         # ローカルスケール自体はひとまとめにしたもの
+                #         dress_local_scale = dress_local_scales.get(dress_bone.index, MVector3D()) + dress_local_thick_scale
+                #     dress_local_scales[dress_bone.index] = dress_local_scale
+
+                #     dress.morphs[DRESS_BONE_FITTING_NAME].offsets.append(
+                #         BoneMorphOffset(
+                #             dress_bone.index,
+                #             local_scale=dress_local_scale,
+                #         )
+                #     )
+
+                # if bone_setting.global_scalable:
+                #     dress.morphs[DRESS_BONE_FITTING_NAME].offsets.append(
+                #         BoneMorphOffset(
+                #             dress_bone.index,
+                #             scale=dress_global_scales.get(dress_bone.index, MVector3D()),
+                #         )
+                #     )
 
             else:
                 # 準標準外、もしくは準標準でもボーンが揃ってない場合、準標準外フィッティング
                 dress_offset_position = MVector3D()
                 dress_offset_qq = MQuaternion()
+                dress_offset_scale = MVector3D()
 
-                # 現在の衣装ボーン位置を求める
-                dress_matrixes = dress_motion.animate_bone([0], dress, append_ik=False)
+                if dress.bones[dress_bone.parent_index].is_standard:
+                    # 現在の衣装ボーン位置を求める
+                    dress_matrixes = dress_motion.animate_bone([0], dress, append_ik=False)
 
-                # 子ボーン
-                tail_far_bone_names = (
-                    [
-                        tail_bone_name
-                        for tail_bone_name in dress_parent_bone_setting.tails
-                        if tail_bone_name in dress.bones and tail_bone_name in model.bones
-                    ]
-                    if not standard_child_names
-                    else standard_child_names
-                )
+                    # 子ボーン
+                    tail_far_bone_names = (
+                        [
+                            tail_bone_name
+                            for tail_bone_name in dress_parent_bone_setting.tails
+                            if tail_bone_name in dress.bones and tail_bone_name in model.bones
+                        ]
+                        if not standard_child_names
+                        else standard_child_names
+                    )
 
-                dress_parent_bone_position = dress_matrixes[0, dress_parent_standard_bone.name].position
-                model_parent_bone_position = model_matrixes[0, dress_parent_standard_bone.name].position
+                    dress_parent_bone_position = dress_matrixes[0, dress_parent_standard_bone.name].position
+                    model_parent_bone_position = model_matrixes[0, dress_parent_standard_bone.name].position
 
-                dress_bone_position = dress_matrixes[0, dress_bone.name].position
-                dress_relative_position = dress_bone_position - dress_parent_bone_position
+                    dress_bone_position = dress_matrixes[0, dress_bone.name].position
+                    dress_relative_position = dress_bone_position - dress_parent_bone_position
 
-                # 人物で親ボーンを基準として相対位置からどこにあるべきかを求め直す
-                model_deformed_position = model_matrixes[0, dress_parent_standard_bone.name].global_matrix * dress_relative_position
+                    # 人物で親ボーンを基準として相対位置からどこにあるべきかを求め直す
+                    model_deformed_position = model_matrixes[0, dress_parent_standard_bone.name].global_matrix * dress_relative_position
 
-                if tail_far_bone_names:
-                    model_tail_position = model_matrixes[0, tail_far_bone_names[0]].position
-                    dress_tail_position = dress_matrixes[0, tail_far_bone_names[0]].position
-                else:
-                    model_tail_position = model_matrixes[0, dress_parent_standard_bone.name].global_matrix * dress_relative_position
-                    dress_tail_position = dress_matrixes[0, dress_parent_standard_bone.name].global_matrix * dress_relative_position
+                    if tail_far_bone_names:
+                        model_tail_position = model_matrixes[0, tail_far_bone_names[0]].position
+                        dress_tail_position = dress_matrixes[0, tail_far_bone_names[0]].position
+                    else:
+                        model_tail_position = model_matrixes[0, dress_parent_standard_bone.name].global_matrix * dress_relative_position
+                        dress_tail_position = dress_matrixes[0, dress_parent_standard_bone.name].global_matrix * dress_relative_position
 
-                dress_bone_fit_position = align_triangle(
-                    dress_parent_bone_position,
-                    dress_tail_position,
-                    dress_bone_position,
-                    model_parent_bone_position,
-                    model_tail_position,
-                )
+                    dress_bone_fit_position = align_triangle(
+                        dress_parent_bone_position,
+                        dress_tail_position,
+                        dress_bone_position,
+                        model_parent_bone_position,
+                        model_tail_position,
+                    )
 
-                dress_offset_position = dress_bone_fit_position - model_deformed_position
+                    if dress_parent_bone_setting.category not in ("上半身", "下半身", "体幹", "首", "頭", "肩根元"):
+                        # 体幹以外は子ボーンの位置を合わせるよう回転させる
+                        original_slope_vector = dress_bone_fit_position - dress_parent_bone_position
+                        deformed_slope_vector = model_deformed_position - dress_parent_bone_position
 
-                if dress_parent_bone_setting.category not in ("上半身", "下半身", "体幹", "首", "頭"):
-                    # 体幹以外は子ボーンの位置を合わせるよう回転させる
-                    original_slope_vector = dress_bone_fit_position - dress_parent_bone_position
-                    deformed_slope_vector = model_deformed_position - dress_parent_bone_position
+                        if 0 < original_slope_vector.length() and 0 < deformed_slope_vector.length():
+                            # 子ボーンとの距離がある場合のみ、回転補正
+                            original_slope_qq = original_slope_vector.to_local_matrix4x4().to_quaternion()
+                            deformed_slope_qq = deformed_slope_vector.to_local_matrix4x4().to_quaternion()
+                            dress_offset_qq = original_slope_qq * deformed_slope_qq.inverse()
+                    else:
+                        # 角度は元々の向きと同じにする
+                        for tree_bone_index in reversed(dress.bone_trees[dress_bone.name].indexes[:-1]):
+                            dress_offset_qq *= dress_offset_qqs.get(tree_bone_index, MQuaternion()).inverse()
 
-                    if 0 < original_slope_vector.length() and 0 < deformed_slope_vector.length():
-                        # 子ボーンとの距離がある場合のみ、回転補正
-                        original_slope_qq = original_slope_vector.to_local_matrix4x4().to_quaternion()
-                        deformed_slope_qq = deformed_slope_vector.to_local_matrix4x4().to_quaternion()
-                        dress_offset_qq = original_slope_qq * deformed_slope_qq.inverse()
-                else:
-                    # 角度は元々の向きと同じにする
-                    for tree_bone_index in reversed(dress.bone_trees[dress_bone.name].indexes[:-1]):
-                        dress_offset_qq *= dress_offset_qqs.get(tree_bone_index, MQuaternion()).inverse()
+                    # スケールはシステムではない親を引き継ぐ
+                    parent_index = [bidx for bidx in dress.bone_trees[dress_bone.name].indexes[:-1] if not dress.bones[bidx].is_system][-1]
+                    dress_parent_scale = dress_global_scales.get(parent_index, MVector3D()) + dress_local_scales.get(
+                        parent_index, MVector3D()
+                    )
+                    dress_offset_scale = MVector3D(dress_parent_scale.x, dress_parent_scale.x, dress_parent_scale.x)
 
                 logger.debug(
                     f"-- -- 移動オフセット[{dress_bone.name}][{dress_offset_position}]"
                     + f"[fit={dress_bone_fit_position}][dress={model_deformed_position}]"
                 )
                 logger.debug(f"-- -- 回転オフセット[{dress_bone.name}][{dress_offset_qq.to_euler_degrees()}]")
+                logger.debug(f"-- -- 縮尺オフセット[{dress_bone.name}][{dress_offset_scale}]")
 
                 dress_offset_positions[dress_bone.index] = dress_offset_position
                 dress_offset_qqs[dress_bone.index] = dress_offset_qq
-                # dress_local_scales[dress_bone.index] = dress_bone_parent_scale
+                dress_global_scales[dress_bone.index] = dress_offset_scale
 
                 dress.morphs[DRESS_BONE_FITTING_NAME].offsets.append(
                     BoneMorphOffset(
                         dress_bone.index,
                         position=dress_offset_position,
                         qq=dress_offset_qq,
+                        scale=dress_offset_scale,
                     )
                 )
 
@@ -1847,8 +1982,12 @@ class LoadUsecase:
         #     os.path.join("E:/MMD/Dressup/output", f"{datetime.now():%Y%m%d_%H%M%S}_dress_bone_deform.pmx"),
         #     dict([(m.name, 0.0) for m in model.materials]),
         #     dict([(m.name, False) for m in model.materials]),
+        #     dict([(m.name, [0, 0, 0]) for m in model.materials]),
+        #     dict([(m.name, 0) for m in model.materials]),
         #     dict([(m.name, 1.0) for m in dress.materials]),
         #     dict([(m.name, False) for m in dress.materials]),
+        #     dict([(m.name, [0, 0, 0]) for m in dress.materials]),
+        #     dict([(m.name, 0) for m in dress.materials]),
         #     {},
         #     {},
         #     {},

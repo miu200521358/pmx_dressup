@@ -132,6 +132,6 @@ jsconfig.json
 archive/rivision.txt
 
 .vscode/
-.env
+.env*
 *.zip
 配布/

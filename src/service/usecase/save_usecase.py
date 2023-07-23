@@ -1031,7 +1031,10 @@ class SaveUsecase:
                 for model_reference in model_display_slot.references:
                     if model_reference.display_type == DisplayType.MORPH:
                         continue
-                    if model.bones[model_reference.display_index].name == bone.name:
+                    if (
+                        model.bones[model_reference.display_index].name == bone.name
+                        or model.bones[model_reference.display_index].name == bone.name[4:]
+                    ):
                         # 同じ名前のとこに入れる
                         display_slot_name = model_display_slot.name
                         display_slot_english_name = model_display_slot.english_name
@@ -1047,7 +1050,10 @@ class SaveUsecase:
                     for dress_reference in dress_display_slot.references:
                         if dress_reference.display_type == DisplayType.MORPH:
                             continue
-                        if dress.bones[dress_reference.display_index].name == bone.name:
+                        if (
+                            dress.bones[dress_reference.display_index].name == bone.name
+                            or dress.bones[dress_reference.display_index].name == bone.name[4:]
+                        ):
                             # 同じ名前のとこに入れる
                             display_slot_name = dress_display_slot.name
                             display_slot_english_name = dress_display_slot.english_name
@@ -1105,7 +1111,7 @@ class SaveUsecase:
         corrected_image = np.asarray(np.copy(copied_image))
 
         # 指定材質に割り当てられた頂点INDEXリスト
-        vertex_indexes = model.vertices_by_materials[copied_material.index]
+        vertex_indexes = model.vertices_by_materials.get(copied_material.index, [])
 
         logger.info("テクスチャ色範囲取得")
 
@@ -1122,23 +1128,24 @@ class SaveUsecase:
 
             vertex_colors.append(copied_image[dv, du, :3])
 
-        base_median_color = np.array(override_base_colors)
-        vertex_median_color = np.median(vertex_colors, axis=0)
+        if vertex_colors:
+            base_median_color = np.array(override_base_colors)
+            vertex_median_color = np.median(vertex_colors, axis=0)
 
-        color_difference = base_median_color - vertex_median_color
+            color_difference = base_median_color - vertex_median_color
 
-        logger.info(
-            "テクスチャ色補正: {c} (補正色[{m}], 材質UV範囲内中央色[{d}])",
-            c=np.round(color_difference, decimals=1),
-            m=np.round(base_median_color, decimals=1),
-            d=np.round(vertex_median_color, decimals=1),
-        )
+            logger.info(
+                "テクスチャ色補正: {c} (補正色[{m}], 材質UV範囲内中央色[{d}])",
+                c=np.round(color_difference, decimals=1),
+                m=np.round(base_median_color, decimals=1),
+                d=np.round(vertex_median_color, decimals=1),
+            )
 
-        # テクスチャ全体を補正（テクスチャ自体を複製）
-        corrected_image[..., :3] += color_difference
+            # テクスチャ全体を補正（テクスチャ自体を複製）
+            corrected_image[..., :3] += color_difference
 
-        # 補正後の色が0未満または255を超える場合、範囲内にクリップする
-        corrected_image = np.clip(corrected_image, 0, 255)
+            # 補正後の色が0未満または255を超える場合、範囲内にクリップする
+            corrected_image = np.clip(corrected_image, 0, 255)
 
         # 補正したテクスチャ画像フルパスを材質別に保存
         texture_dir_path, texture_file_name, texture_file_ext = separate_path(copied_texture.name)

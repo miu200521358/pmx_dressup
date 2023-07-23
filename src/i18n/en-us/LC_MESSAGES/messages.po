@@ -1280,3 +1280,9 @@ msgstr "Get texture color range"
 
 msgid "テクスチャ色補正: {c} (補正色[{m}], 材質UV範囲内中央色[{d}])"
 msgstr "Texture color correction: {c} (corrected color [{m}], center color in material UV range [{d}])"
+
+msgid "人物の材質の非透過度を0.2に設定します"
+msgstr "Set the non-transparency of the person material to 0.2"
+
+msgid "衣装の材質の非透過度を0.2に設定します"
+msgstr "Set the non-transparency of the costume material to 0.2"

@@ -105,6 +105,17 @@ class MaterialCtrlSet:
         self.zero_btn_ctrl.Bind(wx.EVT_BUTTON, self.on_change_material_zero)
         self.slider_sizer.Add(self.zero_btn_ctrl, 0, wx.ALL, 3)
 
+        self.half2_btn_ctrl = wx.Button(
+            self.window,
+            wx.ID_ANY,
+            "0.2",
+            wx.DefaultPosition,
+            wx.Size(30, -1),
+        )
+        self.half2_btn_ctrl.SetToolTip(__(f"{type_name}の材質の非透過度を0.2に設定します"))
+        self.half2_btn_ctrl.Bind(wx.EVT_BUTTON, self.on_change_material_half2)
+        self.slider_sizer.Add(self.half2_btn_ctrl, 0, wx.ALL, 3)
+
         self.half_btn_ctrl = wx.Button(
             self.window,
             wx.ID_ANY,
@@ -296,6 +307,10 @@ class MaterialCtrlSet:
 
         self.parent.Enable(True)
 
+    def on_change_material_half2(self, event: wx.Event) -> None:
+        self.slider.SetValue(0.2)
+        self.on_change_morph(event)
+
     def on_change_material_half(self, event: wx.Event) -> None:
         self.slider.SetValue(0.5)
         self.on_change_morph(event)
@@ -327,6 +342,7 @@ class MaterialCtrlSet:
         self.left_btn_ctrl.Enable(enable)
         self.right_btn_ctrl.Enable(enable)
         self.slider.Enable(enable)
+        self.half2_btn_ctrl.Enable(enable)
         self.half_btn_ctrl.Enable(enable)
         self.zero_btn_ctrl.Enable(enable)
         self.one_btn_ctrl.Enable(enable)
