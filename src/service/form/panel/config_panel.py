@@ -21,6 +21,12 @@ class ConfigPanel(CanvasPanel):
         self._initialize_ui()
         self._initialize_event()
 
+        self.scrolled_window.Layout()
+        self.scrolled_window.Fit()
+        self.Layout()
+
+        self.on_resize(wx.EVT_SIZE)
+
     def _initialize_ui(self) -> None:
         self.config_sizer = wx.BoxSizer(wx.HORIZONTAL)
         # 左にビューワー
@@ -36,8 +42,8 @@ class ConfigPanel(CanvasPanel):
             self,
             wx.ID_ANY,
             wx.DefaultPosition,
-            wx.DefaultSize,
-            wx.FULL_REPAINT_ON_RESIZE | wx.VSCROLL,
+            wx.Size(-1, -1),
+            wx.FULL_REPAINT_ON_RESIZE | wx.VSCROLL | wx.HSCROLL,
         )
         self.scrolled_window.SetScrollRate(5, 5)
 
@@ -98,14 +104,6 @@ class ConfigPanel(CanvasPanel):
         self.config_sizer.Add(self.right_sizer, 1, wx.ALL | wx.EXPAND | wx.FIXED_MINSIZE, 0)
         self.root_sizer.Add(self.config_sizer, 0, wx.ALL, 0)
 
-        self.SetSizer(self.root_sizer)
-        self.fit()
-
-    def fit(self) -> None:
-        self.scrolled_window.Layout()
-        self.Layout()
-        self.frame.fit()
-
     def _initialize_event(self) -> None:
         self.play_ctrl.Bind(wx.EVT_BUTTON, self.on_play)
         # self.model_material_choice_ctrl.Bind(wx.EVT_LISTBOX, self.on_change)
@@ -148,11 +146,8 @@ class ConfigPanel(CanvasPanel):
         # 停止ボタンだけは有効
         self.play_ctrl.Enable(True)
 
-    def on_resize(self) -> None:
-        frame_w, frame_h = self.frame.GetClientSize()
+    def on_resize(self, event: wx.Event):
         self.scrolled_window.SetPosition(wx.Point(self.canvas.size.width, 0))
-        self.scrolled_window.SetSize(wx.Size(frame_w - self.canvas.size.width, frame_h))
-        self.fit()
 
     def Enable(self, enable: bool):
         self.frame_ctrl.Enable(enable)

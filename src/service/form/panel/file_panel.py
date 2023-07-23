@@ -89,7 +89,6 @@ class FilePanel(BasePanel):
         self.console_ctrl.set_parent_sizer(self.root_sizer)
 
         self.root_sizer.Add(wx.StaticLine(self, wx.ID_ANY), wx.GROW)
-        self.fit()
 
     def exec(self, event: wx.Event) -> None:
         self.frame.on_exec()
