@@ -157,8 +157,10 @@ class ConfigPanel(CanvasPanel):
         self.dress_bone_ctrl.Enable(enable)
 
     def on_frame_change(self, event: wx.Event) -> None:
+        self.Enable(False)
         self.frame.fit_model_motion(self.model_material_ctrl.alphas.get(__("ボーンライン"), 0.5))
         self.frame.fit_dress_motion(self.dress_material_ctrl.alphas.get(__("ボーンライン"), 0.5))
+        self.Enable(True)
 
     def on_change_morph(self, target_bone_name: Optional[str] = None) -> None:
         self.change_motion(False, target_bone_name)
