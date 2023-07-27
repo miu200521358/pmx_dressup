@@ -1016,135 +1016,6 @@ class LoadUsecase:
                 l=dress_local_scale + MVector3D(1, 1, 1),
             )
 
-    #     logger.info("頂点フィッティング", decoration=MLogger.Decoration.LINE)
-    #     self.fit_dress_vertex_morph(model, dress, dress_fixed_length_local_scales, dress_fixed_depth_local_scales)
-
-    # def fit_dress_vertex_morph(
-    #     self,
-    #     model: PmxModel,
-    #     dress: PmxModel,
-    #     dress_length_local_scales: dict[int, MVector3D],
-    #     dress_depth_local_scales: dict[int, MVector3D],
-    # ) -> None:
-    #     # ----- 変形結果 -------------
-    #     # 位置とか全部フィッティングしたモーション
-    #     dress_motion = VmdMotion("dress fit motion")
-    #     dress_motion.morphs[DRESS_BONE_FITTING_NAME][0] = VmdMorphFrame(0, DRESS_BONE_FITTING_NAME, ratio=1.0)
-    #     # ローカルスケーリングフィッティングだけのモーション
-    #     local_scale_motion = VmdMotion("dress fit motion")
-
-    #     logger.info("ローカルスケーリングフィッティング")
-
-    #     bone_total_count = len(dress.bones)
-    #     for bone in dress.bones:
-    #         logger.count("ローカルスケール設定", bone.index, bone_total_count, display_block=100)
-
-    #         bf = VmdBoneFrame(0, bone.name)
-    #         # ローカルスケーリングのみの調整を行う
-    #         local_scale = MVector3D()
-    #         if bone.is_standard and DRESS_STANDARD_BONE_NAMES[bone.name].local_x_scalable:
-    #             local_scale += dress_length_local_scales.get(bone.index, MVector3D())
-    #         if bone.is_standard and DRESS_STANDARD_BONE_NAMES[bone.name].local_scalable:
-    #             local_scale += dress_depth_local_scales.get(bone.index, MVector3D())
-    #         bf.local_scale = local_scale
-    #         local_scale_motion.bones[bone.name].append(bf)
-
-    #     dress_matrixes = dress_motion.animate_bone([0], dress, append_ik=False)
-    #     local_scale_matrixes = local_scale_motion.animate_bone([0], dress, append_ik=False)
-
-    #     logger.info("頂点フィッティング")
-
-    #     vertex_total_count = len(dress.vertices)
-    #     for vertex in dress.vertices:
-    #         logger.count("頂点フィッティング", vertex.index, vertex_total_count, display_block=500)
-
-    #         # ボーンフィッティングによる変形後の頂点位置を求める
-    #         dress_mat = np.zeros((4, 4))
-    #         local_scale_mat = np.zeros((4, 4))
-    #         for n in range(vertex.deform.count):
-    #             bone_index = vertex.deform.indexes[n]
-    #             bone_weight = vertex.deform.weights[n]
-    #             # 位置まで合わせたフィッティングでの頂点位置
-    #             dress_mat += dress_matrixes[0, dress.bones[bone_index].name].local_matrix.vector * bone_weight
-    #             # ローカルスケーリングだけのフィッティングでの頂点位置
-    #             local_scale_mat += local_scale_matrixes[0, dress.bones[bone_index].name].local_matrix.vector * bone_weight
-    #         deformed_vertex_position = MMatrix4x4(*dress_mat.flatten()) * vertex.position
-    #         local_scale_vertex_position = MMatrix4x4(*local_scale_mat.flatten()) * vertex.position
-
-    #         # 有効なウェイトボーンをリストアップする
-    #         weights_bone_positions = MVectorDict()
-    #         (
-    #             bone_index1,
-    #             bone_index2,
-    #             bone_index3,
-    #             bone_index4,
-    #             bone_weight1,
-    #             bone_weight2,
-    #             bone_weight3,
-    #             bone_weight4,
-    #         ) = vertex.deform.normalized_deform()
-
-    #         if 0 < bone_weight1:
-    #             weights_bone_positions.append(bone_index1, dress.bones[bone_index1].position)
-
-    #         if 0 < bone_weight2:
-    #             weights_bone_positions.append(bone_index2, dress.bones[bone_index2].position)
-
-    #         if 0 < bone_weight3:
-    #             weights_bone_positions.append(bone_index3, dress.bones[bone_index3].position)
-
-    #         if 0 < bone_weight4:
-    #             weights_bone_positions.append(bone_index4, dress.bones[bone_index4].position)
-
-    #         weight_bone_distances = weights_bone_positions.distances(vertex.position)
-    #         # 距離から重みを求める
-    #         weight_bone_weights = weight_bone_distances / weight_bone_distances.sum(axis=0, keepdims=True)
-
-    #         # ウェイトボーンの位置を原点とした場合のローカル位置
-    #         deformed_vertex_local_positions: list[np.ndarray] = []
-    #         scaled_vertex_local_positions: list[np.ndarray] = []
-    #         for bone_index in weights_bone_positions.keys():
-    #             deformed_vertex_local_positions.append(
-    #                 (deformed_vertex_position - dress_matrixes[0, dress.bones[bone_index].name].position).vector
-    #             )
-    #             scaled_vertex_local_positions.append(
-    #                 (local_scale_vertex_position - local_scale_matrixes[0, dress.bones[bone_index].name].position).vector
-    #             )
-
-    #         vertex_offset_positions = np.array(scaled_vertex_local_positions) - np.array(deformed_vertex_local_positions)
-    #         vertex_offset_position = MVector3D(*np.average(vertex_offset_positions, axis=0, weights=weight_bone_weights))
-    #         dress.morphs[DRESS_VERTEX_FITTING_NAME].offsets.append(VertexMorphOffset(vertex.index, vertex_offset_position))
-
-    #         if 0.5 < vertex_offset_position.length():
-    #             logger.debug(
-    #                 f"頂点オフセット vertex[{vertex.index}] pos[{vertex.position}] deform[{deformed_vertex_position}] "
-    #                 + f"scale[{local_scale_vertex_position}], offset[{vertex_offset_position}]"
-    #             )
-
-    #     # ----- 変形結果 -------------
-
-    #     local_scale_motion.morphs[DRESS_VERTEX_FITTING_NAME][0] = VmdMorphFrame(0, DRESS_VERTEX_FITTING_NAME, ratio=1.0)
-
-    #     from datetime import datetime
-    #     from service.usecase.save_usecase import SaveUsecase
-
-    #     SaveUsecase().save(
-    #         model,
-    #         dress,
-    #         VmdMotion(),
-    #         local_scale_motion,
-    #         os.path.join("E:/MMD/Dressup/output", f"{datetime.now():%Y%m%d_%H%M%S}_dress_vertex_deform.pmx"),
-    #         dict([(m.name, 0.0) for m in model.materials]),
-    #         dict([(m.name, False) for m in model.materials]),
-    #         dict([(m.name, 1.0) for m in dress.materials]),
-    #         dict([(m.name, False) for m in dress.materials]),
-    #         {},
-    #         {},
-    #         {},
-    #         {},
-    #     )
-    #     # ----- 変形結果 -------------
-
     def fit_dress_bone_morph(
         self, model: PmxModel, dress: PmxModel, model_matrixes: VmdBoneFrameTrees
     ) -> tuple[dict[int, MVector3D], dict[int, MVector3D], dict[int, MVector3D], dict[int, MQuaternion]]:
@@ -2011,7 +1882,7 @@ class LoadUsecase:
                 bone_index = vertex.deform.indexes[n]
                 bone_weight = vertex.deform.weights[n]
                 mat += matrixes[0, model.bones[bone_index].name].local_matrix.vector * bone_weight
-            model_deformed_vertices.append((MMatrix4x4(*mat.flatten()) * vertex.position).vector)
+            model_deformed_vertices.append((MMatrix4x4(mat) * vertex.position).vector)
 
         return np.array(model_deformed_vertices)
 

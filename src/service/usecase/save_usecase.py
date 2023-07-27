@@ -574,7 +574,7 @@ class SaveUsecase:
                             bone_index = model.vertices[vertex_index].deform.indexes[n]
                             bone_weight = model.vertices[vertex_index].deform.weights[n]
                             mat += model_matrixes[0, model.bones[bone_index].name].local_matrix.vector * bone_weight
-                        copy_vertex.position = MMatrix4x4(*mat.flatten()) * copy_vertex.position
+                        copy_vertex.position = MMatrix4x4(mat) * copy_vertex.position
 
                         if 1 == model_material_alphas[material.name]:
                             faces.append(len(dress_model.vertices))
@@ -684,7 +684,7 @@ class SaveUsecase:
                             bone_index = dress.vertices[vertex_index].deform.indexes[n]
                             bone_weight = dress.vertices[vertex_index].deform.weights[n]
                             mat += dress_matrixes[0, dress.bones[bone_index].name].local_matrix.vector * bone_weight
-                        copy_vertex.position = MMatrix4x4(*mat.flatten()) * copy_vertex.position
+                        copy_vertex.position = MMatrix4x4(mat) * copy_vertex.position
 
                         if 1 == dress_material_alphas[material.name]:
                             faces.append(len(dress_model.vertices))
