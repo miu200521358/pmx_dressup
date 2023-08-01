@@ -7,9 +7,9 @@ from typing import Optional
 import numpy as np
 from executor import APP_NAME, VERSION_NAME
 
-from mlib.base.logger import MLogger
-from mlib.base.math import MMatrix4x4, MVector3D
-from mlib.base.part import Switch
+from mlib.core.logger import MLogger
+from mlib.core.math import MMatrix4x4, MVector3D
+from mlib.core.part import Switch
 from mlib.pmx.pmx_collection import PmxModel
 from mlib.pmx.pmx_part import (
     BoneMorphOffset,

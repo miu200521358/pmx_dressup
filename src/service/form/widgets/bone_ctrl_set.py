@@ -2,8 +2,8 @@ import os
 
 import wx
 
-from mlib.base.logger import MLogger
-from mlib.base.math import MVector3D
+from mlib.core.logger import MLogger
+from mlib.core.math import MVector3D
 from mlib.service.form.base_panel import BasePanel
 from mlib.service.form.widgets.float_slider_ctrl import FloatSliderCtrl
 

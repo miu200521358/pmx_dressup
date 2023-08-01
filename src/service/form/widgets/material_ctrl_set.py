@@ -2,7 +2,7 @@ import os
 
 import wx
 
-from mlib.base.logger import MLogger
+from mlib.core.logger import MLogger
 from mlib.service.form.base_panel import BasePanel
 from mlib.service.form.widgets.float_slider_ctrl import FloatSliderCtrl
 from mlib.service.form.widgets.image_btn_ctrl import ImageButton
@@ -350,3 +350,4 @@ class MaterialCtrlSet:
         self.override_color_check_ctrl.Enable(enable)
         self.dropper_ctrl.Enable(enable)
         self.color_picker_ctrl.Enable(enable)
+        self.material_override_ctrl.Enable(enable)

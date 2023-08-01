@@ -6,7 +6,13 @@ sys.path.append("src")
 from executor import APP_NAME, VERSION_NAME
 
 file_name = f"{APP_NAME}_{VERSION_NAME}"
-binary_keys = []
+binary_keys = [
+    ('mmd_base/mlib/core/*.pyd', 'mlib/core'),
+    ('mmd_base/mlib/pmx/*.pyd', 'mlib/pmx'),
+    ('mmd_base/mlib/service/*.pyd', 'mlib/service'),
+    ('mmd_base/mlib/utils/*.pyd', 'mlib/utils'),
+    ('mmd_base/mlib/vmd/*.pyd', 'mlib/vmd'),
+]
 data_keys = [
     ('src/resources/logo.ico', 'resources'),
     ('src/resources/icon/*.*', 'resources/icon'),
@@ -25,6 +31,9 @@ exclude_dlls = ['numpy\random\_bounded_integers.cp311-win_amd64.pyd', 'numpy\ran
 
 import os
 
+from glob import glob
+exclude_scripts = glob('mmd_base\mlib\**\*.py', recursive=True)
+
 def remove_from_list(input):
     outlist = []
     for item in sorted(input):
@@ -32,16 +41,18 @@ def remove_from_list(input):
         flag = 0
         if name in exclude_dlls:
             flag = 1
+        if name in exclude_scripts:
+            flag = 1
         print(f"{' OK ' if not flag else '*NG*'} [{name}] = {flag} ({os.path.getsize(path)})")
         if flag != 1:
             outlist.append(item)
     return outlist
 
 a = Analysis(['src/executor.py'],
-            pathex=['src', 'mmd_base/mlib'],
+            pathex=['src'],
             binaries=binary_keys,
             datas=data_keys,
-            hiddenimports=[],
+            hiddenimports=['quaternion', 'OpenGL', 'mlib.service.form.base_notebook', 'bezier', 'wx.glcanvas'],
             hookspath=[],
             runtime_hooks=[],
             excludes=exclude_dlls,

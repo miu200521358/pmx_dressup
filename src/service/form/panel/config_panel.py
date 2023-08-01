@@ -3,7 +3,7 @@ from typing import Optional
 
 import wx
 
-from mlib.base.logger import MLogger
+from mlib.core.logger import MLogger
 from mlib.pmx.canvas import CanvasPanel
 from mlib.service.form.base_frame import BaseFrame
 from mlib.service.form.widgets.spin_ctrl import WheelSpinCtrl

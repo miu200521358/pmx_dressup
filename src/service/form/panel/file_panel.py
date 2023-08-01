@@ -3,7 +3,7 @@ from datetime import datetime
 
 import wx
 
-from mlib.base.logger import MLogger
+from mlib.core.logger import MLogger
 from mlib.service.form.base_frame import BaseFrame
 from mlib.service.form.base_panel import BasePanel
 from mlib.service.form.widgets.console_ctrl import ConsoleCtrl

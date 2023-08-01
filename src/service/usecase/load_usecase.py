@@ -2,9 +2,9 @@ import os
 
 import numpy as np
 
-from mlib.base.exception import MApplicationException
-from mlib.base.logger import MLogger
-from mlib.base.math import (
+from mlib.core.exception import MApplicationException
+from mlib.core.logger import MLogger
+from mlib.core.math import (
     MMatrix4x4,
     MQuaternion,
     MVector3D,

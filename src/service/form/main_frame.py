@@ -3,8 +3,8 @@ from typing import Any, Optional
 
 import wx
 
-from mlib.base.logger import MLogger
-from mlib.base.math import MVector3D
+from mlib.core.logger import MLogger
+from mlib.core.math import MVector3D
 from mlib.pmx.pmx_collection import PmxModel
 from mlib.service.form.base_frame import BaseFrame
 from mlib.utils.file_utils import save_histories
