@@ -1286,3 +1286,12 @@ msgstr "Set the non-transparency of the person material to 0.2"
 
 msgid "衣装の材質の非透過度を0.2に設定します"
 msgstr "Set the non-transparency of the costume material to 0.2"
+
+msgid "ボタンをONにすると、縮尺XとZを同時に操作することができます"
+msgstr "When the button is turned on, scale X and Z can be operated at the same time"
+
+msgid "（読み込み直後はONになっています）"
+msgstr "(It is on immediately after loading)"
+
+msgid "OFFにすると、縮尺XとZを別々に操作する事ができます"
+msgstr "When turned off, scale X and Z can be operated separately"

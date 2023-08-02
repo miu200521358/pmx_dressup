@@ -6,6 +6,7 @@ from mlib.core.logger import MLogger
 from mlib.core.math import MVector3D
 from mlib.service.form.base_panel import BasePanel
 from mlib.service.form.widgets.float_slider_ctrl import FloatSliderCtrl
+from mlib.service.form.widgets.image_btn_ctrl import ImageButton
 
 logger = MLogger(os.path.basename(__file__))
 __ = logger.get_text
@@ -21,6 +22,7 @@ class BoneCtrlSet:
         self.positions: dict[str, MVector3D] = {}
         self.bone_target_dress: dict[str, bool] = {}
         self.individual_target_bone_indexes: list[list[int]] = []
+        self.is_link_scale: bool = False
 
         self.bone_sizer = wx.BoxSizer(wx.HORIZONTAL)
 
@@ -113,9 +115,24 @@ class BoneCtrlSet:
         )
         self.grid_sizer.Add(self.scale_y_slider.sizer, 0, wx.ALL, 3)
 
-        self.scale_link_check_ctrl = wx.CheckBox(self.window, wx.ID_ANY, "", wx.DefaultPosition, wx.DefaultSize, 0)
-        self.scale_link_check_ctrl.SetToolTip(__("チェックをONにすると、縮尺XとZを同時に操作することができます"))
-        self.grid_sizer.Add(self.scale_link_check_ctrl, 0, wx.ALL, 3)
+        self.scale_link_ctrl: ImageButton = ImageButton(
+            self.window,
+            "resources/icon/link_off.png",
+            wx.Size(15, 15),
+            self.on_link_scale,
+            "\n".join(
+                [
+                    __("ボタンをONにすると、縮尺XとZを同時に操作することができます"),
+                    __("（読み込み直後はONになっています）"),
+                    __("OFFにすると、縮尺XとZを別々に操作する事ができます"),
+                ]
+            ),
+        )
+        self.grid_sizer.Add(self.scale_link_ctrl, 0, wx.ALL, 3)
+
+        # self.scale_link_ctrl = wx.CheckBox(self.window, wx.ID_ANY, "", wx.DefaultPosition, wx.DefaultSize, 0)
+        # self.scale_link_ctrl.SetToolTip(__("チェックをONにすると、縮尺XとZを同時に操作することができます"))
+        # self.grid_sizer.Add(self.scale_link_ctrl, 0, wx.ALL, 3)
 
         scale_z_tooltip = __("選択されたボーンの奥行き方向の縮尺を調整できます")
         self.scale_z_label = wx.StaticText(self.window, wx.ID_ANY, __("縮尺Z"))
@@ -315,9 +332,19 @@ class BoneCtrlSet:
         self.position_x_slider.ChangeValue(0.0)
         self.position_y_slider.ChangeValue(0.0)
         self.position_z_slider.ChangeValue(0.0)
-        self.scale_link_check_ctrl.SetValue(1)
         # ボーンハイライトを変更
         self.individual_target_bone_indexes = individual_target_bone_indexes
+        # リンクボタンをONに
+        self.on_link_scale(wx.EVT_BUTTON)
+
+    def on_link_scale(self, event: wx.Event):
+        if not self.is_link_scale:
+            self.scale_link_ctrl.SetBackgroundColour(self.parent.active_background_color)
+            self.scale_link_ctrl.SetBitmap(self.scale_link_ctrl.create_bitmap("resources/icon/link_on.png"))
+        else:
+            self.scale_link_ctrl.SetBackgroundColour(wx.SystemSettings.GetColour(wx.SYS_COLOUR_BTNFACE))
+            self.scale_link_ctrl.SetBitmap(self.scale_link_ctrl.create_bitmap("resources/icon/link_off.png"))
+        self.is_link_scale = not self.is_link_scale
 
     def on_change_bone(self, event: wx.Event) -> None:
         morph_name = self.bone_choice_ctrl.GetStringSelection()
@@ -368,7 +395,7 @@ class BoneCtrlSet:
         self.position_x_slider.ChangeValue(0.0)
         self.position_y_slider.ChangeValue(0.0)
         self.position_z_slider.ChangeValue(0.0)
-        self.scale_link_check_ctrl.SetValue(1)
+        self.scale_link_ctrl.SetValue(1)
         self.bone_target_dress_check_ctrl.SetValue(0)
 
         self.parent.Enable(False)
@@ -376,12 +403,12 @@ class BoneCtrlSet:
         self.parent.Enable(True)
 
     def on_change_scale_x_slider(self, event: wx.Event) -> None:
-        if self.scale_link_check_ctrl.GetValue():
+        if self.is_link_scale:
             self.scale_z_slider.ChangeValue(self.scale_x_slider.GetValue())
         self.on_change_slider(event)
 
     def on_change_scale_z_slider(self, event: wx.Event) -> None:
-        if self.scale_link_check_ctrl.GetValue():
+        if self.is_link_scale:
             self.scale_x_slider.ChangeValue(self.scale_z_slider.GetValue())
         self.on_change_slider(event)
 
@@ -424,6 +451,6 @@ class BoneCtrlSet:
         self.position_y_slider.Enable(enable)
         self.position_z_slider.Enable(enable)
         self.clear_btn_ctrl.Enable(enable)
-        self.scale_link_check_ctrl.Enable(enable)
+        self.scale_link_ctrl.Enable(enable)
         self.bone_target_dress_check_ctrl.Enable(enable)
         self.bone_weight_check_ctrl.Enable(enable)

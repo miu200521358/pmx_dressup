@@ -6,7 +6,6 @@ from mlib.core.logger import MLogger
 from mlib.service.form.base_panel import BasePanel
 from mlib.service.form.widgets.float_slider_ctrl import FloatSliderCtrl
 from mlib.service.form.widgets.image_btn_ctrl import ImageButton
-from mlib.utils.file_utils import get_path
 
 logger = MLogger(os.path.basename(__file__))
 __ = logger.get_text
@@ -157,7 +156,7 @@ class MaterialCtrlSet:
 
         self.dropper_ctrl = ImageButton(
             self.window,
-            get_path("resources/icon/color.png"),
+            "resources/icon/color.png",
             wx.Size(15, 15),
             self.on_dropper,
             "\n".join(
@@ -178,7 +177,7 @@ class MaterialCtrlSet:
         # 材質補正ブロック
         self.material_override_ctrl = ImageButton(
             self.window,
-            get_path("resources/icon/copy.png"),
+            "resources/icon/copy.png",
             wx.Size(15, 15),
             self.on_click_material_override,
             "\n".join(

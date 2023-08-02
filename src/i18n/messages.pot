@@ -1709,3 +1709,15 @@ msgstr ""
 msgid "衣装の材質の非透過度を0.2に設定します"
 msgstr ""
 
+
+msgid "ボタンをONにすると、縮尺XとZを同時に操作することができます"
+msgstr ""
+
+
+msgid "（読み込み直後はONになっています）"
+msgstr ""
+
+
+msgid "OFFにすると、縮尺XとZを別々に操作する事ができます"
+msgstr ""
+

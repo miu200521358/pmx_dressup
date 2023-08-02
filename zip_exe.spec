@@ -23,11 +23,8 @@ data_keys = [
     ('mmd_base/mlib/resources/share_toon/*.*', 'mlib/resources/share_toon'),
     ('mmd_base/mlib/pmx/glsl/*.*', 'mlib/pmx/glsl'),
 ]
-exclude_dlls = ['numpy\random\_bounded_integers.cp311-win_amd64.pyd', 'numpy\random\_common.cp311-win_amd64.pyd',
-                'numpy\random\_generator.cp311-win_amd64.pyd', 'numpy\random\_mt19937.cp311-win_amd64.pyd', 'numpy\random\_pcg64.cp311-win_amd64.pyd',
-                'numpy\random\_philox.cp311-win_amd64.pyd', 'numpy\random\_sfc64.cp311-win_amd64.pyd', 'numpy\random\bit_generator.cp311-win_amd64.pyd',
-                'numpy\random\mtrand.cp311-win_amd64.pyd', 'libssl-3-x64.dll', 'libcrypto-3-x64.dll',
-                'PIL\_webp.cp311-win_amd64.pyd', '_ssl.pyd', '_asyncio.pyd']
+exclude_dlls = ['libssl-3-x64.dll', 'libcrypto-3-x64.dll', '_ssl.pyd', '_asyncio.pyd', 'libopenblas64__v0.3.23-246-g3d31191b-gcc_10_3_0.dll',
+                'PIL\_webp.cp311-win_amd64.pyd', 'wx\_html.cp311-win_amd64.pyd', 'wx\wxmsw32u_html_vc140_x64.dll']
 
 import os
 
@@ -43,7 +40,7 @@ def remove_from_list(input):
             flag = 1
         if name in exclude_scripts:
             flag = 1
-        print(f"{' OK ' if not flag else '*NG*'} [{name}] = {flag} ({os.path.getsize(path)})")
+        print(f"{' OK ' if not flag else '*NG*'} [{name}] = {flag} ({(os.path.getsize(path) / 1000):.2f})")
         if flag != 1:
             outlist.append(item)
     return outlist

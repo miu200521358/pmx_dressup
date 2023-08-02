@@ -208,8 +208,11 @@
 
 https://github.com/miu200521358/pmx_dressup
 
-アイコンは、icon-rainbow様よりお借りしています
+ツールアイコンは、icon-rainbow様よりお借りしています
 https://icon-rainbow.com/%E3%83%AF%E3%83%B3%E3%83%94%E3%83%BC%E3%82%B9%E3%81%AE%E7%84%A1%E6%96%99%E3%82%A2%E3%82%A4%E3%82%B3%E3%83%B3%E7%B4%A0%E6%9D%90-2/
+
+ツール内のアイコンは、Google Material Icon様よりお借りしています。
+https://fonts.google.com/icons
 
 
 ----------------------------------------------------------------
