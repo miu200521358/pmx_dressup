@@ -110,6 +110,7 @@ class MainFrame(BaseFrame):
         self.file_panel.exec_btn_ctrl.Enable(True)
 
         if not (self.file_panel.model_ctrl.data and self.file_panel.dress_ctrl.data and self.file_panel.motion_ctrl.data):
+            logger.warning("モデルデータもしくはモーションデータが正常に配置できませんでした", decoration=MLogger.Decoration.BOX)
             return
 
         # モデルとドレスのボーンの縮尺を合わせる
@@ -131,9 +132,6 @@ class MainFrame(BaseFrame):
         self.config_panel.dress_material_ctrl.initialize(dress.materials.names, all_material_names)
         # ボーン調整の選択肢を入れ替える
         self.config_panel.dress_bone_ctrl.initialize(individual_morph_names, individual_target_bone_indexes)
-
-        # キーフレを戻す
-        self.config_panel.fno = 0
 
         try:
             logger.info("人物モデル描画準備")

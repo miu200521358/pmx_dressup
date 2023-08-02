@@ -27,7 +27,7 @@ exclude_dlls = ['numpy\random\_bounded_integers.cp311-win_amd64.pyd', 'numpy\ran
                 'numpy\random\_generator.cp311-win_amd64.pyd', 'numpy\random\_mt19937.cp311-win_amd64.pyd', 'numpy\random\_pcg64.cp311-win_amd64.pyd',
                 'numpy\random\_philox.cp311-win_amd64.pyd', 'numpy\random\_sfc64.cp311-win_amd64.pyd', 'numpy\random\bit_generator.cp311-win_amd64.pyd',
                 'numpy\random\mtrand.cp311-win_amd64.pyd', 'libssl-3-x64.dll', 'libcrypto-3-x64.dll',
-                'PIL\_webp.cp311-win_amd64.pyd', 'PIL\_imagingtk.cp311-win_amd64.pyd', 'PIL\_imagingcms.cp311-win_amd64.pyd', '_ssl.pyd', '_asyncio.pyd']
+                'PIL\_webp.cp311-win_amd64.pyd', '_ssl.pyd', '_asyncio.pyd']
 
 import os
 
@@ -52,7 +52,7 @@ a = Analysis(['src/executor.py'],
             pathex=['src'],
             binaries=binary_keys,
             datas=data_keys,
-            hiddenimports=['quaternion', 'OpenGL', 'mlib.service.form.base_notebook', 'bezier', 'wx.glcanvas'],
+            hiddenimports=['quaternion', 'OpenGL', 'mlib.service.form.base_notebook', 'bezier', 'wx.glcanvas', 'PIL.Image', 'PIL.ImageOps'],
             hookspath=[],
             runtime_hooks=[],
             excludes=exclude_dlls,
