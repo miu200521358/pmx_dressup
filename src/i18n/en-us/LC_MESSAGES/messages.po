@@ -1295,3 +1295,21 @@ msgstr "(It is on immediately after loading)"
 
 msgid "OFFにすると、縮尺XとZを別々に操作する事ができます"
 msgstr "When turned off, scale X and Z can be operated separately"
+
+msgid "頂点データ出力"
+msgstr "Vertex data output"
+
+msgid "-- 頂点データ出力 [{i} ({p:.2f}%)]"
+msgstr "-- Vertex data output [{i} ({p:.2f}%)]"
+
+msgid "面データ出力"
+msgstr "Surface data output"
+
+msgid "-- 面データ出力 [{i} ({p:.2f}%)]"
+msgstr "-- Surface data output [{i} ({p:.2f}%)]"
+
+msgid "ボーンデータ出力"
+msgstr "Bone data output"
+
+msgid "-- ボーンデータ出力 [{i} ({p:.2f}%)]"
+msgstr "-- Bone data output [{i} ({p:.2f}%)]"

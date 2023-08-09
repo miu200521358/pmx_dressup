@@ -4,8 +4,8 @@ from datetime import datetime
 import wx
 
 from mlib.core.logger import MLogger
-from mlib.service.form.base_frame import BaseFrame
-from mlib.service.form.base_panel import BasePanel
+from mlib.service.form.notebook_frame import NotebookFrame
+from mlib.service.form.notebook_panel import NotebookPanel
 from mlib.service.form.widgets.console_ctrl import ConsoleCtrl
 from mlib.service.form.widgets.exec_btn_ctrl import ExecButton
 from mlib.service.form.widgets.file_ctrl import MPmxFilePickerCtrl, MVmdFilePickerCtrl
@@ -15,8 +15,8 @@ logger = MLogger(os.path.basename(__file__))
 __ = logger.get_text
 
 
-class FilePanel(BasePanel):
-    def __init__(self, frame: BaseFrame, tab_idx: int, *args, **kw) -> None:
+class FilePanel(NotebookPanel):
+    def __init__(self, frame: NotebookFrame, tab_idx: int, *args, **kw) -> None:
         super().__init__(frame, tab_idx, *args, **kw)
 
         self._initialize_ui()

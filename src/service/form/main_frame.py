@@ -6,7 +6,7 @@ import wx
 from mlib.core.logger import MLogger
 from mlib.core.math import MVector3D
 from mlib.pmx.pmx_collection import PmxModel
-from mlib.service.form.base_frame import BaseFrame
+from mlib.service.form.notebook_frame import NotebookFrame
 from mlib.utils.file_utils import save_histories
 from mlib.vmd.vmd_collection import VmdMotion
 from mlib.vmd.vmd_part import VmdMorphFrame
@@ -21,7 +21,7 @@ logger = MLogger(os.path.basename(__file__))
 __ = logger.get_text
 
 
-class MainFrame(BaseFrame):
+class MainFrame(NotebookFrame):
     def __init__(self, app: wx.App, title: str, size: wx.Size, *args, **kw) -> None:
         super().__init__(
             app,

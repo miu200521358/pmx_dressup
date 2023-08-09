@@ -5,7 +5,7 @@ import wx
 
 from mlib.core.logger import MLogger
 from mlib.pmx.canvas import CanvasPanel
-from mlib.service.form.base_frame import BaseFrame
+from mlib.service.form.notebook_frame import NotebookFrame
 from mlib.service.form.widgets.spin_ctrl import WheelSpinCtrl
 from service.form.widgets.bone_ctrl_set import BoneCtrlSet
 from service.form.widgets.material_ctrl_set import MaterialCtrlSet
@@ -15,7 +15,7 @@ __ = logger.get_text
 
 
 class ConfigPanel(CanvasPanel):
-    def __init__(self, frame: BaseFrame, tab_idx: int, *args, **kw) -> None:
+    def __init__(self, frame: NotebookFrame, tab_idx: int, *args, **kw) -> None:
         super().__init__(frame, tab_idx, 0.6, 1.0, *args, **kw)
 
         self._initialize_ui()

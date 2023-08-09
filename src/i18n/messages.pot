@@ -1721,3 +1721,27 @@ msgstr ""
 msgid "OFFにすると、縮尺XとZを別々に操作する事ができます"
 msgstr ""
 
+
+msgid "頂点データ出力"
+msgstr ""
+
+
+msgid "-- 頂点データ出力 [{i} ({p:.2f}%)]"
+msgstr ""
+
+
+msgid "面データ出力"
+msgstr ""
+
+
+msgid "-- 面データ出力 [{i} ({p:.2f}%)]"
+msgstr ""
+
+
+msgid "ボーンデータ出力"
+msgstr ""
+
+
+msgid "-- ボーンデータ出力 [{i} ({p:.2f}%)]"
+msgstr ""
+
