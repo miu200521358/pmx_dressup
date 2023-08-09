@@ -23,6 +23,7 @@ class FilePanel(NotebookPanel):
 
     def _initialize_ui(self) -> None:
         self.model_ctrl = MPmxFilePickerCtrl(
+            self,
             self.frame,
             self,
             key="model_pmx",
@@ -36,6 +37,7 @@ class FilePanel(NotebookPanel):
         self.model_ctrl.set_parent_sizer(self.root_sizer)
 
         self.dress_ctrl = MPmxFilePickerCtrl(
+            self,
             self.frame,
             self,
             key="dress_pmx",
@@ -49,6 +51,7 @@ class FilePanel(NotebookPanel):
         self.dress_ctrl.set_parent_sizer(self.root_sizer)
 
         self.motion_ctrl = MVmdFilePickerCtrl(
+            self,
             self.frame,
             self,
             key="motion_vmd",
@@ -62,6 +65,7 @@ class FilePanel(NotebookPanel):
         self.motion_ctrl.set_parent_sizer(self.root_sizer)
 
         self.output_pmx_ctrl = MPmxFilePickerCtrl(
+            self,
             self.frame,
             self,
             title="お着替えモデル出力先",
@@ -74,6 +78,7 @@ class FilePanel(NotebookPanel):
         self.exec_btn_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.exec_btn_ctrl = ExecButton(
             self,
+            self,
             __("お着替えモデル出力"),
             __("お着替えモデル出力停止"),
             self.exec,
@@ -85,7 +90,7 @@ class FilePanel(NotebookPanel):
         self.exec_btn_sizer.Add(self.exec_btn_ctrl, 0, wx.ALL, 3)
         self.root_sizer.Add(self.exec_btn_sizer, 0, wx.ALIGN_CENTER | wx.SHAPED, 5)
 
-        self.console_ctrl = ConsoleCtrl(self.frame, self, rows=550)
+        self.console_ctrl = ConsoleCtrl(self, self.frame, self, rows=550)
         self.console_ctrl.set_parent_sizer(self.root_sizer)
 
         self.root_sizer.Add(wx.StaticLine(self, wx.ID_ANY), wx.GROW)
