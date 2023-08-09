@@ -90,7 +90,7 @@ class FilePanel(NotebookPanel):
         self.exec_btn_sizer.Add(self.exec_btn_ctrl, 0, wx.ALL, 3)
         self.root_sizer.Add(self.exec_btn_sizer, 0, wx.ALIGN_CENTER | wx.SHAPED, 5)
 
-        self.console_ctrl = ConsoleCtrl(self, self.frame, self, rows=550)
+        self.console_ctrl = ConsoleCtrl(self, self.frame, self, rows=520)
         self.console_ctrl.set_parent_sizer(self.root_sizer)
 
         self.root_sizer.Add(wx.StaticLine(self, wx.ID_ANY), wx.GROW)
