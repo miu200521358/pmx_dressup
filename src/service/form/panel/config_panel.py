@@ -45,7 +45,7 @@ class ConfigPanel(CanvasPanel):
             wx.Size(-1, -1),
             wx.FULL_REPAINT_ON_RESIZE | wx.VSCROLL | wx.HSCROLL,
         )
-        self.scrolled_window.SetScrollRate(5, 5)
+        self.scrolled_window.SetScrollRate(5, 3)
 
         self.window_sizer = wx.BoxSizer(wx.VERTICAL)
 
