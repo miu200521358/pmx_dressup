@@ -135,3 +135,4 @@ archive/rivision.txt
 .env*
 *.zip
 配布/
+revision.txt
