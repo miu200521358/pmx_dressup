@@ -107,11 +107,13 @@ class SaveUsecase:
         if dress_config_motion:
             dress_motion.morphs = dress_config_motion.morphs.copy()
 
+        model.update_vertices_by_bone()
+        dress.update_vertices_by_bone()
+
         # 接地Yを取得する
-        root_ground_y = self.get_dress_ground(
-            dress,
-            dress_motion,
-        )
+        model_root_ground_y = self.get_ground_y(model, model_motion)
+        dress_root_ground_y = self.get_ground_y(dress, dress_motion)
+        root_ground_y = min(model_root_ground_y, dress_root_ground_y)
 
         mmf = VmdMorphFrame(0, "Root:Adjust")
         mmf.ratio = root_ground_y
@@ -250,7 +252,6 @@ class SaveUsecase:
         ) = dress_motion.animate(0, dress, is_gl=False)
 
         logger.info("人物：材質選り分け")
-        model.update_vertices_by_bone()
         model.update_vertices_by_material()
 
         active_model_vertices = set(
@@ -263,7 +264,6 @@ class SaveUsecase:
         )
 
         logger.info("衣装：材質選り分け")
-        dress.update_vertices_by_bone()
         dress.update_vertices_by_material()
 
         active_dress_vertices = set(
@@ -1334,28 +1334,25 @@ class SaveUsecase:
 
         return copy_morph
 
-    def get_dress_ground(
+    def get_ground_y(
         self,
-        dress: PmxModel,
-        dress_morph_motion: VmdMotion,
+        model: PmxModel,
+        model_motion: VmdMotion,
     ) -> float:
         """接地処理"""
         ankle_under_bone_names: list[str] = []
         # 足首より下のボーンから頂点位置を取得する
-        for bone_tree in dress.bone_trees:
+        for bone_tree in model.bone_trees:
             for ankle_bone_name in ("右足首", "左足首", "右足首D", "左足首D"):
                 if ankle_bone_name in bone_tree.names:
                     for bone in bone_tree.filter(ankle_bone_name):
                         ankle_under_bone_names.append(bone.name)
 
-        # モーフだけを引き継いで行列位置を取得する
-        dress_matrixes = dress_morph_motion.animate_bone([0], dress)
-
         ankle_under_vertex_indexes = set(
             [
                 vertex_index
                 for bone_name in ankle_under_bone_names
-                for vertex_index in dress.vertices_by_bones.get(dress.bones[bone_name].index, [])
+                for vertex_index in model.vertices_by_bones.get(model.bones[bone_name].index, [])
             ]
         )
 
@@ -1363,16 +1360,18 @@ class SaveUsecase:
             # 足首から下の頂点が無い場合、スルー
             return 0.0
 
+        (_, _, model_matrixes, vertex_morph_poses, _, _, _, _) = model_motion.animate(0, model, is_gl=False)
+
         ankle_vertex_positions: list[np.ndarray] = []
         for vertex_index in ankle_under_vertex_indexes:
-            vertex = dress.vertices[vertex_index]
+            vertex = model.vertices[vertex_index]
             # 変形後の位置
             mat = np.zeros((4, 4))
             for n in range(vertex.deform.count):
                 bone_index = vertex.deform.indexes[n]
                 bone_weight = vertex.deform.weights[n]
-                mat += dress_matrixes[0, dress.bones[bone_index].name].local_matrix.vector * bone_weight
-            ankle_vertex_positions.append(mat @ np.append(vertex.position.vector, 1))
+                mat += model_matrixes[0, model.bones[bone_index].name].local_matrix.vector * bone_weight
+            ankle_vertex_positions.append((MMatrix4x4(mat) * (vertex.position + MVector3D(*vertex_morph_poses[vertex_index, :]))).vector)
 
         # 最も地面に近い頂点を基準に接地位置を求める
         min_position = np.min(ankle_vertex_positions, axis=0)

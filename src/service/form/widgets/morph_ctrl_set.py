@@ -149,14 +149,14 @@ class MorphCtrlSet:
         if selection == len(self.ratios) - 1:
             selection = -1
         self.morph_choice_ctrl.SetSelection(selection + 1)
-        self.on_change_morph(event)
+        self.on_choice_morph(event)
 
     def on_change_morph_left(self, event: wx.Event) -> None:
         selection = self.morph_choice_ctrl.GetSelection()
         if selection == 0:
             selection = len(self.ratios)
         self.morph_choice_ctrl.SetSelection(selection - 1)
-        self.on_change_morph(event)
+        self.on_choice_morph(event)
 
     def Enable(self, enable: bool) -> None:
         self.morph_choice_ctrl.Enable(enable)
