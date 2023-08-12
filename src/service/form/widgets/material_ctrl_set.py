@@ -86,7 +86,7 @@ class MaterialCtrlSet:
             increment=0.01,
             spin_increment=0.1,
             border=3,
-            size=wx.Size(160, -1),
+            size=wx.Size(110, -1),
             change_event=self.on_change_morph,
             tooltip=__(f"{type_name}の材質の非透過度を任意の値に変更できます。\n非透過度を1未満にした場合、お着替えモデルには出力されません"),
         )
@@ -193,7 +193,7 @@ class MaterialCtrlSet:
             wx.ID_ANY,
             "",
             wx.DefaultPosition,
-            wx.Size(100, -1),
+            wx.Size(70, -1),
             wx.TE_READONLY | wx.BORDER_NONE | wx.WANTS_CHARS,
         )
         self.copy_material_name_ctrl.SetBackgroundColour(wx.SystemSettings.GetColour(wx.SYS_COLOUR_3DLIGHT))

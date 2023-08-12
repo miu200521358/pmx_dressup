@@ -130,6 +130,9 @@ class MainFrame(NotebookFrame):
         # 材質の選択肢を入れ替える
         self.config_panel.model_material_ctrl.initialize(model.materials.names, all_material_names)
         self.config_panel.dress_material_ctrl.initialize(dress.materials.names, all_material_names)
+        # モーフの選択肢を入れ替える
+        self.config_panel.model_morph_ctrl.initialize([m.name for m in model.morphs if not m.is_system])
+        self.config_panel.dress_morph_ctrl.initialize([m.name for m in dress.morphs if not m.is_system])
         # ボーン調整の選択肢を入れ替える
         self.config_panel.dress_bone_ctrl.initialize(individual_morph_names, individual_target_bone_indexes)
 
@@ -204,7 +207,7 @@ class MainFrame(NotebookFrame):
         self.file_panel.Enable(True)
         self.on_sound()
 
-    def set_model_motion_morphs(self, material_alphas: dict[str, float] = {}) -> None:
+    def set_model_motion_morphs(self, material_alphas: dict[str, float] = {}, morph_ratios: dict[str, float] = {}) -> None:
         if self.model_motion is None:
             return
 
@@ -213,6 +216,11 @@ class MainFrame(NotebookFrame):
         for material in model.materials:
             mf = VmdMorphFrame(0, f"{material.name}TR")
             mf.ratio = abs(material_alphas.get(material.name, 1.0) - 1)
+            self.model_motion.morphs[mf.name].append(mf)
+
+        for morph_name, ratio in morph_ratios.items():
+            mf = VmdMorphFrame(0, morph_name)
+            mf.ratio = ratio
             self.model_motion.morphs[mf.name].append(mf)
 
         mf = VmdMorphFrame(0, "全材質TR")
@@ -228,6 +236,7 @@ class MainFrame(NotebookFrame):
     def set_dress_motion_morphs(
         self,
         material_alphas: dict[str, float] = {},
+        morph_ratios: dict[str, float] = {},
         bone_scales: dict[str, MVector3D] = {},
         bone_degrees: dict[str, MVector3D] = {},
         bone_positions: dict[str, MVector3D] = {},
@@ -257,6 +266,11 @@ class MainFrame(NotebookFrame):
         mf = VmdMorphFrame(0, "全材質TR")
         mf.ratio = abs(material_alphas.get(__("全材質"), 1.0) - 1)
         self.dress_motion.morphs[mf.name].append(mf)
+
+        for morph_name, ratio in morph_ratios.items():
+            mf = VmdMorphFrame(0, morph_name)
+            mf.ratio = ratio
+            self.dress_motion.morphs[mf.name].append(mf)
 
         for morph_name, scale, degree, position in zip(
             bone_scales.keys(), bone_scales.values(), bone_degrees.values(), bone_positions.values()

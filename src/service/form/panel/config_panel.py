@@ -9,6 +9,7 @@ from mlib.service.form.notebook_frame import NotebookFrame
 from mlib.service.form.widgets.spin_ctrl import WheelSpinCtrl
 from service.form.widgets.bone_ctrl_set import BoneCtrlSet
 from service.form.widgets.material_ctrl_set import MaterialCtrlSet
+from service.form.widgets.morph_ctrl_set import MorphCtrlSet
 
 logger = MLogger(os.path.basename(__file__), level=1)
 __ = logger.get_text
@@ -16,7 +17,7 @@ __ = logger.get_text
 
 class ConfigPanel(CanvasPanel):
     def __init__(self, frame: NotebookFrame, tab_idx: int, *args, **kw) -> None:
-        super().__init__(frame, tab_idx, 0.6, 1.0, *args, **kw)
+        super().__init__(frame, tab_idx, 0.45, 1.0, *args, **kw)
 
         self._initialize_ui()
         self._initialize_event()
@@ -45,7 +46,7 @@ class ConfigPanel(CanvasPanel):
             wx.Size(-1, -1),
             wx.FULL_REPAINT_ON_RESIZE | wx.VSCROLL | wx.HSCROLL,
         )
-        self.scrolled_window.SetScrollRate(5, 3)
+        self.scrolled_window.SetScrollRate(5, 5)
 
         self.window_sizer = wx.BoxSizer(wx.VERTICAL)
 
@@ -72,16 +73,30 @@ class ConfigPanel(CanvasPanel):
 
         self.window_sizer.Add(self.play_sizer, 0, wx.ALL, 3)
 
+        self.grid_sizer = wx.FlexGridSizer(2)
+
         # --------------
-        # 材質非透過度
+        # 人物用調整
 
         self.model_material_ctrl = MaterialCtrlSet(self, self.scrolled_window, "人物")
-        self.window_sizer.Add(self.model_material_ctrl.sizer, 0, wx.ALL, 3)
+        self.grid_sizer.Add(self.model_material_ctrl.sizer, 0, wx.ALL, 3)
+
+        self.model_morph_ctrl = MorphCtrlSet(self, self.scrolled_window, "人物")
+        self.grid_sizer.Add(self.model_morph_ctrl.sizer, 0, wx.ALL, 3)
+
+        # --------------
+        # 衣装用調整
 
         self.dress_material_ctrl = MaterialCtrlSet(self, self.scrolled_window, "衣装")
-        self.window_sizer.Add(self.dress_material_ctrl.sizer, 0, wx.ALL, 3)
+        self.grid_sizer.Add(self.dress_material_ctrl.sizer, 0, wx.ALL, 3)
+
+        self.dress_morph_ctrl = MorphCtrlSet(self, self.scrolled_window, "衣装")
+        self.grid_sizer.Add(self.dress_morph_ctrl.sizer, 0, wx.ALL, 3)
+
+        # --------------
 
         self.canvas.color_changed_event = self.on_change_color
+        self.window_sizer.Add(self.grid_sizer, 0, wx.ALL, 3)
 
         # --------------
         # ボーン調整
@@ -147,13 +162,19 @@ class ConfigPanel(CanvasPanel):
         self.play_ctrl.Enable(True)
 
     def on_resize(self, event: wx.Event):
-        self.scrolled_window.SetPosition(wx.Point(self.canvas.size.width, 0))
+        w, h = self.frame.GetClientSize()
+        size = self.get_canvas_size()
+
+        self.scrolled_window.SetPosition(wx.Point(size.width, 0))
+        self.scrolled_window.SetSize(wx.Size(w - size.width, h))
 
     def Enable(self, enable: bool):
         self.frame_ctrl.Enable(enable)
         self.play_ctrl.Enable(enable)
         self.model_material_ctrl.Enable(enable)
         self.dress_material_ctrl.Enable(enable)
+        self.model_morph_ctrl.Enable(enable)
+        self.dress_morph_ctrl.Enable(enable)
         self.dress_bone_ctrl.Enable(enable)
 
     def on_frame_change(self, event: wx.Event) -> None:
@@ -184,11 +205,12 @@ class ConfigPanel(CanvasPanel):
         self.frame.change_bone(selected_bone_indexes)
 
     def change_motion(self, is_bone_deform: bool, target_bone_name: Optional[str] = None) -> None:
-        self.frame.set_model_motion_morphs(self.model_material_ctrl.alphas)
+        self.frame.set_model_motion_morphs(self.model_material_ctrl.alphas, self.model_morph_ctrl.ratios)
         self.frame.fit_model_motion(self.model_material_ctrl.alphas.get(__("ボーンライン"), 0.5), is_bone_deform)
 
         self.frame.set_dress_motion_morphs(
             self.dress_material_ctrl.alphas,
+            self.dress_morph_ctrl.ratios,
             self.dress_bone_ctrl.scales,
             self.dress_bone_ctrl.degrees,
             self.dress_bone_ctrl.positions,

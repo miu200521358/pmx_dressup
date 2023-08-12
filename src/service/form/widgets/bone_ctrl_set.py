@@ -47,7 +47,7 @@ class BoneCtrlSet:
             self.window,
             wx.ID_ANY,
             wx.DefaultPosition,
-            wx.Size(230, -1),
+            wx.Size(470, -1),
             choices=[],
         )
         self.bone_choice_ctrl.SetToolTip(__("スライダーで調整対象となる衣装のボーンです。\n左右は一括で調整できます。"))
@@ -82,7 +82,7 @@ class BoneCtrlSet:
             increment=0.01,
             spin_increment=0.05,
             border=3,
-            size=wx.Size(230, -1),
+            size=wx.Size(470, -1),
             change_event=self.on_change_scale_x_slider,
             tooltip=scale_x_tooltip,
         )
@@ -109,7 +109,7 @@ class BoneCtrlSet:
             increment=0.01,
             spin_increment=0.05,
             border=3,
-            size=wx.Size(230, -1),
+            size=wx.Size(470, -1),
             change_event=self.on_change_slider,
             tooltip=scale_y_tooltip,
         )
@@ -147,7 +147,7 @@ class BoneCtrlSet:
             increment=0.01,
             spin_increment=0.05,
             border=3,
-            size=wx.Size(230, -1),
+            size=wx.Size(470, -1),
             change_event=self.on_change_scale_z_slider,
             tooltip=scale_z_tooltip,
         )
@@ -169,7 +169,7 @@ class BoneCtrlSet:
             increment=0.01,
             spin_increment=1,
             border=3,
-            size=wx.Size(230, -1),
+            size=wx.Size(470, -1),
             change_event=self.on_change_slider,
             tooltip=degree_x_tooltip,
         )
@@ -190,7 +190,7 @@ class BoneCtrlSet:
             increment=0.01,
             spin_increment=1,
             border=3,
-            size=wx.Size(230, -1),
+            size=wx.Size(470, -1),
             change_event=self.on_change_slider,
             tooltip=degree_y_tooltip,
         )
@@ -211,7 +211,7 @@ class BoneCtrlSet:
             increment=0.01,
             spin_increment=1,
             border=3,
-            size=wx.Size(230, -1),
+            size=wx.Size(470, -1),
             change_event=self.on_change_slider,
             tooltip=degree_z_tooltip,
         )
@@ -230,9 +230,9 @@ class BoneCtrlSet:
             min_value=-4,
             max_value=4,
             increment=0.01,
-            spin_increment=0.1,
+            spin_increment=0.01,
             border=3,
-            size=wx.Size(230, -1),
+            size=wx.Size(470, -1),
             change_event=self.on_change_slider,
             tooltip=position_x_tooltip,
         )
@@ -251,9 +251,9 @@ class BoneCtrlSet:
             min_value=-4,
             max_value=4,
             increment=0.01,
-            spin_increment=0.1,
+            spin_increment=0.01,
             border=3,
-            size=wx.Size(230, -1),
+            size=wx.Size(470, -1),
             change_event=self.on_change_slider,
             tooltip=position_y_tooltip,
         )
@@ -272,9 +272,9 @@ class BoneCtrlSet:
             min_value=-4,
             max_value=4,
             increment=0.01,
-            spin_increment=0.1,
+            spin_increment=0.01,
             border=3,
-            size=wx.Size(230, -1),
+            size=wx.Size(470, -1),
             change_event=self.on_change_slider,
             tooltip=position_z_tooltip,
         )

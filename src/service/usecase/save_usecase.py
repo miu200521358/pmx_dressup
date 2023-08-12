@@ -8,7 +8,7 @@ import numpy as np
 from executor import APP_NAME, VERSION_NAME
 
 from mlib.core.logger import MLogger
-from mlib.core.math import MMatrix4x4, MVector3D
+from mlib.core.math import MMatrix4x4, MVector2D, MVector3D, MVector4D
 from mlib.core.part import Switch
 from mlib.pmx.pmx_collection import PmxModel
 from mlib.pmx.pmx_part import (
@@ -83,10 +83,12 @@ class SaveUsecase:
         dress_config_motion: Optional[VmdMotion],
         output_path: str,
         model_material_alphas: dict[str, float],
+        model_morph_ratios: dict[str, float],
         model_is_override_colors: dict[str, bool],
         model_override_base_colors: dict[str, list[int]],
         model_override_materials: dict[str, int],
         dress_material_alphas: dict[str, float],
+        dress_morph_ratios: dict[str, float],
         dress_is_override_colors: dict[str, bool],
         dress_override_base_colors: dict[str, list[int]],
         dress_override_materials: dict[str, int],
@@ -223,11 +225,29 @@ class SaveUsecase:
 
         # 変形結果
         logger.info("人物：変形確定")
-        model_original_matrixes = VmdMotion().animate_bone([0], model, append_ik=False)
-        model_matrixes = model_motion.animate_bone([0], model, append_ik=False)
+        model_original_matrixes = VmdMotion().animate_bone([0], model)
+        (
+            _,
+            _,
+            model_matrixes,
+            model_vertex_morph_poses,
+            _,
+            model_uv_morph_poses,
+            model_uv1_morph_poses,
+            _,
+        ) = model_motion.animate(0, model, is_gl=False)
         logger.info("衣装：変形確定")
-        dress_original_matrixes = VmdMotion().animate_bone([0], dress, append_ik=False)
-        dress_matrixes = dress_motion.animate_bone([0], dress, append_ik=False)
+        dress_original_matrixes = VmdMotion().animate_bone([0], dress)
+        (
+            _,
+            _,
+            dress_matrixes,
+            dress_vertex_morph_poses,
+            _,
+            dress_uv_morph_poses,
+            dress_uv1_morph_poses,
+            _,
+        ) = dress_motion.animate(0, dress, is_gl=False)
 
         logger.info("人物：材質選り分け")
         model.update_vertices_by_bone()
@@ -567,6 +587,9 @@ class SaveUsecase:
                         copy_vertex = model.vertices[vertex_index].copy()
                         copy_vertex.index = -1
                         copy_vertex.deform.indexes = np.vectorize(model_all_bone_map.get)(copy_vertex.deform.indexes)
+                        copy_vertex.uv += MVector2D(*model_uv_morph_poses[vertex_index, :2])
+                        if 0 < len(copy_vertex.extended_uvs):
+                            copy_vertex.extended_uvs[0] += MVector4D(*model_uv1_morph_poses[vertex_index, :])
 
                         # 変形後の位置に頂点を配置する
                         mat = np.zeros((4, 4))
@@ -574,7 +597,9 @@ class SaveUsecase:
                             bone_index = model.vertices[vertex_index].deform.indexes[n]
                             bone_weight = model.vertices[vertex_index].deform.weights[n]
                             mat += model_matrixes[0, model.bones[bone_index].name].local_matrix.vector * bone_weight
-                        copy_vertex.position = MMatrix4x4(mat) * copy_vertex.position
+                        copy_vertex.position = MMatrix4x4(mat) * (
+                            copy_vertex.position + MVector3D(*model_vertex_morph_poses[vertex_index, :])
+                        )
 
                         if 1 == model_material_alphas[material.name]:
                             faces.append(len(dress_model.vertices))
@@ -677,6 +702,9 @@ class SaveUsecase:
                         copy_vertex = dress.vertices[vertex_index].copy()
                         copy_vertex.index = -1
                         copy_vertex.deform.indexes = np.vectorize(dress_all_bone_map.get)(copy_vertex.deform.indexes)
+                        copy_vertex.uv += MVector2D(*dress_uv_morph_poses[vertex_index, :2])
+                        if 0 < len(copy_vertex.extended_uvs):
+                            copy_vertex.extended_uvs[0] += MVector4D(*dress_uv1_morph_poses[vertex_index, :])
 
                         # 変形後の位置に頂点を配置する
                         mat = np.zeros((4, 4))
@@ -684,7 +712,9 @@ class SaveUsecase:
                             bone_index = dress.vertices[vertex_index].deform.indexes[n]
                             bone_weight = dress.vertices[vertex_index].deform.weights[n]
                             mat += dress_matrixes[0, dress.bones[bone_index].name].local_matrix.vector * bone_weight
-                        copy_vertex.position = MMatrix4x4(mat) * copy_vertex.position
+                        copy_vertex.position = MMatrix4x4(mat) * (
+                            copy_vertex.position + MVector3D(*dress_vertex_morph_poses[vertex_index, :])
+                        )
 
                         if 1 == dress_material_alphas[material.name]:
                             faces.append(len(dress_model.vertices))
