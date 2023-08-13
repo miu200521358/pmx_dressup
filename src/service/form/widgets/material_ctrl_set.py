@@ -182,7 +182,7 @@ class MaterialCtrlSet:
             self.on_click_material_override,
             "\n".join(
                 [
-                    __("他の材質の設定を、選択されている材質の設定に上書きする事ができます"),
+                    __("他の材質の設定を、選択されている材質の設定にコピーする事ができます"),
                 ]
             ),
         )
@@ -197,7 +197,7 @@ class MaterialCtrlSet:
             wx.TE_READONLY | wx.BORDER_NONE | wx.WANTS_CHARS,
         )
         self.copy_material_name_ctrl.SetBackgroundColour(wx.SystemSettings.GetColour(wx.SYS_COLOUR_3DLIGHT))
-        self.copy_material_name_ctrl.SetToolTip(__("上書き元の材質名"))
+        self.copy_material_name_ctrl.SetToolTip(__("コピー元の材質名"))
         self.override_sizer.Add(self.copy_material_name_ctrl, 0, wx.ALL, 3)
 
         self.sizer.Add(self.override_sizer, 0, wx.ALL, 3)
@@ -205,8 +205,8 @@ class MaterialCtrlSet:
     def on_click_material_override(self, event: wx.Event):
         with wx.SingleChoiceDialog(
             self.parent,
-            __("上書き元の材質を選んでください。先頭の空行を選ぶと、上書き設定をクリアできます。"),
-            caption=__("ファイル履歴選択"),
+            __("コピー元の材質を選んでください。先頭の空行を選ぶと、コピー設定をクリアできます。"),
+            caption=__("設定コピー材質選択"),
             choices=self.all_material_names,
             style=wx.CAPTION | wx.CLOSE_BOX | wx.SYSTEM_MENU | wx.OK | wx.CANCEL | wx.CENTRE,
         ) as choiceDialog:

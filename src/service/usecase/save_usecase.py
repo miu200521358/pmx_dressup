@@ -236,7 +236,7 @@ class SaveUsecase:
             _,
             model_uv_morph_poses,
             model_uv1_morph_poses,
-            _,
+            model_materials,
         ) = model_motion.animate(0, model, is_gl=False)
         logger.info("衣装：変形確定")
         dress_original_matrixes = VmdMotion().animate_bone([0], dress)
@@ -248,7 +248,7 @@ class SaveUsecase:
             _,
             dress_uv_morph_poses,
             dress_uv1_morph_poses,
-            _,
+            dress_materials,
         ) = dress_motion.animate(0, dress, is_gl=False)
 
         logger.info("人物：材質選り分け")
@@ -556,7 +556,7 @@ class SaveUsecase:
                 logger.info("-- 材質出力: {s}", s=material_cnt)
             material_cnt += 1
 
-            copied_material = material.copy()
+            copied_material = model_materials[material.index].material.copy()
             copied_material.index = len(dress_model.materials)
             copied_texture: Optional[Texture] = None
 
@@ -663,8 +663,21 @@ class SaveUsecase:
                 copied_material.sphere_mode = src_material.sphere_mode
 
             # 色補正対象である場合、テクスチャの色を補正
-            if model_is_override_colors[material.name] and copied_texture:
-                self.override_texture(dress_model, copied_material, copied_texture, model_override_base_colors[material.name])
+            if model_is_override_colors[material.name]:
+                if copied_texture:
+                    self.override_texture(dress_model, copied_material, copied_texture, model_override_base_colors[material.name])
+                else:
+                    override_color = MVector3D(*model_override_base_colors[material.name])
+                    color_difference = (override_color - copied_material.diffuse.xyz) / 255
+                    copied_material.diffuse.xyz = color_difference
+                    copied_material.ambient = color_difference * 0.5
+
+                    logger.info(
+                        "材質色補正: {c} (補正色[{m}], 材質拡散色[{d}])",
+                        c=np.round(color_difference.vector, decimals=1),
+                        m=np.round(override_color.vector, decimals=1),
+                        d=np.round(copied_material.diffuse.xyz.vector, decimals=1),
+                    )
 
         prev_faces_count = 0
         for material in dress.materials:
@@ -672,7 +685,7 @@ class SaveUsecase:
                 logger.info("-- 材質出力: {s}", s=material_cnt)
             material_cnt += 1
 
-            copied_material = material.copy()
+            copied_material = dress_materials[material.index].material.copy()
             copied_material.name = f"Cos:{copied_material.name}"
             copied_material.index = len(dress_model.materials)
             copied_texture = None
@@ -777,8 +790,21 @@ class SaveUsecase:
                 copied_material.sphere_mode = src_material.sphere_mode
 
             # 色補正対象である場合、テクスチャの色を補正
-            if dress_is_override_colors[material.name] and copied_texture:
-                self.override_texture(dress_model, copied_material, copied_texture, dress_override_base_colors[material.name])
+            if dress_is_override_colors[material.name]:
+                if copied_texture:
+                    self.override_texture(dress_model, copied_material, copied_texture, dress_override_base_colors[material.name])
+                else:
+                    override_color = MVector3D(*dress_override_base_colors[material.name])
+                    color_difference = (override_color - copied_material.diffuse.xyz) / 255
+                    copied_material.diffuse.xyz = color_difference
+                    copied_material.ambient = color_difference * 0.5
+
+                    logger.info(
+                        "材質色補正: {c} (補正色[{m}], 材質拡散色[{d}])",
+                        c=np.round(color_difference.vector, decimals=1),
+                        m=np.round(override_color.vector, decimals=1),
+                        d=np.round(copied_material.diffuse.xyz.vector, decimals=1),
+                    )
 
         # ---------------------------------
 

@@ -1355,3 +1355,12 @@ msgstr "Set the morph value of the costume to 0.5"
 
 msgid "衣装のモーフの値を1.0に設定します"
 msgstr "Set the morph value of the costume to 1.0"
+
+msgid "他の材質の設定を、選択されている材質の設定にコピーする事ができます"
+msgstr "You can copy the settings of another material to the settings of the selected material"
+
+msgid "コピー元の材質名"
+msgstr "Name of the material from which it was copied"
+
+msgid "材質色補正: {c} (補正色[{m}], 材質拡散色[{d}])"
+msgstr "Material color correction: {c} (corrected color [{m}], material diffusion color [{d}])"
