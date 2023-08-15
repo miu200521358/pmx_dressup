@@ -1804,7 +1804,7 @@ class LoadUsecase:
                         original_slope_vector = dress_bone_fit_position - dress_parent_bone_position
                         deformed_slope_vector = model_deformed_position - dress_parent_bone_position
 
-                        if 0 < original_slope_vector.length() and 0 < deformed_slope_vector.length():
+                        if 0.1 < original_slope_vector.length() and 0.1 < deformed_slope_vector.length():
                             # 子ボーンとの距離がある場合のみ、回転補正
                             original_slope_qq = original_slope_vector.to_local_matrix4x4().to_quaternion()
                             deformed_slope_qq = deformed_slope_vector.to_local_matrix4x4().to_quaternion()
