@@ -491,9 +491,13 @@ class SaveUsecase:
                     dress_link.bone_index = dress_model_bones.get_index_by_map(link.bone_index, dress_model_bone.is_dress)
                     dress_model_bone.ik.links.append(dress_link)
 
-            if bone.is_leg_d and dress_matrixes.exists(0, dress_model_bones[dress_model_bone.effect_index].name):
+            if (
+                dress_model_bone.bone.is_leg_d
+                and 0 <= dress_model_bone.effect_index
+                and dress_matrixes.exists(0, dress_model_bones[dress_model_bone.effect_index].name)
+            ):
                 # 足Dを足FKに揃える
-                dress_model_bones[bone.index].position = dress_matrixes[
+                dress_model_bone.position = dress_matrixes[
                     0, dress_model_bones[dress_model_bone.effect_index].name
                 ].position.copy()
 
