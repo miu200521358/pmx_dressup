@@ -131,6 +131,21 @@ class LoadUsecase:
         # 両方の片方にしかないボーン名を抽出
         mismatch_bone_names = (short_model_bone_names ^ short_dress_bone_names) | add_bone_names
 
+        # 足Dは同様の機能を果たすボーンが衣装側にあれば除外
+        exclude_bone_names = set([])
+        for bname in {"右足D", "左足D", "右ひざD", "左ひざD", "右足首D", "左足首D"} & mismatch_bone_names:
+            parent_bname = bname[:-1]
+            if (
+                bname not in dress.bones
+                and parent_bname in dress.bones
+                and 0 < len([b.name for b in dress.bones if b.effect_index == dress.bones[parent_bname].index and b.effect_factor == 1])
+            ):
+                exclude_bone_names |= {bname}
+
+        if exclude_bone_names:
+            # D系で除外するのがある場合はD系は全部入れない
+            mismatch_bone_names -= {"右足D", "左足D", "右ひざD", "左ひざD", "右足首D", "左足首D"}
+
         # ミスマッチボーンで追加する必要のあるボーン名を抽出(順番を保持する)
         short_mismatch_model_bone_names = [
             bname for bname in DRESS_STANDARD_BONE_NAMES.keys() if bname in (mismatch_bone_names - set(model.bones.names))
@@ -1692,7 +1707,7 @@ class LoadUsecase:
                         dress_fit_length_scale = 1.0
 
                     # ちょっとだけ縮める
-                    dress_fit_length_scale *= 0.97
+                    dress_fit_length_scale *= 0.98
                     dress_local_thick_scale = dress_category_local_scales.get(bone_setting.category, MVector3D())
 
                     if bone_setting.global_scalable:
@@ -1753,14 +1768,23 @@ class LoadUsecase:
                 #             scale=dress_global_scales.get(dress_bone.index, MVector3D()),
                 #         )
                 #     )
-
             else:
                 # 準標準外、もしくは準標準でもボーンが揃ってない場合、準標準外フィッティング
                 dress_offset_position = MVector3D()
                 dress_offset_qq = MQuaternion()
-                dress_offset_scale = MVector3D()
+                dress_global_offset_scale = MVector3D()
+                dress_local_offset_scale = MVector3D()
+                parent_index = [bidx for bidx in dress.bone_trees[dress_bone.name].indexes[:-1] if not dress.bones[bidx].is_system][-1]
 
-                if dress.bones[dress_bone.parent_index].is_standard:
+                if dress.bones[dress_bone.parent_index].is_standard or (
+                    dress_bone.effect_index in dress.bones and dress.bones[dress_bone.effect_index].is_standard
+                ):
+                    dress_parent_standard_bone = dress.bones[parent_index]
+                    if dress_bone.effect_index in dress.bones and dress.bones[dress_bone.effect_index].is_standard:
+                        # 付与親が準標準である場合、それを参照する
+                        parent_index = dress_bone.effect_index
+                        dress_parent_standard_bone = dress.bones[dress_bone.effect_index]
+
                     # 現在の衣装ボーン位置を求める
                     dress_matrixes = dress_motion.animate_bone([0], dress, append_ik=False)
 
@@ -1815,29 +1839,39 @@ class LoadUsecase:
                             dress_offset_qq *= dress_offset_qqs.get(tree_bone_index, MQuaternion()).inverse()
 
                     # スケールはシステムではない親を引き継ぐ
-                    parent_index = [bidx for bidx in dress.bone_trees[dress_bone.name].indexes[:-1] if not dress.bones[bidx].is_system][-1]
+                    dress_local_offset_scale = dress_local_scales.get(parent_index, MVector3D()).copy()
+
+                    # 親ボーンのローカル軸をコピーしておく（軸がずれると形状がズレる）
+                    dress.bones[dress_bone.index].local_axis = dress.bones[parent_index].local_axis.copy()
+                elif dress_bone.parent_index in dress_local_scales:
+                    # 準標準ではない子ボーンのスケールはローカルが親にある場合のみローカルXを引き継ぐ（準標準の子である準標準外）
                     dress_parent_scale = dress_global_scales.get(parent_index, MVector3D()) + dress_local_scales.get(
                         parent_index, MVector3D()
                     )
-                    dress_offset_scale = MVector3D(dress_parent_scale.x, dress_parent_scale.x, dress_parent_scale.x)
+                    dress_global_offset_scale = MVector3D(dress_parent_scale.x, dress_parent_scale.x, dress_parent_scale.x)
 
                 logger.debug(
                     f"-- -- 移動オフセット[{dress_bone.name}][{dress_offset_position}]"
                     + f"[fit={dress_bone_fit_position}][dress={model_deformed_position}]"
                 )
                 logger.debug(f"-- -- 回転オフセット[{dress_bone.name}][{dress_offset_qq.to_euler_degrees()}]")
-                logger.debug(f"-- -- 縮尺オフセット[{dress_bone.name}][{dress_offset_scale}]")
+                logger.debug(f"-- -- グローバル縮尺オフセット[{dress_bone.name}][{dress_global_offset_scale}]")
+                logger.debug(f"-- -- ローカル縮尺オフセット[{dress_bone.name}][{dress_local_offset_scale}]")
 
                 dress_offset_positions[dress_bone.index] = dress_offset_position
                 dress_offset_qqs[dress_bone.index] = dress_offset_qq
-                dress_global_scales[dress_bone.index] = dress_offset_scale
+                if 0 < dress_global_offset_scale.length():
+                    dress_global_scales[dress_bone.index] = dress_global_offset_scale
+                if 0 < dress_local_offset_scale.length():
+                    dress_local_scales[dress_bone.index] = dress_local_offset_scale
 
                 dress.morphs[DRESS_BONE_FITTING_NAME].offsets.append(
                     BoneMorphOffset(
                         dress_bone.index,
                         position=dress_offset_position,
                         qq=dress_offset_qq,
-                        scale=dress_offset_scale,
+                        scale=dress_global_offset_scale,
+                        local_scale=dress_local_offset_scale,
                     )
                 )
 
