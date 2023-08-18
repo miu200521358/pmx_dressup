@@ -101,8 +101,7 @@ class DressBoneSettings(Enum):
     )
     NECK = DressBoneSetting(
         setting=BoneSettings.NECK.value,
-        category="首",
-        translatable=True,
+        category="体幹",
         rotatable=True,
         local_scalable=True,
         local_x_scalable=True,
@@ -110,7 +109,6 @@ class DressBoneSettings(Enum):
     HEAD = DressBoneSetting(
         setting=BoneSettings.HEAD.value,
         category="頭",
-        translatable=True,
         rotatable=True,
         rotate_cancel=True,
     )
@@ -684,9 +682,9 @@ class FitMorphSettings(Enum):
         name="腰",
         target_bone_names=["腰"],
         move_target_bone_names=[],
-        child_move_morph_names=["下半身", "上半身", "上半身2", "首根元", "胸"],
+        child_move_morph_names=["下半身", "上半身", "上半身2", "首根元", "首", "胸"],
         child_rotation_morph_names=[],
-        child_scale_morph_names=["下半身", "上半身", "上半身2", "首根元"],
+        child_scale_morph_names=["下半身", "上半身", "上半身2", "首根元", "首"],
         attend_weight_bone_names=[],
     )
 
@@ -704,9 +702,9 @@ class FitMorphSettings(Enum):
         name="上半身",
         target_bone_names=["上半身"],
         move_target_bone_names=[],
-        child_move_morph_names=["胸", "上半身2", "首根元"],
+        child_move_morph_names=["胸", "上半身2", "首根元", "首"],
         child_rotation_morph_names=[],
-        child_scale_morph_names=["上半身2", "首根元"],
+        child_scale_morph_names=["上半身2", "首根元", "首"],
         attend_weight_bone_names=[],
     )
 
@@ -714,9 +712,9 @@ class FitMorphSettings(Enum):
         name="上半身2",
         target_bone_names=["上半身2"],
         move_target_bone_names=[],
-        child_move_morph_names=["胸", "首根元"],
+        child_move_morph_names=["胸", "首根元", "首"],
         child_rotation_morph_names=[],
-        child_scale_morph_names=["首根元"],
+        child_scale_morph_names=["首根元", "首"],
         attend_weight_bone_names=[],
     )
 
@@ -734,9 +732,9 @@ class FitMorphSettings(Enum):
         name="首根元",
         target_bone_names=["首根元"],
         move_target_bone_names=[],
-        child_move_morph_names=[],
+        child_move_morph_names=["首"],
         child_rotation_morph_names=[],
-        child_scale_morph_names=[],
+        child_scale_morph_names=["首"],
         attend_weight_bone_names=[],
     )
 

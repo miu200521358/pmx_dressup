@@ -113,7 +113,7 @@ class SaveUsecase:
         # 接地Yを取得する
         model_root_ground_y = self.get_ground_y(model, model_motion)
         dress_root_ground_y = self.get_ground_y(dress, dress_motion)
-        root_ground_y = min(model_root_ground_y, dress_root_ground_y)
+        root_ground_y = np.array([model_root_ground_y, dress_root_ground_y])[np.argmax(np.abs([model_root_ground_y, dress_root_ground_y]))]
 
         mmf = VmdMorphFrame(0, "Root:Adjust")
         mmf.ratio = root_ground_y
@@ -497,9 +497,10 @@ class SaveUsecase:
                 and dress_matrixes.exists(0, dress_model_bones[dress_model_bone.effect_index].name)
             ):
                 # 足Dを足FKに揃える
-                dress_model_bone.position = dress_matrixes[
-                    0, dress_model_bones[dress_model_bone.effect_index].name
-                ].position.copy()
+                dress_model_bone.position = dress_matrixes[0, dress_model_bones[dress_model_bone.effect_index].name].position.copy()
+
+            if "全ての親" == dress_model_bone.name:
+                dress_model_bone.position = MVector3D()
 
             dress_model.bones.append(dress_model_bone.get_bone())
 
