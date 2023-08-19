@@ -1,1 +1,0 @@
-start /B PmxDressup_1.00.00_É¿28.exe --verbose 20 --out_log 0 --lang ko
