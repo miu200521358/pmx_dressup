@@ -385,7 +385,6 @@ class BoneCtrlSet:
             self.degrees[morph_name] = MVector3D()
             self.positions[morph_name] = MVector3D()
             self.bone_target_dress[morph_name] = False
-        # self.bone_choice_ctrl.SetSelection(0)
         self.scale_x_slider.ChangeValue(1.0)
         self.scale_y_slider.ChangeValue(1.0)
         self.scale_z_slider.ChangeValue(1.0)
@@ -395,12 +394,10 @@ class BoneCtrlSet:
         self.position_x_slider.ChangeValue(0.0)
         self.position_y_slider.ChangeValue(0.0)
         self.position_z_slider.ChangeValue(0.0)
-        self.scale_link_ctrl.SetValue(1)
         self.bone_target_dress_check_ctrl.SetValue(0)
+        self.bone_weight_check_ctrl.SetValue(0)
 
-        self.parent.Enable(False)
-        self.parent.on_change(is_clear=True)
-        self.parent.Enable(True)
+        self.on_change_slider(event)
 
     def on_change_scale_x_slider(self, event: wx.Event) -> None:
         if self.is_link_scale:
