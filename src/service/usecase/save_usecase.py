@@ -8,7 +8,7 @@ import numpy as np
 from executor import APP_NAME, VERSION_NAME
 
 from mlib.core.logger import MLogger
-from mlib.core.math import MMatrix4x4, MVector2D, MVector3D, MVector4D
+from mlib.core.math import MMatrix4x4, MVector2D, MVector3D, MVector4D, intersect_line_point
 from mlib.core.part import Switch
 from mlib.pmx.pmx_collection import PmxModel
 from mlib.pmx.pmx_part import (
@@ -22,6 +22,7 @@ from mlib.pmx.pmx_part import (
     MaterialMorphOffset,
     Morph,
     MorphType,
+    Sdef,
     SphereMode,
     Texture,
     ToonSharing,
@@ -606,6 +607,20 @@ class SaveUsecase:
                             copy_vertex.position + MVector3D(*model_vertex_morph_poses[vertex_index, :])
                         )
 
+                        # SDEFの場合、パラメーターを再計算
+                        if isinstance(copy_vertex.deform, Sdef):
+                            sdef: Sdef = copy_vertex.deform
+                            # SDEF-C: ボーンのベクトルと頂点の交点
+                            sdef.sdef_c = intersect_line_point(
+                                dress_model.bones[sdef.indexes[0]].position,
+                                dress_model.bones[sdef.indexes[1]].position,
+                                copy_vertex.position,
+                            )
+                            # SDEF-R0: 0番目のボーンとSDEF-Cの中点
+                            sdef.sdef_r0 = (sdef.sdef_c + dress_model.bones[sdef.indexes[0]].position) / 2
+                            # SDEF-R1: 1番目のボーンとSDEF-Cの中点
+                            sdef.sdef_r0 = (sdef.sdef_c + dress_model.bones[sdef.indexes[1]].position) / 2
+
                         if 1 == model_material_alphas[material.name]:
                             faces.append(len(dress_model.vertices))
                             model_vertex_map[vertex_index] = len(dress_model.vertices)
@@ -733,6 +748,20 @@ class SaveUsecase:
                         copy_vertex.position = MMatrix4x4(mat) * (
                             copy_vertex.position + MVector3D(*dress_vertex_morph_poses[vertex_index, :])
                         )
+
+                        # SDEFの場合、パラメーターを再計算
+                        if isinstance(copy_vertex.deform, Sdef):
+                            sdef: Sdef = copy_vertex.deform
+                            # SDEF-C: ボーンのベクトルと頂点の交点
+                            sdef.sdef_c = intersect_line_point(
+                                dress_model.bones[sdef.indexes[0]].position,
+                                dress_model.bones[sdef.indexes[1]].position,
+                                copy_vertex.position,
+                            )
+                            # SDEF-R0: 0番目のボーンとSDEF-Cの中点
+                            sdef.sdef_r0 = (sdef.sdef_c + dress_model.bones[sdef.indexes[0]].position) / 2
+                            # SDEF-R1: 1番目のボーンとSDEF-Cの中点
+                            sdef.sdef_r0 = (sdef.sdef_c + dress_model.bones[sdef.indexes[1]].position) / 2
 
                         if 1 == dress_material_alphas[material.name]:
                             faces.append(len(dress_model.vertices))
