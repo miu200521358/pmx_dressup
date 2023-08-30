@@ -1050,7 +1050,7 @@ class SaveUsecase:
 
         # その後、衣装側の表情を入れる
         for morph in dress.morphs:
-            if morph.name not in dress_model.morphs:
+            if morph.name not in dress_model.morphs and f"Cos:{morph.name}" not in dress_model.morphs:
                 continue
             if [
                 reference
