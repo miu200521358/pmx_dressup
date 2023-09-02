@@ -1894,74 +1894,43 @@ class LoadUsecase:
                 out_standard_dress_position = dress_out_standard_positions[dress_bone.index]
 
                 # ウェイトを持ったほぼ同じ位置にあるボーン
-                nearest_dress_bone_indexes = [
-                    ni for ni in dress_standard_positions.nearest_all_keys(out_standard_dress_position) if ni in model.vertices_by_bones
+                nearest_dress_standard_bone_indexes = [
+                    ni for ni in dress_standard_positions.nearest_all_keys(out_standard_dress_position) if ni in dress.vertices_by_bones
                 ]
-                if 0 < len(nearest_dress_bone_indexes):
-                    nearest_dress_bone_index = nearest_dress_bone_indexes[0]
+                nearest_dress_out_standard_bone_indexes = [
+                    ni for ni in dress_out_standard_positions.nearest_all_keys(out_standard_dress_position) if ni in dress.vertices_by_bones
+                ]
+                if not nearest_dress_standard_bone_indexes and nearest_dress_out_standard_bone_indexes:
+                    # 準標準外のみウェイトを持つボーンがある場合、それと同じ準標準ボーン（ウェイト不問）をチェック対象とする
+                    nearest_dress_standard_bone_indexes = [
+                        ni
+                        for ni in dress_standard_positions.nearest_all_keys(
+                            dress_out_standard_positions[nearest_dress_out_standard_bone_indexes[0]]
+                        )
+                    ]
+
+                if 0 < len(nearest_dress_standard_bone_indexes):
+                    nearest_dress_bone_index = nearest_dress_standard_bone_indexes[0]
                     nearest_dress_bone_position = dress_standard_positions[nearest_dress_bone_index]
                     nearest_dress_bone_name = dress.bones[nearest_dress_bone_index].name
                     if (
                         nearest_dress_bone_name in model.bones
                         and np.isclose(nearest_dress_bone_position.vector, out_standard_dress_position.vector, atol=1e-2, rtol=1e-2).all()
                     ):
-                        # ほぼ同じ位置に準標準がある場合、人物側のそのボーンの位置に合わせる
-                        model_standard_position = model_standard_positions[model.bones[nearest_dress_bone_name].index]
+                        # ほぼ同じ位置に準標準がある場合、そのボーンの位置に合わせる
                         dress_position = dress_matrixes[0, dress_bone.name].position
-                        dress_offset_position = model_standard_position - dress_position
+                        dress_offset_position = model_matrixes[0, nearest_dress_bone_name].position - dress_position
                         bone_setting = DRESS_STANDARD_BONE_NAMES[nearest_dress_bone_name]
 
-                        # 縮尺は準標準の縮尺に合わせる
+                        # 角度・縮尺は準標準の縮尺に合わせる
                         dress_local_offset_scale = dress_local_scales.get(nearest_dress_bone_index, MVector3D()).copy()
                         dress_local_thick_scale = dress_category_local_scales.get(bone_setting.category, MVector3D())
                         dress_local_offset_scale.y = dress_local_thick_scale.y
                         dress_local_offset_scale.z = dress_local_thick_scale.z
 
-                        # # 親ボーンのローカル軸をコピーしておく（軸がずれると形状がズレる）
-                        # dress.bones[dress_bone.index].local_axis = dress.bones[nearest_dress_bone_index].local_axis.copy()
+                        dress_offset_qq = dress_offset_qqs.get(nearest_dress_bone_index, MQuaternion()).copy()
+
                         is_same_standard = True
-
-                        # if (
-                        #     0 < dress_bone.tail_index
-                        #     and dress_bone.tail_index in dress.bones
-                        #     and dress.bones[dress_bone.tail_index].name in model.bones
-                        # ):
-                        #     # 表示先ボーンがある場合、縮尺と角度も合わせる
-                        #     dress_tail_name = dress.bones[dress_bone.tail_index].name
-
-                        #     if (
-                        #         model_standard_positions[model.bones[nearest_dress_bone_name].index]
-                        #         and (
-                        #             model_standard_positions[model.bones[dress_tail_name].index]
-                        #             or model_out_standard_positions[model.bones[dress_tail_name].index]
-                        #         )
-                        #         and dress_standard_positions[dress.bones[nearest_dress_bone_name].index]
-                        #         and (
-                        #             dress_standard_positions[dress.bones[dress_tail_name].index]
-                        #             or dress_out_standard_positions[dress.bones[dress_tail_name].index]
-                        #         )
-                        #     ):
-                        #         dress_fit_length_scale = (
-                        #             model_standard_positions[model.bones[nearest_dress_bone_name].index]
-                        #             - (
-                        #                 model_standard_positions[model.bones[dress_tail_name].index]
-                        #                 or model_out_standard_positions[model.bones[dress_tail_name].index]
-                        #             )
-                        #         ).length() / (
-                        #             dress_standard_positions[dress.bones[nearest_dress_bone_name].index]
-                        #             - (
-                        #                 dress_standard_positions[dress.bones[dress_tail_name].index]
-                        #                 or dress_out_standard_positions[dress.bones[dress_tail_name].index]
-                        #             )
-                        #         ).length()
-                        #         dress_local_offset_scale.x = dress_fit_length_scale - 1
-
-                        #     original_slope_vector = dress_matrixes[0, dress_tail_name].position - dress_position
-                        #     deformed_slope_vector = model_matrixes[0, dress_tail_name].position - model_standard_position
-
-                        #     original_slope_qq = original_slope_vector.to_local_matrix4x4().to_quaternion()
-                        #     deformed_slope_qq = deformed_slope_vector.to_local_matrix4x4().to_quaternion()
-                        #     dress_offset_qq = original_slope_qq * deformed_slope_qq.inverse()
 
                 if not is_same_standard:
                     if dress.bones[dress_bone.parent_index].is_standard or (
@@ -2034,16 +2003,15 @@ class LoadUsecase:
                             for tree_bone_index in reversed(dress.bone_trees[dress_bone.name].indexes[:-1]):
                                 dress_offset_qq *= dress_offset_qqs.get(tree_bone_index, MQuaternion()).inverse()
 
-                        # スケールはシステムではない親を引き継ぐ
-                        dress_local_offset_scale = dress_local_scales.get(parent_index, MVector3D()).copy()
+                        # # スケールはシステムではない親を引き継ぐ
+                        # dress_local_offset_scale = dress_local_scales.get(parent_index, MVector3D()).copy()
 
                         # 親ボーンのローカル軸をコピーしておく（軸がずれると形状がズレる）
                         dress.bones[dress_bone.index].local_axis = dress.bones[parent_index].local_axis.copy()
-                    elif dress_bone.parent_index in dress_local_scales:
+
+                    elif dress.bones[dress_bone.parent_index].is_standard and dress_bone.parent_index in dress_local_scales:
                         # 準標準ではない子ボーンのスケールはローカルが親にある場合のみローカルXを引き継ぐ（準標準の子である準標準外）
-                        dress_parent_scale = dress_global_scales.get(parent_index, MVector3D()) + dress_local_scales.get(
-                            parent_index, MVector3D()
-                        )
+                        dress_parent_scale = dress_local_scales[parent_index]
                         dress_global_offset_scale = MVector3D(dress_parent_scale.x, dress_parent_scale.x, dress_parent_scale.x)
 
                 logger.debug(
