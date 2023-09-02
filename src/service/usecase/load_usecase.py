@@ -837,8 +837,11 @@ class LoadUsecase:
         for dress_bone in dress.bones:
             if (
                 dress_bone.is_standard
-                or dress_bone.index not in dress.vertices_by_bones
-                or dress.bones[dress_bone.parent_index].name in individual_morph_names
+                or (dress_bone.index not in dress.vertices_by_bones and not dress_bone.child_bone_indexes)
+                or (
+                    not dress.bones[dress_bone.parent_index].is_standard
+                    and dress.bones[dress_bone.parent_index].name in individual_morph_names
+                )
                 or "操作中心" == dress_bone.name
                 or "胸" in dress_bone.name
                 or "握" in dress_bone.name
