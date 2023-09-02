@@ -1917,51 +1917,51 @@ class LoadUsecase:
                         dress_local_offset_scale.y = dress_local_thick_scale.y
                         dress_local_offset_scale.z = dress_local_thick_scale.z
 
-                        # 親ボーンのローカル軸をコピーしておく（軸がずれると形状がズレる）
-                        dress.bones[dress_bone.index].local_axis = dress.bones[nearest_dress_bone_index].local_axis.copy()
+                        # # 親ボーンのローカル軸をコピーしておく（軸がずれると形状がズレる）
+                        # dress.bones[dress_bone.index].local_axis = dress.bones[nearest_dress_bone_index].local_axis.copy()
                         is_same_standard = True
 
-                        if (
-                            0 < dress_bone.tail_index
-                            and dress_bone.tail_index in dress.bones
-                            and dress.bones[dress_bone.tail_index].name in model.bones
-                        ):
-                            # 表示先ボーンがある場合、縮尺と角度も合わせる
-                            dress_tail_name = dress.bones[dress_bone.tail_index].name
+                        # if (
+                        #     0 < dress_bone.tail_index
+                        #     and dress_bone.tail_index in dress.bones
+                        #     and dress.bones[dress_bone.tail_index].name in model.bones
+                        # ):
+                        #     # 表示先ボーンがある場合、縮尺と角度も合わせる
+                        #     dress_tail_name = dress.bones[dress_bone.tail_index].name
 
-                            if (
-                                model_standard_positions[model.bones[nearest_dress_bone_name].index]
-                                and (
-                                    model_standard_positions[model.bones[dress_tail_name].index]
-                                    or model_out_standard_positions[model.bones[dress_tail_name].index]
-                                )
-                                and dress_standard_positions[dress.bones[nearest_dress_bone_name].index]
-                                and (
-                                    dress_standard_positions[dress.bones[dress_tail_name].index]
-                                    or dress_out_standard_positions[dress.bones[dress_tail_name].index]
-                                )
-                            ):
-                                dress_fit_length_scale = (
-                                    model_standard_positions[model.bones[nearest_dress_bone_name].index]
-                                    - (
-                                        model_standard_positions[model.bones[dress_tail_name].index]
-                                        or model_out_standard_positions[model.bones[dress_tail_name].index]
-                                    )
-                                ).length() / (
-                                    dress_standard_positions[dress.bones[nearest_dress_bone_name].index]
-                                    - (
-                                        dress_standard_positions[dress.bones[dress_tail_name].index]
-                                        or dress_out_standard_positions[dress.bones[dress_tail_name].index]
-                                    )
-                                ).length()
-                                dress_local_offset_scale.x = dress_fit_length_scale - 1
+                        #     if (
+                        #         model_standard_positions[model.bones[nearest_dress_bone_name].index]
+                        #         and (
+                        #             model_standard_positions[model.bones[dress_tail_name].index]
+                        #             or model_out_standard_positions[model.bones[dress_tail_name].index]
+                        #         )
+                        #         and dress_standard_positions[dress.bones[nearest_dress_bone_name].index]
+                        #         and (
+                        #             dress_standard_positions[dress.bones[dress_tail_name].index]
+                        #             or dress_out_standard_positions[dress.bones[dress_tail_name].index]
+                        #         )
+                        #     ):
+                        #         dress_fit_length_scale = (
+                        #             model_standard_positions[model.bones[nearest_dress_bone_name].index]
+                        #             - (
+                        #                 model_standard_positions[model.bones[dress_tail_name].index]
+                        #                 or model_out_standard_positions[model.bones[dress_tail_name].index]
+                        #             )
+                        #         ).length() / (
+                        #             dress_standard_positions[dress.bones[nearest_dress_bone_name].index]
+                        #             - (
+                        #                 dress_standard_positions[dress.bones[dress_tail_name].index]
+                        #                 or dress_out_standard_positions[dress.bones[dress_tail_name].index]
+                        #             )
+                        #         ).length()
+                        #         dress_local_offset_scale.x = dress_fit_length_scale - 1
 
-                            original_slope_vector = dress_matrixes[0, dress_tail_name].position - dress_position
-                            deformed_slope_vector = model_matrixes[0, dress_tail_name].position - model_standard_position
+                        #     original_slope_vector = dress_matrixes[0, dress_tail_name].position - dress_position
+                        #     deformed_slope_vector = model_matrixes[0, dress_tail_name].position - model_standard_position
 
-                            original_slope_qq = original_slope_vector.to_local_matrix4x4().to_quaternion()
-                            deformed_slope_qq = deformed_slope_vector.to_local_matrix4x4().to_quaternion()
-                            dress_offset_qq = original_slope_qq * deformed_slope_qq.inverse()
+                        #     original_slope_qq = original_slope_vector.to_local_matrix4x4().to_quaternion()
+                        #     deformed_slope_qq = deformed_slope_vector.to_local_matrix4x4().to_quaternion()
+                        #     dress_offset_qq = original_slope_qq * deformed_slope_qq.inverse()
 
                 if not is_same_standard:
                     if dress.bones[dress_bone.parent_index].is_standard or (
