@@ -759,7 +759,9 @@ class LoadUsecase:
 
                 for bone_name in target_all_bone_names:
                     if bone_name in dress.bones:
-                        if axis_name in ("MX", "RY", "RZ"):
+                        if axis_name in ("MX", "RZ") or (
+                            axis_name == "RY" and bone_name not in ("頭", "左胸", "右胸", "左足首D", "右足首D", "左足首", "右足首")
+                        ):
                             offset_position = position * (-1 if "右" in bone_name else 1)
                             offset_local_qq = local_qq.inverse() if "左" in bone_name else local_qq
                         else:
@@ -1885,38 +1887,43 @@ class LoadUsecase:
                 is_same_standard = False
                 out_standard_dress_position = dress_out_standard_positions[dress_bone.index] or dress_standard_positions[dress_bone.index]
 
-                # 同じ位置にある準標準ボーン
-                nearest_dress_standard_bone_indexes = [ni for ni in dress_standard_positions.nearest_all_keys(out_standard_dress_position)]
-                if 0 < len(nearest_dress_standard_bone_indexes):
-                    # ウェイトを持っているボーンがあれば、それを優先させる
-                    nearest_dress_bone_index = nearest_dress_standard_bone_indexes[
-                        np.argmax([len(dress.vertices_by_bones.get(i, [])) for i in nearest_dress_standard_bone_indexes])
+                if out_standard_dress_position is not None:
+                    # 同じ位置にある準標準ボーン
+                    nearest_dress_standard_bone_indexes = [
+                        ni for ni in dress_standard_positions.nearest_all_keys(out_standard_dress_position)
                     ]
-                    if set(dress.bone_trees[dress_bone.name].indexes) & set(nearest_dress_standard_bone_indexes):
-                        # 自分の親に同位置準標準ボーンがある場合、その最後尾を採用する
-                        nearest_dress_bone_index = [
-                            i for i in dress.bone_trees[dress_bone.name].indexes if i in nearest_dress_standard_bone_indexes
-                        ][-1]
-                    nearest_dress_bone_position = dress_standard_positions[nearest_dress_bone_index]
-                    nearest_dress_bone_name = dress.bones[nearest_dress_bone_index].name
-                    if (
-                        nearest_dress_bone_name in model.bones
-                        and np.isclose(nearest_dress_bone_position.vector, out_standard_dress_position.vector, atol=1e-2, rtol=1e-2).all()
-                    ):
-                        # ほぼ同じ位置に準標準がある場合、そのボーンの位置に合わせる
-                        dress_position = dress_matrixes[0, dress_bone.name].position
-                        dress_offset_position = model_matrixes[0, nearest_dress_bone_name].position - dress_position
-                        bone_setting = DRESS_STANDARD_BONE_NAMES[nearest_dress_bone_name]
+                    if 0 < len(nearest_dress_standard_bone_indexes):
+                        # ウェイトを持っているボーンがあれば、それを優先させる
+                        nearest_dress_bone_index = nearest_dress_standard_bone_indexes[
+                            np.argmax([len(dress.vertices_by_bones.get(i, [])) for i in nearest_dress_standard_bone_indexes])
+                        ]
+                        if set(dress.bone_trees[dress_bone.name].indexes) & set(nearest_dress_standard_bone_indexes):
+                            # 自分の親に同位置準標準ボーンがある場合、その最後尾を採用する
+                            nearest_dress_bone_index = [
+                                i for i in dress.bone_trees[dress_bone.name].indexes if i in nearest_dress_standard_bone_indexes
+                            ][-1]
+                        nearest_dress_bone_position = dress_standard_positions[nearest_dress_bone_index]
+                        nearest_dress_bone_name = dress.bones[nearest_dress_bone_index].name
+                        if (
+                            nearest_dress_bone_name in model.bones
+                            and np.isclose(
+                                nearest_dress_bone_position.vector, out_standard_dress_position.vector, atol=1e-2, rtol=1e-2
+                            ).all()
+                        ):
+                            # ほぼ同じ位置に準標準がある場合、そのボーンの位置に合わせる
+                            dress_position = dress_matrixes[0, dress_bone.name].position
+                            dress_offset_position = model_matrixes[0, nearest_dress_bone_name].position - dress_position
+                            bone_setting = DRESS_STANDARD_BONE_NAMES[nearest_dress_bone_name]
 
-                        # 角度・縮尺は準標準の縮尺に合わせる
-                        dress_local_offset_scale = dress_local_scales.get(nearest_dress_bone_index, MVector3D()).copy()
-                        dress_local_thick_scale = dress_category_local_scales.get(bone_setting.category, MVector3D())
-                        dress_local_offset_scale.y = dress_local_thick_scale.y
-                        dress_local_offset_scale.z = dress_local_thick_scale.z
+                            # 角度・縮尺は準標準の縮尺に合わせる
+                            dress_local_offset_scale = dress_local_scales.get(nearest_dress_bone_index, MVector3D()).copy()
+                            dress_local_thick_scale = dress_category_local_scales.get(bone_setting.category, MVector3D())
+                            dress_local_offset_scale.y = dress_local_thick_scale.y
+                            dress_local_offset_scale.z = dress_local_thick_scale.z
 
-                        dress_offset_qq = dress_offset_qqs.get(nearest_dress_bone_index, MQuaternion()).copy()
+                            dress_offset_qq = dress_offset_qqs.get(nearest_dress_bone_index, MQuaternion()).copy()
 
-                        is_same_standard = True
+                            is_same_standard = True
 
                 if not is_same_standard:
                     if dress.bones[dress_bone.parent_index].is_standard or (
