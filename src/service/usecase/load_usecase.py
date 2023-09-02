@@ -2,7 +2,6 @@ import os
 
 import numpy as np
 
-from mlib.core.exception import MApplicationException
 from mlib.core.logger import MLogger
 from mlib.core.math import (
     MMatrix4x4,
@@ -43,17 +42,7 @@ __ = logger.get_text
 class LoadUsecase:
     def valid_model(self, model: PmxModel, type_name: str) -> None:
         """フィッティングに最低限必要なボーンで不足しているボーンリストを取得する"""
-        required_bone_names = {
-            "センター",
-            "上半身",
-            "下半身",
-        }
-        missing_bone_names = sorted(list(required_bone_names - set(model.bones.names)))
-        if missing_bone_names:
-            raise MApplicationException(
-                type_name + "モデルのフィッティングに必要なボーンが不足しています。\n不足ボーン: {b}",
-                b=", ".join(missing_bone_names),
-            )
+        pass
 
     def insert_mismatch_bones(self, model: PmxModel, dress: PmxModel) -> None:
         """準標準ボーンの不足分を追加"""
