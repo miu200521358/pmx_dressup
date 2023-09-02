@@ -9,6 +9,7 @@ from mlib.core.math import (
     MQuaternion,
     MVector3D,
     MVector4D,
+    MVectorDict,
     calc_local_positions,
     align_triangle,
     filter_values,
@@ -199,7 +200,7 @@ class LoadUsecase:
         logger.info("衣装: 初期姿勢計算")
 
         # 衣装の初期姿勢を求める
-        dress_matrixes = VmdMotion().animate_bone([0], dress)
+        dress_matrixes = VmdMotion().animate_bone([0], dress, append_ik=False)
 
         dress.update_vertices_by_bone()
 
@@ -901,7 +902,15 @@ class LoadUsecase:
 
         return individual_morph_names, individual_target_bone_indexes
 
-    def create_dress_fit_morphs(self, model: PmxModel, dress: PmxModel):
+    def create_dress_fit_morphs(
+        self,
+        model: PmxModel,
+        dress: PmxModel,
+        model_standard_positions: MVectorDict,
+        model_out_standard_positions: MVectorDict,
+        dress_standard_positions: MVectorDict,
+        dress_out_standard_positions: MVectorDict,
+    ):
         """衣装フィッティング用ボーンモーフを作成"""
 
         # ルート調整用ボーンモーフ追加
@@ -932,7 +941,13 @@ class LoadUsecase:
 
         logger.info("ボーンフィッティング", decoration=MLogger.Decoration.LINE)
         dress_local_scales, dress_global_scales, dress_offset_positions, dress_offset_qqs = self.fit_dress_bone_morph(
-            model, dress, model_matrixes
+            model,
+            dress,
+            model_matrixes,
+            model_standard_positions,
+            model_out_standard_positions,
+            dress_standard_positions,
+            dress_out_standard_positions,
         )
 
         dress_part_offset_positions: dict[str, list[np.ndarray]] = {}
@@ -1031,8 +1046,72 @@ class LoadUsecase:
                 l=dress_local_scale + MVector3D(1, 1, 1),
             )
 
+    def get_bone_positions(self, model: PmxModel) -> tuple[MVectorDict, MVectorDict]:
+        # 準標準のボーン位置
+        standard_positions = MVectorDict()
+        out_standard_positions = MVectorDict()
+
+        for bone in model.bones:
+            if bone.is_standard:
+                standard_positions.append(bone.index, bone.position.copy())
+            else:
+                out_standard_positions.append(bone.index, bone.position.copy())
+
+        return standard_positions, out_standard_positions
+
+    def get_model_local_positions(
+        self,
+        model: PmxModel,
+        model_matrixes: VmdBoneFrameTrees,
+        model_standard_positions: MVectorDict,
+        model_out_standard_positions: MVectorDict,
+        model_local_positions: dict[str, dict[str, np.ndarray]],
+        dress_standard_bone_name: str,
+    ) -> dict[str, dict[str, np.ndarray]]:
+        # 人物の頂点ローカル位置を計算
+        if dress_standard_bone_name in model.bones:
+            model_standard_bone = model.bones[dress_standard_bone_name]
+            bone_setting = DRESS_STANDARD_BONE_NAMES[model_standard_bone.name]
+
+            for model_standard_bone_index in model_standard_positions.nearest_all_keys(model_standard_bone.position):
+                model_bone = model.bones[model_standard_bone_index]
+                if np.isclose(model_standard_bone.position.vector, model_bone.position.vector, atol=1e-2, rtol=1e-2).all():
+                    # ほぼ同じ位置にある準標準ボーンを全てローカル位置を取得
+                    model_vertices = set(model.vertices_by_bones.get(model_bone.index, []))
+                    if model_vertices:
+                        model_deformed_local_positions = self.get_deformed_local_positions(
+                            model, model_bone, bone_setting, model_vertices, model_matrixes
+                        )
+                        if bone_setting.category not in model_local_positions:
+                            model_local_positions[bone_setting.category] = {}
+
+                        model_local_positions[bone_setting.category][model_bone.name] = model_deformed_local_positions
+
+            for model_out_standard_bone_index in model_out_standard_positions.nearest_all_keys(model_standard_bone.position):
+                model_bone = model.bones[model_out_standard_bone_index]
+                if np.isclose(model_standard_bone.position.vector, model_bone.position.vector, atol=1e-2, rtol=1e-2).all():
+                    # ほぼ同じ位置にある準標準外ボーンがあれば、それも含めて調べる
+                    model_vertices = set(model.vertices_by_bones.get(model_bone.index, []))
+                    if model_vertices:
+                        model_deformed_local_positions = self.get_deformed_local_positions(
+                            model, model_bone, bone_setting, model_vertices, model_matrixes
+                        )
+                        if bone_setting.category not in model_local_positions:
+                            model_local_positions[bone_setting.category] = {}
+
+                        model_local_positions[bone_setting.category][model_bone.name] = model_deformed_local_positions
+
+        return model_local_positions
+
     def fit_dress_bone_morph(
-        self, model: PmxModel, dress: PmxModel, model_matrixes: VmdBoneFrameTrees
+        self,
+        model: PmxModel,
+        dress: PmxModel,
+        model_matrixes: VmdBoneFrameTrees,
+        model_standard_positions: MVectorDict,
+        model_out_standard_positions: MVectorDict,
+        dress_standard_positions: MVectorDict,
+        dress_out_standard_positions: MVectorDict,
     ) -> tuple[dict[int, MVector3D], dict[int, MVector3D], dict[int, MVector3D], dict[int, MQuaternion]]:
         """衣装との距離比率を元に、X方向のローカルスケーリングを行う"""
 
@@ -1188,21 +1267,16 @@ class LoadUsecase:
                             logger.debug(f"ボーン厚み比率 [{dress_bone.name}({bone_setting.category})][{dress_deformed_local_positions[0]}]")
 
                     # 人物の頂点ローカル位置を計算
-                    if dress_bone.name in model.bones:
-                        model_bone = model.bones[dress_bone.name]
-
-                        model_vertices = set(model.vertices_by_bones.get(model_bone.index, []))
-                        if model_vertices:
-                            model_deformed_local_positions = self.get_deformed_local_positions(
-                                model, model_bone, bone_setting, model_vertices, model_matrixes
-                            )
-
-                            if bone_setting.category not in model_local_positions:
-                                model_local_positions[bone_setting.category] = {}
-
-                            model_local_positions[bone_setting.category][model_bone.name] = model_deformed_local_positions
-
+                    model_local_positions = self.get_model_local_positions(
+                        model,
+                        model_matrixes,
+                        model_standard_positions,
+                        model_out_standard_positions,
+                        model_local_positions,
+                        dress_bone.name,
+                    )
             else:
+                # 該当ボーンが準標準では無い場合
                 if (
                     0 <= dress_bone.parent_index
                     and dress_bone.parent_index in dress.bones
@@ -1231,19 +1305,58 @@ class LoadUsecase:
                                 logger.debug(f"ボーン厚み比率 [{dress_bone.name}({bone_setting.category})][{dress_deformed_local_positions[0]}]")
 
                         # 人物の頂点ローカル位置を計算
-                        if dress_bone.name in model.bones:
-                            model_bone = model.bones[dress_bone.name]
+                        model_local_positions = self.get_model_local_positions(
+                            model,
+                            model_matrixes,
+                            model_standard_positions,
+                            model_out_standard_positions,
+                            model_local_positions,
+                            dress_parent_bone.name,
+                        )
+                else:
+                    out_standard_dress_position = dress_out_standard_positions[dress_bone.index]
 
-                            model_vertices = set(model.vertices_by_bones.get(model_bone.index, []))
-                            if model_vertices:
-                                model_deformed_local_positions = self.get_deformed_local_positions(
-                                    model, model_bone, bone_setting, model_vertices, model_matrixes
+                    for nearest_dress_bone_index in dress_standard_positions.nearest_all_keys(out_standard_dress_position):
+                        nearest_dress_bone = dress.bones[nearest_dress_bone_index]
+                        if (
+                            nearest_dress_bone.is_standard
+                            and np.isclose(
+                                dress_standard_positions[nearest_dress_bone_index].vector, dress_bone.position.vector, atol=1e-2, rtol=1e-2
+                            ).all()
+                        ):
+                            # 該当ボーンが準標準と同じ位置にある場合
+                            bone_setting = DRESS_STANDARD_BONE_NAMES[nearest_dress_bone.name]
+
+                            if bone_setting.local_scalable:
+                                dress_matrixes = dress_motion.animate_bone([0], dress, append_ik=False)
+
+                                # 衣装の頂点ローカル位置を計算
+                                dress_vertices = set(dress.vertices_by_bones.get(dress_bone.index, []))
+                                if dress_vertices:
+                                    dress_deformed_local_positions = self.get_deformed_local_positions(
+                                        dress, dress_bone, bone_setting, dress_vertices, dress_matrixes
+                                    )
+
+                                    if dress_deformed_local_positions.any():
+                                        if bone_setting.category not in dress_local_positions:
+                                            dress_local_positions[bone_setting.category] = {}
+
+                                        dress_local_positions[bone_setting.category][dress_bone.name] = dress_deformed_local_positions
+
+                                        logger.debug(
+                                            f"ボーン厚み比率 [{dress_bone.name} -> {nearest_dress_bone.name}({bone_setting.category})]"
+                                            + f"[{dress_deformed_local_positions[0]}]"
+                                        )
+
+                                # 人物の頂点ローカル位置を計算
+                                model_local_positions = self.get_model_local_positions(
+                                    model,
+                                    model_matrixes,
+                                    model_standard_positions,
+                                    model_out_standard_positions,
+                                    model_local_positions,
+                                    nearest_dress_bone.name,
                                 )
-
-                                if bone_setting.category not in model_local_positions:
-                                    model_local_positions[bone_setting.category] = {}
-
-                                model_local_positions[bone_setting.category][model_bone.name] = model_deformed_local_positions
 
         # # dress_category_global_scales: dict[str, MVector3D] = {}
         dress_category_local_scales: dict[str, MVector3D] = {}
@@ -1281,11 +1394,11 @@ class LoadUsecase:
                 local_scale_y = max(min(local_scale[1], avg_x_scale * 1.2), avg_x_scale * 0.9) - 1
                 local_scale_z = max(min(local_scale[2], avg_x_scale * 1.2), avg_x_scale * 0.9) - 1
                 dress_category_local_scales[category] = MVector3D(0, local_scale_y, local_scale_z)
-                logger.info("-- 厚み比率 [{b}][y={y:.3f})][z={z:.3f})]", b=category, y=(local_scale_y + 1), z=(local_scale_z + 1))
+                logger.info("-- 厚み比率 [{b}][y={y:.3f}][z={z:.3f}]", b=category, y=(local_scale_y + 1), z=(local_scale_z + 1))
             else:
                 local_scale_value = max(min(np.mean([local_scale[1], local_scale[2]]), avg_x_scale * 1.2), avg_x_scale * 0.9) - 1
                 dress_category_local_scales[category] = MVector3D(0, local_scale_value, local_scale_value)
-                logger.info("-- 厚み比率 [{b}][y={s:.3f})][z={s:.3f})]", b=category, s=(local_scale_value + 1))
+                logger.info("-- 厚み比率 [{b}][y={s:.3f}][z={s:.3f}]", b=category, s=(local_scale_value + 1))
 
             if "腕" == category and "肩" not in dress_category_local_scales:
                 # 腕だけ比率が分かってて、肩が無い場合、腕の比率をコピーする
@@ -1770,93 +1883,168 @@ class LoadUsecase:
                 #     )
             else:
                 # 準標準外、もしくは準標準でもボーンが揃ってない場合、準標準外フィッティング
+                model_deformed_position = MVector3D()
                 dress_offset_position = MVector3D()
                 dress_offset_qq = MQuaternion()
                 dress_global_offset_scale = MVector3D()
                 dress_local_offset_scale = MVector3D()
                 parent_index = [bidx for bidx in dress.bone_trees[dress_bone.name].indexes[:-1] if not dress.bones[bidx].is_system][-1]
 
-                if dress.bones[dress_bone.parent_index].is_standard or (
-                    dress_bone.effect_index in dress.bones and dress.bones[dress_bone.effect_index].is_standard
-                ):
-                    if dress_bone.effect_index in dress.bones and dress.bones[dress_bone.effect_index].is_standard:
-                        # 付与親が準標準である場合、それを参照する
-                        parent_index = dress_bone.effect_index
-                        dress_parent_standard_bone = dress.bones[dress_bone.effect_index]
+                is_same_standard = False
+                out_standard_dress_position = dress_out_standard_positions[dress_bone.index]
 
-                    # 現在の衣装ボーン位置を求める
-                    dress_matrixes = dress_motion.animate_bone([0], dress, append_ik=False)
-
-                    # 子ボーン
-                    tail_far_bone_names = (
-                        [
-                            tail_bone_name
-                            for tail_bone_name in dress_parent_bone_setting.tails
-                            if tail_bone_name in dress.bones and tail_bone_name in model.bones
-                        ]
-                        if not standard_child_names
-                        else standard_child_names
-                    )
-
-                    dress_parent_bone_position = dress_matrixes[0, dress_parent_standard_bone.name].position
-                    model_parent_bone_position = model_matrixes[0, dress_parent_standard_bone.name].position
-
-                    dress_bone_position = dress_matrixes[0, dress_bone.name].position
-                    dress_relative_position = dress_bone_position - dress_parent_bone_position
-
-                    # 人物で親ボーンを基準として相対位置からどこにあるべきかを求め直す
-                    model_deformed_position = model_matrixes[0, dress_parent_standard_bone.name].global_matrix * dress_relative_position
-
-                    if tail_far_bone_names:
-                        model_tail_position = model_matrixes[0, tail_far_bone_names[0]].position
-                        dress_tail_position = dress_matrixes[0, tail_far_bone_names[0]].position
-                    else:
-                        model_tail_position = model_matrixes[0, dress_parent_standard_bone.name].global_matrix * dress_relative_position
-                        dress_tail_position = dress_matrixes[0, dress_parent_standard_bone.name].global_matrix * dress_relative_position
-
+                # ウェイトを持ったほぼ同じ位置にあるボーン
+                nearest_dress_bone_indexes = [
+                    ni for ni in dress_standard_positions.nearest_all_keys(out_standard_dress_position) if ni in model.vertices_by_bones
+                ]
+                if 0 < len(nearest_dress_bone_indexes):
+                    nearest_dress_bone_index = nearest_dress_bone_indexes[0]
+                    nearest_dress_bone_position = dress_standard_positions[nearest_dress_bone_index]
+                    nearest_dress_bone_name = dress.bones[nearest_dress_bone_index].name
                     if (
-                        np.isclose((dress_parent_bone_position - model_parent_bone_position).vector, 0, atol=1e-2, rtol=1e-2).any()
-                        and np.isclose((dress_tail_position - dress_tail_position).vector, 0, atol=1e-2, rtol=1e-2).any()
+                        nearest_dress_bone_name in model.bones
+                        and np.isclose(nearest_dress_bone_position.vector, out_standard_dress_position.vector, atol=1e-2, rtol=1e-2).all()
                     ):
-                        dress_bone_fit_position = dress_bone_position.copy()
-                        dress_offset_position = MVector3D()
-                    else:
-                        dress_bone_fit_position = align_triangle(
-                            dress_parent_bone_position,
-                            dress_tail_position,
-                            dress_bone_position,
-                            model_parent_bone_position,
-                            model_tail_position,
-                        )
+                        # ほぼ同じ位置に準標準がある場合、人物側のそのボーンの位置に合わせる
+                        model_standard_position = model_standard_positions[model.bones[nearest_dress_bone_name].index]
+                        dress_position = dress_matrixes[0, dress_bone.name].position
+                        dress_offset_position = model_standard_position - dress_position
+                        bone_setting = DRESS_STANDARD_BONE_NAMES[nearest_dress_bone_name]
 
-                        dress_offset_position = dress_bone_fit_position - model_deformed_position
+                        # 縮尺は準標準の縮尺に合わせる
+                        dress_local_offset_scale = dress_local_scales.get(nearest_dress_bone_index, MVector3D()).copy()
+                        dress_local_thick_scale = dress_category_local_scales.get(bone_setting.category, MVector3D())
+                        dress_local_offset_scale.y = dress_local_thick_scale.y
+                        dress_local_offset_scale.z = dress_local_thick_scale.z
 
-                    if dress_parent_bone_setting.category not in ("上半身", "下半身", "体幹", "首", "頭", "肩根元"):
-                        # 体幹以外は子ボーンの位置を合わせるよう回転させる
-                        original_slope_vector = dress_bone_fit_position - dress_parent_bone_position
-                        deformed_slope_vector = model_deformed_position - dress_parent_bone_position
+                        # 親ボーンのローカル軸をコピーしておく（軸がずれると形状がズレる）
+                        dress.bones[dress_bone.index].local_axis = dress.bones[nearest_dress_bone_index].local_axis.copy()
+                        is_same_standard = True
 
-                        if 0.1 < original_slope_vector.length() and 0.1 < deformed_slope_vector.length():
-                            # 子ボーンとの距離がある場合のみ、回転補正
+                        if (
+                            0 < dress_bone.tail_index
+                            and dress_bone.tail_index in dress.bones
+                            and dress.bones[dress_bone.tail_index].name in model.bones
+                        ):
+                            # 表示先ボーンがある場合、縮尺と角度も合わせる
+                            dress_tail_name = dress.bones[dress_bone.tail_index].name
+
+                            if (
+                                model_standard_positions[model.bones[nearest_dress_bone_name].index]
+                                and (
+                                    model_standard_positions[model.bones[dress_tail_name].index]
+                                    or model_out_standard_positions[model.bones[dress_tail_name].index]
+                                )
+                                and dress_standard_positions[dress.bones[nearest_dress_bone_name].index]
+                                and (
+                                    dress_standard_positions[dress.bones[dress_tail_name].index]
+                                    or dress_out_standard_positions[dress.bones[dress_tail_name].index]
+                                )
+                            ):
+                                dress_fit_length_scale = (
+                                    model_standard_positions[model.bones[nearest_dress_bone_name].index]
+                                    - (
+                                        model_standard_positions[model.bones[dress_tail_name].index]
+                                        or model_out_standard_positions[model.bones[dress_tail_name].index]
+                                    )
+                                ).length() / (
+                                    dress_standard_positions[dress.bones[nearest_dress_bone_name].index]
+                                    - (
+                                        dress_standard_positions[dress.bones[dress_tail_name].index]
+                                        or dress_out_standard_positions[dress.bones[dress_tail_name].index]
+                                    )
+                                ).length()
+                                dress_local_offset_scale.x = dress_fit_length_scale - 1
+
+                            original_slope_vector = dress_matrixes[0, dress_tail_name].position - dress_position
+                            deformed_slope_vector = model_matrixes[0, dress_tail_name].position - model_standard_position
+
                             original_slope_qq = original_slope_vector.to_local_matrix4x4().to_quaternion()
                             deformed_slope_qq = deformed_slope_vector.to_local_matrix4x4().to_quaternion()
                             dress_offset_qq = original_slope_qq * deformed_slope_qq.inverse()
-                    else:
-                        # 角度は元々の向きと同じにする
-                        for tree_bone_index in reversed(dress.bone_trees[dress_bone.name].indexes[:-1]):
-                            dress_offset_qq *= dress_offset_qqs.get(tree_bone_index, MQuaternion()).inverse()
 
-                    # スケールはシステムではない親を引き継ぐ
-                    dress_local_offset_scale = dress_local_scales.get(parent_index, MVector3D()).copy()
+                if not is_same_standard:
+                    if dress.bones[dress_bone.parent_index].is_standard or (
+                        dress_bone.effect_index in dress.bones and dress.bones[dress_bone.effect_index].is_standard
+                    ):
+                        if dress_bone.effect_index in dress.bones and dress.bones[dress_bone.effect_index].is_standard:
+                            # 付与親が準標準である場合、それを参照する
+                            parent_index = dress_bone.effect_index
+                            dress_parent_standard_bone = dress.bones[dress_bone.effect_index]
 
-                    # 親ボーンのローカル軸をコピーしておく（軸がずれると形状がズレる）
-                    dress.bones[dress_bone.index].local_axis = dress.bones[parent_index].local_axis.copy()
-                elif dress_bone.parent_index in dress_local_scales:
-                    # 準標準ではない子ボーンのスケールはローカルが親にある場合のみローカルXを引き継ぐ（準標準の子である準標準外）
-                    dress_parent_scale = dress_global_scales.get(parent_index, MVector3D()) + dress_local_scales.get(
-                        parent_index, MVector3D()
-                    )
-                    dress_global_offset_scale = MVector3D(dress_parent_scale.x, dress_parent_scale.x, dress_parent_scale.x)
+                        # 現在の衣装ボーン位置を求める
+                        dress_matrixes = dress_motion.animate_bone([0], dress, append_ik=False)
+
+                        # 子ボーン
+                        tail_far_bone_names = (
+                            [
+                                tail_bone_name
+                                for tail_bone_name in dress_parent_bone_setting.tails
+                                if tail_bone_name in dress.bones and tail_bone_name in model.bones
+                            ]
+                            if not standard_child_names
+                            else standard_child_names
+                        )
+
+                        dress_parent_bone_position = dress_matrixes[0, dress_parent_standard_bone.name].position
+                        model_parent_bone_position = model_matrixes[0, dress_parent_standard_bone.name].position
+
+                        dress_bone_position = dress_matrixes[0, dress_bone.name].position
+                        dress_relative_position = dress_bone_position - dress_parent_bone_position
+
+                        # 人物で親ボーンを基準として相対位置からどこにあるべきかを求め直す
+                        model_deformed_position = model_matrixes[0, dress_parent_standard_bone.name].global_matrix * dress_relative_position
+
+                        if tail_far_bone_names:
+                            model_tail_position = model_matrixes[0, tail_far_bone_names[0]].position
+                            dress_tail_position = dress_matrixes[0, tail_far_bone_names[0]].position
+                        else:
+                            model_tail_position = model_matrixes[0, dress_parent_standard_bone.name].global_matrix * dress_relative_position
+                            dress_tail_position = dress_matrixes[0, dress_parent_standard_bone.name].global_matrix * dress_relative_position
+
+                        if (
+                            np.isclose((dress_parent_bone_position - model_parent_bone_position).vector, 0, atol=1e-2, rtol=1e-2).any()
+                            and np.isclose((dress_tail_position - dress_tail_position).vector, 0, atol=1e-2, rtol=1e-2).any()
+                        ):
+                            dress_bone_fit_position = dress_bone_position.copy()
+                            dress_offset_position = MVector3D()
+                        else:
+                            dress_bone_fit_position = align_triangle(
+                                dress_parent_bone_position,
+                                dress_tail_position,
+                                dress_bone_position,
+                                model_parent_bone_position,
+                                model_tail_position,
+                            )
+
+                            dress_offset_position = dress_bone_fit_position - model_deformed_position
+
+                        if dress_parent_bone_setting.category not in ("上半身", "下半身", "体幹", "首", "頭", "肩根元"):
+                            # 体幹以外は子ボーンの位置を合わせるよう回転させる
+                            original_slope_vector = dress_bone_fit_position - dress_parent_bone_position
+                            deformed_slope_vector = model_deformed_position - dress_parent_bone_position
+
+                            if 0.1 < original_slope_vector.length() and 0.1 < deformed_slope_vector.length():
+                                # 子ボーンとの距離がある場合のみ、回転補正
+                                original_slope_qq = original_slope_vector.to_local_matrix4x4().to_quaternion()
+                                deformed_slope_qq = deformed_slope_vector.to_local_matrix4x4().to_quaternion()
+                                dress_offset_qq = original_slope_qq * deformed_slope_qq.inverse()
+                        else:
+                            # 角度は元々の向きと同じにする
+                            for tree_bone_index in reversed(dress.bone_trees[dress_bone.name].indexes[:-1]):
+                                dress_offset_qq *= dress_offset_qqs.get(tree_bone_index, MQuaternion()).inverse()
+
+                        # スケールはシステムではない親を引き継ぐ
+                        dress_local_offset_scale = dress_local_scales.get(parent_index, MVector3D()).copy()
+
+                        # 親ボーンのローカル軸をコピーしておく（軸がずれると形状がズレる）
+                        dress.bones[dress_bone.index].local_axis = dress.bones[parent_index].local_axis.copy()
+                    elif dress_bone.parent_index in dress_local_scales:
+                        # 準標準ではない子ボーンのスケールはローカルが親にある場合のみローカルXを引き継ぐ（準標準の子である準標準外）
+                        dress_parent_scale = dress_global_scales.get(parent_index, MVector3D()) + dress_local_scales.get(
+                            parent_index, MVector3D()
+                        )
+                        dress_global_offset_scale = MVector3D(dress_parent_scale.x, dress_parent_scale.x, dress_parent_scale.x)
 
                 logger.debug(
                     f"-- -- 移動オフセット[{dress_bone.name}][{dress_offset_position}]"

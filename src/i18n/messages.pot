@@ -1813,3 +1813,11 @@ msgstr ""
 msgid "材質色補正: {c} (補正色[{m}], 材質拡散色[{d}])"
 msgstr ""
 
+
+msgid "-- 厚み比率 [{b}][y={y:.3f}][z={z:.3f}]"
+msgstr ""
+
+
+msgid "-- 厚み比率 [{b}][y={s:.3f}][z={s:.3f}]"
+msgstr ""
+

@@ -76,6 +76,9 @@ class LoadWorker(BaseWorker):
             logger.info("衣装: 不足ボーン調整", decoration=MLogger.Decoration.LINE)
             usecase.insert_mismatch_bones(model, dress)
 
+            model_standard_positions, model_out_standard_positions = usecase.get_bone_positions(model)
+            dress_standard_positions, dress_out_standard_positions = usecase.get_bone_positions(dress)
+
             replaced_bone_names: list[str] = []
 
             logger.info("衣装: 位置調整", decoration=MLogger.Decoration.LINE)
@@ -131,7 +134,9 @@ class LoadWorker(BaseWorker):
 
             # 衣装にフィッティングボーンモーフを入れる
             logger.info("衣装: 追加セットアップ: フィッティングモーフ追加", decoration=MLogger.Decoration.BOX)
-            usecase.create_dress_fit_morphs(model, dress)
+            usecase.create_dress_fit_morphs(
+                model, dress, model_standard_positions, model_out_standard_positions, dress_standard_positions, dress_out_standard_positions
+            )
 
             is_dress_change = True
         elif file_panel.dress_ctrl.original_data:
