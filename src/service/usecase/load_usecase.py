@@ -1891,7 +1891,7 @@ class LoadUsecase:
                 parent_index = [bidx for bidx in dress.bone_trees[dress_bone.name].indexes[:-1] if not dress.bones[bidx].is_system][-1]
 
                 is_same_standard = False
-                out_standard_dress_position = dress_out_standard_positions[dress_bone.index]
+                out_standard_dress_position = dress_out_standard_positions[dress_bone.index] or dress_standard_positions[dress_bone.index]
 
                 # ウェイトを持ったほぼ同じ位置にあるボーン
                 nearest_dress_standard_bone_indexes = [

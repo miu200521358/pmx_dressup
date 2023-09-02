@@ -1364,3 +1364,12 @@ msgstr "Name of the material from which it was copied"
 
 msgid "材質色補正: {c} (補正色[{m}], 材質拡散色[{d}])"
 msgstr "Material color correction: {c} (corrected color [{m}], material diffusion color [{d}])"
+
+msgid "-- 厚み比率 [{b}][y={y:.3f}][z={z:.3f}]"
+msgstr "-- Thickness ratio [{b}][y={y:.3f}][z={z:.3f}]"
+
+msgid "-- 厚み比率 [{b}][y={s:.3f}][z={s:.3f}]"
+msgstr "-- Thickness ratio [{b}][y={s:.3f}][z={s:.3f}]"
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}, 衣装ボーン位置[{i}]"
+msgstr "{b}: scale{s}, rotation{r}, translation{p}, costume bone position[{i}]"

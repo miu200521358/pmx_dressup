@@ -45,6 +45,7 @@ class SaveWorker(BaseWorker):
 
         SaveUsecase().save(
             file_panel.model_ctrl.data,
+            file_panel.dress_ctrl.original_data,
             file_panel.dress_ctrl.data,
             self.frame.model_motion,
             self.frame.dress_motion,

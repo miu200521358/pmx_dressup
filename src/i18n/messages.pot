@@ -1821,3 +1821,7 @@ msgstr ""
 msgid "-- 厚み比率 [{b}][y={s:.3f}][z={s:.3f}]"
 msgstr ""
 
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}, 衣装ボーン位置[{i}]"
+msgstr ""
+

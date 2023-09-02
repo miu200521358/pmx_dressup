@@ -8,7 +8,7 @@ import numpy as np
 from executor import APP_NAME, VERSION_NAME
 
 from mlib.core.logger import MLogger
-from mlib.core.math import MMatrix4x4, MVector2D, MVector3D, MVector4D, intersect_line_point
+from mlib.core.math import MMatrix4x4, MVector2D, MVector3D, MVector4D, MVectorDict, intersect_line_point
 from mlib.core.part import Switch
 from mlib.pmx.pmx_collection import PmxModel
 from mlib.pmx.pmx_part import (
@@ -79,6 +79,7 @@ class SaveUsecase:
     def save(
         self,
         model: PmxModel,
+        original_dress: PmxModel,
         dress: PmxModel,
         model_config_motion: Optional[VmdMotion],
         dress_config_motion: Optional[VmdMotion],
@@ -164,10 +165,10 @@ class SaveUsecase:
         )
 
         fitting_messages = []
-        for bone_type_name, scale, degree, position in zip(
-            dress_scales.keys(), dress_scales.values(), dress_degrees.values(), dress_positions.values()
+        for bone_type_name, scale, degree, position, is_bone_dress in zip(
+            dress_scales.keys(), dress_scales.values(), dress_degrees.values(), dress_positions.values(), bone_target_dress.values()
         ):
-            message = __("  {b}: 縮尺{s}, 回転{r}, 移動{p}", b=bone_type_name, s=scale, r=degree, p=position)
+            message = __("  {b}: 縮尺{s}, 回転{r}, 移動{p}, 衣装ボーン位置[{i}]", b=bone_type_name, s=scale, r=degree, p=position, i=is_bone_dress)
             fitting_messages.append(message)
 
         model_output_material_names = [
@@ -275,6 +276,26 @@ class SaveUsecase:
                 for vertex_index in vertices
             ]
         )
+
+        # ---------------------------------
+
+        original_dress_positions = MVectorDict()
+        for dress_bone in original_dress.bones:
+            original_dress_positions.append(dress_bone.index, dress_bone.position)
+
+        dress_same_position_bone_names: dict[str, list[str]] = {}
+        for dress_bone in original_dress.bones:
+            nearest_bone_indexes = original_dress_positions.nearest_all_keys(dress_bone.position)
+            for nearest_bone_index in nearest_bone_indexes:
+                if (
+                    nearest_bone_index != dress_bone.index
+                    and np.isclose(
+                        original_dress.bones[nearest_bone_index].position.vector, dress_bone.position.vector, atol=1e-2, rtol=1e-2
+                    ).all()
+                ):
+                    if dress_bone.name not in dress_same_position_bone_names:
+                        dress_same_position_bone_names[dress_bone.name] = []
+                    dress_same_position_bone_names[dress_bone.name].append(original_dress.bones[nearest_bone_index].name)
 
         # ---------------------------------
 
@@ -409,6 +430,13 @@ class SaveUsecase:
                 # 親ボーンが登録されていない場合、子ボーンも登録しない
                 continue
 
+            dress_bone_position = dress_matrixes[0, bone.name].local_matrix * bone.position
+            for nearest_bone_name in dress_same_position_bone_names.get(bone.name, []):
+                # 同じ位置にボーンがある場合、それに合わせる
+                if nearest_bone_name in dress_model_bones:
+                    nearest_bone = dress_model_bones[nearest_bone_name]
+                    dress_bone_position = nearest_bone.position.copy()
+
             # 変形後の位置にボーンを配置する
             if bone.child_bone_indexes and dress.bones[bone.child_bone_indexes[0]].name in dress_model_bones:
                 # 自分の子どもが既に登録されている場合、自分の子ボーンのひとつ前に挿入する
@@ -418,7 +446,7 @@ class SaveUsecase:
                     bone,
                     is_dress=True,
                     is_weight=True,
-                    position=dress_matrixes[0, bone.name].local_matrix * bone.position,
+                    position=dress_bone_position,
                     bone_index=child_bone.index,
                 )
             elif bone.child_bone_indexes and dress.bone_trees.is_in_standard(dress.bones[bone.child_bone_indexes[0]].name):
@@ -430,7 +458,7 @@ class SaveUsecase:
                     bone,
                     is_dress=True,
                     is_weight=True,
-                    position=dress_matrixes[0, bone.name].local_matrix * bone.position,
+                    position=dress_bone_position,
                     bone_index=child_bone_index,
                 )
 
@@ -441,9 +469,7 @@ class SaveUsecase:
                     dress_model_bones[child_name].bone = dress.bones[child_name].copy()
             else:
                 # そのまま追加する
-                dress_model_bones.append(
-                    bone, is_dress=True, is_weight=True, position=dress_matrixes[0, bone.name].local_matrix * bone.position
-                )
+                dress_model_bones.append(bone, is_dress=True, is_weight=True, position=dress_bone_position)
 
             if 0 == len(dress_model_bones) % 100:
                 logger.info("-- ボーン出力: {s}", s=len(dress_model_bones))
@@ -619,7 +645,7 @@ class SaveUsecase:
                             # SDEF-R0: 0番目のボーンとSDEF-Cの中点
                             sdef.sdef_r0 = (sdef.sdef_c + dress_model.bones[sdef.indexes[0]].position) / 2
                             # SDEF-R1: 1番目のボーンとSDEF-Cの中点
-                            sdef.sdef_r0 = (sdef.sdef_c + dress_model.bones[sdef.indexes[1]].position) / 2
+                            sdef.sdef_r1 = (sdef.sdef_c + dress_model.bones[sdef.indexes[1]].position) / 2
 
                         if 1 == model_material_alphas[material.name]:
                             faces.append(len(dress_model.vertices))
@@ -761,7 +787,7 @@ class SaveUsecase:
                             # SDEF-R0: 0番目のボーンとSDEF-Cの中点
                             sdef.sdef_r0 = (sdef.sdef_c + dress_model.bones[sdef.indexes[0]].position) / 2
                             # SDEF-R1: 1番目のボーンとSDEF-Cの中点
-                            sdef.sdef_r0 = (sdef.sdef_c + dress_model.bones[sdef.indexes[1]].position) / 2
+                            sdef.sdef_r1 = (sdef.sdef_c + dress_model.bones[sdef.indexes[1]].position) / 2
 
                         if 1 == dress_material_alphas[material.name]:
                             faces.append(len(dress_model.vertices))
