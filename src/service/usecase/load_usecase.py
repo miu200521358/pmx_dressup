@@ -1893,24 +1893,18 @@ class LoadUsecase:
                 is_same_standard = False
                 out_standard_dress_position = dress_out_standard_positions[dress_bone.index] or dress_standard_positions[dress_bone.index]
 
-                # ウェイトを持ったほぼ同じ位置にあるボーン
-                nearest_dress_standard_bone_indexes = [
-                    ni for ni in dress_standard_positions.nearest_all_keys(out_standard_dress_position) if ni in dress.vertices_by_bones
-                ]
-                nearest_dress_out_standard_bone_indexes = [
-                    ni for ni in dress_out_standard_positions.nearest_all_keys(out_standard_dress_position) if ni in dress.vertices_by_bones
-                ]
-                if not nearest_dress_standard_bone_indexes and nearest_dress_out_standard_bone_indexes:
-                    # 準標準外のみウェイトを持つボーンがある場合、それと同じ準標準ボーン（ウェイト不問）をチェック対象とする
-                    nearest_dress_standard_bone_indexes = [
-                        ni
-                        for ni in dress_standard_positions.nearest_all_keys(
-                            dress_out_standard_positions[nearest_dress_out_standard_bone_indexes[0]]
-                        )
-                    ]
-
+                # 同じ位置にある準標準ボーン
+                nearest_dress_standard_bone_indexes = [ni for ni in dress_standard_positions.nearest_all_keys(out_standard_dress_position)]
                 if 0 < len(nearest_dress_standard_bone_indexes):
-                    nearest_dress_bone_index = nearest_dress_standard_bone_indexes[0]
+                    # ウェイトを持っているボーンがあれば、それを優先させる
+                    nearest_dress_bone_index = nearest_dress_standard_bone_indexes[
+                        np.argmax([len(dress.vertices_by_bones.get(i, [])) for i in nearest_dress_standard_bone_indexes])
+                    ]
+                    if set(dress.bone_trees[dress_bone.name].indexes) & set(nearest_dress_standard_bone_indexes):
+                        # 自分の親に同位置準標準ボーンがある場合、その最後尾を採用する
+                        nearest_dress_bone_index = [
+                            i for i in dress.bone_trees[dress_bone.name].indexes if i in nearest_dress_standard_bone_indexes
+                        ][-1]
                     nearest_dress_bone_position = dress_standard_positions[nearest_dress_bone_index]
                     nearest_dress_bone_name = dress.bones[nearest_dress_bone_index].name
                     if (
