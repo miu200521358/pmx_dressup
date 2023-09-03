@@ -41,7 +41,7 @@ if __name__ == "__main__":
     # アプリの起動
     app = wx.App(False)
     icon = wx.Icon(get_path("resources/logo.ico"), wx.BITMAP_TYPE_ICO)
-    frame = MainFrame(app, f"{APP_NAME} {VERSION_NAME}", wx.Size(1200, 880))
+    frame = MainFrame(app, f"{APP_NAME} {VERSION_NAME}", wx.Size(1200, 880), args.is_saving)
     frame.SetIcon(icon)
     frame.Show(True)
     app.MainLoop()
