@@ -1921,7 +1921,9 @@ class LoadUsecase:
                             dress_local_offset_scale.y = dress_local_thick_scale.y
                             dress_local_offset_scale.z = dress_local_thick_scale.z
 
-                            dress_offset_qq = dress_offset_qqs.get(nearest_dress_bone_index, MQuaternion()).copy()
+                            if 0 > dress_bone.effect_index:
+                                # 付与が入ってなければ回転を準標準に合わせる
+                                dress_offset_qq = dress_offset_qqs.get(nearest_dress_bone_index, MQuaternion()).copy()
 
                             is_same_standard = True
 
@@ -1929,7 +1931,11 @@ class LoadUsecase:
                     if dress.bones[dress_bone.parent_index].is_standard or (
                         dress_bone.effect_index in dress.bones and dress.bones[dress_bone.effect_index].is_standard
                     ):
-                        if dress_bone.effect_index in dress.bones and dress.bones[dress_bone.effect_index].is_standard:
+                        if (
+                            dress_bone.effect_index in dress.bones
+                            and dress.bones[dress_bone.effect_index].is_standard
+                            and dress.bones[dress_bone.effect_index].name in model.bones
+                        ):
                             # 付与親が準標準である場合、それを参照する
                             parent_index = dress_bone.effect_index
                             dress_parent_standard_bone = dress.bones[dress_bone.effect_index]
