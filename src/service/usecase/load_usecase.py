@@ -1162,17 +1162,52 @@ class LoadUsecase:
                         dress_fit_length_scale = (model_bone.position - model.bones[f"{dress_bone.name[0]}足ＩＫ"].position).length() / (
                             (dress_bone.position - dress.bones[f"{dress_bone.name[0]}足ＩＫ"].position).length() or 1
                         )
-                    elif (
-                        bone_setting.category == "足首"
-                        and f"{dress_bone.name[0]}つま先ＩＫ" in model.bones
-                        and f"{dress_bone.name[0]}つま先ＩＫ" in dress.bones
-                    ):
-                        dress_fit_length_scale = (
-                            model_bone.position - model.bones[model.bones[f"{dress_bone.name[0]}つま先ＩＫ"].ik.bone_index].position
-                        ).length() / (
-                            (dress_bone.position - dress.bones[dress.bones[f"{dress_bone.name[0]}つま先ＩＫ"].ik.bone_index].position).length()
-                            or 1
+                    elif bone_setting.category == "足首":
+                        dress_ankle_bone_names = [
+                            dress_setting.name
+                            for dress_setting in DRESS_STANDARD_BONE_NAMES.values()
+                            if dress_setting.category == "足首" and dress_setting.name[0] == dress_bone.name[0]
+                        ]
+                        dress_ankle_vertices = set(
+                            [
+                                vertex_index
+                                for bname in dress_ankle_bone_names
+                                if bname in dress.bones
+                                for vertex_index in dress.vertices_by_bones.get(dress.bones[bname].index, [])
+                            ]
                         )
+                        model_ankle_vertices = set(
+                            [
+                                vertex_index
+                                for bname in dress_ankle_bone_names
+                                if bname in model.bones
+                                for vertex_index in model.vertices_by_bones.get(model.bones[bname].index, [])
+                            ]
+                        )
+                        if dress_ankle_vertices and model_ankle_vertices:
+                            # 足のスケールは足底の長さで決める
+                            dress_ankle_vertex_positions = np.array([dress.vertices[vidx].position.vector for vidx in dress_ankle_vertices])
+                            dress_ankle_vertex_min_positions = np.min(dress_ankle_vertex_positions, axis=0)
+                            dress_ankle_vertex_max_positions = np.max(dress_ankle_vertex_positions, axis=0)
+                            model_ankle_vertex_positions = np.array([model.vertices[vidx].position.vector for vidx in model_ankle_vertices])
+                            model_ankle_vertex_min_positions = np.min(model_ankle_vertex_positions, axis=0)
+                            model_ankle_vertex_max_positions = np.max(model_ankle_vertex_positions, axis=0)
+                            dress_fit_length_scale = float(
+                                (model_ankle_vertex_max_positions[2] - model_ankle_vertex_min_positions[2])
+                                / (dress_ankle_vertex_max_positions[2] - dress_ankle_vertex_min_positions[2])
+                            )
+                        elif f"{dress_bone.name[0]}つま先ＩＫ" in model.bones and f"{dress_bone.name[0]}つま先ＩＫ" in dress.bones:
+                            # つま先ＩＫがある場合、そこまでの長さ
+                            dress_fit_length_scale = (
+                                model_bone.position - model.bones[model.bones[f"{dress_bone.name[0]}つま先ＩＫ"].ik.bone_index].position
+                            ).length() / (
+                                (
+                                    dress_bone.position - dress.bones[dress.bones[f"{dress_bone.name[0]}つま先ＩＫ"].ik.bone_index].position
+                                ).length()
+                                or 1
+                            )
+                        else:
+                            dress_fit_length_scale = 1.0
                     elif dress_bone.name in ("首根元", "首") and "上半身2" in dress.bones:
                         # 首根元は上半身2のスケールを流用する
                         dress_fit_length_scale = (dress_local_scales[dress.bones["上半身2"].index].x / 0.98) + 1
@@ -1755,17 +1790,52 @@ class LoadUsecase:
                         dress_fit_length_scale = (model_bone.position - model.bones[f"{dress_bone.name[0]}足ＩＫ"].position).length() / (
                             (dress_bone.position - dress.bones[f"{dress_bone.name[0]}足ＩＫ"].position).length() or 1
                         )
-                    elif (
-                        bone_setting.category == "足首"
-                        and f"{dress_bone.name[0]}つま先ＩＫ" in model.bones
-                        and f"{dress_bone.name[0]}つま先ＩＫ" in dress.bones
-                    ):
-                        dress_fit_length_scale = (
-                            model_bone.position - model.bones[model.bones[f"{dress_bone.name[0]}つま先ＩＫ"].ik.bone_index].position
-                        ).length() / (
-                            (dress_bone.position - dress.bones[dress.bones[f"{dress_bone.name[0]}つま先ＩＫ"].ik.bone_index].position).length()
-                            or 1
+                    elif bone_setting.category == "足首":
+                        dress_ankle_bone_names = [
+                            dress_setting.name
+                            for dress_setting in DRESS_STANDARD_BONE_NAMES.values()
+                            if dress_setting.category == "足首" and dress_setting.name[0] == dress_bone.name[0]
+                        ]
+                        dress_ankle_vertices = set(
+                            [
+                                vertex_index
+                                for bname in dress_ankle_bone_names
+                                if bname in dress.bones
+                                for vertex_index in dress.vertices_by_bones.get(dress.bones[bname].index, [])
+                            ]
                         )
+                        model_ankle_vertices = set(
+                            [
+                                vertex_index
+                                for bname in dress_ankle_bone_names
+                                if bname in model.bones
+                                for vertex_index in model.vertices_by_bones.get(model.bones[bname].index, [])
+                            ]
+                        )
+                        if dress_ankle_vertices and model_ankle_vertices:
+                            # 足のスケールは足底の長さで決める
+                            dress_ankle_vertex_positions = np.array([dress.vertices[vidx].position.vector for vidx in dress_ankle_vertices])
+                            dress_ankle_vertex_min_positions = np.min(dress_ankle_vertex_positions, axis=0)
+                            dress_ankle_vertex_max_positions = np.max(dress_ankle_vertex_positions, axis=0)
+                            model_ankle_vertex_positions = np.array([model.vertices[vidx].position.vector for vidx in model_ankle_vertices])
+                            model_ankle_vertex_min_positions = np.min(model_ankle_vertex_positions, axis=0)
+                            model_ankle_vertex_max_positions = np.max(model_ankle_vertex_positions, axis=0)
+                            dress_fit_length_scale = float(
+                                (model_ankle_vertex_max_positions[2] - model_ankle_vertex_min_positions[2])
+                                / (dress_ankle_vertex_max_positions[2] - dress_ankle_vertex_min_positions[2])
+                            )
+                        elif f"{dress_bone.name[0]}つま先ＩＫ" in model.bones and f"{dress_bone.name[0]}つま先ＩＫ" in dress.bones:
+                            # つま先ＩＫがある場合、そこまでの長さ
+                            dress_fit_length_scale = (
+                                model_bone.position - model.bones[model.bones[f"{dress_bone.name[0]}つま先ＩＫ"].ik.bone_index].position
+                            ).length() / (
+                                (
+                                    dress_bone.position - dress.bones[dress.bones[f"{dress_bone.name[0]}つま先ＩＫ"].ik.bone_index].position
+                                ).length()
+                                or 1
+                            )
+                        else:
+                            dress_fit_length_scale = 1.0
                     elif dress_bone.name in ("首根元", "首") and "上半身2" in dress.bones:
                         # 首根元は上半身2のスケールを流用する
                         dress_fit_length_scale = (dress_local_scales[dress.bones["上半身2"].index].x / 0.98) + 1
