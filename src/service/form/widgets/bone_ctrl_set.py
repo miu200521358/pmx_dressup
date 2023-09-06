@@ -77,7 +77,7 @@ class BoneCtrlSet:
         self.scale_x_slider = FloatSliderCtrl(
             parent=self.window,
             value=1,
-            min_value=0.01,
+            min_value=0.1,
             max_value=5,
             increment=0.01,
             spin_increment=0.01,
@@ -104,7 +104,7 @@ class BoneCtrlSet:
         self.scale_y_slider = FloatSliderCtrl(
             parent=self.window,
             value=1,
-            min_value=0.01,
+            min_value=0.1,
             max_value=5,
             increment=0.01,
             spin_increment=0.01,
@@ -142,7 +142,7 @@ class BoneCtrlSet:
         self.scale_z_slider = FloatSliderCtrl(
             parent=self.window,
             value=1,
-            min_value=0.01,
+            min_value=0.1,
             max_value=5,
             increment=0.01,
             spin_increment=0.01,
@@ -164,7 +164,7 @@ class BoneCtrlSet:
         self.degree_x_slider = FloatSliderCtrl(
             parent=self.window,
             value=0,
-            min_value=-45,
+            min_value=-65,
             max_value=45,
             increment=0.01,
             spin_increment=1,
@@ -185,7 +185,7 @@ class BoneCtrlSet:
         self.degree_y_slider = FloatSliderCtrl(
             parent=self.window,
             value=0,
-            min_value=-45,
+            min_value=-65,
             max_value=45,
             increment=0.01,
             spin_increment=1,
@@ -206,7 +206,7 @@ class BoneCtrlSet:
         self.degree_z_slider = FloatSliderCtrl(
             parent=self.window,
             value=0,
-            min_value=-45,
+            min_value=-65,
             max_value=45,
             increment=0.01,
             spin_increment=1,
@@ -227,8 +227,8 @@ class BoneCtrlSet:
         self.position_x_slider = FloatSliderCtrl(
             parent=self.window,
             value=0,
-            min_value=-4,
-            max_value=4,
+            min_value=-6,
+            max_value=6,
             increment=0.01,
             spin_increment=0.01,
             border=3,
@@ -248,8 +248,8 @@ class BoneCtrlSet:
         self.position_y_slider = FloatSliderCtrl(
             parent=self.window,
             value=0,
-            min_value=-4,
-            max_value=4,
+            min_value=-6,
+            max_value=6,
             increment=0.01,
             spin_increment=0.01,
             border=3,
@@ -269,8 +269,8 @@ class BoneCtrlSet:
         self.position_z_slider = FloatSliderCtrl(
             parent=self.window,
             value=0,
-            min_value=-4,
-            max_value=4,
+            min_value=-6,
+            max_value=6,
             increment=0.01,
             spin_increment=0.01,
             border=3,

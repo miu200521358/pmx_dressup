@@ -83,17 +83,17 @@ class LoadWorker(BaseWorker):
 
             logger.info("衣装: 位置調整", decoration=MLogger.Decoration.LINE)
 
-            # 下半身の再設定
-            replaced_bone_names += usecase.replace_lower(model, dress)
-
             # 上半身の再設定
             replaced_bone_names += usecase.replace_upper(model, dress)
 
             # 上半身2の再設定
             replaced_bone_names += usecase.replace_upper2(model, dress)
 
-            # 胸の再設定
-            replaced_bust_bone_names = usecase.replace_bust(model, dress)
+            # 上半身3の再設定
+            replaced_bone_names += usecase.replace_upper3(model, dress)
+
+            # # 胸の再設定
+            # replaced_bust_bone_names = usecase.replace_bust(model, dress)
 
             # 首の再設定
             usecase.replace_neck(model, dress)
@@ -101,20 +101,17 @@ class LoadWorker(BaseWorker):
             # 肩と腕の再設定
             usecase.replace_shoulder_arm(model, dress)
 
-            # # 左足先EXの再設定
-            # replaced_bone_names += usecase.replace_toe_ex(model, dress, "左")
-
-            # # 右足先EXの再設定
-            # replaced_bone_names += usecase.replace_toe_ex(model, dress, "右")
-
             # 捩りの再設定
             usecase.replace_twist(model, dress, replaced_bone_names)
 
+            # 下半身の再設定
+            replaced_bone_names += usecase.replace_lower(model, dress)
+
             logger.info("衣装: ウェイト調整", decoration=MLogger.Decoration.LINE)
 
-            if replaced_bust_bone_names:
-                dress.setup()
-                usecase.replace_bust_weights(dress, replaced_bust_bone_names)
+            # if replaced_bust_bone_names:
+            #     dress.setup()
+            #     usecase.replace_bust_weights(dress, replaced_bust_bone_names)
 
             if replaced_bone_names:
                 dress.setup()

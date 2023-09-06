@@ -207,19 +207,19 @@ class LoadUsecase:
 
         dress.update_vertices_by_bone()
 
-        dress_inserted_bust_bone_names = []
-        for bone_name in ("左胸", "右胸"):
-            # 胸ボーンの追加
-            if bone_name in short_mismatch_dress_bone_names and self.insert_bust(dress, bone_name):
-                logger.info("-- 衣装: ボーン追加: {b}", b=bone_name)
-                dress_inserted_bust_bone_names.append(bone_name)
+        # dress_inserted_bust_bone_names = []
+        # for bone_name in ("左胸", "右胸"):
+        #     # 胸ボーンの追加
+        #     if bone_name in short_mismatch_dress_bone_names and self.insert_bust(dress, bone_name):
+        #         logger.info("-- 衣装: ボーン追加: {b}", b=bone_name)
+        #         dress_inserted_bust_bone_names.append(bone_name)
 
-        if dress_inserted_bust_bone_names:
-            dress.setup()
-            dress.replace_standard_weights(dress_inserted_bust_bone_names)
-            logger.info("衣装: 再セットアップ")
+        # if dress_inserted_bust_bone_names:
+        #     dress.setup()
+        #     dress.replace_standard_weights(dress_inserted_bust_bone_names)
+        #     logger.info("衣装: 再セットアップ")
 
-            dress.update_vertices_by_bone()
+        #     dress.update_vertices_by_bone()
 
     def replace_bust_weights(self, model: PmxModel, bone_names: list[str]) -> None:
         """胸ウェイトの置き換え"""
@@ -367,17 +367,20 @@ class LoadUsecase:
 
     def replace_lower(self, model: PmxModel, dress: PmxModel) -> list[str]:
         """下半身のボーン置き換え"""
-        replace_bone_names = ("足中心", "頭", "下半身")
+        replace_bone_names = ("足中心", "上半身2", "下半身")
         if not (model.bones.exists(replace_bone_names) and dress.bones.exists(replace_bone_names)):
             return []
 
         is_add, diff = self.replace_bone_position(model, dress, *replace_bone_names, is_fix_x_zero=True)
 
+        if is_add and 0 < dress.bones["下半身"].tail_index and dress.bones["下半身"].tail_index in dress.bones:
+            dress.bones[dress.bones["下半身"].tail_index].position += diff
+
         return ["下半身"] if is_add else []
 
     def replace_upper(self, model: PmxModel, dress: PmxModel) -> list[str]:
         """上半身のボーン置き換え"""
-        replace_bone_names = ("足中心", "頭", "上半身")
+        replace_bone_names = ("足中心", "首根元", "上半身")
         if not (model.bones.exists(replace_bone_names) and dress.bones.exists(replace_bone_names)):
             return []
 
@@ -387,7 +390,7 @@ class LoadUsecase:
 
     def replace_upper2(self, model: PmxModel, dress: PmxModel) -> list[str]:
         """上半身2のボーン置き換え"""
-        replace_bone_names = ("上半身", "頭", "上半身2")
+        replace_bone_names = ("上半身", "首根元", "上半身2")
         if not (model.bones.exists(replace_bone_names) and dress.bones.exists(replace_bone_names)):
             return []
 
@@ -395,11 +398,21 @@ class LoadUsecase:
 
         return ["上半身2"] if is_add else []
 
+    def replace_upper3(self, model: PmxModel, dress: PmxModel) -> list[str]:
+        """上半身3のボーン置き換え"""
+        replace_bone_names = ("上半身2", "首根元", "上半身3")
+        if not (model.bones.exists(replace_bone_names) and dress.bones.exists(replace_bone_names)):
+            return []
+
+        is_add, diff = self.replace_bone_position(model, dress, *replace_bone_names, is_fix_x_zero=True)
+
+        return ["上半身3"] if is_add else []
+
     def replace_bust(self, model: PmxModel, dress: PmxModel) -> list[str]:
         """胸系のボーン置き換え"""
         bust_added_bone_names: list[str] = []
         for bust_bone_name in ("右胸", "左胸"):
-            replace_bone_names = ("上半身2", "頭", bust_bone_name)
+            replace_bone_names = ("上半身2", "首根元", bust_bone_name)
             if model.bones.exists(replace_bone_names) and dress.bones.exists(replace_bone_names):
                 is_add, diff = self.replace_bone_position(model, dress, *replace_bone_names, is_fix_x_zero=True)
                 if is_add:
@@ -410,7 +423,7 @@ class LoadUsecase:
 
     def replace_neck(self, model: PmxModel, dress: PmxModel) -> list[str]:
         """首のボーン置き換え"""
-        replace_bone_names = ("上半身2", "頭", "首")
+        replace_bone_names = ("上半身2", "首根元", "首")
         if not (model.bones.exists(replace_bone_names) and dress.bones.exists(replace_bone_names)):
             return []
 
@@ -2075,8 +2088,8 @@ class LoadUsecase:
                         # # スケールはシステムではない親を引き継ぐ
                         # dress_local_offset_scale = dress_local_scales.get(parent_index, MVector3D()).copy()
 
-                        # 親ボーンのローカル軸をコピーしておく（軸がずれると形状がズレる）
-                        dress.bones[dress_bone.index].local_axis = dress.bones[parent_index].local_axis.copy()
+                        # # 親ボーンのローカル軸をコピーしておく（軸がずれると形状がズレる）
+                        # dress.bones[dress_bone.index].local_axis = dress.bones[parent_index].local_axis.copy()
 
                     elif dress.bones[dress_bone.parent_index].is_standard and dress_bone.parent_index in dress_local_scales:
                         # 準標準ではない子ボーンのスケールはローカルが親にある場合のみローカルXを引き継ぐ（準標準の子である準標準外）

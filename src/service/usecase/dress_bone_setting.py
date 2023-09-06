@@ -92,6 +92,14 @@ class DressBoneSettings(Enum):
         local_scalable=True,
         local_x_scalable=True,
     )
+    UPPER3 = DressBoneSetting(
+        setting=BoneSettings.UPPER3.value,
+        category="体幹",
+        translatable=True,
+        rotatable=True,
+        local_scalable=True,
+        local_x_scalable=True,
+    )
     NECK_ROOT = DressBoneSetting(
         setting=BoneSettings.NECK_ROOT.value,
         category="体幹",
@@ -680,11 +688,11 @@ class FitMorphSettings(Enum):
 
     WAIST = FitMorphSetting(
         name="腰",
-        target_bone_names=["腰"],
+        target_bone_names=["下半身", "上半身"],
         move_target_bone_names=[],
-        child_move_morph_names=["下半身", "上半身", "上半身2", "首根元", "首", "胸"],
+        child_move_morph_names=["下半身", "上半身"],
         child_rotation_morph_names=[],
-        child_scale_morph_names=["下半身", "上半身", "上半身2", "首根元", "首"],
+        child_scale_morph_names=["下半身", "上半身", "上半身2", "上半身3", "首根元", "首"],
         attend_weight_bone_names=[],
     )
 
@@ -702,9 +710,9 @@ class FitMorphSettings(Enum):
         name="上半身",
         target_bone_names=["上半身"],
         move_target_bone_names=[],
-        child_move_morph_names=["胸", "上半身2", "首根元", "首"],
+        child_move_morph_names=["胸"],
         child_rotation_morph_names=[],
-        child_scale_morph_names=["上半身2", "首根元", "首"],
+        child_scale_morph_names=["上半身2", "上半身3", "首根元", "首"],
         attend_weight_bone_names=[],
     )
 
@@ -712,7 +720,17 @@ class FitMorphSettings(Enum):
         name="上半身2",
         target_bone_names=["上半身2"],
         move_target_bone_names=[],
-        child_move_morph_names=["胸", "首根元", "首"],
+        child_move_morph_names=["胸"],
+        child_rotation_morph_names=[],
+        child_scale_morph_names=["上半身3", "首根元", "首"],
+        attend_weight_bone_names=[],
+    )
+
+    UPPER3 = FitMorphSetting(
+        name="上半身3",
+        target_bone_names=["上半身3"],
+        move_target_bone_names=[],
+        child_move_morph_names=["胸"],
         child_rotation_morph_names=[],
         child_scale_morph_names=["首根元", "首"],
         attend_weight_bone_names=[],
