@@ -402,7 +402,8 @@ class SaveUsecase:
                     # 元々ウェイトを持っていて、かつ出力先にウェイトが乗ってる頂点が無い場合、スルー
                     continue
                 if (
-                    bone.index not in dress.vertices_by_bones
+                    not bone.is_ik
+                    and bone.index not in dress.vertices_by_bones
                     and bone.parent_index in dress.vertices_by_bones
                     and not set(dress.vertices_by_bones[bone.parent_index]) & active_dress_vertices
                 ):
