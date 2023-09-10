@@ -427,6 +427,10 @@ class SaveUsecase:
                     # 自身はウェイトを持っておらず、付与親ボーンが元々ウェイトを持っていて、かつ出力先にウェイトが乗ってる頂点が無い場合、スルー
                     continue
 
+            if "指" in bone.name and ("握" in bone.name or "拡" in bone.name):
+                # 握り拡散系は無視
+                continue
+
             if bone.parent_index not in dress_model_bones.dress_map and not bone.is_standard:
                 # 親ボーンが登録されていない場合、子ボーンも登録しない
                 continue
@@ -452,7 +456,11 @@ class SaveUsecase:
                 )
             elif bone.child_bone_indexes and dress.bone_trees.is_in_standard(dress.bones[bone.child_bone_indexes[0]].name):
                 # 準標準の中の順標準外の場合、子どもの準標準ボーンのひとつ前に挿入する
-                child_bones = [b for b in dress.bones if bone.child_bone_indexes[0] in b.relative_bone_indexes and b.is_standard]
+                child_bones = [
+                    b
+                    for b in dress.bones
+                    if bone.child_bone_indexes[0] in b.relative_bone_indexes and b.is_standard and b.name in dress_model_bones
+                ]
                 child_bone_index = dress_model_bones[child_bones[0].name].index if child_bones else -1
 
                 dress_model_bones.append(
