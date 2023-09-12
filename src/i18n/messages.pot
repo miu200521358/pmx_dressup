@@ -1825,3 +1825,19 @@ msgstr ""
 msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}, 衣装ボーン位置[{i}]"
 msgstr ""
 
+
+msgid "握り拡散ボーン除去"
+msgstr ""
+
+
+msgid "-- 握り拡散ボーン除去 [{i} ({p:.2f}%)]"
+msgstr ""
+
+
+msgid "不要ボーン除去"
+msgstr ""
+
+
+msgid "-- 不要ボーン除去 [{i} ({p:.2f}%)]"
+msgstr ""
+

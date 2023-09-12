@@ -427,10 +427,6 @@ class SaveUsecase:
                     # 自身はウェイトを持っておらず、付与親ボーンが元々ウェイトを持っていて、かつ出力先にウェイトが乗ってる頂点が無い場合、スルー
                     continue
 
-            if "指" in bone.name and ("握" in bone.name or "拡" in bone.name):
-                # 握り拡散系は無視
-                continue
-
             if bone.parent_index not in dress_model_bones.dress_map and not bone.is_standard:
                 # 親ボーンが登録されていない場合、子ボーンも登録しない
                 continue
@@ -1214,10 +1210,19 @@ class SaveUsecase:
                 logger.info("-- ボーン表示枠出力: {s}", s=bone.index)
 
         for bone in dress_model.bones:
+            logger.count("不要ボーン除去", index=bone.index, total_index_count=len(dress_model.bones), display_block=100)
+
             if bone.is_ik and 0 > bone.ik.bone_index:
                 # IKターゲットが無い場合、出力対象外にする
                 dress_model.remove_bone(bone.name)
                 continue
+
+            if ("握" in bone.name or "拡" in bone.name) and (
+                "指" in bone.name
+                or (f"{bone.name[0]}手首" in dress_model.bones and bone.parent_index == dress_model.bones[f"{bone.name[0]}手首"].index)
+            ):
+                # 握り拡散系は除外
+                dress_model.remove_bone(bone.name)
 
         logger.info("モデル出力", decoration=MLogger.Decoration.LINE)
 

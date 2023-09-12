@@ -1373,3 +1373,15 @@ msgstr "-- Thickness ratio [{b}][y={s:.3f}][z={s:.3f}]"
 
 msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}, 衣装ボーン位置[{i}]"
 msgstr "{b}: scale{s}, rotation{r}, translation{p}, costume bone position[{i}]"
+
+msgid "握り拡散ボーン除去"
+msgstr "Grip Diffusion Bone Removal"
+
+msgid "-- 握り拡散ボーン除去 [{i} ({p:.2f}%)]"
+msgstr "-- grip diffusion bone removal [{i} ({p:.2f}%)]"
+
+msgid "不要ボーン除去"
+msgstr "Unnecessary Bone Removal"
+
+msgid "-- 不要ボーン除去 [{i} ({p:.2f}%)]"
+msgstr "-- unwanted bone removal [{i} ({p:.2f}%)]"

@@ -126,7 +126,7 @@ class FilePanel(NotebookPanel):
             self.output_pmx_ctrl.path = os.path.join(
                 model_dir_path,
                 f"{dress_file_name}_{datetime.now():%Y%m%d_%H%M%S}",
-                f"{self.model_ctrl.name_ctrl.GetValue()[1:-1]}_{self.dress_ctrl.name_ctrl.GetValue()[1:-1]}{model_file_ext}",
+                f"{self.model_ctrl.get_name_for_file()}_{self.dress_ctrl.get_name_for_file()}{model_file_ext}",
             )
 
     def Enable(self, enable: bool) -> None:

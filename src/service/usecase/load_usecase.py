@@ -1960,6 +1960,10 @@ class LoadUsecase:
                 #     )
             else:
                 # 準標準外、もしくは準標準でもボーンが揃ってない場合、準標準外フィッティング
+                if f"{dress_bone.name[0]}手首" in dress.bone_trees[dress_bone.name].names[:-1]:
+                    # 手首から先は無視(握り拡散とか)
+                    continue
+
                 model_deformed_position = MVector3D()
                 dress_offset_position = MVector3D()
                 dress_offset_qq = MQuaternion()

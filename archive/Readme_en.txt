@@ -44,6 +44,7 @@
 　　The weights of the costume models have been slightly altered to clean up the deformation.
 　　　This product is not available for costume models for which weight manipulation is not permitted.
 　　If the mesh on the arms or other body-covering positions of the costume is weighted with weights other than the quasi-standard bones, it will not be eligible for support
+   (I follow up to some extent, but there will be many cases where you will be asked to manipulate the semi-standardized bones and play with the scale, etc.)
 
 
 ----------------------------------------------------------------
@@ -130,6 +131,7 @@ The file history can be transferred by copying and pasting "history.json" into t
  4. When you have finished fitting, go back to the File tab and click the "Output Costume Model" button.
     - The model will be output with the material, bones, rigid body, etc. adjusted accordingly.
     - If there is a risk of overwriting files, textures, etc. of the original model with the result of the changeover, the output will be aborted.
+    - Some bones, such as the grip diffusion bone, are excluded from the output due to the difficulty of calculating hierarchy.
 
  Extra
    The model data in the folder "Mesh Compensating Elements" is an element model that I created in VRoid Studio.
@@ -246,6 +248,22 @@ Credits
 ----------------------------------------------------------------
 History
 ----------------------------------------------------------------
+
+PmxDressup_1.00.01 (2023/08/10)
+Function additions and modifications
+ - Adjustment to allow changing of cat ears and other parts
+ - Added SDEF parameter recalculation process
+ - Adjusted semi-non-standard fittings such as sleeve IK
+ - Modified shoe size to be determined by the ratio of shoe soles (width in Z direction) of the person and costume
+ - Added upper body 3 as a semi-standard check target
+ - Added skip processing so that grip diffusion system is not output
+Bug fixes
+ - Fixed a case where costume morphs did not fit in the display frame
+ - Fixed a case where costume morphs did not fit into the display frame.
+ - Fixed Y-rotation not being the same for left and right when adjusting ankles and other parts of the body globally.
+ - Excluded head and neck from reference bones when adjusting bone positions for upper and lower body
+ - Fixed wrong output judgment of IK bone when outputting a change of clothes model.
+ - Fixed to remove characters in PMX model name that cannot be output to file.
 
 PmxDressup_1.00.00 (2023/08/20)
  General distribution starts
