@@ -136,9 +136,6 @@ class DressBoneSettings(Enum):
     RIGHT_BUST = DressBoneSetting(
         setting=BoneSettings.RIGHT_BUST.value,
         category="胸",
-        translatable=True,
-        rotatable=True,
-        rotate_cancel=True,
     )
     RIGHT_SHOULDER_ROOT = DressBoneSetting(
         setting=BoneSettings.RIGHT_SHOULDER_ROOT.value,
@@ -391,9 +388,6 @@ class DressBoneSettings(Enum):
     LEFT_BUST = DressBoneSetting(
         setting=BoneSettings.LEFT_BUST.value,
         category="胸",
-        translatable=True,
-        rotatable=True,
-        rotate_cancel=True,
     )
     LEFT_SHOULDER_ROOT = DressBoneSetting(
         setting=BoneSettings.LEFT_SHOULDER_ROOT.value,
