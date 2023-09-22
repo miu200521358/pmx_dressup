@@ -1,7 +1,7 @@
 from typing import Optional
-from mlib.base.collection import BaseIndexNameDictModel
-from mlib.base.math import MVector3D
-from mlib.base.part import BaseIndexNameModel
+from mlib.core.collection import BaseIndexNameDictModel
+from mlib.core.math import MVector3D
+from mlib.core.part import BaseIndexNameModel
 from mlib.pmx.bone_setting import BoneFlg
 from mlib.pmx.pmx_part import Bone, Ik
 

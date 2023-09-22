@@ -1280,3 +1280,108 @@ msgstr "Get texture color range"
 
 msgid "テクスチャ色補正: {c} (補正色[{m}], 材質UV範囲内中央色[{d}])"
 msgstr "Texture color correction: {c} (corrected color [{m}], center color in material UV range [{d}])"
+
+msgid "人物の材質の非透過度を0.2に設定します"
+msgstr "Set the non-transparency of the person material to 0.2"
+
+msgid "衣装の材質の非透過度を0.2に設定します"
+msgstr "Set the non-transparency of the costume material to 0.2"
+
+msgid "ボタンをONにすると、縮尺XとZを同時に操作することができます"
+msgstr "When the button is turned on, scale X and Z can be operated at the same time"
+
+msgid "（読み込み直後はONになっています）"
+msgstr "(It is on immediately after loading)"
+
+msgid "OFFにすると、縮尺XとZを別々に操作する事ができます"
+msgstr "When turned off, scale X and Z can be operated separately"
+
+msgid "頂点データ出力"
+msgstr "Vertex data output"
+
+msgid "-- 頂点データ出力 [{i} ({p:.2f}%)]"
+msgstr "-- Vertex data output [{i} ({p:.2f}%)]"
+
+msgid "面データ出力"
+msgstr "Surface data output"
+
+msgid "-- 面データ出力 [{i} ({p:.2f}%)]"
+msgstr "-- Surface data output [{i} ({p:.2f}%)]"
+
+msgid "ボーンデータ出力"
+msgstr "Bone data output"
+
+msgid "-- ボーンデータ出力 [{i} ({p:.2f}%)]"
+msgstr "-- Bone data output [{i} ({p:.2f}%)]"
+
+msgid "人物のモーフプルダウンの選択肢を上方向に移動できます。"
+msgstr "You can move the person morph pulldown choices upward"
+
+msgid "スライダーで調整対象となる人物のモーフです。\nモーフの値が0より大きい状態にすると、お着替え結果に反映されます"
+msgstr "This is the morph of the person to be adjusted by the slider. \If you set the value of the ↪Lo_N0↩n morph to be greater than 0, it will be reflected in the result of the change of clothes"
+
+msgid "人物のモーフプルダウンの選択肢を下方向に移動できます。"
+msgstr "You can move the person morph pulldown choices downward"
+
+msgid "人物のモーフを任意の値に変更できます。\nモーフの値が0より大きい状態にすると、お着替え結果に反映されます"
+msgstr "You can change the morph of the person to any value. \If you set the value of the ↪Lo_N0↩n morph to be greater than 0, it will be reflected in the result of the changeover"
+
+msgid "人物のモーフの値を0.0に設定します"
+msgstr "Set the morph value of the person to 0.0"
+
+msgid "人物のモーフの値を0.5に設定します"
+msgstr "Set the morph value of the person to 0.5"
+
+msgid "人物のモーフの値を1.0に設定します"
+msgstr "Set the morph value of the person to 1.0"
+
+msgid "衣装のモーフプルダウンの選択肢を上方向に移動できます。"
+msgstr "You can move the morph pull-down choices for costumes upward"
+
+msgid "スライダーで調整対象となる衣装のモーフです。\nモーフの値が0より大きい状態にすると、お着替え結果に反映されます"
+msgstr "This is the morph of the outfit to be adjusted with the slider. \If the value of the ɑn morph is set to be greater than 0, it will be reflected in the result of the outfit change"
+
+msgid "衣装のモーフプルダウンの選択肢を下方向に移動できます。"
+msgstr "You can move the morph pull-down choices for costumes downward"
+
+msgid "衣装のモーフを任意の値に変更できます。\nモーフの値が0より大きい状態にすると、お着替え結果に反映されます"
+msgstr "You can change the morph of the outfit to any value. \If you set the value of the 팀n morph to be greater than 0, it will be reflected in the result of the outfit change"
+
+msgid "衣装のモーフの値を0.0に設定します"
+msgstr "Set the morph value of the costume to 0.0"
+
+msgid "衣装のモーフの値を0.5に設定します"
+msgstr "Set the morph value of the costume to 0.5"
+
+msgid "衣装のモーフの値を1.0に設定します"
+msgstr "Set the morph value of the costume to 1.0"
+
+msgid "他の材質の設定を、選択されている材質の設定にコピーする事ができます"
+msgstr "You can copy the settings of another material to the settings of the selected material"
+
+msgid "コピー元の材質名"
+msgstr "Name of the material from which it was copied"
+
+msgid "材質色補正: {c} (補正色[{m}], 材質拡散色[{d}])"
+msgstr "Material color correction: {c} (corrected color [{m}], material diffusion color [{d}])"
+
+msgid "-- 厚み比率 [{b}][y={y:.3f}][z={z:.3f}]"
+msgstr "-- Thickness ratio [{b}][y={y:.3f}][z={z:.3f}]"
+
+msgid "-- 厚み比率 [{b}][y={s:.3f}][z={s:.3f}]"
+msgstr "-- Thickness ratio [{b}][y={s:.3f}][z={s:.3f}]"
+
+msgid "  {b}: 縮尺{s}, 回転{r}, 移動{p}, 衣装ボーン位置[{i}]"
+msgstr "{b}: scale{s}, rotation{r}, translation{p}, costume bone position[{i}]"
+
+msgid "握り拡散ボーン除去"
+msgstr "Grip Diffusion Bone Removal"
+
+msgid "-- 握り拡散ボーン除去 [{i} ({p:.2f}%)]"
+msgstr "-- grip diffusion bone removal [{i} ({p:.2f}%)]"
+
+msgid "不要ボーン除去"
+msgstr "Unnecessary Bone Removal"
+
+msgid "-- 不要ボーン除去 [{i} ({p:.2f}%)]"
+msgstr "-- unwanted bone removal [{i} ({p:.2f}%)]"

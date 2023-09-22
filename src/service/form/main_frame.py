@@ -3,10 +3,10 @@ from typing import Any, Optional
 
 import wx
 
-from mlib.base.logger import MLogger
-from mlib.base.math import MVector3D
+from mlib.core.logger import MLogger
+from mlib.core.math import MVector3D
 from mlib.pmx.pmx_collection import PmxModel
-from mlib.service.form.base_frame import BaseFrame
+from mlib.service.form.notebook_frame import NotebookFrame
 from mlib.utils.file_utils import save_histories
 from mlib.vmd.vmd_collection import VmdMotion
 from mlib.vmd.vmd_part import VmdMorphFrame
@@ -21,13 +21,14 @@ logger = MLogger(os.path.basename(__file__))
 __ = logger.get_text
 
 
-class MainFrame(BaseFrame):
-    def __init__(self, app: wx.App, title: str, size: wx.Size, *args, **kw) -> None:
+class MainFrame(NotebookFrame):
+    def __init__(self, app: wx.App, title: str, size: wx.Size, is_saving: bool, *args, **kw) -> None:
         super().__init__(
             app,
             history_keys=["model_pmx", "dress_pmx", "motion_vmd"],
             title=title,
             size=size,
+            is_saving=is_saving,
         )
 
         # ファイルタブ
@@ -110,6 +111,7 @@ class MainFrame(BaseFrame):
         self.file_panel.exec_btn_ctrl.Enable(True)
 
         if not (self.file_panel.model_ctrl.data and self.file_panel.dress_ctrl.data and self.file_panel.motion_ctrl.data):
+            logger.warning("モデルデータもしくはモーションデータが正常に配置できませんでした", decoration=MLogger.Decoration.BOX)
             return
 
         # モデルとドレスのボーンの縮尺を合わせる
@@ -129,11 +131,11 @@ class MainFrame(BaseFrame):
         # 材質の選択肢を入れ替える
         self.config_panel.model_material_ctrl.initialize(model.materials.names, all_material_names)
         self.config_panel.dress_material_ctrl.initialize(dress.materials.names, all_material_names)
+        # モーフの選択肢を入れ替える
+        self.config_panel.model_morph_ctrl.initialize([m.name for m in model.morphs if not m.is_system])
+        self.config_panel.dress_morph_ctrl.initialize([m.name for m in dress.morphs if not m.is_system])
         # ボーン調整の選択肢を入れ替える
         self.config_panel.dress_bone_ctrl.initialize(individual_morph_names, individual_target_bone_indexes)
-
-        # キーフレを戻す
-        self.config_panel.fno = 0
 
         try:
             logger.info("人物モデル描画準備")
@@ -206,7 +208,7 @@ class MainFrame(BaseFrame):
         self.file_panel.Enable(True)
         self.on_sound()
 
-    def set_model_motion_morphs(self, material_alphas: dict[str, float] = {}) -> None:
+    def set_model_motion_morphs(self, material_alphas: dict[str, float] = {}, morph_ratios: dict[str, float] = {}) -> None:
         if self.model_motion is None:
             return
 
@@ -215,6 +217,11 @@ class MainFrame(BaseFrame):
         for material in model.materials:
             mf = VmdMorphFrame(0, f"{material.name}TR")
             mf.ratio = abs(material_alphas.get(material.name, 1.0) - 1)
+            self.model_motion.morphs[mf.name].append(mf)
+
+        for morph_name, ratio in morph_ratios.items():
+            mf = VmdMorphFrame(0, morph_name)
+            mf.ratio = ratio
             self.model_motion.morphs[mf.name].append(mf)
 
         mf = VmdMorphFrame(0, "全材質TR")
@@ -230,6 +237,7 @@ class MainFrame(BaseFrame):
     def set_dress_motion_morphs(
         self,
         material_alphas: dict[str, float] = {},
+        morph_ratios: dict[str, float] = {},
         bone_scales: dict[str, MVector3D] = {},
         bone_degrees: dict[str, MVector3D] = {},
         bone_positions: dict[str, MVector3D] = {},
@@ -259,6 +267,11 @@ class MainFrame(BaseFrame):
         mf = VmdMorphFrame(0, "全材質TR")
         mf.ratio = abs(material_alphas.get(__("全材質"), 1.0) - 1)
         self.dress_motion.morphs[mf.name].append(mf)
+
+        for morph_name, ratio in morph_ratios.items():
+            mf = VmdMorphFrame(0, morph_name)
+            mf.ratio = ratio
+            self.dress_motion.morphs[mf.name].append(mf)
 
         for morph_name, scale, degree, position in zip(
             bone_scales.keys(), bone_scales.values(), bone_degrees.values(), bone_positions.values()

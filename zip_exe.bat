@@ -10,9 +10,13 @@ del dist\*.zip
 del dist\*.bat
 move /y dist\*.exe dist\past
 
+call mmd_base\setup.bat
+
 pyinstaller --clean zip_exe.spec
+
+cd src && python create_bat.py && cd ..
 
 copy /y archive\Readme*.txt dist
 
-cd src && python create_bat.py && cd ..
+call python mmd_base\setup_clear.py
 

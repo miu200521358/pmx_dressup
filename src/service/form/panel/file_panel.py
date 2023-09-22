@@ -3,9 +3,9 @@ from datetime import datetime
 
 import wx
 
-from mlib.base.logger import MLogger
-from mlib.service.form.base_frame import BaseFrame
-from mlib.service.form.base_panel import BasePanel
+from mlib.core.logger import MLogger
+from mlib.service.form.notebook_frame import NotebookFrame
+from mlib.service.form.notebook_panel import NotebookPanel
 from mlib.service.form.widgets.console_ctrl import ConsoleCtrl
 from mlib.service.form.widgets.exec_btn_ctrl import ExecButton
 from mlib.service.form.widgets.file_ctrl import MPmxFilePickerCtrl, MVmdFilePickerCtrl
@@ -15,14 +15,15 @@ logger = MLogger(os.path.basename(__file__))
 __ = logger.get_text
 
 
-class FilePanel(BasePanel):
-    def __init__(self, frame: BaseFrame, tab_idx: int, *args, **kw) -> None:
+class FilePanel(NotebookPanel):
+    def __init__(self, frame: NotebookFrame, tab_idx: int, *args, **kw) -> None:
         super().__init__(frame, tab_idx, *args, **kw)
 
         self._initialize_ui()
 
     def _initialize_ui(self) -> None:
         self.model_ctrl = MPmxFilePickerCtrl(
+            self,
             self.frame,
             self,
             key="model_pmx",
@@ -36,6 +37,7 @@ class FilePanel(BasePanel):
         self.model_ctrl.set_parent_sizer(self.root_sizer)
 
         self.dress_ctrl = MPmxFilePickerCtrl(
+            self,
             self.frame,
             self,
             key="dress_pmx",
@@ -49,6 +51,7 @@ class FilePanel(BasePanel):
         self.dress_ctrl.set_parent_sizer(self.root_sizer)
 
         self.motion_ctrl = MVmdFilePickerCtrl(
+            self,
             self.frame,
             self,
             key="motion_vmd",
@@ -62,6 +65,7 @@ class FilePanel(BasePanel):
         self.motion_ctrl.set_parent_sizer(self.root_sizer)
 
         self.output_pmx_ctrl = MPmxFilePickerCtrl(
+            self,
             self.frame,
             self,
             title="お着替えモデル出力先",
@@ -74,6 +78,7 @@ class FilePanel(BasePanel):
         self.exec_btn_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.exec_btn_ctrl = ExecButton(
             self,
+            self,
             __("お着替えモデル出力"),
             __("お着替えモデル出力停止"),
             self.exec,
@@ -83,13 +88,12 @@ class FilePanel(BasePanel):
         # 初期では無効化
         self.exec_btn_ctrl.Enable(False)
         self.exec_btn_sizer.Add(self.exec_btn_ctrl, 0, wx.ALL, 3)
-        self.root_sizer.Add(self.exec_btn_sizer, 0, wx.ALIGN_CENTER | wx.SHAPED, 5)
+        self.root_sizer.Add(self.exec_btn_sizer, 0, wx.ALIGN_CENTER | wx.SHAPED, 3)
 
-        self.console_ctrl = ConsoleCtrl(self.frame, self, rows=550)
+        self.console_ctrl = ConsoleCtrl(self, self.frame, self, rows=520)
         self.console_ctrl.set_parent_sizer(self.root_sizer)
 
         self.root_sizer.Add(wx.StaticLine(self, wx.ID_ANY), wx.GROW)
-        self.fit()
 
     def exec(self, event: wx.Event) -> None:
         self.frame.on_exec()
@@ -122,7 +126,7 @@ class FilePanel(BasePanel):
             self.output_pmx_ctrl.path = os.path.join(
                 model_dir_path,
                 f"{dress_file_name}_{datetime.now():%Y%m%d_%H%M%S}",
-                f"{self.model_ctrl.name_ctrl.GetValue()[1:-1]}_{self.dress_ctrl.name_ctrl.GetValue()[1:-1]}{model_file_ext}",
+                f"{self.model_ctrl.get_name_for_file()}_{self.dress_ctrl.get_name_for_file()}{model_file_ext}",
             )
 
     def Enable(self, enable: bool) -> None:

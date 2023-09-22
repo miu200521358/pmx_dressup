@@ -4,7 +4,7 @@ from typing import Optional
 
 import wx
 
-from mlib.base.logger import MLogger
+from mlib.core.logger import MLogger
 from mlib.pmx.pmx_collection import PmxModel
 from mlib.pmx.pmx_writer import PmxWriter
 from mlib.service.base_worker import BaseWorker
@@ -76,12 +76,12 @@ class LoadWorker(BaseWorker):
             logger.info("衣装: 不足ボーン調整", decoration=MLogger.Decoration.LINE)
             usecase.insert_mismatch_bones(model, dress)
 
+            model_standard_positions, model_out_standard_positions = usecase.get_bone_positions(model)
+            dress_standard_positions, dress_out_standard_positions = usecase.get_bone_positions(dress)
+
             replaced_bone_names: list[str] = []
 
             logger.info("衣装: 位置調整", decoration=MLogger.Decoration.LINE)
-
-            # 下半身の再設定
-            replaced_bone_names += usecase.replace_lower(model, dress)
 
             # 上半身の再設定
             replaced_bone_names += usecase.replace_upper(model, dress)
@@ -89,8 +89,11 @@ class LoadWorker(BaseWorker):
             # 上半身2の再設定
             replaced_bone_names += usecase.replace_upper2(model, dress)
 
-            # 胸の再設定
-            replaced_bust_bone_names = usecase.replace_bust(model, dress)
+            # 上半身3の再設定
+            replaced_bone_names += usecase.replace_upper3(model, dress)
+
+            # # 胸の再設定
+            # replaced_bust_bone_names = usecase.replace_bust(model, dress)
 
             # 首の再設定
             usecase.replace_neck(model, dress)
@@ -98,20 +101,17 @@ class LoadWorker(BaseWorker):
             # 肩と腕の再設定
             usecase.replace_shoulder_arm(model, dress)
 
-            # # 左足先EXの再設定
-            # replaced_bone_names += usecase.replace_toe_ex(model, dress, "左")
-
-            # # 右足先EXの再設定
-            # replaced_bone_names += usecase.replace_toe_ex(model, dress, "右")
-
             # 捩りの再設定
             usecase.replace_twist(model, dress, replaced_bone_names)
 
+            # 下半身の再設定
+            replaced_bone_names += usecase.replace_lower(model, dress)
+
             logger.info("衣装: ウェイト調整", decoration=MLogger.Decoration.LINE)
 
-            if replaced_bust_bone_names:
-                dress.setup()
-                usecase.replace_bust_weights(dress, replaced_bust_bone_names)
+            # if replaced_bust_bone_names:
+            #     dress.setup()
+            #     usecase.replace_bust_weights(dress, replaced_bust_bone_names)
 
             if replaced_bone_names:
                 dress.setup()
@@ -131,7 +131,9 @@ class LoadWorker(BaseWorker):
 
             # 衣装にフィッティングボーンモーフを入れる
             logger.info("衣装: 追加セットアップ: フィッティングモーフ追加", decoration=MLogger.Decoration.BOX)
-            usecase.create_dress_fit_morphs(model, dress)
+            usecase.create_dress_fit_morphs(
+                model, dress, model_standard_positions, model_out_standard_positions, dress_standard_positions, dress_out_standard_positions
+            )
 
             is_dress_change = True
         elif file_panel.dress_ctrl.original_data:

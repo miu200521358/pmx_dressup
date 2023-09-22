@@ -1,13 +1,12 @@
-from datetime import datetime
 import os
 
 import wx
 
-from mlib.base.exception import MApplicationException
-from mlib.base.logger import MLogger
+from mlib.core.exception import MApplicationException
+from mlib.core.logger import MLogger
 from mlib.service.base_worker import BaseWorker
 from mlib.service.form.base_frame import BaseFrame
-from mlib.utils.file_utils import get_root_dir, separate_path
+from mlib.utils.file_utils import get_root_dir
 from service.form.panel.config_panel import ConfigPanel
 from service.form.panel.file_panel import FilePanel
 from service.usecase.save_usecase import SaveUsecase
@@ -32,19 +31,7 @@ class SaveWorker(BaseWorker):
 
         if not file_panel.output_pmx_ctrl.path or not os.path.exists(os.path.dirname(file_panel.output_pmx_ctrl.path)):
             logger.warning("出力ファイルパスが有効なパスではないため、デフォルトの出力ファイルパスを再設定します。")
-            model_dir_path, model_file_name, model_file_ext = separate_path(file_panel.model_ctrl.path)
-            dress_dir_path, dress_file_name, dress_file_ext = separate_path(file_panel.dress_ctrl.path)
-            file_panel.output_pmx_ctrl.path = os.path.join(
-                model_dir_path,
-                dress_file_name,
-                os.path.join(
-                    model_dir_path,
-                    f"{dress_file_name}_{datetime.now():%Y%m%d_%H%M%S}",
-                    f"{file_panel.model_ctrl.name_ctrl.GetValue()[1:-1]}_{file_panel.dress_ctrl.name_ctrl.GetValue()[1:-1]}"
-                    + model_file_ext,
-                ),
-            )
-
+            file_panel.create_output_path()
             os.makedirs(os.path.dirname(file_panel.output_pmx_ctrl.path), exist_ok=True)
 
         if not SaveUsecase().valid_output_path(
@@ -58,15 +45,18 @@ class SaveWorker(BaseWorker):
 
         SaveUsecase().save(
             file_panel.model_ctrl.data,
+            file_panel.dress_ctrl.original_data,
             file_panel.dress_ctrl.data,
             self.frame.model_motion,
             self.frame.dress_motion,
             file_panel.output_pmx_ctrl.path,
             config_panel.model_material_ctrl.alphas,
+            config_panel.model_morph_ctrl.ratios,
             config_panel.model_material_ctrl.is_override_colors,
             config_panel.model_material_ctrl.override_base_colors,
             config_panel.model_material_ctrl.override_materials,
             config_panel.dress_material_ctrl.alphas,
+            config_panel.dress_morph_ctrl.ratios,
             config_panel.dress_material_ctrl.is_override_colors,
             config_panel.dress_material_ctrl.override_base_colors,
             config_panel.dress_material_ctrl.override_materials,

@@ -2,11 +2,10 @@ import os
 
 import wx
 
-from mlib.base.logger import MLogger
+from mlib.core.logger import MLogger
 from mlib.service.form.base_panel import BasePanel
 from mlib.service.form.widgets.float_slider_ctrl import FloatSliderCtrl
 from mlib.service.form.widgets.image_btn_ctrl import ImageButton
-from mlib.utils.file_utils import get_path
 
 logger = MLogger(os.path.basename(__file__))
 __ = logger.get_text
@@ -87,7 +86,7 @@ class MaterialCtrlSet:
             increment=0.01,
             spin_increment=0.1,
             border=3,
-            size=wx.Size(160, -1),
+            size=wx.Size(110, -1),
             change_event=self.on_change_morph,
             tooltip=__(f"{type_name}の材質の非透過度を任意の値に変更できます。\n非透過度を1未満にした場合、お着替えモデルには出力されません"),
         )
@@ -104,6 +103,17 @@ class MaterialCtrlSet:
         self.zero_btn_ctrl.SetToolTip(__(f"{type_name}の材質の非透過度を0.0に設定します"))
         self.zero_btn_ctrl.Bind(wx.EVT_BUTTON, self.on_change_material_zero)
         self.slider_sizer.Add(self.zero_btn_ctrl, 0, wx.ALL, 3)
+
+        self.half2_btn_ctrl = wx.Button(
+            self.window,
+            wx.ID_ANY,
+            "0.2",
+            wx.DefaultPosition,
+            wx.Size(30, -1),
+        )
+        self.half2_btn_ctrl.SetToolTip(__(f"{type_name}の材質の非透過度を0.2に設定します"))
+        self.half2_btn_ctrl.Bind(wx.EVT_BUTTON, self.on_change_material_half2)
+        self.slider_sizer.Add(self.half2_btn_ctrl, 0, wx.ALL, 3)
 
         self.half_btn_ctrl = wx.Button(
             self.window,
@@ -146,7 +156,7 @@ class MaterialCtrlSet:
 
         self.dropper_ctrl = ImageButton(
             self.window,
-            get_path("resources/icon/color.png"),
+            "resources/icon/color.png",
             wx.Size(15, 15),
             self.on_dropper,
             "\n".join(
@@ -167,12 +177,12 @@ class MaterialCtrlSet:
         # 材質補正ブロック
         self.material_override_ctrl = ImageButton(
             self.window,
-            get_path("resources/icon/copy.png"),
+            "resources/icon/copy.png",
             wx.Size(15, 15),
             self.on_click_material_override,
             "\n".join(
                 [
-                    __("他の材質の設定を、選択されている材質の設定に上書きする事ができます"),
+                    __("他の材質の設定を、選択されている材質の設定にコピーする事ができます"),
                 ]
             ),
         )
@@ -183,11 +193,11 @@ class MaterialCtrlSet:
             wx.ID_ANY,
             "",
             wx.DefaultPosition,
-            wx.Size(100, -1),
+            wx.Size(70, -1),
             wx.TE_READONLY | wx.BORDER_NONE | wx.WANTS_CHARS,
         )
         self.copy_material_name_ctrl.SetBackgroundColour(wx.SystemSettings.GetColour(wx.SYS_COLOUR_3DLIGHT))
-        self.copy_material_name_ctrl.SetToolTip(__("上書き元の材質名"))
+        self.copy_material_name_ctrl.SetToolTip(__("コピー元の材質名"))
         self.override_sizer.Add(self.copy_material_name_ctrl, 0, wx.ALL, 3)
 
         self.sizer.Add(self.override_sizer, 0, wx.ALL, 3)
@@ -195,8 +205,8 @@ class MaterialCtrlSet:
     def on_click_material_override(self, event: wx.Event):
         with wx.SingleChoiceDialog(
             self.parent,
-            __("上書き元の材質を選んでください。先頭の空行を選ぶと、上書き設定をクリアできます。"),
-            caption=__("ファイル履歴選択"),
+            __("コピー元の材質を選んでください。先頭の空行を選ぶと、コピー設定をクリアできます。"),
+            caption=__("設定コピー材質選択"),
             choices=self.all_material_names,
             style=wx.CAPTION | wx.CLOSE_BOX | wx.SYSTEM_MENU | wx.OK | wx.CANCEL | wx.CENTRE,
         ) as choiceDialog:
@@ -296,6 +306,10 @@ class MaterialCtrlSet:
 
         self.parent.Enable(True)
 
+    def on_change_material_half2(self, event: wx.Event) -> None:
+        self.slider.SetValue(0.2)
+        self.on_change_morph(event)
+
     def on_change_material_half(self, event: wx.Event) -> None:
         self.slider.SetValue(0.5)
         self.on_change_morph(event)
@@ -327,6 +341,7 @@ class MaterialCtrlSet:
         self.left_btn_ctrl.Enable(enable)
         self.right_btn_ctrl.Enable(enable)
         self.slider.Enable(enable)
+        self.half2_btn_ctrl.Enable(enable)
         self.half_btn_ctrl.Enable(enable)
         self.zero_btn_ctrl.Enable(enable)
         self.one_btn_ctrl.Enable(enable)
@@ -334,3 +349,4 @@ class MaterialCtrlSet:
         self.override_color_check_ctrl.Enable(enable)
         self.dropper_ctrl.Enable(enable)
         self.color_picker_ctrl.Enable(enable)
+        self.material_override_ctrl.Enable(enable)

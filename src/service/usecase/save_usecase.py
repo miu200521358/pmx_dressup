@@ -7,9 +7,9 @@ from typing import Optional
 import numpy as np
 from executor import APP_NAME, VERSION_NAME
 
-from mlib.base.logger import MLogger
-from mlib.base.math import MMatrix4x4, MVector3D
-from mlib.base.part import Switch
+from mlib.core.logger import MLogger
+from mlib.core.math import MMatrix4x4, MVector2D, MVector3D, MVector4D, MVectorDict, intersect_line_point
+from mlib.core.part import Switch
 from mlib.pmx.pmx_collection import PmxModel
 from mlib.pmx.pmx_part import (
     BoneMorphOffset,
@@ -22,6 +22,7 @@ from mlib.pmx.pmx_part import (
     MaterialMorphOffset,
     Morph,
     MorphType,
+    Sdef,
     SphereMode,
     Texture,
     ToonSharing,
@@ -78,15 +79,18 @@ class SaveUsecase:
     def save(
         self,
         model: PmxModel,
+        original_dress: PmxModel,
         dress: PmxModel,
         model_config_motion: Optional[VmdMotion],
         dress_config_motion: Optional[VmdMotion],
         output_path: str,
         model_material_alphas: dict[str, float],
+        model_morph_ratios: dict[str, float],
         model_is_override_colors: dict[str, bool],
         model_override_base_colors: dict[str, list[int]],
         model_override_materials: dict[str, int],
         dress_material_alphas: dict[str, float],
+        dress_morph_ratios: dict[str, float],
         dress_is_override_colors: dict[str, bool],
         dress_override_base_colors: dict[str, list[int]],
         dress_override_materials: dict[str, int],
@@ -105,11 +109,13 @@ class SaveUsecase:
         if dress_config_motion:
             dress_motion.morphs = dress_config_motion.morphs.copy()
 
+        model.update_vertices_by_bone()
+        dress.update_vertices_by_bone()
+
         # 接地Yを取得する
-        root_ground_y = self.get_dress_ground(
-            dress,
-            dress_motion,
-        )
+        model_root_ground_y = self.get_ground_y(model, model_motion)
+        dress_root_ground_y = self.get_ground_y(dress, dress_motion)
+        root_ground_y = np.array([model_root_ground_y, dress_root_ground_y])[np.argmax(np.abs([model_root_ground_y, dress_root_ground_y]))]
 
         mmf = VmdMorphFrame(0, "Root:Adjust")
         mmf.ratio = root_ground_y
@@ -159,10 +165,10 @@ class SaveUsecase:
         )
 
         fitting_messages = []
-        for bone_type_name, scale, degree, position in zip(
-            dress_scales.keys(), dress_scales.values(), dress_degrees.values(), dress_positions.values()
+        for bone_type_name, scale, degree, position, is_bone_dress in zip(
+            dress_scales.keys(), dress_scales.values(), dress_degrees.values(), dress_positions.values(), bone_target_dress.values()
         ):
-            message = __("  {b}: 縮尺{s}, 回転{r}, 移動{p}", b=bone_type_name, s=scale, r=degree, p=position)
+            message = __("  {b}: 縮尺{s}, 回転{r}, 移動{p}, 衣装ボーン位置[{i}]", b=bone_type_name, s=scale, r=degree, p=position, i=is_bone_dress)
             fitting_messages.append(message)
 
         model_output_material_names = [
@@ -223,14 +229,31 @@ class SaveUsecase:
 
         # 変形結果
         logger.info("人物：変形確定")
-        model_original_matrixes = VmdMotion().animate_bone([0], model, append_ik=False)
-        model_matrixes = model_motion.animate_bone([0], model, append_ik=False)
+        model_original_matrixes = VmdMotion().animate_bone([0], model)
+        (
+            _,
+            _,
+            model_matrixes,
+            model_vertex_morph_poses,
+            _,
+            model_uv_morph_poses,
+            model_uv1_morph_poses,
+            model_materials,
+        ) = model_motion.animate(0, model, is_gl=False)
         logger.info("衣装：変形確定")
-        dress_original_matrixes = VmdMotion().animate_bone([0], dress, append_ik=False)
-        dress_matrixes = dress_motion.animate_bone([0], dress, append_ik=False)
+        dress_original_matrixes = VmdMotion().animate_bone([0], dress)
+        (
+            _,
+            _,
+            dress_matrixes,
+            dress_vertex_morph_poses,
+            _,
+            dress_uv_morph_poses,
+            dress_uv1_morph_poses,
+            dress_materials,
+        ) = dress_motion.animate(0, dress, is_gl=False)
 
         logger.info("人物：材質選り分け")
-        model.update_vertices_by_bone()
         model.update_vertices_by_material()
 
         active_model_vertices = set(
@@ -243,7 +266,6 @@ class SaveUsecase:
         )
 
         logger.info("衣装：材質選り分け")
-        dress.update_vertices_by_bone()
         dress.update_vertices_by_material()
 
         active_dress_vertices = set(
@@ -254,6 +276,26 @@ class SaveUsecase:
                 for vertex_index in vertices
             ]
         )
+
+        # ---------------------------------
+
+        original_dress_positions = MVectorDict()
+        for dress_bone in original_dress.bones:
+            original_dress_positions.append(dress_bone.index, dress_bone.position)
+
+        dress_same_position_bone_names: dict[str, list[str]] = {}
+        for dress_bone in original_dress.bones:
+            nearest_bone_indexes = original_dress_positions.nearest_all_keys(dress_bone.position)
+            for nearest_bone_index in nearest_bone_indexes:
+                if (
+                    nearest_bone_index != dress_bone.index
+                    and np.isclose(
+                        original_dress.bones[nearest_bone_index].position.vector, dress_bone.position.vector, atol=1e-2, rtol=1e-2
+                    ).all()
+                ):
+                    if dress_bone.name not in dress_same_position_bone_names:
+                        dress_same_position_bone_names[dress_bone.name] = []
+                    dress_same_position_bone_names[dress_bone.name].append(original_dress.bones[nearest_bone_index].name)
 
         # ---------------------------------
 
@@ -360,7 +402,8 @@ class SaveUsecase:
                     # 元々ウェイトを持っていて、かつ出力先にウェイトが乗ってる頂点が無い場合、スルー
                     continue
                 if (
-                    bone.index not in dress.vertices_by_bones
+                    not bone.is_ik
+                    and bone.index not in dress.vertices_by_bones
                     and bone.parent_index in dress.vertices_by_bones
                     and not set(dress.vertices_by_bones[bone.parent_index]) & active_dress_vertices
                 ):
@@ -388,6 +431,13 @@ class SaveUsecase:
                 # 親ボーンが登録されていない場合、子ボーンも登録しない
                 continue
 
+            dress_bone_position = dress_matrixes[0, bone.name].local_matrix * bone.position
+            for nearest_bone_name in dress_same_position_bone_names.get(bone.name, []):
+                # 同じ位置にボーンがある場合、それに合わせる
+                if nearest_bone_name in dress_model_bones:
+                    nearest_bone = dress_model_bones[nearest_bone_name]
+                    dress_bone_position = nearest_bone.position.copy()
+
             # 変形後の位置にボーンを配置する
             if bone.child_bone_indexes and dress.bones[bone.child_bone_indexes[0]].name in dress_model_bones:
                 # 自分の子どもが既に登録されている場合、自分の子ボーンのひとつ前に挿入する
@@ -397,19 +447,23 @@ class SaveUsecase:
                     bone,
                     is_dress=True,
                     is_weight=True,
-                    position=dress_matrixes[0, bone.name].local_matrix * bone.position,
+                    position=dress_bone_position,
                     bone_index=child_bone.index,
                 )
             elif bone.child_bone_indexes and dress.bone_trees.is_in_standard(dress.bones[bone.child_bone_indexes[0]].name):
                 # 準標準の中の順標準外の場合、子どもの準標準ボーンのひとつ前に挿入する
-                child_bones = [b for b in dress.bones if bone.child_bone_indexes[0] in b.relative_bone_indexes and b.is_standard]
+                child_bones = [
+                    b
+                    for b in dress.bones
+                    if bone.child_bone_indexes[0] in b.relative_bone_indexes and b.is_standard and b.name in dress_model_bones
+                ]
                 child_bone_index = dress_model_bones[child_bones[0].name].index if child_bones else -1
 
                 dress_model_bones.append(
                     bone,
                     is_dress=True,
                     is_weight=True,
-                    position=dress_matrixes[0, bone.name].local_matrix * bone.position,
+                    position=dress_bone_position,
                     bone_index=child_bone_index,
                 )
 
@@ -420,9 +474,7 @@ class SaveUsecase:
                     dress_model_bones[child_name].bone = dress.bones[child_name].copy()
             else:
                 # そのまま追加する
-                dress_model_bones.append(
-                    bone, is_dress=True, is_weight=True, position=dress_matrixes[0, bone.name].local_matrix * bone.position
-                )
+                dress_model_bones.append(bone, is_dress=True, is_weight=True, position=dress_bone_position)
 
             if 0 == len(dress_model_bones) % 100:
                 logger.info("-- ボーン出力: {s}", s=len(dress_model_bones))
@@ -471,11 +523,16 @@ class SaveUsecase:
                     dress_link.bone_index = dress_model_bones.get_index_by_map(link.bone_index, dress_model_bone.is_dress)
                     dress_model_bone.ik.links.append(dress_link)
 
-            if bone.is_leg_d and dress_matrixes.exists(0, dress_model_bones[dress_model_bone.effect_index].name):
+            if (
+                dress_model_bone.bone.is_leg_d
+                and 0 <= dress_model_bone.effect_index
+                and dress_matrixes.exists(0, dress_model_bones[dress_model_bone.effect_index].name)
+            ):
                 # 足Dを足FKに揃える
-                dress_model_bones[bone.index].position = dress_matrixes[
-                    0, dress_model_bones[dress_model_bone.effect_index].name
-                ].position.copy()
+                dress_model_bone.position = dress_matrixes[0, dress_model_bones[dress_model_bone.effect_index].name].position.copy()
+
+            if "全ての親" == dress_model_bone.name:
+                dress_model_bone.position = MVector3D()
 
             dress_model.bones.append(dress_model_bone.get_bone())
 
@@ -536,7 +593,7 @@ class SaveUsecase:
                 logger.info("-- 材質出力: {s}", s=material_cnt)
             material_cnt += 1
 
-            copied_material = material.copy()
+            copied_material = model_materials[material.index].material.copy()
             copied_material.index = len(dress_model.materials)
             copied_texture: Optional[Texture] = None
 
@@ -567,6 +624,9 @@ class SaveUsecase:
                         copy_vertex = model.vertices[vertex_index].copy()
                         copy_vertex.index = -1
                         copy_vertex.deform.indexes = np.vectorize(model_all_bone_map.get)(copy_vertex.deform.indexes)
+                        copy_vertex.uv += MVector2D(*model_uv_morph_poses[vertex_index, :2])
+                        if 0 < len(copy_vertex.extended_uvs):
+                            copy_vertex.extended_uvs[0] += MVector4D(*model_uv1_morph_poses[vertex_index, :])
 
                         # 変形後の位置に頂点を配置する
                         mat = np.zeros((4, 4))
@@ -574,7 +634,23 @@ class SaveUsecase:
                             bone_index = model.vertices[vertex_index].deform.indexes[n]
                             bone_weight = model.vertices[vertex_index].deform.weights[n]
                             mat += model_matrixes[0, model.bones[bone_index].name].local_matrix.vector * bone_weight
-                        copy_vertex.position = MMatrix4x4(*mat.flatten()) * copy_vertex.position
+                        copy_vertex.position = MMatrix4x4(mat) * (
+                            copy_vertex.position + MVector3D(*model_vertex_morph_poses[vertex_index, :])
+                        )
+
+                        # SDEFの場合、パラメーターを再計算
+                        if isinstance(copy_vertex.deform, Sdef):
+                            sdef: Sdef = copy_vertex.deform
+                            # SDEF-C: ボーンのベクトルと頂点の交点
+                            sdef.sdef_c = intersect_line_point(
+                                dress_model.bones[sdef.indexes[0]].position,
+                                dress_model.bones[sdef.indexes[1]].position,
+                                copy_vertex.position,
+                            )
+                            # SDEF-R0: 0番目のボーンとSDEF-Cの中点
+                            sdef.sdef_r0 = (sdef.sdef_c + dress_model.bones[sdef.indexes[0]].position) / 2
+                            # SDEF-R1: 1番目のボーンとSDEF-Cの中点
+                            sdef.sdef_r1 = (sdef.sdef_c + dress_model.bones[sdef.indexes[1]].position) / 2
 
                         if 1 == model_material_alphas[material.name]:
                             faces.append(len(dress_model.vertices))
@@ -638,8 +714,21 @@ class SaveUsecase:
                 copied_material.sphere_mode = src_material.sphere_mode
 
             # 色補正対象である場合、テクスチャの色を補正
-            if model_is_override_colors[material.name] and copied_texture:
-                self.override_texture(dress_model, copied_material, copied_texture, model_override_base_colors[material.name])
+            if model_is_override_colors[material.name]:
+                if copied_texture:
+                    self.override_texture(dress_model, copied_material, copied_texture, model_override_base_colors[material.name])
+                else:
+                    override_color = MVector3D(*model_override_base_colors[material.name])
+                    color_difference = (override_color - copied_material.diffuse.xyz) / 255
+                    copied_material.diffuse.xyz = color_difference
+                    copied_material.ambient = color_difference * 0.5
+
+                    logger.info(
+                        "材質色補正: {c} (補正色[{m}], 材質拡散色[{d}])",
+                        c=np.round(color_difference.vector, decimals=1),
+                        m=np.round(override_color.vector, decimals=1),
+                        d=np.round(copied_material.diffuse.xyz.vector, decimals=1),
+                    )
 
         prev_faces_count = 0
         for material in dress.materials:
@@ -647,7 +736,7 @@ class SaveUsecase:
                 logger.info("-- 材質出力: {s}", s=material_cnt)
             material_cnt += 1
 
-            copied_material = material.copy()
+            copied_material = dress_materials[material.index].material.copy()
             copied_material.name = f"Cos:{copied_material.name}"
             copied_material.index = len(dress_model.materials)
             copied_texture = None
@@ -677,6 +766,9 @@ class SaveUsecase:
                         copy_vertex = dress.vertices[vertex_index].copy()
                         copy_vertex.index = -1
                         copy_vertex.deform.indexes = np.vectorize(dress_all_bone_map.get)(copy_vertex.deform.indexes)
+                        copy_vertex.uv += MVector2D(*dress_uv_morph_poses[vertex_index, :2])
+                        if 0 < len(copy_vertex.extended_uvs):
+                            copy_vertex.extended_uvs[0] += MVector4D(*dress_uv1_morph_poses[vertex_index, :])
 
                         # 変形後の位置に頂点を配置する
                         mat = np.zeros((4, 4))
@@ -684,7 +776,23 @@ class SaveUsecase:
                             bone_index = dress.vertices[vertex_index].deform.indexes[n]
                             bone_weight = dress.vertices[vertex_index].deform.weights[n]
                             mat += dress_matrixes[0, dress.bones[bone_index].name].local_matrix.vector * bone_weight
-                        copy_vertex.position = MMatrix4x4(*mat.flatten()) * copy_vertex.position
+                        copy_vertex.position = MMatrix4x4(mat) * (
+                            copy_vertex.position + MVector3D(*dress_vertex_morph_poses[vertex_index, :])
+                        )
+
+                        # SDEFの場合、パラメーターを再計算
+                        if isinstance(copy_vertex.deform, Sdef):
+                            sdef: Sdef = copy_vertex.deform
+                            # SDEF-C: ボーンのベクトルと頂点の交点
+                            sdef.sdef_c = intersect_line_point(
+                                dress_model.bones[sdef.indexes[0]].position,
+                                dress_model.bones[sdef.indexes[1]].position,
+                                copy_vertex.position,
+                            )
+                            # SDEF-R0: 0番目のボーンとSDEF-Cの中点
+                            sdef.sdef_r0 = (sdef.sdef_c + dress_model.bones[sdef.indexes[0]].position) / 2
+                            # SDEF-R1: 1番目のボーンとSDEF-Cの中点
+                            sdef.sdef_r1 = (sdef.sdef_c + dress_model.bones[sdef.indexes[1]].position) / 2
 
                         if 1 == dress_material_alphas[material.name]:
                             faces.append(len(dress_model.vertices))
@@ -747,8 +855,21 @@ class SaveUsecase:
                 copied_material.sphere_mode = src_material.sphere_mode
 
             # 色補正対象である場合、テクスチャの色を補正
-            if dress_is_override_colors[material.name] and copied_texture:
-                self.override_texture(dress_model, copied_material, copied_texture, dress_override_base_colors[material.name])
+            if dress_is_override_colors[material.name]:
+                if copied_texture:
+                    self.override_texture(dress_model, copied_material, copied_texture, dress_override_base_colors[material.name])
+                else:
+                    override_color = MVector3D(*dress_override_base_colors[material.name])
+                    color_difference = (override_color - copied_material.diffuse.xyz) / 255
+                    copied_material.diffuse.xyz = color_difference
+                    copied_material.ambient = color_difference * 0.5
+
+                    logger.info(
+                        "材質色補正: {c} (補正色[{m}], 材質拡散色[{d}])",
+                        c=np.round(color_difference.vector, decimals=1),
+                        m=np.round(override_color.vector, decimals=1),
+                        d=np.round(copied_material.diffuse.xyz.vector, decimals=1),
+                    )
 
         # ---------------------------------
 
@@ -989,7 +1110,7 @@ class SaveUsecase:
 
         # その後、衣装側の表情を入れる
         for morph in dress.morphs:
-            if morph.name not in dress_model.morphs:
+            if morph.name not in dress_model.morphs and f"Cos:{morph.name}" not in dress_model.morphs:
                 continue
             if [
                 reference
@@ -1031,7 +1152,10 @@ class SaveUsecase:
                 for model_reference in model_display_slot.references:
                     if model_reference.display_type == DisplayType.MORPH:
                         continue
-                    if model.bones[model_reference.display_index].name == bone.name:
+                    if (
+                        model.bones[model_reference.display_index].name == bone.name
+                        or model.bones[model_reference.display_index].name == bone.name[4:]
+                    ):
                         # 同じ名前のとこに入れる
                         display_slot_name = model_display_slot.name
                         display_slot_english_name = model_display_slot.english_name
@@ -1047,7 +1171,10 @@ class SaveUsecase:
                     for dress_reference in dress_display_slot.references:
                         if dress_reference.display_type == DisplayType.MORPH:
                             continue
-                        if dress.bones[dress_reference.display_index].name == bone.name:
+                        if (
+                            dress.bones[dress_reference.display_index].name == bone.name
+                            or dress.bones[dress_reference.display_index].name == bone.name[4:]
+                        ):
                             # 同じ名前のとこに入れる
                             display_slot_name = dress_display_slot.name
                             display_slot_english_name = dress_display_slot.english_name
@@ -1083,10 +1210,19 @@ class SaveUsecase:
                 logger.info("-- ボーン表示枠出力: {s}", s=bone.index)
 
         for bone in dress_model.bones:
+            logger.count("不要ボーン除去", index=bone.index, total_index_count=len(dress_model.bones), display_block=100)
+
             if bone.is_ik and 0 > bone.ik.bone_index:
                 # IKターゲットが無い場合、出力対象外にする
                 dress_model.remove_bone(bone.name)
                 continue
+
+            if ("握" in bone.name or "拡" in bone.name) and (
+                "指" in bone.name
+                or (f"{bone.name[0]}手首" in dress_model.bones and bone.parent_index == dress_model.bones[f"{bone.name[0]}手首"].index)
+            ):
+                # 握り拡散系は除外
+                dress_model.remove_bone(bone.name)
 
         logger.info("モデル出力", decoration=MLogger.Decoration.LINE)
 
@@ -1100,12 +1236,12 @@ class SaveUsecase:
         model.update_vertices_by_material()
 
         # 上書き元のテクスチャ画像
-        copied_image = np.array(copied_texture.image, np.float64)
+        copied_image = np.array(Image.open(copied_texture.path).convert("RGBA"), np.float64)
         # 補正テクスチャ画像
         corrected_image = np.asarray(np.copy(copied_image))
 
         # 指定材質に割り当てられた頂点INDEXリスト
-        vertex_indexes = model.vertices_by_materials[copied_material.index]
+        vertex_indexes = model.vertices_by_materials.get(copied_material.index, [])
 
         logger.info("テクスチャ色範囲取得")
 
@@ -1122,23 +1258,24 @@ class SaveUsecase:
 
             vertex_colors.append(copied_image[dv, du, :3])
 
-        base_median_color = np.array(override_base_colors)
-        vertex_median_color = np.median(vertex_colors, axis=0)
+        if vertex_colors:
+            base_median_color = np.array(override_base_colors)
+            vertex_median_color = np.median(vertex_colors, axis=0)
 
-        color_difference = base_median_color - vertex_median_color
+            color_difference = base_median_color - vertex_median_color
 
-        logger.info(
-            "テクスチャ色補正: {c} (補正色[{m}], 材質UV範囲内中央色[{d}])",
-            c=np.round(color_difference, decimals=1),
-            m=np.round(base_median_color, decimals=1),
-            d=np.round(vertex_median_color, decimals=1),
-        )
+            logger.info(
+                "テクスチャ色補正: {c} (補正色[{m}], 材質UV範囲内中央色[{d}])",
+                c=np.round(color_difference, decimals=1),
+                m=np.round(base_median_color, decimals=1),
+                d=np.round(vertex_median_color, decimals=1),
+            )
 
-        # テクスチャ全体を補正（テクスチャ自体を複製）
-        corrected_image[..., :3] += color_difference
+            # テクスチャ全体を補正（テクスチャ自体を複製）
+            corrected_image[..., :3] += color_difference
 
-        # 補正後の色が0未満または255を超える場合、範囲内にクリップする
-        corrected_image = np.clip(corrected_image, 0, 255)
+            # 補正後の色が0未満または255を超える場合、範囲内にクリップする
+            corrected_image = np.clip(corrected_image, 0, 255)
 
         # 補正したテクスチャ画像フルパスを材質別に保存
         texture_dir_path, texture_file_name, texture_file_ext = separate_path(copied_texture.name)
@@ -1297,28 +1434,25 @@ class SaveUsecase:
 
         return copy_morph
 
-    def get_dress_ground(
+    def get_ground_y(
         self,
-        dress: PmxModel,
-        dress_morph_motion: VmdMotion,
+        model: PmxModel,
+        model_motion: VmdMotion,
     ) -> float:
         """接地処理"""
         ankle_under_bone_names: list[str] = []
         # 足首より下のボーンから頂点位置を取得する
-        for bone_tree in dress.bone_trees:
+        for bone_tree in model.bone_trees:
             for ankle_bone_name in ("右足首", "左足首", "右足首D", "左足首D"):
                 if ankle_bone_name in bone_tree.names:
                     for bone in bone_tree.filter(ankle_bone_name):
                         ankle_under_bone_names.append(bone.name)
 
-        # モーフだけを引き継いで行列位置を取得する
-        dress_matrixes = dress_morph_motion.animate_bone([0], dress)
-
         ankle_under_vertex_indexes = set(
             [
                 vertex_index
                 for bone_name in ankle_under_bone_names
-                for vertex_index in dress.vertices_by_bones.get(dress.bones[bone_name].index, [])
+                for vertex_index in model.vertices_by_bones.get(model.bones[bone_name].index, [])
             ]
         )
 
@@ -1326,16 +1460,18 @@ class SaveUsecase:
             # 足首から下の頂点が無い場合、スルー
             return 0.0
 
+        (_, _, model_matrixes, vertex_morph_poses, _, _, _, _) = model_motion.animate(0, model, is_gl=False)
+
         ankle_vertex_positions: list[np.ndarray] = []
         for vertex_index in ankle_under_vertex_indexes:
-            vertex = dress.vertices[vertex_index]
+            vertex = model.vertices[vertex_index]
             # 変形後の位置
             mat = np.zeros((4, 4))
             for n in range(vertex.deform.count):
                 bone_index = vertex.deform.indexes[n]
                 bone_weight = vertex.deform.weights[n]
-                mat += dress_matrixes[0, dress.bones[bone_index].name].local_matrix.vector * bone_weight
-            ankle_vertex_positions.append(mat @ np.append(vertex.position.vector, 1))
+                mat += model_matrixes[0, model.bones[bone_index].name].local_matrix.vector * bone_weight
+            ankle_vertex_positions.append((MMatrix4x4(mat) * (vertex.position + MVector3D(*vertex_morph_poses[vertex_index, :]))).vector)
 
         # 最も地面に近い頂点を基準に接地位置を求める
         min_position = np.min(ankle_vertex_positions, axis=0)
