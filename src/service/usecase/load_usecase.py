@@ -1619,15 +1619,15 @@ class LoadUsecase:
                             dress_toe_ik_position,
                         )
 
-                    elif "つま先" in bone_name:
+                    elif "つま先" in bone_name and f"{bone_name[0]}つま先ＩＫ" in dress.bones:
                         toe_ik_bone_name = f"{bone_name[0]}つま先ＩＫ"
 
                         dress_bone_fit_position = dress_matrixes[0, toe_ik_bone_name].position
                         dress_bone_position = dress_matrixes[0, bone_name].position
-                    elif bone_name in ("右肩", "左肩"):
+                    elif bone_name in ("右肩", "左肩") and f"{bone_name[0]}肩P" in dress.bones:
                         dress_bone_fit_position = dress_matrixes[0, f"{bone_name}P"].position
                         dress_bone_position = dress_matrixes[0, bone_name].position
-                    elif bone_name in ("右腕", "左腕"):
+                    elif bone_name in ("右腕", "左腕") and f"{bone_name[0]}肩C" in dress.bones:
                         dress_bone_fit_position = dress_matrixes[0, f"{bone_name[0]}肩C"].position
                         dress_bone_position = dress_matrixes[0, bone_name].position
                     # elif parent_far_bone_names and tail_far_bone_names:

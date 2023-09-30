@@ -443,17 +443,11 @@ class SaveUsecase:
                     # IKボーンで、かつ出力先にリンクやターゲットボーンのウェイトが乗ってる頂点が無い場合、スルー
                     continue
                 if bone.ik_target_indexes and not (
-                    0 <= dress_model_bones.get_index_by_map(model.bones[bone.ik_target_indexes[0]].ik.bone_index, False)
-                    or set(model.vertices_by_bones.get(model.bones[bone.ik_target_indexes[0]].ik.bone_index, [])) & active_model_vertices
+                    set(dress.vertices_by_bones.get(dress.bones[bone.ik_target_indexes[0]].ik.bone_index, [])) & active_dress_vertices
                     or [
-                        link_bone_index
-                        for link in model.bones[bone.ik_target_indexes[0]].ik.links
-                        for link_bone_index in set(model.vertices_by_bones.get(link.bone_index, [])) & active_model_vertices
-                    ]
-                    or [
-                        link.bone_index
-                        for link in model.bones[bone.ik_target_indexes[0]].ik.links
-                        if 0 <= dress_model_bones.get_index_by_map(link.bone_index, False)
+                        vertex_index
+                        for link in dress.bones[bone.ik_target_indexes[0]].ik.links
+                        for vertex_index in set(dress.vertices_by_bones.get(link.bone_index, [])) & active_dress_vertices
                     ]
                 ):
                     # IKターゲットボーンかつIKが出力対象外の場合、スルー

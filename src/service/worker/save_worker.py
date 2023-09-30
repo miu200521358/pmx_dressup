@@ -29,10 +29,11 @@ class SaveWorker(BaseWorker):
         if not file_panel.dress_ctrl.data:
             raise MApplicationException("衣装モデルデータが読み込まれていません")
 
-        if not file_panel.output_pmx_ctrl.path or not os.path.exists(os.path.dirname(file_panel.output_pmx_ctrl.path)):
-            logger.warning("出力ファイルパスが有効なパスではないため、デフォルトの出力ファイルパスを再設定します。")
+        if not file_panel.output_pmx_ctrl.path:
+            logger.warning("出力ファイルパスが有効なパスではないため、デフォルトの出力ファイルパスを再設定します。", decoration=MLogger.Decoration.BOX)
             file_panel.create_output_path()
-            os.makedirs(os.path.dirname(file_panel.output_pmx_ctrl.path), exist_ok=True)
+
+        os.makedirs(os.path.dirname(file_panel.output_pmx_ctrl.path), exist_ok=True)
 
         if not SaveUsecase().valid_output_path(
             file_panel.model_ctrl.data,
