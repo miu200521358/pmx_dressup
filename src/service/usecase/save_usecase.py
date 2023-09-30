@@ -312,7 +312,10 @@ class SaveUsecase:
                     # 元々ウェイトを持っていて、かつ出力先にウェイトが乗ってる頂点が無い場合、スルー
                     continue
                 if (
-                    bone.index not in model.vertices_by_bones
+                    not bone.is_ik
+                    and not bone.ik_target_indexes
+                    and not bone.ik_link_indexes
+                    and bone.index not in model.vertices_by_bones
                     and bone.parent_index in model.vertices_by_bones
                     and not set(model.vertices_by_bones[bone.parent_index]) & active_model_vertices
                 ):
@@ -331,8 +334,26 @@ class SaveUsecase:
                     # IKボーンで、かつ出力先にリンクやターゲットボーンのウェイトが乗ってる頂点が無い場合、スルー
                     # またIKのリンクやターゲットが既に出力対象である場合、IKボーンも出力する
                     continue
+                if bone.ik_target_indexes and not (
+                    0 <= dress_model_bones.get_index_by_map(model.bones[bone.ik_target_indexes[0]].ik.bone_index, False)
+                    or set(model.vertices_by_bones.get(model.bones[bone.ik_target_indexes[0]].ik.bone_index, [])) & active_model_vertices
+                    or [
+                        link_bone_index
+                        for link in model.bones[bone.ik_target_indexes[0]].ik.links
+                        for link_bone_index in set(model.vertices_by_bones.get(link.bone_index, [])) & active_model_vertices
+                    ]
+                    or [
+                        link.bone_index
+                        for link in model.bones[bone.ik_target_indexes[0]].ik.links
+                        if 0 <= dress_model_bones.get_index_by_map(link.bone_index, False)
+                    ]
+                ):
+                    # IKターゲットボーンかつIKが出力対象外の場合、スルー
+                    continue
                 if (
-                    (bone.is_external_translation or bone.is_external_rotation)
+                    not bone.ik_target_indexes
+                    and not bone.ik_link_indexes
+                    and (bone.is_external_translation or bone.is_external_rotation)
                     and bone.effect_index in model.vertices_by_bones
                     and not set(model.vertices_by_bones[bone.effect_index]) & active_model_vertices
                 ):
@@ -403,6 +424,8 @@ class SaveUsecase:
                     continue
                 if (
                     not bone.is_ik
+                    and not bone.ik_target_indexes
+                    and not bone.ik_link_indexes
                     and bone.index not in dress.vertices_by_bones
                     and bone.parent_index in dress.vertices_by_bones
                     and not set(dress.vertices_by_bones[bone.parent_index]) & active_dress_vertices
@@ -419,8 +442,26 @@ class SaveUsecase:
                 ):
                     # IKボーンで、かつ出力先にリンクやターゲットボーンのウェイトが乗ってる頂点が無い場合、スルー
                     continue
+                if bone.ik_target_indexes and not (
+                    0 <= dress_model_bones.get_index_by_map(model.bones[bone.ik_target_indexes[0]].ik.bone_index, False)
+                    or set(model.vertices_by_bones.get(model.bones[bone.ik_target_indexes[0]].ik.bone_index, [])) & active_model_vertices
+                    or [
+                        link_bone_index
+                        for link in model.bones[bone.ik_target_indexes[0]].ik.links
+                        for link_bone_index in set(model.vertices_by_bones.get(link.bone_index, [])) & active_model_vertices
+                    ]
+                    or [
+                        link.bone_index
+                        for link in model.bones[bone.ik_target_indexes[0]].ik.links
+                        if 0 <= dress_model_bones.get_index_by_map(link.bone_index, False)
+                    ]
+                ):
+                    # IKターゲットボーンかつIKが出力対象外の場合、スルー
+                    continue
                 if (
-                    (bone.is_external_translation or bone.is_external_rotation)
+                    not bone.ik_target_indexes
+                    and not bone.ik_link_indexes
+                    and (bone.is_external_translation or bone.is_external_rotation)
                     and bone.effect_index in dress.vertices_by_bones
                     and not set(dress.vertices_by_bones[bone.effect_index]) & active_dress_vertices
                 ):

@@ -1385,3 +1385,9 @@ msgstr "Unnecessary Bone Removal"
 
 msgid "-- 不要ボーン除去 [{i} ({p:.2f}%)]"
 msgstr "-- unwanted bone removal [{i} ({p:.2f}%)]"
+
+msgid "コピー元の材質を選んでください。先頭の空行を選ぶと、コピー設定をクリアできます。"
+msgstr "Select the material from which you want to copy. Select a leading blank line to clear the copy settings"
+
+msgid "設定コピー材質選択"
+msgstr "Selecting a material for copying settings"
