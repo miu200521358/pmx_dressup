@@ -1657,6 +1657,11 @@ class LoadUsecase:
                         # dress_bone_position = MVector3D()
 
                     dress_offset_position = dress_bone_fit_position - dress_bone_position
+
+                    if bone_setting.category == "体幹":
+                        # 体幹の移動Xは動かさない
+                        dress_offset_position.x = 0.0
+
                     dress.morphs[DRESS_BONE_FITTING_NAME].offsets.append(
                         BoneMorphOffset(
                             dress_bone.index,
@@ -1707,6 +1712,10 @@ class LoadUsecase:
                                     dress_offset_qq = model_slope_qq * dress_slope_qq.inverse()
 
                                     _, _, _, dress_offset_yz_qq = dress_offset_qq.separate_by_axis(dress_bone.local_axis)
+
+                                    if bone_setting.category == "体幹":
+                                        # 体幹は回転X以外は動かさない
+                                        dress_offset_yz_qq = MQuaternion.from_euler_degrees(dress_offset_yz_qq.to_euler_degrees().x, 0, 0)
 
                                     # X軸（捩り）成分を除去した値のみ保持
                                     dress_tail_offset_qqs.append(dress_offset_yz_qq)
