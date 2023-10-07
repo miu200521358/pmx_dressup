@@ -279,6 +279,10 @@ class SaveUsecase:
 
         # ---------------------------------
 
+        original_model_positions = MVectorDict()
+        for model_bone in model.bones:
+            original_model_positions.append(model_bone.index, model_bone.position)
+
         original_dress_positions = MVectorDict()
         for dress_bone in original_dress.bones:
             original_dress_positions.append(dress_bone.index, dress_bone.position)
@@ -307,58 +311,66 @@ class SaveUsecase:
         for bone in model.bones:
             if not (model.bone_trees.is_in_standard(bone.name) or bone.is_standard_extend):
                 # 準標準ではない場合、登録可否チェック
-
-                if bone.index in model.vertices_by_bones and not set(model.vertices_by_bones[bone.index]) & active_model_vertices:
-                    # 元々ウェイトを持っていて、かつ出力先にウェイトが乗ってる頂点が無い場合、スルー
-                    continue
-                if (
-                    not bone.is_ik
-                    and not bone.ik_target_indexes
-                    and not bone.ik_link_indexes
-                    and bone.index not in model.vertices_by_bones
-                    and bone.parent_index in model.vertices_by_bones
-                    and not set(model.vertices_by_bones[bone.parent_index]) & active_model_vertices
-                ):
-                    # 自身はウェイトを持っておらず、親ボーンが元々ウェイトを持っていて、かつ出力先にウェイトが乗ってる頂点が無い場合、スルー
-                    continue
-                if bone.is_ik and not (
-                    0 <= dress_model_bones.get_index_by_map(bone.ik.bone_index, False)
-                    or set(model.vertices_by_bones.get(bone.ik.bone_index, [])) & active_model_vertices
-                    or [
-                        link_bone_index
-                        for link in bone.ik.links
-                        for link_bone_index in set(model.vertices_by_bones.get(link.bone_index, [])) & active_model_vertices
-                    ]
-                    or [link.bone_index for link in bone.ik.links if 0 <= dress_model_bones.get_index_by_map(link.bone_index, False)]
-                ):
-                    # IKボーンで、かつ出力先にリンクやターゲットボーンのウェイトが乗ってる頂点が無い場合、スルー
-                    # またIKのリンクやターゲットが既に出力対象である場合、IKボーンも出力する
-                    continue
-                if bone.ik_target_indexes and not (
-                    0 <= dress_model_bones.get_index_by_map(model.bones[bone.ik_target_indexes[0]].ik.bone_index, False)
-                    or set(model.vertices_by_bones.get(model.bones[bone.ik_target_indexes[0]].ik.bone_index, [])) & active_model_vertices
-                    or [
-                        link_bone_index
-                        for link in model.bones[bone.ik_target_indexes[0]].ik.links
-                        for link_bone_index in set(model.vertices_by_bones.get(link.bone_index, [])) & active_model_vertices
-                    ]
-                    or [
-                        link.bone_index
-                        for link in model.bones[bone.ik_target_indexes[0]].ik.links
-                        if 0 <= dress_model_bones.get_index_by_map(link.bone_index, False)
-                    ]
-                ):
-                    # IKターゲットボーンかつIKが出力対象外の場合、スルー
-                    continue
-                if (
-                    not bone.ik_target_indexes
-                    and not bone.ik_link_indexes
-                    and (bone.is_external_translation or bone.is_external_rotation)
-                    and bone.effect_index in model.vertices_by_bones
-                    and not set(model.vertices_by_bones[bone.effect_index]) & active_model_vertices
-                ):
-                    # 自身はウェイトを持っておらず、付与親ボーンが元々ウェイトを持っていて、かつ出力先にウェイトが乗ってる頂点が無い場合、スルー
-                    continue
+                if [
+                    bone_index
+                    for bone_index in bone.child_bone_indexes
+                    if bone_index in model.vertices_by_bones and set(model.vertices_by_bones[bone_index]) & active_model_vertices
+                ]:
+                    # 子ボーンが元々ウェイトを持っていて、かつ出力先にウェイトが乗ってる頂点がある場合、登録対象
+                    pass
+                else:
+                    if bone.index in model.vertices_by_bones and not set(model.vertices_by_bones[bone.index]) & active_model_vertices:
+                        # 元々ウェイトを持っていて、かつ出力先にウェイトが乗ってる頂点が無い場合、スルー
+                        continue
+                    if (
+                        not bone.is_ik
+                        and not bone.ik_target_indexes
+                        and not bone.ik_link_indexes
+                        and bone.index not in model.vertices_by_bones
+                        and bone.parent_index in model.vertices_by_bones
+                        and not set(model.vertices_by_bones[bone.parent_index]) & active_model_vertices
+                    ):
+                        # 自身はウェイトを持っておらず、親ボーンが元々ウェイトを持っていて、かつ出力先にウェイトが乗ってる頂点が無い場合、スルー
+                        continue
+                    if bone.is_ik and not (
+                        0 <= dress_model_bones.get_index_by_map(bone.ik.bone_index, False)
+                        or set(model.vertices_by_bones.get(bone.ik.bone_index, [])) & active_model_vertices
+                        or [
+                            link_bone_index
+                            for link in bone.ik.links
+                            for link_bone_index in set(model.vertices_by_bones.get(link.bone_index, [])) & active_model_vertices
+                        ]
+                        or [link.bone_index for link in bone.ik.links if 0 <= dress_model_bones.get_index_by_map(link.bone_index, False)]
+                    ):
+                        # IKボーンで、かつ出力先にリンクやターゲットボーンのウェイトが乗ってる頂点が無い場合、スルー
+                        # またIKのリンクやターゲットが既に出力対象である場合、IKボーンも出力する
+                        continue
+                    if bone.ik_target_indexes and not (
+                        0 <= dress_model_bones.get_index_by_map(model.bones[bone.ik_target_indexes[0]].ik.bone_index, False)
+                        or set(model.vertices_by_bones.get(model.bones[bone.ik_target_indexes[0]].ik.bone_index, []))
+                        & active_model_vertices
+                        or [
+                            link_bone_index
+                            for link in model.bones[bone.ik_target_indexes[0]].ik.links
+                            for link_bone_index in set(model.vertices_by_bones.get(link.bone_index, [])) & active_model_vertices
+                        ]
+                        or [
+                            link.bone_index
+                            for link in model.bones[bone.ik_target_indexes[0]].ik.links
+                            if 0 <= dress_model_bones.get_index_by_map(link.bone_index, False)
+                        ]
+                    ):
+                        # IKターゲットボーンかつIKが出力対象外の場合、スルー
+                        continue
+                    if (
+                        not bone.ik_target_indexes
+                        and not bone.ik_link_indexes
+                        and (bone.is_external_translation or bone.is_external_rotation)
+                        and bone.effect_index in model.vertices_by_bones
+                        and not set(model.vertices_by_bones[bone.effect_index]) & active_model_vertices
+                    ):
+                        # 自身はウェイトを持っておらず、付与親ボーンが元々ウェイトを持っていて、かつ出力先にウェイトが乗ってる頂点が無い場合、スルー
+                        continue
 
             if bone.parent_index not in dress_model_bones.model_map and not bone.is_standard:
                 # 人物側の親ボーンが登録されていない場合、子ボーンも登録しない
@@ -969,7 +981,32 @@ class SaveUsecase:
         dress_rigidbody_map: dict[int, int] = {-1: -1}
 
         for rigidbody in model.rigidbodies:
-            if (
+            if 0 > rigidbody.bone_index:
+                # ボーンに紐付いていない剛体はとりあえず出力する
+                model_copy_rigidbody = rigidbody.copy()
+                model_copy_rigidbody.index = len(dress_model.rigidbodies)
+
+                # 最も近いボーンの位置関係から剛体位置を求め直す
+                nearest_bone_index = original_model_positions.nearest_key(model_copy_rigidbody.shape_position)
+                model_bone_name = model.bones[nearest_bone_index].name
+                rigidbody_local_position = model_original_matrixes[0, model_bone_name].global_matrix.inverse() * rigidbody.shape_position
+                rigidbody_copy_position = model_matrixes[0, model_bone_name].global_matrix * rigidbody_local_position
+                rigidbody_copy_scale = MVector3D(
+                    model_matrixes[0, model_bone_name].global_matrix[0, 0],
+                    model_matrixes[0, model_bone_name].global_matrix[1, 1],
+                    model_matrixes[0, model_bone_name].global_matrix[2, 2],
+                )
+
+                model_copy_rigidbody.shape_position = rigidbody_copy_position
+                model_copy_rigidbody.shape_size *= rigidbody_copy_scale
+
+                model_rigidbody_map[rigidbody.index] = len(dress_model.rigidbodies)
+                dress_model.rigidbodies.append(model_copy_rigidbody)
+
+                if not len(dress_model.rigidbodies) % 50:
+                    logger.info("-- 剛体出力: {s}", s=len(dress_model.rigidbodies))
+
+            elif (
                 rigidbody.is_system
                 or 0 > rigidbody.bone_index
                 or rigidbody.bone_index not in dress_model_bones.model_map
@@ -1001,6 +1038,34 @@ class SaveUsecase:
                 logger.info("-- 剛体出力: {s}", s=len(dress_model.rigidbodies))
 
         for rigidbody in dress.rigidbodies:
+            if 0 > rigidbody.bone_index:
+                # ボーンに紐付いていない剛体はとりあえず出力する
+                dress_copy_rigidbody = rigidbody.copy()
+                dress_copy_rigidbody.name = f"Cos:{rigidbody.name}"
+                dress_copy_rigidbody.index = len(dress_model.rigidbodies)
+
+                # 最も近いボーンの位置関係から剛体位置を求め直す
+                nearest_bone_index = original_dress_positions.nearest_key(dress_copy_rigidbody.shape_position)
+
+                # ボーンと剛体の位置関係から剛体位置を求め直す
+                dress_bone_name = dress.bones[nearest_bone_index].name
+                rigidbody_local_position = dress_original_matrixes[0, dress_bone_name].global_matrix.inverse() * rigidbody.shape_position
+                rigidbody_copy_position = dress_matrixes[0, dress_bone_name].global_matrix * rigidbody_local_position
+                rigidbody_copy_scale = MVector3D(
+                    dress_matrixes[0, dress_bone_name].global_matrix[0, 0],
+                    dress_matrixes[0, dress_bone_name].global_matrix[1, 1],
+                    dress_matrixes[0, dress_bone_name].global_matrix[2, 2],
+                )
+
+                dress_copy_rigidbody.shape_position = rigidbody_copy_position
+                dress_copy_rigidbody.shape_size *= rigidbody_copy_scale
+
+                dress_rigidbody_map[rigidbody.index] = len(dress_model.rigidbodies)
+                dress_model.rigidbodies.append(dress_copy_rigidbody)
+
+                if not len(dress_model.rigidbodies) % 50:
+                    logger.info("-- 剛体出力: {s}", s=len(dress_model.rigidbodies))
+
             if (
                 rigidbody.is_system
                 or 0 > rigidbody.bone_index
