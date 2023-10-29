@@ -20,3 +20,5 @@ copy /y archive\Readme*.txt dist
 
 call python mmd_base\setup_clear.py
 
+rem -- 音を鳴らす
+rundll32 user32.dll,MessageBeep

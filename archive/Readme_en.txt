@@ -249,6 +249,16 @@ Credits
 History
 ----------------------------------------------------------------
 
+PmxDressup_1.00.02 (2023/10/22)
+Bug Fixes
+ - Fixed a case where IK link bones were output and IK bones were not output.
+ - The path consistency judgment when outputting a change of clothes model was checking for the existence of folders that had not yet been created, so this was removed.
+ - Fixed an error when judging the movement offset of arm bones when there is no shoulder C.
+ - Removed rotation fitting for neck and head.
+ - Added processing to ignore X for trunk movement and YZ for rotation.
+ - Fixed output of parent bones when child bones are output targets.
+ - Fixed output of rigid bodies to which no bones are attached
+
 PmxDressup_1.00.01 (2023/08/10)
 Function additions and modifications
  - Adjustment to allow changing of cat ears and other parts

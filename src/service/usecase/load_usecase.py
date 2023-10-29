@@ -112,6 +112,18 @@ class LoadUsecase:
             "右小指２",
             "右小指３",
             "右小指先",
+            "右腕捩1",
+            "左腕捩1",
+            "右手捩1",
+            "左手捩1",
+            "右腕捩2",
+            "左腕捩2",
+            "右手捩2",
+            "左手捩2",
+            "右腕捩3",
+            "左腕捩3",
+            "右手捩3",
+            "左手捩3",
         }
 
         # 準標準ボーンで足りないボーン名を抽出
@@ -1619,15 +1631,15 @@ class LoadUsecase:
                             dress_toe_ik_position,
                         )
 
-                    elif "つま先" in bone_name:
+                    elif "つま先" in bone_name and f"{bone_name[0]}つま先ＩＫ" in dress.bones:
                         toe_ik_bone_name = f"{bone_name[0]}つま先ＩＫ"
 
                         dress_bone_fit_position = dress_matrixes[0, toe_ik_bone_name].position
                         dress_bone_position = dress_matrixes[0, bone_name].position
-                    elif bone_name in ("右肩", "左肩"):
+                    elif bone_name in ("右肩", "左肩") and f"{bone_name[0]}肩P" in dress.bones:
                         dress_bone_fit_position = dress_matrixes[0, f"{bone_name}P"].position
                         dress_bone_position = dress_matrixes[0, bone_name].position
-                    elif bone_name in ("右腕", "左腕"):
+                    elif bone_name in ("右腕", "左腕") and f"{bone_name[0]}肩C" in dress.bones:
                         dress_bone_fit_position = dress_matrixes[0, f"{bone_name[0]}肩C"].position
                         dress_bone_position = dress_matrixes[0, bone_name].position
                     # elif parent_far_bone_names and tail_far_bone_names:
@@ -1657,6 +1669,11 @@ class LoadUsecase:
                         # dress_bone_position = MVector3D()
 
                     dress_offset_position = dress_bone_fit_position - dress_bone_position
+
+                    if bone_setting.category == "体幹":
+                        # 体幹の移動Xは動かさない
+                        dress_offset_position.x = 0.0
+
                     dress.morphs[DRESS_BONE_FITTING_NAME].offsets.append(
                         BoneMorphOffset(
                             dress_bone.index,
@@ -1707,6 +1724,10 @@ class LoadUsecase:
                                     dress_offset_qq = model_slope_qq * dress_slope_qq.inverse()
 
                                     _, _, _, dress_offset_yz_qq = dress_offset_qq.separate_by_axis(dress_bone.local_axis)
+
+                                    if bone_setting.category == "体幹":
+                                        # 体幹は回転X以外は動かさない
+                                        dress_offset_yz_qq = MQuaternion.from_euler_degrees(dress_offset_yz_qq.to_euler_degrees().x, 0, 0)
 
                                     # X軸（捩り）成分を除去した値のみ保持
                                     dress_tail_offset_qqs.append(dress_offset_yz_qq)

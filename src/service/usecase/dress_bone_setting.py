@@ -110,15 +110,12 @@ class DressBoneSettings(Enum):
     NECK = DressBoneSetting(
         setting=BoneSettings.NECK.value,
         category="体幹",
-        rotatable=True,
         local_scalable=True,
         local_x_scalable=True,
     )
     HEAD = DressBoneSetting(
         setting=BoneSettings.HEAD.value,
         category="頭",
-        rotatable=True,
-        rotate_cancel=True,
     )
     EYES = DressBoneSetting(
         setting=BoneSettings.EYES.value,
