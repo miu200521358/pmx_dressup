@@ -1383,8 +1383,8 @@ msgstr "Select the material from which you want to copy. Select a leading blank 
 msgid "設定コピー材質選択"
 msgstr "Selecting a material for copying settings"
 
-msgid "[{v}]予期せぬエラーが発生しました"
+msgid "[{v}]\n予期せぬエラーが発生しました"
 msgstr "[{v}]An unexpected error has occurred"
 
-msgid "[{v}]処理が継続できないため、中断しました\n----------------\n{m}"
+msgid "[{v}]\n処理が継続できないため、中断しました\n----------------\n{m}"
 msgstr "[{v}]Aborted because processing cannot continue\n----------------\n{m}"
