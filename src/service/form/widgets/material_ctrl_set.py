@@ -12,7 +12,9 @@ __ = logger.get_text
 
 
 class MaterialCtrlSet:
-    def __init__(self, parent: BasePanel, window: wx.ScrolledWindow, type_name: str) -> None:
+    def __init__(
+        self, parent: BasePanel, window: wx.ScrolledWindow, type_name: str
+    ) -> None:
         self.parent = parent
         self.window = window
         self.type_name = type_name
@@ -24,7 +26,12 @@ class MaterialCtrlSet:
         self.override_materials: dict[str, int] = {}
         self.all_material_names: list[str] = []
 
-        self.sizer = wx.StaticBoxSizer(wx.StaticBox(self.window, wx.ID_ANY, __(type_name) + ": " + __("材質非透過度")), orient=wx.VERTICAL)
+        self.sizer = wx.StaticBoxSizer(
+            wx.StaticBox(
+                self.window, wx.ID_ANY, __(type_name) + ": " + __("材質非透過度")
+            ),
+            orient=wx.VERTICAL,
+        )
 
         self.material_sizer = wx.BoxSizer(wx.HORIZONTAL)
 
@@ -35,7 +42,9 @@ class MaterialCtrlSet:
             wx.DefaultPosition,
             wx.Size(20, -1),
         )
-        self.left_btn_ctrl.SetToolTip(__(f"{type_name}の材質プルダウンの選択肢を上方向に移動できます。"))
+        self.left_btn_ctrl.SetToolTip(
+            __(f"{type_name}の材質プルダウンの選択肢を上方向に移動できます。")
+        )
         self.left_btn_ctrl.Bind(wx.EVT_BUTTON, self.on_change_material_left)
         self.material_sizer.Add(self.left_btn_ctrl, 0, wx.ALL, 3)
 
@@ -47,7 +56,9 @@ class MaterialCtrlSet:
             choices=[],
         )
         self.material_choice_ctrl.SetToolTip(
-            __(f"スライダーで調整対象となる{type_name}の材質です。\n「ボーンライン」はボーンを表す線を示します。\n非透過度が1でない状態でエクスポートすると、お着替え結果には出力されません\n(ボーンラインは常に出力されません)")
+            __(
+                f"スライダーで調整対象となる{type_name}の材質です。\n「ボーンライン」はボーンを表す線を示します。\n非透過度が1でない状態でエクスポートすると、お着替え結果には出力されません\n(ボーンラインは常に出力されません)"
+            )
         )
         self.material_choice_ctrl.Bind(wx.EVT_CHOICE, self.on_change_material)
         self.material_sizer.Add(self.material_choice_ctrl, 1, wx.EXPAND | wx.ALL, 3)
@@ -59,7 +70,9 @@ class MaterialCtrlSet:
             wx.DefaultPosition,
             wx.Size(20, -1),
         )
-        self.right_btn_ctrl.SetToolTip(__(f"{type_name}の材質プルダウンの選択肢を下方向に移動できます。"))
+        self.right_btn_ctrl.SetToolTip(
+            __(f"{type_name}の材質プルダウンの選択肢を下方向に移動できます。")
+        )
         self.right_btn_ctrl.Bind(wx.EVT_BUTTON, self.on_change_material_right)
         self.material_sizer.Add(self.right_btn_ctrl, 0, wx.ALL, 3)
 
@@ -70,7 +83,9 @@ class MaterialCtrlSet:
             wx.DefaultPosition,
             wx.Size(30, -1),
         )
-        self.only_btn_ctrl.SetToolTip(__(f"{type_name}の材質のみを表示します。もう一回押すと元に戻ります"))
+        self.only_btn_ctrl.SetToolTip(
+            __(f"{type_name}の材質のみを表示します。もう一回押すと元に戻ります")
+        )
         self.only_btn_ctrl.Bind(wx.EVT_BUTTON, self.on_change_material_only)
         self.material_sizer.Add(self.only_btn_ctrl, 0, wx.ALL, 3)
 
@@ -88,7 +103,9 @@ class MaterialCtrlSet:
             border=3,
             size=wx.Size(110, -1),
             change_event=self.on_change_morph,
-            tooltip=__(f"{type_name}の材質の非透過度を任意の値に変更できます。\n非透過度を1未満にした場合、お着替えモデルには出力されません"),
+            tooltip=__(
+                f"{type_name}の材質の非透過度を任意の値に変更できます。\n非透過度を1未満にした場合、お着替えモデルには出力されません"
+            ),
         )
 
         self.slider_sizer.Add(self.slider.sizer, 0, wx.ALL, 3)
@@ -100,7 +117,9 @@ class MaterialCtrlSet:
             wx.DefaultPosition,
             wx.Size(20, -1),
         )
-        self.zero_btn_ctrl.SetToolTip(__(f"{type_name}の材質の非透過度を0.0に設定します"))
+        self.zero_btn_ctrl.SetToolTip(
+            __(f"{type_name}の材質の非透過度を0.0に設定します")
+        )
         self.zero_btn_ctrl.Bind(wx.EVT_BUTTON, self.on_change_material_zero)
         self.slider_sizer.Add(self.zero_btn_ctrl, 0, wx.ALL, 3)
 
@@ -111,7 +130,9 @@ class MaterialCtrlSet:
             wx.DefaultPosition,
             wx.Size(30, -1),
         )
-        self.half2_btn_ctrl.SetToolTip(__(f"{type_name}の材質の非透過度を0.2に設定します"))
+        self.half2_btn_ctrl.SetToolTip(
+            __(f"{type_name}の材質の非透過度を0.2に設定します")
+        )
         self.half2_btn_ctrl.Bind(wx.EVT_BUTTON, self.on_change_material_half2)
         self.slider_sizer.Add(self.half2_btn_ctrl, 0, wx.ALL, 3)
 
@@ -122,7 +143,9 @@ class MaterialCtrlSet:
             wx.DefaultPosition,
             wx.Size(30, -1),
         )
-        self.half_btn_ctrl.SetToolTip(__(f"{type_name}の材質の非透過度を0.5に設定します"))
+        self.half_btn_ctrl.SetToolTip(
+            __(f"{type_name}の材質の非透過度を0.5に設定します")
+        )
         self.half_btn_ctrl.Bind(wx.EVT_BUTTON, self.on_change_material_half)
         self.slider_sizer.Add(self.half_btn_ctrl, 0, wx.ALL, 3)
 
@@ -133,7 +156,9 @@ class MaterialCtrlSet:
             wx.DefaultPosition,
             wx.Size(20, -1),
         )
-        self.one_btn_ctrl.SetToolTip(__(f"{type_name}の材質の非透過度を1.0に設定します"))
+        self.one_btn_ctrl.SetToolTip(
+            __(f"{type_name}の材質の非透過度を1.0に設定します")
+        )
         self.one_btn_ctrl.Bind(wx.EVT_BUTTON, self.on_change_material_one)
         self.slider_sizer.Add(self.one_btn_ctrl, 0, wx.ALL, 3)
 
@@ -142,17 +167,28 @@ class MaterialCtrlSet:
         # 色補正ブロック
         self.override_sizer = wx.BoxSizer(wx.HORIZONTAL)
 
-        self.override_color_check_ctrl = wx.CheckBox(self.window, wx.ID_ANY, __("色補正あり"), wx.Point(20, -1), wx.DefaultSize, 0)
+        self.override_color_check_ctrl = wx.CheckBox(
+            self.window,
+            wx.ID_ANY,
+            __("色補正あり"),
+            wx.Point(20, -1),
+            wx.DefaultSize,
+            0,
+        )
         self.override_color_check_ctrl.SetToolTip(
             "\n".join(
                 [
                     __("このチェックをONにすると指定された色でテクスチャを補正します"),
-                    __("補正する色はインクアイコンをクリックした状態でプレビュー画面内を左クリックするか、パレットアイコンから直接定義できます"),
+                    __(
+                        "補正する色はインクアイコンをクリックした状態でプレビュー画面内を左クリックするか、パレットアイコンから直接定義できます"
+                    ),
                 ]
             )
         )
         self.override_sizer.Add(self.override_color_check_ctrl, 0, wx.ALL, 3)
-        self.override_color_check_ctrl.Bind(wx.EVT_CHECKBOX, self.on_change_override_color_check)
+        self.override_color_check_ctrl.Bind(
+            wx.EVT_CHECKBOX, self.on_change_override_color_check
+        )
 
         self.dropper_ctrl = ImageButton(
             self.window,
@@ -161,8 +197,12 @@ class MaterialCtrlSet:
             self.on_dropper,
             "\n".join(
                 [
-                    __("ボタンをクリックした状態でプレビュー画面上で左クリックすると、該当箇所の色を抽出できます"),
-                    __("（クリックしたままドラッグして、抽出する色を変える事もできます）"),
+                    __(
+                        "ボタンをクリックした状態でプレビュー画面上で左クリックすると、該当箇所の色を抽出できます"
+                    ),
+                    __(
+                        "（クリックしたままドラッグして、抽出する色を変える事もできます）"
+                    ),
                     __("もう一度ボタンをクリックすると、色抽出機能を停止します"),
                 ]
             ),
@@ -170,8 +210,12 @@ class MaterialCtrlSet:
         self.override_sizer.Add(self.dropper_ctrl, 0, wx.ALL, 3)
 
         self.color_picker_ctrl = wx.ColourPickerCtrl(self.window, wx.ID_ANY, wx.BLACK)
-        self.color_picker_ctrl.Bind(wx.EVT_COLOURPICKER_CHANGED, self.picked_override_color)
-        self.color_picker_ctrl.SetToolTip(__("色をクリックすると、カラーピッカーから任意の色を定義出来ます"))
+        self.color_picker_ctrl.Bind(
+            wx.EVT_COLOURPICKER_CHANGED, self.picked_override_color
+        )
+        self.color_picker_ctrl.SetToolTip(
+            __("色をクリックすると、カラーピッカーから任意の色を定義出来ます")
+        )
         self.override_sizer.Add(self.color_picker_ctrl, 0, wx.ALL, 0)
 
         # 材質補正ブロック
@@ -182,7 +226,9 @@ class MaterialCtrlSet:
             self.on_click_material_override,
             "\n".join(
                 [
-                    __("他の材質の設定を、選択されている材質の設定にコピーする事ができます"),
+                    __(
+                        "他の材質の設定を、選択されている材質の設定にコピーする事ができます"
+                    ),
                 ]
             ),
         )
@@ -196,7 +242,9 @@ class MaterialCtrlSet:
             wx.Size(70, -1),
             wx.TE_READONLY | wx.BORDER_NONE | wx.WANTS_CHARS,
         )
-        self.copy_material_name_ctrl.SetBackgroundColour(wx.SystemSettings.GetColour(wx.SYS_COLOUR_3DLIGHT))
+        self.copy_material_name_ctrl.SetBackgroundColour(
+            wx.SystemSettings.GetColour(wx.SYS_COLOUR_3DLIGHT)
+        )
         self.copy_material_name_ctrl.SetToolTip(__("コピー元の材質名"))
         self.override_sizer.Add(self.copy_material_name_ctrl, 0, wx.ALL, 3)
 
@@ -205,10 +253,17 @@ class MaterialCtrlSet:
     def on_click_material_override(self, event: wx.Event):
         with wx.SingleChoiceDialog(
             self.parent,
-            __("コピー元の材質を選んでください。先頭の空行を選ぶと、コピー設定をクリアできます。"),
+            __(
+                "コピー元の材質を選んでください。先頭の空行を選ぶと、コピー設定をクリアできます。"
+            ),
             caption=__("設定コピー材質選択"),
             choices=self.all_material_names,
-            style=wx.CAPTION | wx.CLOSE_BOX | wx.SYSTEM_MENU | wx.OK | wx.CANCEL | wx.CENTRE,
+            style=wx.CAPTION
+            | wx.CLOSE_BOX
+            | wx.SYSTEM_MENU
+            | wx.OK
+            | wx.CANCEL
+            | wx.CENTRE,
         ) as choiceDialog:
             if choiceDialog.ShowModal() == wx.ID_CANCEL:
                 return
@@ -221,7 +276,9 @@ class MaterialCtrlSet:
 
     def on_change_override_color_check(self, event: wx.Event):
         material_name = self.material_choice_ctrl.GetStringSelection()
-        self.is_override_colors[material_name] = self.override_color_check_ctrl.GetValue()
+        self.is_override_colors[
+            material_name
+        ] = self.override_color_check_ctrl.GetValue()
 
     def on_dropper(self, event: wx.Event):
         if not self.is_dropper:
@@ -229,7 +286,9 @@ class MaterialCtrlSet:
             self.override_color_check_ctrl.SetValue(True)
             self.on_change_override_color_check(event)
         else:
-            self.dropper_ctrl.SetBackgroundColour(wx.SystemSettings.GetColour(wx.SYS_COLOUR_BTNFACE))
+            self.dropper_ctrl.SetBackgroundColour(
+                wx.SystemSettings.GetColour(wx.SYS_COLOUR_BTNFACE)
+            )
         self.is_dropper = not self.is_dropper
 
     def picked_override_color(self, event: wx.Event):
@@ -242,7 +301,9 @@ class MaterialCtrlSet:
         self.override_color_check_ctrl.SetValue(True)
         self.on_change_override_color_check(event)
 
-    def initialize(self, material_names: list[str], all_material_names: list[str]) -> None:
+    def initialize(
+        self, material_names: list[str], all_material_names: list[str]
+    ) -> None:
         self.material_choice_ctrl.Clear()
         self.all_material_names = all_material_names
         self.alphas = {}
@@ -273,12 +334,16 @@ class MaterialCtrlSet:
         material_name = self.material_choice_ctrl.GetStringSelection()
         self.slider.ChangeValue(self.alphas[material_name])
         self.override_color_check_ctrl.SetValue(self.is_override_colors[material_name])
-        self.color_picker_ctrl.SetColour(wx.Colour(*self.override_base_colors[material_name]))
+        self.color_picker_ctrl.SetColour(
+            wx.Colour(*self.override_base_colors[material_name])
+        )
         self.color_picker_ctrl.Refresh()
         if self.is_dropper:
             # 抽出モードになっていたら解除
             self.on_dropper(event)
-        self.copy_material_name_ctrl.ChangeValue(self.all_material_names[self.override_materials[material_name]])
+        self.copy_material_name_ctrl.ChangeValue(
+            self.all_material_names[self.override_materials[material_name]]
+        )
 
     def on_change_morph(self, event: wx.Event) -> None:
         self.is_only = False

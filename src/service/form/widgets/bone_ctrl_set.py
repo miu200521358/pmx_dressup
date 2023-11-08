@@ -13,7 +13,9 @@ __ = logger.get_text
 
 
 class BoneCtrlSet:
-    def __init__(self, parent: BasePanel, window: wx.ScrolledWindow, sizer: wx.Sizer) -> None:
+    def __init__(
+        self, parent: BasePanel, window: wx.ScrolledWindow, sizer: wx.Sizer
+    ) -> None:
         self.sizer = sizer
         self.parent = parent
         self.window = window
@@ -26,8 +28,17 @@ class BoneCtrlSet:
 
         self.bone_sizer = wx.BoxSizer(wx.HORIZONTAL)
 
-        bone_weight_tooltip = __("このチェックをONにすると、選択ボーンのウェイト範囲をグラデーションで表示します")
-        self.bone_weight_check_ctrl = wx.CheckBox(self.window, wx.ID_ANY, __("ボーンウェイト表示"), wx.Point(20, -1), wx.DefaultSize, 0)
+        bone_weight_tooltip = __(
+            "このチェックをONにすると、選択ボーンのウェイト範囲をグラデーションで表示します"
+        )
+        self.bone_weight_check_ctrl = wx.CheckBox(
+            self.window,
+            wx.ID_ANY,
+            __("ボーンウェイト表示"),
+            wx.Point(20, -1),
+            wx.DefaultSize,
+            0,
+        )
         self.bone_weight_check_ctrl.Bind(wx.EVT_CHECKBOX, self.on_show_bone_weight)
         self.bone_weight_check_ctrl.SetToolTip(bone_weight_tooltip)
         self.sizer.Add(self.bone_weight_check_ctrl, 0, wx.ALL, 3)
@@ -39,7 +50,9 @@ class BoneCtrlSet:
             wx.DefaultPosition,
             wx.Size(20, -1),
         )
-        self.left_btn_ctrl.SetToolTip(__("ボーンプルダウンの選択肢を上方向に移動できます。"))
+        self.left_btn_ctrl.SetToolTip(
+            __("ボーンプルダウンの選択肢を上方向に移動できます。")
+        )
         self.left_btn_ctrl.Bind(wx.EVT_BUTTON, self.on_change_bone_left)
         self.bone_sizer.Add(self.left_btn_ctrl, 0, wx.ALL, 3)
 
@@ -50,7 +63,11 @@ class BoneCtrlSet:
             wx.Size(470, -1),
             choices=[],
         )
-        self.bone_choice_ctrl.SetToolTip(__("スライダーで調整対象となる衣装のボーンです。\n左右は一括で調整できます。"))
+        self.bone_choice_ctrl.SetToolTip(
+            __(
+                "スライダーで調整対象となる衣装のボーンです。\n左右は一括で調整できます。"
+            )
+        )
         self.bone_choice_ctrl.Bind(wx.EVT_CHOICE, self.on_change_bone)
         self.bone_sizer.Add(self.bone_choice_ctrl, 1, wx.EXPAND | wx.ALL, 3)
 
@@ -61,7 +78,9 @@ class BoneCtrlSet:
             wx.DefaultPosition,
             wx.Size(20, -1),
         )
-        self.right_btn_ctrl.SetToolTip(__("ボーンプルダウンの選択肢を下方向に移動できます。"))
+        self.right_btn_ctrl.SetToolTip(
+            __("ボーンプルダウンの選択肢を下方向に移動できます。")
+        )
         self.right_btn_ctrl.Bind(wx.EVT_BUTTON, self.on_change_bone_right)
         self.bone_sizer.Add(self.right_btn_ctrl, 0, wx.ALL, 3)
 
@@ -282,15 +301,24 @@ class BoneCtrlSet:
 
         self.grid_sizer.Add(wx.StaticText(self.window, wx.ID_ANY, ""), 0, wx.ALL, 3)
 
-        bone_target_dress_tooltip = __("人物と衣装のどちらにもメッシュがある場合には、基本的には人物側のボーン位置で出力します。\n") + __(
+        bone_target_dress_tooltip = __(
+            "人物と衣装のどちらにもメッシュがある場合には、基本的には人物側のボーン位置で出力します。\n"
+        ) + __(
             "このチェックをONにすると、指など人物と衣装のボーン位置がずれている場合に衣装側のボーン位置で出力することができます。"
         )
         self.grid_sizer.Add(wx.StaticText(self.window, wx.ID_ANY, ""), 0, wx.ALL, 3)
 
         self.bone_target_dress_check_ctrl = wx.CheckBox(
-            self.window, wx.ID_ANY, __("ボーン位置を衣装モデルに合わせる"), wx.DefaultPosition, wx.DefaultSize, 0
+            self.window,
+            wx.ID_ANY,
+            __("ボーン位置を衣装モデルに合わせる"),
+            wx.DefaultPosition,
+            wx.DefaultSize,
+            0,
         )
-        self.bone_target_dress_check_ctrl.Bind(wx.EVT_CHECKBOX, self.on_change_bone_target_dress)
+        self.bone_target_dress_check_ctrl.Bind(
+            wx.EVT_CHECKBOX, self.on_change_bone_target_dress
+        )
         self.bone_target_dress_check_ctrl.SetToolTip(bone_target_dress_tooltip)
         self.grid_sizer.Add(self.bone_target_dress_check_ctrl, 0, wx.ALL, 3)
 
@@ -314,7 +342,11 @@ class BoneCtrlSet:
 
         self.sizer.Add(self.btn_sizer, 1, wx.EXPAND, 0)
 
-    def initialize(self, individual_morph_names: list[str], individual_target_bone_indexes: list[list[int]]) -> None:
+    def initialize(
+        self,
+        individual_morph_names: list[str],
+        individual_target_bone_indexes: list[list[int]],
+    ) -> None:
         self.bone_choice_ctrl.Clear()
         for morph_name in individual_morph_names:
             self.bone_choice_ctrl.Append(morph_name)
@@ -339,11 +371,19 @@ class BoneCtrlSet:
 
     def on_link_scale(self, event: wx.Event):
         if not self.is_link_scale:
-            self.scale_link_ctrl.SetBackgroundColour(self.parent.active_background_color)
-            self.scale_link_ctrl.SetBitmap(self.scale_link_ctrl.create_bitmap("resources/icon/link_on.png"))
+            self.scale_link_ctrl.SetBackgroundColour(
+                self.parent.active_background_color
+            )
+            self.scale_link_ctrl.SetBitmap(
+                self.scale_link_ctrl.create_bitmap("resources/icon/link_on.png")
+            )
         else:
-            self.scale_link_ctrl.SetBackgroundColour(wx.SystemSettings.GetColour(wx.SYS_COLOUR_BTNFACE))
-            self.scale_link_ctrl.SetBitmap(self.scale_link_ctrl.create_bitmap("resources/icon/link_off.png"))
+            self.scale_link_ctrl.SetBackgroundColour(
+                wx.SystemSettings.GetColour(wx.SYS_COLOUR_BTNFACE)
+            )
+            self.scale_link_ctrl.SetBitmap(
+                self.scale_link_ctrl.create_bitmap("resources/icon/link_off.png")
+            )
         self.is_link_scale = not self.is_link_scale
 
     def on_change_bone(self, event: wx.Event) -> None:
@@ -359,7 +399,9 @@ class BoneCtrlSet:
         self.position_z_slider.ChangeValue(self.positions[morph_name].z)
         self.bone_target_dress_check_ctrl.SetValue(self.bone_target_dress[morph_name])
         # ボーンハイライトを変更
-        self.parent.change_bone(self.individual_target_bone_indexes[self.bone_choice_ctrl.GetSelection()])
+        self.parent.change_bone(
+            self.individual_target_bone_indexes[self.bone_choice_ctrl.GetSelection()]
+        )
 
     def on_change_bone_right(self, event: wx.Event) -> None:
         selection = self.bone_choice_ctrl.GetSelection()
@@ -377,7 +419,9 @@ class BoneCtrlSet:
 
     def on_change_bone_target_dress(self, event: wx.Event) -> None:
         morph_name = self.bone_choice_ctrl.GetStringSelection()
-        self.bone_target_dress[morph_name] = self.bone_target_dress_check_ctrl.GetValue()
+        self.bone_target_dress[
+            morph_name
+        ] = self.bone_target_dress_check_ctrl.GetValue()
 
     def on_change_clear(self, event: wx.Event) -> None:
         for morph_name in self.scales.keys():
@@ -420,12 +464,16 @@ class BoneCtrlSet:
         self.positions[morph_name].x = self.position_x_slider.GetValue()
         self.positions[morph_name].y = self.position_y_slider.GetValue()
         self.positions[morph_name].z = self.position_z_slider.GetValue()
-        self.bone_target_dress[morph_name] = self.bone_target_dress_check_ctrl.GetValue()
+        self.bone_target_dress[
+            morph_name
+        ] = self.bone_target_dress_check_ctrl.GetValue()
 
         self.parent.Enable(False)
         self.parent.on_change(morph_name)
         # ボーンハイライトを変更
-        self.parent.change_bone(self.individual_target_bone_indexes[self.bone_choice_ctrl.GetSelection()])
+        self.parent.change_bone(
+            self.individual_target_bone_indexes[self.bone_choice_ctrl.GetSelection()]
+        )
         self.parent.Enable(True)
 
     def on_show_bone_weight(self, event: wx.Event) -> None:

@@ -23,7 +23,9 @@ class LoadMotionWorker(BaseWorker):
         motion: Optional[VmdMotion] = None
 
         if file_panel.motion_ctrl.valid() and not file_panel.motion_ctrl.data:
-            motion = file_panel.motion_ctrl.reader.read_by_filepath(file_panel.motion_ctrl.path)
+            motion = file_panel.motion_ctrl.reader.read_by_filepath(
+                file_panel.motion_ctrl.path
+            )
         elif file_panel.motion_ctrl.original_data:
             motion = file_panel.motion_ctrl.original_data
         else:
@@ -33,7 +35,9 @@ class LoadMotionWorker(BaseWorker):
 
     def output_log(self) -> None:
         file_panel: FilePanel = self.frame.file_panel
-        output_log_path = os.path.join(get_root_dir(), f"{os.path.basename(file_panel.output_pmx_ctrl.path)}.log")
+        output_log_path = os.path.join(
+            get_root_dir(), f"{os.path.basename(file_panel.output_pmx_ctrl.path)}.log"
+        )
 
         # 出力されたメッセージを全部出力
         file_panel.console_ctrl.text_ctrl.SaveFile(filename=output_log_path)

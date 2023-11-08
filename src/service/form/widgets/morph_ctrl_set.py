@@ -11,14 +11,19 @@ __ = logger.get_text
 
 
 class MorphCtrlSet:
-    def __init__(self, parent: BasePanel, window: wx.ScrolledWindow, type_name: str) -> None:
+    def __init__(
+        self, parent: BasePanel, window: wx.ScrolledWindow, type_name: str
+    ) -> None:
         self.parent = parent
         self.window = window
         self.type_name = type_name
         self.ratios: dict[str, float] = {}
         self.all_morph_names: list[str] = []
 
-        self.sizer = wx.StaticBoxSizer(wx.StaticBox(self.window, wx.ID_ANY, __(type_name) + ": " + __("モーフ")), orient=wx.VERTICAL)
+        self.sizer = wx.StaticBoxSizer(
+            wx.StaticBox(self.window, wx.ID_ANY, __(type_name) + ": " + __("モーフ")),
+            orient=wx.VERTICAL,
+        )
 
         self.morph_sizer = wx.BoxSizer(wx.HORIZONTAL)
 
@@ -29,7 +34,9 @@ class MorphCtrlSet:
             wx.DefaultPosition,
             wx.Size(20, -1),
         )
-        self.left_btn_ctrl.SetToolTip(__(f"{type_name}のモーフプルダウンの選択肢を上方向に移動できます。"))
+        self.left_btn_ctrl.SetToolTip(
+            __(f"{type_name}のモーフプルダウンの選択肢を上方向に移動できます。")
+        )
         self.left_btn_ctrl.Bind(wx.EVT_BUTTON, self.on_change_morph_left)
         self.morph_sizer.Add(self.left_btn_ctrl, 0, wx.ALL, 3)
 
@@ -40,7 +47,11 @@ class MorphCtrlSet:
             wx.Size(200, -1),
             choices=[],
         )
-        self.morph_choice_ctrl.SetToolTip(__(f"スライダーで調整対象となる{type_name}のモーフです。\nモーフの値が0より大きい状態にすると、お着替え結果に反映されます"))
+        self.morph_choice_ctrl.SetToolTip(
+            __(
+                f"スライダーで調整対象となる{type_name}のモーフです。\nモーフの値が0より大きい状態にすると、お着替え結果に反映されます"
+            )
+        )
         self.morph_choice_ctrl.Bind(wx.EVT_CHOICE, self.on_choice_morph)
         self.morph_sizer.Add(self.morph_choice_ctrl, 1, wx.EXPAND | wx.ALL, 3)
 
@@ -51,7 +62,9 @@ class MorphCtrlSet:
             wx.DefaultPosition,
             wx.Size(20, -1),
         )
-        self.right_btn_ctrl.SetToolTip(__(f"{type_name}のモーフプルダウンの選択肢を下方向に移動できます。"))
+        self.right_btn_ctrl.SetToolTip(
+            __(f"{type_name}のモーフプルダウンの選択肢を下方向に移動できます。")
+        )
         self.right_btn_ctrl.Bind(wx.EVT_BUTTON, self.on_change_morph_right)
         self.morph_sizer.Add(self.right_btn_ctrl, 0, wx.ALL, 3)
 
@@ -69,7 +82,9 @@ class MorphCtrlSet:
             border=3,
             size=wx.Size(100, -1),
             change_event=self.on_change_morph,
-            tooltip=__(f"{type_name}のモーフを任意の値に変更できます。\nモーフの値が0より大きい状態にすると、お着替え結果に反映されます"),
+            tooltip=__(
+                f"{type_name}のモーフを任意の値に変更できます。\nモーフの値が0より大きい状態にすると、お着替え結果に反映されます"
+            ),
         )
 
         self.slider_sizer.Add(self.slider.sizer, 0, wx.ALL, 3)

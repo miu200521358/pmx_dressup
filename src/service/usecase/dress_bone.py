@@ -7,7 +7,15 @@ from mlib.pmx.pmx_part import Bone, Ik
 
 
 class DressBone(BaseIndexNameModel):
-    def __init__(self, index: int, name: str, bone: Bone, is_dress: bool, is_weight: bool, position: Optional[MVector3D] = None) -> None:
+    def __init__(
+        self,
+        index: int,
+        name: str,
+        bone: Bone,
+        is_dress: bool,
+        is_weight: bool,
+        position: Optional[MVector3D] = None,
+    ) -> None:
         super().__init__()
 
         self.bone = bone
@@ -31,7 +39,9 @@ class DressBone(BaseIndexNameModel):
         self.ik: Ik = Ik()
 
     def get_bone(self) -> Bone:
-        new_bone = Bone(self.index, self.name, self.english_name or self.bone.english_name)
+        new_bone = Bone(
+            self.index, self.name, self.english_name or self.bone.english_name
+        )
         new_bone.position = self.position or self.bone.position
         new_bone.parent_index = self.parent_index
         new_bone.layer = self.layer
@@ -56,9 +66,20 @@ class DressBones(BaseIndexNameDictModel[DressBone]):
         self.model_map: dict[int, int] = {}
         self.dress_map: dict[int, int] = {}
 
-    def append(self, bone: Bone, is_dress: bool, is_weight: bool, position: Optional[MVector3D] = None, bone_index: int = -1) -> None:
+    def append(
+        self,
+        bone: Bone,
+        is_dress: bool,
+        is_weight: bool,
+        position: Optional[MVector3D] = None,
+        bone_index: int = -1,
+    ) -> None:
         # 人物もしくは準標準の場合、そのまま。それ以外は衣装用に名前を変える
-        dress_bone_name = bone.name if not is_dress or bone.is_standard or bone.is_standard_extend else f"Cos:{bone.name}"
+        dress_bone_name = (
+            bone.name
+            if not is_dress or bone.is_standard or bone.is_standard_extend
+            else f"Cos:{bone.name}"
+        )
 
         if dress_bone_name in self:
             if is_dress:
@@ -73,7 +94,9 @@ class DressBones(BaseIndexNameDictModel[DressBone]):
 
         if 0 <= bone_index:
             # 同じINDEX位置にある元のボーン
-            dress_bone = DressBone(bone_index, dress_bone_name, bone, is_dress, is_weight, position)
+            dress_bone = DressBone(
+                bone_index, dress_bone_name, bone, is_dress, is_weight, position
+            )
             self.insert(dress_bone, is_sort=False)
 
             # 既に同じINDEXがある場合、ずらす
@@ -85,7 +108,9 @@ class DressBones(BaseIndexNameDictModel[DressBone]):
                 if v >= bone_index:
                     self.model_map[k] = v + 1
         else:
-            dress_bone = DressBone(len(self.data), dress_bone_name, bone, is_dress, is_weight, position)
+            dress_bone = DressBone(
+                len(self.data), dress_bone_name, bone, is_dress, is_weight, position
+            )
             self.data[dress_bone.index] = dress_bone
 
         if dress_bone_name not in self._names:

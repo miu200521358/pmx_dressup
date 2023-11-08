@@ -83,7 +83,9 @@ class FilePanel(NotebookPanel):
             __("お着替えモデル出力停止"),
             self.exec,
             250,
-            __("フィッティングさせた衣装と人物を合成して、PMXデータを出力します\nフィッティング結果を設定タブで確認した後にクリックできるようになります"),
+            __(
+                "フィッティングさせた衣装と人物を合成して、PMXデータを出力します\nフィッティング結果を設定タブで確認した後にクリックできるようになります"
+            ),
         )
         # 初期では無効化
         self.exec_btn_ctrl.Enable(False)
@@ -119,8 +121,12 @@ class FilePanel(NotebookPanel):
 
     def create_output_path(self) -> None:
         if self.model_ctrl.valid() and self.dress_ctrl.valid():
-            model_dir_path, model_file_name, model_file_ext = separate_path(self.model_ctrl.path)
-            dress_dir_path, dress_file_name, dress_file_ext = separate_path(self.dress_ctrl.path)
+            model_dir_path, model_file_name, model_file_ext = separate_path(
+                self.model_ctrl.path
+            )
+            dress_dir_path, dress_file_name, dress_file_ext = separate_path(
+                self.dress_ctrl.path
+            )
             self.model_ctrl.read_name()
             self.dress_ctrl.read_name()
             self.output_pmx_ctrl.path = os.path.join(

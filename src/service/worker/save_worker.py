@@ -30,7 +30,10 @@ class SaveWorker(BaseWorker):
             raise MApplicationException("衣装モデルデータが読み込まれていません")
 
         if not file_panel.output_pmx_ctrl.path:
-            logger.warning("出力ファイルパスが有効なパスではないため、デフォルトの出力ファイルパスを再設定します。", decoration=MLogger.Decoration.BOX)
+            logger.warning(
+                "出力ファイルパスが有効なパスではないため、デフォルトの出力ファイルパスを再設定します。",
+                decoration=MLogger.Decoration.BOX,
+            )
             file_panel.create_output_path()
 
         os.makedirs(os.path.dirname(file_panel.output_pmx_ctrl.path), exist_ok=True)
@@ -40,7 +43,9 @@ class SaveWorker(BaseWorker):
             file_panel.dress_ctrl.data,
             file_panel.output_pmx_ctrl.path,
         ):
-            raise MApplicationException("お着替えモデル出力結果が元モデルデータを上書きする危険性があるため、出力を中断します\nお着替えモデル出力ファイルパスを変更してください")
+            raise MApplicationException(
+                "お着替えモデル出力結果が元モデルデータを上書きする危険性があるため、出力を中断します\nお着替えモデル出力ファイルパスを変更してください"
+            )
 
         logger.info("お着替えモデル出力開始", decoration=MLogger.Decoration.BOX)
 
@@ -67,11 +72,17 @@ class SaveWorker(BaseWorker):
             config_panel.dress_bone_ctrl.bone_target_dress,
         )
 
-        logger.info("*** お着替えモデル出力成功 ***\n出力先: {f}", f=file_panel.output_pmx_ctrl.path, decoration=MLogger.Decoration.BOX)
+        logger.info(
+            "*** お着替えモデル出力成功 ***\n出力先: {f}",
+            f=file_panel.output_pmx_ctrl.path,
+            decoration=MLogger.Decoration.BOX,
+        )
 
     def output_log(self):
         file_panel: FilePanel = self.frame.file_panel
-        output_log_path = os.path.join(get_root_dir(), f"{os.path.basename(file_panel.output_pmx_ctrl.path)}.log")
+        output_log_path = os.path.join(
+            get_root_dir(), f"{os.path.basename(file_panel.output_pmx_ctrl.path)}.log"
+        )
 
         # 出力されたメッセージを全部出力
         file_panel.console_ctrl.text_ctrl.SaveFile(filename=output_log_path)

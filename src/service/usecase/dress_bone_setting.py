@@ -641,7 +641,9 @@ DRESS_BONE_FITTING_NAME = "BoneFitting"
 DRESS_VERTEX_FITTING_NAME = "VertexFitting"
 """衣装フィッティング用ボーン"""
 
-DRESS_STANDARD_BONE_NAMES: dict[str, DressBoneSetting] = dict([(bs.value.name, bs.value) for bs in DressBoneSettings])
+DRESS_STANDARD_BONE_NAMES: dict[str, DressBoneSetting] = dict(
+    [(bs.value.name, bs.value) for bs in DressBoneSettings]
+)
 """衣装用準標準ボーン名前とEnumのキーの辞書"""
 
 
@@ -683,7 +685,14 @@ class FitMorphSettings(Enum):
         move_target_bone_names=[],
         child_move_morph_names=["下半身", "上半身"],
         child_rotation_morph_names=[],
-        child_scale_morph_names=["下半身", "上半身", "上半身2", "上半身3", "首根元", "首"],
+        child_scale_morph_names=[
+            "下半身",
+            "上半身",
+            "上半身2",
+            "上半身3",
+            "首根元",
+            "首",
+        ],
         attend_weight_bone_names=[],
     )
 
@@ -899,5 +908,7 @@ class FitMorphSettings(Enum):
     )
 
 
-FIT_INDIVIDUAL_MORPH_NAMES: dict[str, FitMorphSetting] = dict([(bs.value.name, bs.value) for bs in FitMorphSettings])
+FIT_INDIVIDUAL_MORPH_NAMES: dict[str, FitMorphSetting] = dict(
+    [(bs.value.name, bs.value) for bs in FitMorphSettings]
+)
 """個別調整用モーフ名とEnumのキーの辞書"""

@@ -8,7 +8,14 @@ import numpy as np
 from executor import APP_NAME, VERSION_NAME
 
 from mlib.core.logger import MLogger
-from mlib.core.math import MMatrix4x4, MVector2D, MVector3D, MVector4D, MVectorDict, intersect_line_point
+from mlib.core.math import (
+    MMatrix4x4,
+    MVector2D,
+    MVector3D,
+    MVector4D,
+    MVectorDict,
+    intersect_line_point,
+)
 from mlib.core.part import Switch
 from mlib.pmx.pmx_collection import PmxModel
 from mlib.pmx.pmx_part import (
@@ -60,14 +67,18 @@ class SaveUsecase:
             )
             return False
 
-        if os.path.abspath(os.path.dirname(model.path)) == os.path.abspath(os.path.dirname(output_path)):
+        if os.path.abspath(os.path.dirname(model.path)) == os.path.abspath(
+            os.path.dirname(output_path)
+        ):
             logger.error(
                 "人物モデルPMXと同じフォルダ階層にお着替えモデルPMXファイルを出力しようとしています。\nテクスチャが上書きされる危険性があります。",
                 decoration=MLogger.Decoration.BOX,
             )
             return False
 
-        if os.path.abspath(os.path.dirname(dress.path)) == os.path.abspath(os.path.dirname(output_path)):
+        if os.path.abspath(os.path.dirname(dress.path)) == os.path.abspath(
+            os.path.dirname(output_path)
+        ):
             logger.error(
                 "衣装モデルPMXと同じフォルダ階層にお着替えモデルPMXファイルを出力しようとしています。\nテクスチャが上書きされる危険性があります。",
                 decoration=MLogger.Decoration.BOX,
@@ -115,7 +126,9 @@ class SaveUsecase:
         # 接地Yを取得する
         model_root_ground_y = self.get_ground_y(model, model_motion)
         dress_root_ground_y = self.get_ground_y(dress, dress_motion)
-        root_ground_y = np.array([model_root_ground_y, dress_root_ground_y])[np.argmax(np.abs([model_root_ground_y, dress_root_ground_y]))]
+        root_ground_y = np.array([model_root_ground_y, dress_root_ground_y])[
+            np.argmax(np.abs([model_root_ground_y, dress_root_ground_y]))
+        ]
 
         mmf = VmdMorphFrame(0, "Root:Adjust")
         mmf.ratio = root_ground_y
@@ -128,7 +141,9 @@ class SaveUsecase:
         dress_model = PmxModel(output_path)
         dress_model.model_name = model.name + "(" + dress.name + ")"
         dress_model.english_name = model.english_name + "(" + dress.english_name + ")"
-        dress_model.extended_uv_count = max(model.extended_uv_count, dress.extended_uv_count)
+        dress_model.extended_uv_count = max(
+            model.extended_uv_count, dress.extended_uv_count
+        )
         dress_model.comment = (
             __("着替え: ")
             + APP_NAME
@@ -166,9 +181,20 @@ class SaveUsecase:
 
         fitting_messages = []
         for bone_type_name, scale, degree, position, is_bone_dress in zip(
-            dress_scales.keys(), dress_scales.values(), dress_degrees.values(), dress_positions.values(), bone_target_dress.values()
+            dress_scales.keys(),
+            dress_scales.values(),
+            dress_degrees.values(),
+            dress_positions.values(),
+            bone_target_dress.values(),
         ):
-            message = __("  {b}: 縮尺{s}, 回転{r}, 移動{p}, 衣装ボーン位置[{i}]", b=bone_type_name, s=scale, r=degree, p=position, i=is_bone_dress)
+            message = __(
+                "  {b}: 縮尺{s}, 回転{r}, 移動{p}, 衣装ボーン位置[{i}]",
+                b=bone_type_name,
+                s=scale,
+                r=degree,
+                p=position,
+                i=is_bone_dress,
+            )
             fitting_messages.append(message)
 
         model_output_material_names = [
@@ -183,7 +209,14 @@ class SaveUsecase:
             if alpha == 1.0 and material_name not in [__("ボーンライン"), __("全材質")]
         ]
 
-        with open(os.path.join(os.path.dirname(output_path), f"settings_{datetime.now():%Y%m%d_%H%M%S}.txt"), "w", encoding="utf-8") as f:
+        with open(
+            os.path.join(
+                os.path.dirname(output_path),
+                f"settings_{datetime.now():%Y%m%d_%H%M%S}.txt",
+            ),
+            "w",
+            encoding="utf-8",
+        ) as f:
             f.write(__("人物モデル") + "\n")
             f.write(model.path + "\n")
             f.write("\n")
@@ -289,17 +322,24 @@ class SaveUsecase:
 
         dress_same_position_bone_names: dict[str, list[str]] = {}
         for dress_bone in original_dress.bones:
-            nearest_bone_indexes = original_dress_positions.nearest_all_keys(dress_bone.position)
+            nearest_bone_indexes = original_dress_positions.nearest_all_keys(
+                dress_bone.position
+            )
             for nearest_bone_index in nearest_bone_indexes:
                 if (
                     nearest_bone_index != dress_bone.index
                     and np.isclose(
-                        original_dress.bones[nearest_bone_index].position.vector, dress_bone.position.vector, atol=1e-2, rtol=1e-2
+                        original_dress.bones[nearest_bone_index].position.vector,
+                        dress_bone.position.vector,
+                        atol=1e-2,
+                        rtol=1e-2,
                     ).all()
                 ):
                     if dress_bone.name not in dress_same_position_bone_names:
                         dress_same_position_bone_names[dress_bone.name] = []
-                    dress_same_position_bone_names[dress_bone.name].append(original_dress.bones[nearest_bone_index].name)
+                    dress_same_position_bone_names[dress_bone.name].append(
+                        original_dress.bones[nearest_bone_index].name
+                    )
 
         # ---------------------------------
 
@@ -309,17 +349,24 @@ class SaveUsecase:
         logger.info("ボーン出力", decoration=MLogger.Decoration.LINE)
 
         for bone in model.bones:
-            if not (model.bone_trees.is_in_standard(bone.name) or bone.is_standard_extend):
+            if not (
+                model.bone_trees.is_in_standard(bone.name) or bone.is_standard_extend
+            ):
                 # 準標準ではない場合、登録可否チェック
                 if [
                     bone_index
                     for bone_index in bone.child_bone_indexes
-                    if bone_index in model.vertices_by_bones and set(model.vertices_by_bones[bone_index]) & active_model_vertices
+                    if bone_index in model.vertices_by_bones
+                    and set(model.vertices_by_bones[bone_index]) & active_model_vertices
                 ]:
                     # 子ボーンが元々ウェイトを持っていて、かつ出力先にウェイトが乗ってる頂点がある場合、登録対象
                     pass
                 else:
-                    if bone.index in model.vertices_by_bones and not set(model.vertices_by_bones[bone.index]) & active_model_vertices:
+                    if (
+                        bone.index in model.vertices_by_bones
+                        and not set(model.vertices_by_bones[bone.index])
+                        & active_model_vertices
+                    ):
                         # 元々ウェイトを持っていて、かつ出力先にウェイトが乗ってる頂点が無い場合、スルー
                         continue
                     if (
@@ -328,36 +375,62 @@ class SaveUsecase:
                         and not bone.ik_link_indexes
                         and bone.index not in model.vertices_by_bones
                         and bone.parent_index in model.vertices_by_bones
-                        and not set(model.vertices_by_bones[bone.parent_index]) & active_model_vertices
+                        and not set(model.vertices_by_bones[bone.parent_index])
+                        & active_model_vertices
                     ):
                         # 自身はウェイトを持っておらず、親ボーンが元々ウェイトを持っていて、かつ出力先にウェイトが乗ってる頂点が無い場合、スルー
                         continue
                     if bone.is_ik and not (
-                        0 <= dress_model_bones.get_index_by_map(bone.ik.bone_index, False)
-                        or set(model.vertices_by_bones.get(bone.ik.bone_index, [])) & active_model_vertices
+                        0
+                        <= dress_model_bones.get_index_by_map(bone.ik.bone_index, False)
+                        or set(model.vertices_by_bones.get(bone.ik.bone_index, []))
+                        & active_model_vertices
                         or [
                             link_bone_index
                             for link in bone.ik.links
-                            for link_bone_index in set(model.vertices_by_bones.get(link.bone_index, [])) & active_model_vertices
+                            for link_bone_index in set(
+                                model.vertices_by_bones.get(link.bone_index, [])
+                            )
+                            & active_model_vertices
                         ]
-                        or [link.bone_index for link in bone.ik.links if 0 <= dress_model_bones.get_index_by_map(link.bone_index, False)]
+                        or [
+                            link.bone_index
+                            for link in bone.ik.links
+                            if 0
+                            <= dress_model_bones.get_index_by_map(
+                                link.bone_index, False
+                            )
+                        ]
                     ):
                         # IKボーンで、かつ出力先にリンクやターゲットボーンのウェイトが乗ってる頂点が無い場合、スルー
                         # またIKのリンクやターゲットが既に出力対象である場合、IKボーンも出力する
                         continue
                     if bone.ik_target_indexes and not (
-                        0 <= dress_model_bones.get_index_by_map(model.bones[bone.ik_target_indexes[0]].ik.bone_index, False)
-                        or set(model.vertices_by_bones.get(model.bones[bone.ik_target_indexes[0]].ik.bone_index, []))
+                        0
+                        <= dress_model_bones.get_index_by_map(
+                            model.bones[bone.ik_target_indexes[0]].ik.bone_index, False
+                        )
+                        or set(
+                            model.vertices_by_bones.get(
+                                model.bones[bone.ik_target_indexes[0]].ik.bone_index, []
+                            )
+                        )
                         & active_model_vertices
                         or [
                             link_bone_index
                             for link in model.bones[bone.ik_target_indexes[0]].ik.links
-                            for link_bone_index in set(model.vertices_by_bones.get(link.bone_index, [])) & active_model_vertices
+                            for link_bone_index in set(
+                                model.vertices_by_bones.get(link.bone_index, [])
+                            )
+                            & active_model_vertices
                         ]
                         or [
                             link.bone_index
                             for link in model.bones[bone.ik_target_indexes[0]].ik.links
-                            if 0 <= dress_model_bones.get_index_by_map(link.bone_index, False)
+                            if 0
+                            <= dress_model_bones.get_index_by_map(
+                                link.bone_index, False
+                            )
                         ]
                     ):
                         # IKターゲットボーンかつIKが出力対象外の場合、スルー
@@ -367,12 +440,16 @@ class SaveUsecase:
                         and not bone.ik_link_indexes
                         and (bone.is_external_translation or bone.is_external_rotation)
                         and bone.effect_index in model.vertices_by_bones
-                        and not set(model.vertices_by_bones[bone.effect_index]) & active_model_vertices
+                        and not set(model.vertices_by_bones[bone.effect_index])
+                        & active_model_vertices
                     ):
                         # 自身はウェイトを持っておらず、付与親ボーンが元々ウェイトを持っていて、かつ出力先にウェイトが乗ってる頂点が無い場合、スルー
                         continue
 
-            if bone.parent_index not in dress_model_bones.model_map and not bone.is_standard:
+            if (
+                bone.parent_index not in dress_model_bones.model_map
+                and not bone.is_standard
+            ):
                 # 人物側の親ボーンが登録されていない場合、子ボーンも登録しない
                 continue
 
@@ -389,49 +466,84 @@ class SaveUsecase:
             #         if not len(dress_model_bones) % 100:
             #             logger.info("-- ボーン出力: {s}", s=len(dress_model_bones))
 
-            is_weight = bool(bone.index in model.vertices_by_bones and set(model.vertices_by_bones[bone.index]) & active_model_vertices)
+            is_weight = bool(
+                bone.index in model.vertices_by_bones
+                and set(model.vertices_by_bones[bone.index]) & active_model_vertices
+            )
 
             # 変形後の位置にボーンを配置する
-            dress_model_bones.append(bone, is_dress=False, is_weight=is_weight, position=model_matrixes[0, bone.name].position.copy())
+            dress_model_bones.append(
+                bone,
+                is_dress=False,
+                is_weight=is_weight,
+                position=model_matrixes[0, bone.name].position.copy(),
+            )
 
             if not len(dress_model_bones) % 100:
                 logger.info("-- ボーン出力: {s}", s=len(dress_model_bones))
 
         for bone in dress.bones:
-            if (bone.is_standard or bone.is_standard_extend) and bone.name in dress_model_bones:
+            if (
+                bone.is_standard or bone.is_standard_extend
+            ) and bone.name in dress_model_bones:
                 # 既に登録済みの準標準ボーンは追加しない
-                dress_model_bones.dress_map[bone.index] = dress_model_bones[bone.name].index
+                dress_model_bones.dress_map[bone.index] = dress_model_bones[
+                    bone.name
+                ].index
 
-                if not dress_model_bones[bone.name].is_weight or bone.index in dress_fit_bone_indexes:
+                if (
+                    not dress_model_bones[bone.name].is_weight
+                    or bone.index in dress_fit_bone_indexes
+                ):
                     # 人物側にウェイトが乗っていない場合、変形後の位置にボーンを配置する
                     # もしくは衣装側に合わせる、と指示したボーンは衣装側の変形後の位置に配置
-                    dress_model_bones[bone.name].position = dress_matrixes[0, bone.name].position.copy()
+                    dress_model_bones[bone.name].position = dress_matrixes[
+                        0, bone.name
+                    ].position.copy()
 
                     if (
                         not bone.is_tail_bone
                         and dress_model_bones[bone.name].bone.is_tail_bone
                         and 0 <= dress_model_bones[bone.name].bone.tail_index
-                        and model.bones[model.bones[bone.name].tail_index].name in dress_model_bones
+                        and model.bones[model.bones[bone.name].tail_index].name
+                        in dress_model_bones
                     ):
                         # 衣装側が表示先がなくて、人物側に表示先がある場合、表示先ボーンの位置を変形後の位置に合わせる
-                        dress_model_bones[model.bones[model.bones[bone.name].tail_index].name].position = (
-                            dress_matrixes[0, bone.name].global_matrix * bone.tail_position
+                        dress_model_bones[
+                            model.bones[model.bones[bone.name].tail_index].name
+                        ].position = (
+                            dress_matrixes[0, bone.name].global_matrix
+                            * bone.tail_position
                         )
 
-                    for parent_bone_name in reversed(model.bone_trees[bone.name].names[:-1]):
-                        if dress_model_bones[parent_bone_name].bone.is_standard or parent_bone_name in dress.bones:
+                    for parent_bone_name in reversed(
+                        model.bone_trees[bone.name].names[:-1]
+                    ):
+                        if (
+                            dress_model_bones[parent_bone_name].bone.is_standard
+                            or parent_bone_name in dress.bones
+                        ):
                             break
                         # 親が準標準ではなく、衣装側にない場合、親は子（対象）の変形後の位置からみた相対位置にボーンを配置する
-                        dress_model_bones[parent_bone_name].position = dress_matrixes[0, bone.name].global_matrix * (
-                            model_matrixes[0, parent_bone_name].position - model_matrixes[0, bone.name].position
+                        dress_model_bones[parent_bone_name].position = dress_matrixes[
+                            0, bone.name
+                        ].global_matrix * (
+                            model_matrixes[0, parent_bone_name].position
+                            - model_matrixes[0, bone.name].position
                         )
 
                 continue
 
-            if not (dress.bone_trees.is_in_standard(bone.name) or bone.is_standard_extend):
+            if not (
+                dress.bone_trees.is_in_standard(bone.name) or bone.is_standard_extend
+            ):
                 # 準標準ではない場合、登録可否チェック
 
-                if bone.index in dress.vertices_by_bones and not set(dress.vertices_by_bones[bone.index]) & active_dress_vertices:
+                if (
+                    bone.index in dress.vertices_by_bones
+                    and not set(dress.vertices_by_bones[bone.index])
+                    & active_dress_vertices
+                ):
                     # 元々ウェイトを持っていて、かつ出力先にウェイトが乗ってる頂点が無い場合、スルー
                     continue
                 if (
@@ -440,26 +552,39 @@ class SaveUsecase:
                     and not bone.ik_link_indexes
                     and bone.index not in dress.vertices_by_bones
                     and bone.parent_index in dress.vertices_by_bones
-                    and not set(dress.vertices_by_bones[bone.parent_index]) & active_dress_vertices
+                    and not set(dress.vertices_by_bones[bone.parent_index])
+                    & active_dress_vertices
                 ):
                     # 自身はウェイトを持っておらず、親ボーンが元々ウェイトを持っていて、かつ出力先にウェイトが乗ってる頂点が無い場合、スルー
                     continue
                 if bone.is_ik and not (
-                    set(dress.vertices_by_bones.get(bone.ik.bone_index, [])) & active_dress_vertices
+                    set(dress.vertices_by_bones.get(bone.ik.bone_index, []))
+                    & active_dress_vertices
                     or [
                         vertex_index
                         for link in bone.ik.links
-                        for vertex_index in set(dress.vertices_by_bones.get(link.bone_index, [])) & active_dress_vertices
+                        for vertex_index in set(
+                            dress.vertices_by_bones.get(link.bone_index, [])
+                        )
+                        & active_dress_vertices
                     ]
                 ):
                     # IKボーンで、かつ出力先にリンクやターゲットボーンのウェイトが乗ってる頂点が無い場合、スルー
                     continue
                 if bone.ik_target_indexes and not (
-                    set(dress.vertices_by_bones.get(dress.bones[bone.ik_target_indexes[0]].ik.bone_index, [])) & active_dress_vertices
+                    set(
+                        dress.vertices_by_bones.get(
+                            dress.bones[bone.ik_target_indexes[0]].ik.bone_index, []
+                        )
+                    )
+                    & active_dress_vertices
                     or [
                         vertex_index
                         for link in dress.bones[bone.ik_target_indexes[0]].ik.links
-                        for vertex_index in set(dress.vertices_by_bones.get(link.bone_index, [])) & active_dress_vertices
+                        for vertex_index in set(
+                            dress.vertices_by_bones.get(link.bone_index, [])
+                        )
+                        & active_dress_vertices
                     ]
                 ):
                     # IKターゲットボーンかつIKが出力対象外の場合、スルー
@@ -469,16 +594,22 @@ class SaveUsecase:
                     and not bone.ik_link_indexes
                     and (bone.is_external_translation or bone.is_external_rotation)
                     and bone.effect_index in dress.vertices_by_bones
-                    and not set(dress.vertices_by_bones[bone.effect_index]) & active_dress_vertices
+                    and not set(dress.vertices_by_bones[bone.effect_index])
+                    & active_dress_vertices
                 ):
                     # 自身はウェイトを持っておらず、付与親ボーンが元々ウェイトを持っていて、かつ出力先にウェイトが乗ってる頂点が無い場合、スルー
                     continue
 
-            if bone.parent_index not in dress_model_bones.dress_map and not bone.is_standard:
+            if (
+                bone.parent_index not in dress_model_bones.dress_map
+                and not bone.is_standard
+            ):
                 # 親ボーンが登録されていない場合、子ボーンも登録しない
                 continue
 
-            dress_bone_position = dress_matrixes[0, bone.name].local_matrix * bone.position
+            dress_bone_position = (
+                dress_matrixes[0, bone.name].local_matrix * bone.position
+            )
             for nearest_bone_name in dress_same_position_bone_names.get(bone.name, []):
                 # 同じ位置にボーンがある場合、それに合わせる
                 if nearest_bone_name in dress_model_bones:
@@ -486,9 +617,14 @@ class SaveUsecase:
                     dress_bone_position = nearest_bone.position.copy()
 
             # 変形後の位置にボーンを配置する
-            if bone.child_bone_indexes and dress.bones[bone.child_bone_indexes[0]].name in dress_model_bones:
+            if (
+                bone.child_bone_indexes
+                and dress.bones[bone.child_bone_indexes[0]].name in dress_model_bones
+            ):
                 # 自分の子どもが既に登録されている場合、自分の子ボーンのひとつ前に挿入する
-                child_bone = dress_model_bones[dress.bones[bone.child_bone_indexes[0]].name]
+                child_bone = dress_model_bones[
+                    dress.bones[bone.child_bone_indexes[0]].name
+                ]
 
                 dress_model_bones.append(
                     bone,
@@ -497,14 +633,20 @@ class SaveUsecase:
                     position=dress_bone_position,
                     bone_index=child_bone.index,
                 )
-            elif bone.child_bone_indexes and dress.bone_trees.is_in_standard(dress.bones[bone.child_bone_indexes[0]].name):
+            elif bone.child_bone_indexes and dress.bone_trees.is_in_standard(
+                dress.bones[bone.child_bone_indexes[0]].name
+            ):
                 # 準標準の中の順標準外の場合、子どもの準標準ボーンのひとつ前に挿入する
                 child_bones = [
                     b
                     for b in dress.bones
-                    if bone.child_bone_indexes[0] in b.relative_bone_indexes and b.is_standard and b.name in dress_model_bones
+                    if bone.child_bone_indexes[0] in b.relative_bone_indexes
+                    and b.is_standard
+                    and b.name in dress_model_bones
                 ]
-                child_bone_index = dress_model_bones[child_bones[0].name].index if child_bones else -1
+                child_bone_index = (
+                    dress_model_bones[child_bones[0].name].index if child_bones else -1
+                )
 
                 dress_model_bones.append(
                     bone,
@@ -521,7 +663,9 @@ class SaveUsecase:
                     dress_model_bones[child_name].bone = dress.bones[child_name].copy()
             else:
                 # そのまま追加する
-                dress_model_bones.append(bone, is_dress=True, is_weight=True, position=dress_bone_position)
+                dress_model_bones.append(
+                    bone, is_dress=True, is_weight=True, position=dress_bone_position
+                )
 
             if 0 == len(dress_model_bones) % 100:
                 logger.info("-- ボーン出力: {s}", s=len(dress_model_bones))
@@ -533,15 +677,25 @@ class SaveUsecase:
             dress_model_bone.parent_index = dress_model_bones.get_index_by_map(
                 dress_model_bone.bone.parent_index, dress_model_bone.is_dress
             )
-            dress_model_bone.tail_index = dress_model_bones.get_index_by_map(dress_model_bone.bone.tail_index, dress_model_bone.is_dress)
+            dress_model_bone.tail_index = dress_model_bones.get_index_by_map(
+                dress_model_bone.bone.tail_index, dress_model_bone.is_dress
+            )
             dress_model_bone.effect_index = dress_model_bones.get_index_by_map(
                 dress_model_bone.bone.effect_index, dress_model_bone.is_dress
             )
 
             dress_model_bone.layer = max(
                 dress_model_bone.bone.layer,
-                (dress_model_bones[dress_model_bone.parent_index].layer if 0 < dress_model_bone.parent_index else 0),
-                (dress_model_bones[dress_model_bone.effect_index].layer if 0 <= dress_model_bone.effect_index else 0),
+                (
+                    dress_model_bones[dress_model_bone.parent_index].layer
+                    if 0 < dress_model_bone.parent_index
+                    else 0
+                ),
+                (
+                    dress_model_bones[dress_model_bone.effect_index].layer
+                    if 0 <= dress_model_bone.effect_index
+                    else 0
+                ),
             )
 
             dress_model_bone.external_key = dress_model_bone.bone.external_key
@@ -554,12 +708,20 @@ class SaveUsecase:
                     dress_model_bone.bone.ik.bone_index, dress_model_bone.is_dress
                 )
                 dress_model_bone.ik.loop_count = dress_model_bone.bone.ik.loop_count
-                dress_model_bone.ik.unit_rotation = dress_model_bone.bone.ik.unit_rotation
-                if 0 <= dress_model_bone.ik.bone_index and dress_matrixes.exists(0, dress_model_bones[dress_model_bone.ik.bone_index].name):
+                dress_model_bone.ik.unit_rotation = (
+                    dress_model_bone.bone.ik.unit_rotation
+                )
+                if 0 <= dress_model_bone.ik.bone_index and dress_matrixes.exists(
+                    0, dress_model_bones[dress_model_bone.ik.bone_index].name
+                ):
                     # IKターゲットとその位置を修正
-                    ik_target_position = dress_matrixes[0, dress_model_bones[dress_model_bone.ik.bone_index].name].position
+                    ik_target_position = dress_matrixes[
+                        0, dress_model_bones[dress_model_bone.ik.bone_index].name
+                    ].position
                     dress_model_bone.position = ik_target_position.copy()
-                    dress_model_bones[dress_model_bone.ik.bone_index].position = ik_target_position.copy()
+                    dress_model_bones[
+                        dress_model_bone.ik.bone_index
+                    ].position = ik_target_position.copy()
 
                     if "つま先ＩＫ" in dress_model_bone.name:
                         dress_model_bone.position.y = 0
@@ -567,16 +729,22 @@ class SaveUsecase:
 
                 for link in dress_model_bone.bone.ik.links:
                     dress_link = link.copy()
-                    dress_link.bone_index = dress_model_bones.get_index_by_map(link.bone_index, dress_model_bone.is_dress)
+                    dress_link.bone_index = dress_model_bones.get_index_by_map(
+                        link.bone_index, dress_model_bone.is_dress
+                    )
                     dress_model_bone.ik.links.append(dress_link)
 
             if (
                 dress_model_bone.bone.is_leg_d
                 and 0 <= dress_model_bone.effect_index
-                and dress_matrixes.exists(0, dress_model_bones[dress_model_bone.effect_index].name)
+                and dress_matrixes.exists(
+                    0, dress_model_bones[dress_model_bone.effect_index].name
+                )
             ):
                 # 足Dを足FKに揃える
-                dress_model_bone.position = dress_matrixes[0, dress_model_bones[dress_model_bone.effect_index].name].position.copy()
+                dress_model_bone.position = dress_matrixes[
+                    0, dress_model_bones[dress_model_bone.effect_index].name
+                ].position.copy()
 
             if "全ての親" == dress_model_bone.name:
                 dress_model_bone.position = MVector3D()
@@ -589,18 +757,24 @@ class SaveUsecase:
         for bone in dress_model.bones:
             if bone.has_fixed_axis:
                 # 軸制限がある場合、合わせる
-                fixed_axis = dress_model.bones.get_tail_relative_position(bone.index).normalized()
+                fixed_axis = dress_model.bones.get_tail_relative_position(
+                    bone.index
+                ).normalized()
                 if 0 != fixed_axis.dot(bone.fixed_axis):
                     # 元々のローカル軸と大きく違いすぎてる場合は判定結果を入れない
                     bone.fixed_axis = fixed_axis
 
             if bone.has_local_coordinate:
                 # ローカル軸も合わせる
-                local_z_vector = dress_model.bones.get_tail_relative_position(bone.index).normalized()
+                local_z_vector = dress_model.bones.get_tail_relative_position(
+                    bone.index
+                ).normalized()
                 if 0 != local_z_vector.dot(bone.local_z_vector):
                     # 元々のローカル軸と大きく違いすぎてる場合は判定結果を入れない
                     bone.local_z_vector = local_z_vector
-                    bone.local_x_vector = local_y_vector.cross(bone.local_z_vector).normalized()
+                    bone.local_x_vector = local_y_vector.cross(
+                        bone.local_z_vector
+                    ).normalized()
 
             # if (bone.is_external_rotation or bone.is_external_translation) and bone.effect_index in dress_model.bones:
             #     external_bone = dress_model.bones[bone.effect_index]
@@ -618,8 +792,18 @@ class SaveUsecase:
             if 0 < bone.index and not bone.index % 100:
                 logger.info("-- ボーン軸定義再設定: {s}", s=bone.index)
 
-        model_all_bone_map: dict[int, int] = dict([(bone.index, dress_model_bones.model_map.get(bone.index, 0)) for bone in model.bones])
-        dress_all_bone_map: dict[int, int] = dict([(bone.index, dress_model_bones.dress_map.get(bone.index, 0)) for bone in dress.bones])
+        model_all_bone_map: dict[int, int] = dict(
+            [
+                (bone.index, dress_model_bones.model_map.get(bone.index, 0))
+                for bone in model.bones
+            ]
+        )
+        dress_all_bone_map: dict[int, int] = dict(
+            [
+                (bone.index, dress_model_bones.dress_map.get(bone.index, 0))
+                for bone in dress.bones
+            ]
+        )
 
         # ---------------------------------
 
@@ -645,44 +829,81 @@ class SaveUsecase:
             copied_texture: Optional[Texture] = None
 
             if 0 <= material.texture_index:
-                copied_texture = self.copy_texture(dress_model, model.textures[material.texture_index], model.path, is_dress=False)
-                copied_material.texture_index = copied_texture.index if copied_texture else -1
+                copied_texture = self.copy_texture(
+                    dress_model,
+                    model.textures[material.texture_index],
+                    model.path,
+                    is_dress=False,
+                )
+                copied_material.texture_index = (
+                    copied_texture.index if copied_texture else -1
+                )
 
-            if material.toon_sharing_flg == ToonSharing.INDIVIDUAL and 0 <= material.toon_texture_index:
+            if (
+                material.toon_sharing_flg == ToonSharing.INDIVIDUAL
+                and 0 <= material.toon_texture_index
+            ):
                 copied_toon_texture = self.copy_texture(
-                    dress_model, model.textures[material.toon_texture_index], model.path, is_dress=False
+                    dress_model,
+                    model.textures[material.toon_texture_index],
+                    model.path,
+                    is_dress=False,
                 )
-                copied_material.toon_texture_index = copied_toon_texture.index if copied_toon_texture else -1
+                copied_material.toon_texture_index = (
+                    copied_toon_texture.index if copied_toon_texture else -1
+                )
 
-            if material.sphere_mode != SphereMode.INVALID and 0 <= material.sphere_texture_index:
+            if (
+                material.sphere_mode != SphereMode.INVALID
+                and 0 <= material.sphere_texture_index
+            ):
                 copied_sphere_texture = self.copy_texture(
-                    dress_model, model.textures[material.sphere_texture_index], model.path, is_dress=False
+                    dress_model,
+                    model.textures[material.sphere_texture_index],
+                    model.path,
+                    is_dress=False,
                 )
-                copied_material.sphere_texture_index = copied_sphere_texture.index if copied_sphere_texture else -1
+                copied_material.sphere_texture_index = (
+                    copied_sphere_texture.index if copied_sphere_texture else -1
+                )
 
             if 1 == model_material_alphas[material.name]:
                 dress_model.materials.append(copied_material, is_sort=False)
                 model_material_map[material.index] = copied_material.index
 
-            for face_index in range(prev_faces_count, prev_faces_count + material.vertices_count // 3):
+            for face_index in range(
+                prev_faces_count, prev_faces_count + material.vertices_count // 3
+            ):
                 faces = []
                 for vertex_index in model.faces[face_index].vertices:
                     if vertex_index not in model_vertex_map:
                         copy_vertex = model.vertices[vertex_index].copy()
                         copy_vertex.index = -1
-                        copy_vertex.deform.indexes = np.vectorize(model_all_bone_map.get)(copy_vertex.deform.indexes)
-                        copy_vertex.uv += MVector2D(*model_uv_morph_poses[vertex_index, :2])
+                        copy_vertex.deform.indexes = np.vectorize(
+                            model_all_bone_map.get
+                        )(copy_vertex.deform.indexes)
+                        copy_vertex.uv += MVector2D(
+                            *model_uv_morph_poses[vertex_index, :2]
+                        )
                         if 0 < len(copy_vertex.extended_uvs):
-                            copy_vertex.extended_uvs[0] += MVector4D(*model_uv1_morph_poses[vertex_index, :])
+                            copy_vertex.extended_uvs[0] += MVector4D(
+                                *model_uv1_morph_poses[vertex_index, :]
+                            )
 
                         # 変形後の位置に頂点を配置する
                         mat = np.zeros((4, 4))
                         for n in range(copy_vertex.deform.count):
                             bone_index = model.vertices[vertex_index].deform.indexes[n]
                             bone_weight = model.vertices[vertex_index].deform.weights[n]
-                            mat += model_matrixes[0, model.bones[bone_index].name].local_matrix.vector * bone_weight
+                            mat += (
+                                model_matrixes[
+                                    0, model.bones[bone_index].name
+                                ].local_matrix.vector
+                                * bone_weight
+                            )
                         copy_vertex.position = MMatrix4x4(mat) * (
-                            copy_vertex.position + MVector3D(*model_vertex_morph_poses[vertex_index, :])
+                            copy_vertex.position
+                            + MVector3D(*model_vertex_morph_poses[vertex_index, :])
                         )
 
                         # SDEFの場合、パラメーターを再計算
@@ -695,9 +916,15 @@ class SaveUsecase:
                                 copy_vertex.position,
                             )
                             # SDEF-R0: 0番目のボーンとSDEF-Cの中点
-                            sdef.sdef_r0 = (sdef.sdef_c + dress_model.bones[sdef.indexes[0]].position) / 2
+                            sdef.sdef_r0 = (
+                                sdef.sdef_c
+                                + dress_model.bones[sdef.indexes[0]].position
+                            ) / 2
                             # SDEF-R1: 1番目のボーンとSDEF-Cの中点
-                            sdef.sdef_r1 = (sdef.sdef_c + dress_model.bones[sdef.indexes[1]].position) / 2
+                            sdef.sdef_r1 = (
+                                sdef.sdef_c
+                                + dress_model.bones[sdef.indexes[1]].position
+                            ) / 2
 
                         if 1 == model_material_alphas[material.name]:
                             faces.append(len(dress_model.vertices))
@@ -707,7 +934,14 @@ class SaveUsecase:
                         faces.append(model_vertex_map[vertex_index])
 
                 if 1 == model_material_alphas[material.name]:
-                    dress_model.faces.append(Face(vertex_index0=faces[0], vertex_index1=faces[1], vertex_index2=faces[2]), is_sort=False)
+                    dress_model.faces.append(
+                        Face(
+                            vertex_index0=faces[0],
+                            vertex_index1=faces[1],
+                            vertex_index2=faces[2],
+                        ),
+                        is_sort=False,
+                    )
 
             prev_faces_count += material.vertices_count // 3
 
@@ -715,10 +949,16 @@ class SaveUsecase:
                 # 先頭の空行ではない上書き材質が選択されている場合
                 if model_override_materials[material.name] - 1 < len(model.materials):
                     # 人物側の材質INDEX範囲内である場合
-                    src_material = model.materials[model_override_materials[material.name] - 1]
+                    src_material = model.materials[
+                        model_override_materials[material.name] - 1
+                    ]
                     is_dress_material = False
                 else:
-                    src_material = model.materials[model_override_materials[material.name] - len(model.materials) - 1]
+                    src_material = model.materials[
+                        model_override_materials[material.name]
+                        - len(model.materials)
+                        - 1
+                    ]
                     is_dress_material = True
 
                 # 非透過度はコピーしない
@@ -731,13 +971,24 @@ class SaveUsecase:
                 copied_material.edge_size = src_material.edge_size
                 # texture_index はコピーしない
                 copied_material.toon_sharing_flg = src_material.toon_sharing_flg
-                if src_material.toon_sharing_flg == ToonSharing.INDIVIDUAL and 0 <= src_material.toon_texture_index:
-                    if model.textures[src_material.toon_texture_index].name not in dress_model.textures:
+                if (
+                    src_material.toon_sharing_flg == ToonSharing.INDIVIDUAL
+                    and 0 <= src_material.toon_texture_index
+                ):
+                    if (
+                        model.textures[src_material.toon_texture_index].name
+                        not in dress_model.textures
+                    ):
                         # コピー対象外でテクスチャを複製してなかった場合、テクスチャをコピーする
                         copied_toon_texture = self.copy_texture(
-                            dress_model, model.textures[material.toon_texture_index], model.path, is_dress=is_dress_material
+                            dress_model,
+                            model.textures[material.toon_texture_index],
+                            model.path,
+                            is_dress=is_dress_material,
                         )
-                        copied_material.toon_texture_index = copied_toon_texture.index if copied_toon_texture else -1
+                        copied_material.toon_texture_index = (
+                            copied_toon_texture.index if copied_toon_texture else -1
+                        )
                     else:
                         copied_material.toon_texture_index = dress_model.textures[
                             model.textures[src_material.toon_texture_index].name
@@ -745,13 +996,24 @@ class SaveUsecase:
                 else:
                     copied_material.toon_texture_index = src_material.toon_texture_index
 
-                if src_material.sphere_mode != SphereMode.INVALID and 0 < src_material.sphere_texture_index:
-                    if model.textures[src_material.sphere_texture_index].name not in dress_model.textures:
+                if (
+                    src_material.sphere_mode != SphereMode.INVALID
+                    and 0 < src_material.sphere_texture_index
+                ):
+                    if (
+                        model.textures[src_material.sphere_texture_index].name
+                        not in dress_model.textures
+                    ):
                         # コピー対象外でテクスチャを複製してなかった場合、テクスチャをコピーする
                         copied_sphere_texture = self.copy_texture(
-                            dress_model, model.textures[material.sphere_texture_index], model.path, is_dress=is_dress_material
+                            dress_model,
+                            model.textures[material.sphere_texture_index],
+                            model.path,
+                            is_dress=is_dress_material,
                         )
-                        copied_material.sphere_texture_index = copied_sphere_texture.index if copied_sphere_texture else -1
+                        copied_material.sphere_texture_index = (
+                            copied_sphere_texture.index if copied_sphere_texture else -1
+                        )
                     else:
                         copied_material.sphere_texture_index = dress_model.textures[
                             model.textures[src_material.sphere_texture_index].name
@@ -763,10 +1025,19 @@ class SaveUsecase:
             # 色補正対象である場合、テクスチャの色を補正
             if model_is_override_colors[material.name]:
                 if copied_texture:
-                    self.override_texture(dress_model, copied_material, copied_texture, model_override_base_colors[material.name])
+                    self.override_texture(
+                        dress_model,
+                        copied_material,
+                        copied_texture,
+                        model_override_base_colors[material.name],
+                    )
                 else:
-                    override_color = MVector3D(*model_override_base_colors[material.name])
-                    color_difference = (override_color - copied_material.diffuse.xyz) / 255
+                    override_color = MVector3D(
+                        *model_override_base_colors[material.name]
+                    )
+                    color_difference = (
+                        override_color - copied_material.diffuse.xyz
+                    ) / 255
                     copied_material.diffuse.xyz = color_difference
                     copied_material.ambient = color_difference * 0.5
 
@@ -789,42 +1060,81 @@ class SaveUsecase:
             copied_texture = None
 
             if 0 <= material.texture_index:
-                copied_texture = self.copy_texture(dress_model, dress.textures[material.texture_index], dress.path, is_dress=True)
-                copied_material.texture_index = copied_texture.index if copied_texture else -1
-
-            if material.toon_sharing_flg == ToonSharing.INDIVIDUAL and 0 <= material.toon_texture_index:
-                copied_toon_texture = self.copy_texture(dress_model, dress.textures[material.toon_texture_index], dress.path, is_dress=True)
-                copied_material.toon_texture_index = copied_toon_texture.index if copied_toon_texture else -1
-
-            if material.sphere_mode != SphereMode.INVALID and 0 < material.sphere_texture_index:
-                copied_sphere_texture = self.copy_texture(
-                    dress_model, dress.textures[material.sphere_texture_index], dress.path, is_dress=True
+                copied_texture = self.copy_texture(
+                    dress_model,
+                    dress.textures[material.texture_index],
+                    dress.path,
+                    is_dress=True,
                 )
-                copied_material.sphere_texture_index = copied_sphere_texture.index if copied_sphere_texture else -1
+                copied_material.texture_index = (
+                    copied_texture.index if copied_texture else -1
+                )
+
+            if (
+                material.toon_sharing_flg == ToonSharing.INDIVIDUAL
+                and 0 <= material.toon_texture_index
+            ):
+                copied_toon_texture = self.copy_texture(
+                    dress_model,
+                    dress.textures[material.toon_texture_index],
+                    dress.path,
+                    is_dress=True,
+                )
+                copied_material.toon_texture_index = (
+                    copied_toon_texture.index if copied_toon_texture else -1
+                )
+
+            if (
+                material.sphere_mode != SphereMode.INVALID
+                and 0 < material.sphere_texture_index
+            ):
+                copied_sphere_texture = self.copy_texture(
+                    dress_model,
+                    dress.textures[material.sphere_texture_index],
+                    dress.path,
+                    is_dress=True,
+                )
+                copied_material.sphere_texture_index = (
+                    copied_sphere_texture.index if copied_sphere_texture else -1
+                )
 
             if 1 == dress_material_alphas[material.name]:
                 dress_model.materials.append(copied_material, is_sort=False)
                 dress_material_map[material.index] = copied_material.index
 
-            for face_index in range(prev_faces_count, prev_faces_count + copied_material.vertices_count // 3):
+            for face_index in range(
+                prev_faces_count, prev_faces_count + copied_material.vertices_count // 3
+            ):
                 faces = []
                 for vertex_index in dress.faces[face_index].vertices:
                     if vertex_index not in dress_vertex_map:
                         copy_vertex = dress.vertices[vertex_index].copy()
                         copy_vertex.index = -1
-                        copy_vertex.deform.indexes = np.vectorize(dress_all_bone_map.get)(copy_vertex.deform.indexes)
-                        copy_vertex.uv += MVector2D(*dress_uv_morph_poses[vertex_index, :2])
+                        copy_vertex.deform.indexes = np.vectorize(
+                            dress_all_bone_map.get
+                        )(copy_vertex.deform.indexes)
+                        copy_vertex.uv += MVector2D(
+                            *dress_uv_morph_poses[vertex_index, :2]
+                        )
                         if 0 < len(copy_vertex.extended_uvs):
-                            copy_vertex.extended_uvs[0] += MVector4D(*dress_uv1_morph_poses[vertex_index, :])
+                            copy_vertex.extended_uvs[0] += MVector4D(
+                                *dress_uv1_morph_poses[vertex_index, :]
+                            )
 
                         # 変形後の位置に頂点を配置する
                         mat = np.zeros((4, 4))
                         for n in range(copy_vertex.deform.count):
                             bone_index = dress.vertices[vertex_index].deform.indexes[n]
                             bone_weight = dress.vertices[vertex_index].deform.weights[n]
-                            mat += dress_matrixes[0, dress.bones[bone_index].name].local_matrix.vector * bone_weight
+                            mat += (
+                                dress_matrixes[
+                                    0, dress.bones[bone_index].name
+                                ].local_matrix.vector
+                                * bone_weight
+                            )
                         copy_vertex.position = MMatrix4x4(mat) * (
-                            copy_vertex.position + MVector3D(*dress_vertex_morph_poses[vertex_index, :])
+                            copy_vertex.position
+                            + MVector3D(*dress_vertex_morph_poses[vertex_index, :])
                         )
 
                         # SDEFの場合、パラメーターを再計算
@@ -837,9 +1147,15 @@ class SaveUsecase:
                                 copy_vertex.position,
                             )
                             # SDEF-R0: 0番目のボーンとSDEF-Cの中点
-                            sdef.sdef_r0 = (sdef.sdef_c + dress_model.bones[sdef.indexes[0]].position) / 2
+                            sdef.sdef_r0 = (
+                                sdef.sdef_c
+                                + dress_model.bones[sdef.indexes[0]].position
+                            ) / 2
                             # SDEF-R1: 1番目のボーンとSDEF-Cの中点
-                            sdef.sdef_r1 = (sdef.sdef_c + dress_model.bones[sdef.indexes[1]].position) / 2
+                            sdef.sdef_r1 = (
+                                sdef.sdef_c
+                                + dress_model.bones[sdef.indexes[1]].position
+                            ) / 2
 
                         if 1 == dress_material_alphas[material.name]:
                             faces.append(len(dress_model.vertices))
@@ -848,7 +1164,14 @@ class SaveUsecase:
                     else:
                         faces.append(dress_vertex_map[vertex_index])
                 if 1 == dress_material_alphas[material.name]:
-                    dress_model.faces.append(Face(vertex_index0=faces[0], vertex_index1=faces[1], vertex_index2=faces[2]), is_sort=False)
+                    dress_model.faces.append(
+                        Face(
+                            vertex_index0=faces[0],
+                            vertex_index1=faces[1],
+                            vertex_index2=faces[2],
+                        ),
+                        is_sort=False,
+                    )
 
             prev_faces_count += material.vertices_count // 3
 
@@ -856,10 +1179,16 @@ class SaveUsecase:
                 # 先頭の空行ではない上書き材質が選択されている場合
                 if dress_override_materials[material.name] - 1 < len(model.materials):
                     # 人物側の材質INDEX範囲内である場合
-                    src_material = model.materials[dress_override_materials[material.name] - 1]
+                    src_material = model.materials[
+                        dress_override_materials[material.name] - 1
+                    ]
                     is_dress_material = False
                 else:
-                    src_material = dress.materials[dress_override_materials[material.name] - len(model.materials) - 1]
+                    src_material = dress.materials[
+                        dress_override_materials[material.name]
+                        - len(model.materials)
+                        - 1
+                    ]
                     is_dress_material = True
 
                 # 非透過度はコピーしない
@@ -872,13 +1201,24 @@ class SaveUsecase:
                 copied_material.edge_size = src_material.edge_size
                 # texture_index はコピーしない
                 copied_material.toon_sharing_flg = src_material.toon_sharing_flg
-                if src_material.toon_sharing_flg == ToonSharing.INDIVIDUAL and 0 <= src_material.toon_texture_index:
-                    if model.textures[src_material.toon_texture_index].name not in dress_model.textures:
+                if (
+                    src_material.toon_sharing_flg == ToonSharing.INDIVIDUAL
+                    and 0 <= src_material.toon_texture_index
+                ):
+                    if (
+                        model.textures[src_material.toon_texture_index].name
+                        not in dress_model.textures
+                    ):
                         # コピー対象外でテクスチャを複製してなかった場合、テクスチャをコピーする
                         copied_toon_texture = self.copy_texture(
-                            dress_model, model.textures[material.toon_texture_index], model.path, is_dress=is_dress_material
+                            dress_model,
+                            model.textures[material.toon_texture_index],
+                            model.path,
+                            is_dress=is_dress_material,
                         )
-                        copied_material.toon_texture_index = copied_toon_texture.index if copied_toon_texture else -1
+                        copied_material.toon_texture_index = (
+                            copied_toon_texture.index if copied_toon_texture else -1
+                        )
                     else:
                         copied_material.toon_texture_index = dress_model.textures[
                             model.textures[src_material.toon_texture_index].name
@@ -886,13 +1226,24 @@ class SaveUsecase:
                 else:
                     copied_material.toon_texture_index = src_material.toon_texture_index
 
-                if src_material.sphere_mode != SphereMode.INVALID and 0 < src_material.sphere_texture_index:
-                    if model.textures[src_material.sphere_texture_index].name not in dress_model.textures:
+                if (
+                    src_material.sphere_mode != SphereMode.INVALID
+                    and 0 < src_material.sphere_texture_index
+                ):
+                    if (
+                        model.textures[src_material.sphere_texture_index].name
+                        not in dress_model.textures
+                    ):
                         # コピー対象外でテクスチャを複製してなかった場合、テクスチャをコピーする
                         copied_sphere_texture = self.copy_texture(
-                            dress_model, model.textures[material.sphere_texture_index], model.path, is_dress=is_dress_material
+                            dress_model,
+                            model.textures[material.sphere_texture_index],
+                            model.path,
+                            is_dress=is_dress_material,
                         )
-                        copied_material.sphere_texture_index = copied_sphere_texture.index if copied_sphere_texture else -1
+                        copied_material.sphere_texture_index = (
+                            copied_sphere_texture.index if copied_sphere_texture else -1
+                        )
                     else:
                         copied_material.sphere_texture_index = dress_model.textures[
                             model.textures[src_material.sphere_texture_index].name
@@ -904,10 +1255,19 @@ class SaveUsecase:
             # 色補正対象である場合、テクスチャの色を補正
             if dress_is_override_colors[material.name]:
                 if copied_texture:
-                    self.override_texture(dress_model, copied_material, copied_texture, dress_override_base_colors[material.name])
+                    self.override_texture(
+                        dress_model,
+                        copied_material,
+                        copied_texture,
+                        dress_override_base_colors[material.name],
+                    )
                 else:
-                    override_color = MVector3D(*dress_override_base_colors[material.name])
-                    color_difference = (override_color - copied_material.diffuse.xyz) / 255
+                    override_color = MVector3D(
+                        *dress_override_base_colors[material.name]
+                    )
+                    color_difference = (
+                        override_color - copied_material.diffuse.xyz
+                    ) / 255
                     copied_material.diffuse.xyz = color_difference
                     copied_material.ambient = color_difference * 0.5
 
@@ -938,7 +1298,9 @@ class SaveUsecase:
                 if is_group:
                     copy_morph = self.copy_group_morph(morph, model_morph_map)
                 else:
-                    copy_morph = self.copy_morph(morph, model_all_bone_map, model_vertex_map, model_material_map)
+                    copy_morph = self.copy_morph(
+                        morph, model_all_bone_map, model_vertex_map, model_material_map
+                    )
 
                 if copy_morph.offsets:
                     copy_morph.index = len(dress_model.morphs)
@@ -960,7 +1322,9 @@ class SaveUsecase:
                 if is_group:
                     copy_morph = self.copy_group_morph(morph, dress_morph_map)
                 else:
-                    copy_morph = self.copy_morph(morph, dress_all_bone_map, dress_vertex_map, dress_material_map)
+                    copy_morph = self.copy_morph(
+                        morph, dress_all_bone_map, dress_vertex_map, dress_material_map
+                    )
 
                 copy_morph.name = f"Cos:{copy_morph.name}"
 
@@ -987,10 +1351,18 @@ class SaveUsecase:
                 model_copy_rigidbody.index = len(dress_model.rigidbodies)
 
                 # 最も近いボーンの位置関係から剛体位置を求め直す
-                nearest_bone_index = original_model_positions.nearest_key(model_copy_rigidbody.shape_position)
+                nearest_bone_index = original_model_positions.nearest_key(
+                    model_copy_rigidbody.shape_position
+                )
                 model_bone_name = model.bones[nearest_bone_index].name
-                rigidbody_local_position = model_original_matrixes[0, model_bone_name].global_matrix.inverse() * rigidbody.shape_position
-                rigidbody_copy_position = model_matrixes[0, model_bone_name].global_matrix * rigidbody_local_position
+                rigidbody_local_position = (
+                    model_original_matrixes[0, model_bone_name].global_matrix.inverse()
+                    * rigidbody.shape_position
+                )
+                rigidbody_copy_position = (
+                    model_matrixes[0, model_bone_name].global_matrix
+                    * rigidbody_local_position
+                )
                 rigidbody_copy_scale = MVector3D(
                     model_matrixes[0, model_bone_name].global_matrix[0, 0],
                     model_matrixes[0, model_bone_name].global_matrix[1, 1],
@@ -1020,8 +1392,14 @@ class SaveUsecase:
 
             # ボーンと剛体の位置関係から剛体位置を求め直す
             model_bone_name = model.bones[rigidbody.bone_index].name
-            rigidbody_local_position = model_original_matrixes[0, model_bone_name].global_matrix.inverse() * rigidbody.shape_position
-            rigidbody_copy_position = model_matrixes[0, model_bone_name].global_matrix * rigidbody_local_position
+            rigidbody_local_position = (
+                model_original_matrixes[0, model_bone_name].global_matrix.inverse()
+                * rigidbody.shape_position
+            )
+            rigidbody_copy_position = (
+                model_matrixes[0, model_bone_name].global_matrix
+                * rigidbody_local_position
+            )
             rigidbody_copy_scale = MVector3D(
                 model_matrixes[0, model_bone_name].global_matrix[0, 0],
                 model_matrixes[0, model_bone_name].global_matrix[1, 1],
@@ -1045,12 +1423,20 @@ class SaveUsecase:
                 dress_copy_rigidbody.index = len(dress_model.rigidbodies)
 
                 # 最も近いボーンの位置関係から剛体位置を求め直す
-                nearest_bone_index = original_dress_positions.nearest_key(dress_copy_rigidbody.shape_position)
+                nearest_bone_index = original_dress_positions.nearest_key(
+                    dress_copy_rigidbody.shape_position
+                )
 
                 # ボーンと剛体の位置関係から剛体位置を求め直す
                 dress_bone_name = dress.bones[nearest_bone_index].name
-                rigidbody_local_position = dress_original_matrixes[0, dress_bone_name].global_matrix.inverse() * rigidbody.shape_position
-                rigidbody_copy_position = dress_matrixes[0, dress_bone_name].global_matrix * rigidbody_local_position
+                rigidbody_local_position = (
+                    dress_original_matrixes[0, dress_bone_name].global_matrix.inverse()
+                    * rigidbody.shape_position
+                )
+                rigidbody_copy_position = (
+                    dress_matrixes[0, dress_bone_name].global_matrix
+                    * rigidbody_local_position
+                )
                 rigidbody_copy_scale = MVector3D(
                     dress_matrixes[0, dress_bone_name].global_matrix[0, 0],
                     dress_matrixes[0, dress_bone_name].global_matrix[1, 1],
@@ -1072,29 +1458,44 @@ class SaveUsecase:
                 or rigidbody.bone_index not in dress_model_bones.dress_map
                 or (
                     not dress.bones[rigidbody.bone_index].is_standard
-                    and f"Cos:{dress.bones[rigidbody.bone_index].name}" not in dress_model.bones
+                    and f"Cos:{dress.bones[rigidbody.bone_index].name}"
+                    not in dress_model.bones
                 )
             ):
                 continue
             if (
                 rigidbody.name in dress_model.rigidbodies
-                and dress_model.bones[dress_model.rigidbodies[rigidbody.name].bone_index].is_standard
+                and dress_model.bones[
+                    dress_model.rigidbodies[rigidbody.name].bone_index
+                ].is_standard
             ):
                 # 既に同名の準標準ボーンに繋がる剛体がある場合、INDEXだけ保持してスルー
-                dress_rigidbody_map[rigidbody.index] = dress_model.rigidbodies[rigidbody.name].index
+                dress_rigidbody_map[rigidbody.index] = dress_model.rigidbodies[
+                    rigidbody.name
+                ].index
 
                 # 位置とサイズは衣装に合わせる
                 dress_bone_name = dress.bones[rigidbody.bone_index].name
-                rigidbody_local_position = dress_original_matrixes[0, dress_bone_name].global_matrix.inverse() * rigidbody.shape_position
-                rigidbody_copy_position = dress_matrixes[0, dress_bone_name].global_matrix * rigidbody_local_position
+                rigidbody_local_position = (
+                    dress_original_matrixes[0, dress_bone_name].global_matrix.inverse()
+                    * rigidbody.shape_position
+                )
+                rigidbody_copy_position = (
+                    dress_matrixes[0, dress_bone_name].global_matrix
+                    * rigidbody_local_position
+                )
                 rigidbody_copy_scale = MVector3D(
                     dress_matrixes[0, dress_bone_name].global_matrix[0, 0],
                     dress_matrixes[0, dress_bone_name].global_matrix[1, 1],
                     dress_matrixes[0, dress_bone_name].global_matrix[2, 2],
                 )
 
-                dress_model.rigidbodies[rigidbody.name].shape_position = rigidbody_copy_position
-                dress_model.rigidbodies[rigidbody.name].shape_size = dress.rigidbodies[rigidbody.name].shape_size * rigidbody_copy_scale
+                dress_model.rigidbodies[
+                    rigidbody.name
+                ].shape_position = rigidbody_copy_position
+                dress_model.rigidbodies[rigidbody.name].shape_size = (
+                    dress.rigidbodies[rigidbody.name].shape_size * rigidbody_copy_scale
+                )
 
                 continue
 
@@ -1105,8 +1506,14 @@ class SaveUsecase:
 
             # ボーンと剛体の位置関係から剛体位置を求め直す
             dress_bone_name = dress.bones[rigidbody.bone_index].name
-            rigidbody_local_position = dress_original_matrixes[0, dress_bone_name].global_matrix.inverse() * rigidbody.shape_position
-            rigidbody_copy_position = dress_matrixes[0, dress_bone_name].global_matrix * rigidbody_local_position
+            rigidbody_local_position = (
+                dress_original_matrixes[0, dress_bone_name].global_matrix.inverse()
+                * rigidbody.shape_position
+            )
+            rigidbody_copy_position = (
+                dress_matrixes[0, dress_bone_name].global_matrix
+                * rigidbody_local_position
+            )
             rigidbody_copy_scale = MVector3D(
                 dress_matrixes[0, dress_bone_name].global_matrix[0, 0],
                 dress_matrixes[0, dress_bone_name].global_matrix[1, 1],
@@ -1129,26 +1536,51 @@ class SaveUsecase:
         for joint in model.joints:
             if joint.is_system:
                 continue
-            if not (joint.rigidbody_index_a in model_rigidbody_map and joint.rigidbody_index_b in model_rigidbody_map):
+            if not (
+                joint.rigidbody_index_a in model_rigidbody_map
+                and joint.rigidbody_index_b in model_rigidbody_map
+            ):
                 continue
 
-            rigidbody_a = dress_model.rigidbodies[model_rigidbody_map[joint.rigidbody_index_a]]
-            rigidbody_b = dress_model.rigidbodies[model_rigidbody_map[joint.rigidbody_index_b]]
+            rigidbody_a = dress_model.rigidbodies[
+                model_rigidbody_map[joint.rigidbody_index_a]
+            ]
+            rigidbody_b = dress_model.rigidbodies[
+                model_rigidbody_map[joint.rigidbody_index_b]
+            ]
 
             model_copy_joint = joint.copy()
             model_copy_joint.index = len(dress_model.joints)
             model_copy_joint.rigidbody_index_a = rigidbody_a.index
             model_copy_joint.rigidbody_index_b = rigidbody_b.index
 
-            model_bone_a = model.bones[model.rigidbodies[joint.rigidbody_index_a].bone_index]
-            model_bone_b = model.bones[model.rigidbodies[joint.rigidbody_index_b].bone_index]
+            model_bone_a = model.bones[
+                model.rigidbodies[joint.rigidbody_index_a].bone_index
+            ]
+            model_bone_b = model.bones[
+                model.rigidbodies[joint.rigidbody_index_b].bone_index
+            ]
 
-            joint_a_local_position = model_original_matrixes[0, model_bone_a.name].global_matrix.inverse() * joint.position
-            joint_b_local_position = model_original_matrixes[0, model_bone_b.name].global_matrix.inverse() * joint.position
-            joint_a_copy_position = model_matrixes[0, model_bone_a.name].global_matrix * joint_a_local_position
-            joint_b_copy_position = model_matrixes[0, model_bone_b.name].global_matrix * joint_b_local_position
+            joint_a_local_position = (
+                model_original_matrixes[0, model_bone_a.name].global_matrix.inverse()
+                * joint.position
+            )
+            joint_b_local_position = (
+                model_original_matrixes[0, model_bone_b.name].global_matrix.inverse()
+                * joint.position
+            )
+            joint_a_copy_position = (
+                model_matrixes[0, model_bone_a.name].global_matrix
+                * joint_a_local_position
+            )
+            joint_b_copy_position = (
+                model_matrixes[0, model_bone_b.name].global_matrix
+                * joint_b_local_position
+            )
 
-            model_copy_joint.position = (joint_a_copy_position + joint_b_copy_position) / 2
+            model_copy_joint.position = (
+                joint_a_copy_position + joint_b_copy_position
+            ) / 2
 
             dress_model.joints.append(model_copy_joint)
 
@@ -1158,11 +1590,18 @@ class SaveUsecase:
         for joint in dress.joints:
             if joint.is_system:
                 continue
-            if not (joint.rigidbody_index_a in dress_rigidbody_map and joint.rigidbody_index_b in dress_rigidbody_map):
+            if not (
+                joint.rigidbody_index_a in dress_rigidbody_map
+                and joint.rigidbody_index_b in dress_rigidbody_map
+            ):
                 continue
 
-            rigidbody_a = dress_model.rigidbodies[dress_rigidbody_map[joint.rigidbody_index_a]]
-            rigidbody_b = dress_model.rigidbodies[dress_rigidbody_map[joint.rigidbody_index_b]]
+            rigidbody_a = dress_model.rigidbodies[
+                dress_rigidbody_map[joint.rigidbody_index_a]
+            ]
+            rigidbody_b = dress_model.rigidbodies[
+                dress_rigidbody_map[joint.rigidbody_index_b]
+            ]
 
             dress_copy_joint = joint.copy()
             dress_copy_joint.name = f"Cos:{joint.name}"
@@ -1170,16 +1609,34 @@ class SaveUsecase:
             dress_copy_joint.rigidbody_index_a = rigidbody_a.index
             dress_copy_joint.rigidbody_index_b = rigidbody_b.index
 
-            dress_bone_a = dress.bones[dress.rigidbodies[joint.rigidbody_index_a].bone_index]
-            dress_bone_b = dress.bones[dress.rigidbodies[joint.rigidbody_index_b].bone_index]
+            dress_bone_a = dress.bones[
+                dress.rigidbodies[joint.rigidbody_index_a].bone_index
+            ]
+            dress_bone_b = dress.bones[
+                dress.rigidbodies[joint.rigidbody_index_b].bone_index
+            ]
 
-            joint_a_local_position = dress_original_matrixes[0, dress_bone_a.name].global_matrix.inverse() * joint.position
-            joint_b_local_position = dress_original_matrixes[0, dress_bone_b.name].global_matrix.inverse() * joint.position
-            joint_a_copy_position = dress_matrixes[0, dress_bone_a.name].global_matrix * joint_a_local_position
-            joint_b_copy_position = dress_matrixes[0, dress_bone_b.name].global_matrix * joint_b_local_position
+            joint_a_local_position = (
+                dress_original_matrixes[0, dress_bone_a.name].global_matrix.inverse()
+                * joint.position
+            )
+            joint_b_local_position = (
+                dress_original_matrixes[0, dress_bone_b.name].global_matrix.inverse()
+                * joint.position
+            )
+            joint_a_copy_position = (
+                dress_matrixes[0, dress_bone_a.name].global_matrix
+                * joint_a_local_position
+            )
+            joint_b_copy_position = (
+                dress_matrixes[0, dress_bone_b.name].global_matrix
+                * joint_b_local_position
+            )
 
             dress_copy_joint.index = len(dress_model.joints)
-            dress_copy_joint.position = (joint_a_copy_position + joint_b_copy_position) / 2
+            dress_copy_joint.position = (
+                joint_a_copy_position + joint_b_copy_position
+            ) / 2
 
             dress_model.joints.append(dress_copy_joint)
 
@@ -1198,10 +1655,14 @@ class SaveUsecase:
             if [
                 reference
                 for reference in model.display_slots["表情"].references
-                if reference.display_type == DisplayType.MORPH and reference.display_index == morph.index
+                if reference.display_type == DisplayType.MORPH
+                and reference.display_index == morph.index
             ]:
                 dress_model.display_slots["表情"].references.append(
-                    DisplaySlotReference(display_type=DisplayType.MORPH, display_index=dress_model.morphs[morph.name].index)
+                    DisplaySlotReference(
+                        display_type=DisplayType.MORPH,
+                        display_index=dress_model.morphs[morph.name].index,
+                    )
                 )
 
                 morph_cnt += 1
@@ -1210,12 +1671,16 @@ class SaveUsecase:
 
         # その後、衣装側の表情を入れる
         for morph in dress.morphs:
-            if morph.name not in dress_model.morphs and f"Cos:{morph.name}" not in dress_model.morphs:
+            if (
+                morph.name not in dress_model.morphs
+                and f"Cos:{morph.name}" not in dress_model.morphs
+            ):
                 continue
             if [
                 reference
                 for reference in dress.display_slots["表情"].references
-                if reference.display_type == DisplayType.MORPH and reference.display_index == morph.index
+                if reference.display_type == DisplayType.MORPH
+                and reference.display_index == morph.index
             ]:
                 display_index = (
                     dress_model.morphs[morph.name].index
@@ -1223,7 +1688,9 @@ class SaveUsecase:
                     else dress_model.morphs[f"Cos:{morph.name}"].index
                 )
                 dress_model.display_slots["表情"].references.append(
-                    DisplaySlotReference(display_type=DisplayType.MORPH, display_index=display_index)
+                    DisplaySlotReference(
+                        display_type=DisplayType.MORPH, display_index=display_index
+                    )
                 )
 
                 morph_cnt += 1
@@ -1236,7 +1703,9 @@ class SaveUsecase:
             if 0 == bone.index:
                 # 全親は単品で追加
                 dress_model.display_slots["Root"].references.append(
-                    DisplaySlotReference(display_type=DisplayType.BONE, display_index=bone.index)
+                    DisplaySlotReference(
+                        display_type=DisplayType.BONE, display_index=bone.index
+                    )
                 )
                 continue
             # 表示枠
@@ -1254,7 +1723,8 @@ class SaveUsecase:
                         continue
                     if (
                         model.bones[model_reference.display_index].name == bone.name
-                        or model.bones[model_reference.display_index].name == bone.name[4:]
+                        or model.bones[model_reference.display_index].name
+                        == bone.name[4:]
                     ):
                         # 同じ名前のとこに入れる
                         display_slot_name = model_display_slot.name
@@ -1273,7 +1743,8 @@ class SaveUsecase:
                             continue
                         if (
                             dress.bones[dress_reference.display_index].name == bone.name
-                            or dress.bones[dress_reference.display_index].name == bone.name[4:]
+                            or dress.bones[dress_reference.display_index].name
+                            == bone.name[4:]
                         ):
                             # 同じ名前のとこに入れる
                             display_slot_name = dress_display_slot.name
@@ -1286,31 +1757,55 @@ class SaveUsecase:
                 # それでも見つからなければ、親の表示枠に入れる
                 for tree_index in reversed(dress_model.bone_trees[bone.name].indexes):
                     if tree_index in dress_display_slot_indexes:
-                        display_slot_name = dress_model.display_slots[dress_display_slot_indexes[tree_index]].name
-                        display_slot_english_name = dress_model.display_slots[dress_display_slot_indexes[tree_index]].english_name
+                        display_slot_name = dress_model.display_slots[
+                            dress_display_slot_indexes[tree_index]
+                        ].name
+                        display_slot_english_name = dress_model.display_slots[
+                            dress_display_slot_indexes[tree_index]
+                        ].english_name
                         break
 
             if display_slot_name:
                 # 既存の表示枠がある場合はそこに追加
                 if display_slot_name not in dress_model.display_slots:
-                    dress_model.display_slots.append(DisplaySlot(name=display_slot_name, english_name=display_slot_english_name))
+                    dress_model.display_slots.append(
+                        DisplaySlot(
+                            name=display_slot_name,
+                            english_name=display_slot_english_name,
+                        )
+                    )
                 dress_model.display_slots[display_slot_name].references.append(
-                    DisplaySlotReference(display_type=DisplayType.BONE, display_index=bone.index)
+                    DisplaySlotReference(
+                        display_type=DisplayType.BONE, display_index=bone.index
+                    )
                 )
-                dress_display_slot_indexes[bone.index] = dress_model.display_slots[display_slot_name].index
+                dress_display_slot_indexes[bone.index] = dress_model.display_slots[
+                    display_slot_name
+                ].index
             else:
                 # なければ新規作成
-                dress_model.display_slots.append(DisplaySlot(name=bone.name, english_name=bone.english_name))
-                dress_model.display_slots[bone.name].references.append(
-                    DisplaySlotReference(display_type=DisplayType.BONE, display_index=bone.index)
+                dress_model.display_slots.append(
+                    DisplaySlot(name=bone.name, english_name=bone.english_name)
                 )
-                dress_display_slot_indexes[bone.index] = dress_model.display_slots[bone.name].index
+                dress_model.display_slots[bone.name].references.append(
+                    DisplaySlotReference(
+                        display_type=DisplayType.BONE, display_index=bone.index
+                    )
+                )
+                dress_display_slot_indexes[bone.index] = dress_model.display_slots[
+                    bone.name
+                ].index
 
             if not bone.index % 100:
                 logger.info("-- ボーン表示枠出力: {s}", s=bone.index)
 
         for bone in dress_model.bones:
-            logger.count("不要ボーン除去", index=bone.index, total_index_count=len(dress_model.bones), display_block=100)
+            logger.count(
+                "不要ボーン除去",
+                index=bone.index,
+                total_index_count=len(dress_model.bones),
+                display_block=100,
+            )
 
             if bone.is_ik and 0 > bone.ik.bone_index:
                 # IKターゲットが無い場合、出力対象外にする
@@ -1319,7 +1814,11 @@ class SaveUsecase:
 
             if ("握" in bone.name or "拡" in bone.name) and (
                 "指" in bone.name
-                or (f"{bone.name[0]}手首" in dress_model.bones and bone.parent_index == dress_model.bones[f"{bone.name[0]}手首"].index)
+                or (
+                    f"{bone.name[0]}手首" in dress_model.bones
+                    and bone.parent_index
+                    == dress_model.bones[f"{bone.name[0]}手首"].index
+                )
             ):
                 # 握り拡散系は除外
                 dress_model.remove_bone(bone.name)
@@ -1328,15 +1827,27 @@ class SaveUsecase:
 
         PmxWriter(dress_model, output_path).save()
 
-    def override_texture(self, model: PmxModel, copied_material: Material, copied_texture: Texture, override_base_colors: list[int]):
+    def override_texture(
+        self,
+        model: PmxModel,
+        copied_material: Material,
+        copied_texture: Texture,
+        override_base_colors: list[int],
+    ):
         if not copied_texture or not copied_texture.valid:
             return
 
-        logger.info("テクスチャ色補正 [{t}]", t=copied_material.name, decoration=MLogger.Decoration.LINE)
+        logger.info(
+            "テクスチャ色補正 [{t}]",
+            t=copied_material.name,
+            decoration=MLogger.Decoration.LINE,
+        )
         model.update_vertices_by_material()
 
         # 上書き元のテクスチャ画像
-        copied_image = np.array(Image.open(copied_texture.path).convert("RGBA"), np.float64)
+        copied_image = np.array(
+            Image.open(copied_texture.path).convert("RGBA"), np.float64
+        )
         # 補正テクスチャ画像
         corrected_image = np.asarray(np.copy(copied_image))
 
@@ -1348,13 +1859,25 @@ class SaveUsecase:
         # 衣装の指定材質に割り当てられた頂点INDEXが配置されている3次元頂点の位置
         vertex_colors: list[np.ndarray] = []
         for i, vertex_index in enumerate(vertex_indexes):
-            logger.count("衣装テクスチャ色取得", i, len(vertex_indexes), display_block=500)
+            logger.count(
+                "衣装テクスチャ色取得", i, len(vertex_indexes), display_block=500
+            )
 
             vertex = model.vertices[vertex_index]
 
             # 衣装の指定頂点に割り当てられたテクスチャとUVから、テクスチャの該当位置を取得する
-            du = max(0, min(int(vertex.uv.x * copied_image.shape[1]), copied_image.shape[1] - 1))
-            dv = max(0, min(int(vertex.uv.y * copied_image.shape[0]), copied_image.shape[0] - 1))
+            du = max(
+                0,
+                min(
+                    int(vertex.uv.x * copied_image.shape[1]), copied_image.shape[1] - 1
+                ),
+            )
+            dv = max(
+                0,
+                min(
+                    int(vertex.uv.y * copied_image.shape[0]), copied_image.shape[0] - 1
+                ),
+            )
 
             vertex_colors.append(copied_image[dv, du, :3])
 
@@ -1378,10 +1901,17 @@ class SaveUsecase:
             corrected_image = np.clip(corrected_image, 0, 255)
 
         # 補正したテクスチャ画像フルパスを材質別に保存
-        texture_dir_path, texture_file_name, texture_file_ext = separate_path(copied_texture.name)
+        texture_dir_path, texture_file_name, texture_file_ext = separate_path(
+            copied_texture.name
+        )
         # テクスチャパス生成
-        texture_path = os.path.join(texture_dir_path, f"{texture_file_name}_{copied_material.name.replace(':', '_')}{texture_file_ext}")
-        dress_correct_image_path = os.path.abspath(os.path.join(os.path.dirname(model.path), texture_path))
+        texture_path = os.path.join(
+            texture_dir_path,
+            f"{texture_file_name}_{copied_material.name.replace(':', '_')}{texture_file_ext}",
+        )
+        dress_correct_image_path = os.path.abspath(
+            os.path.join(os.path.dirname(model.path), texture_path)
+        )
 
         corrected_copied_texture = Texture(name=texture_path)
         model.textures.append(corrected_copied_texture)
@@ -1391,8 +1921,16 @@ class SaveUsecase:
         corrected_dress_output = Image.fromarray(corrected_image.astype(np.uint8))
         corrected_dress_output.save(dress_correct_image_path)
 
-    def copy_texture(self, dest_model: PmxModel, texture: Texture, src_model_path: str, is_dress: bool) -> Optional[Texture]:
-        copy_texture_name = os.path.join("Costume", texture.name) if is_dress else texture.name
+    def copy_texture(
+        self,
+        dest_model: PmxModel,
+        texture: Texture,
+        src_model_path: str,
+        is_dress: bool,
+    ) -> Optional[Texture]:
+        copy_texture_name = (
+            os.path.join("Costume", texture.name) if is_dress else texture.name
+        )
 
         if copy_texture_name in dest_model.textures:
             # 既に同じテクスチャが定義されている場合、そのINDEXを返す
@@ -1400,13 +1938,23 @@ class SaveUsecase:
 
         copy_texture = texture.copy()
         copy_texture.index = len(dest_model.textures)
-        texture_path = os.path.abspath(os.path.join(os.path.dirname(src_model_path), copy_texture.name))
-        if copy_texture.name and os.path.exists(texture_path) and os.path.isfile(texture_path):
+        texture_path = os.path.abspath(
+            os.path.join(os.path.dirname(src_model_path), copy_texture.name)
+        )
+        if (
+            copy_texture.name
+            and os.path.exists(texture_path)
+            and os.path.isfile(texture_path)
+        ):
             if is_dress:
                 copy_texture.name = copy_texture_name
-                new_texture_path = os.path.join(os.path.dirname(dest_model.path), copy_texture_name)
+                new_texture_path = os.path.join(
+                    os.path.dirname(dest_model.path), copy_texture_name
+                )
             else:
-                new_texture_path = os.path.join(os.path.dirname(dest_model.path), texture.name)
+                new_texture_path = os.path.join(
+                    os.path.dirname(dest_model.path), texture.name
+                )
             if texture_path == new_texture_path:
                 logger.warning(
                     "お着替えモデル出力先のパス設定が、人物もしくは衣装モデルのテクスチャを上書きする設定となっていたため、テクスチャのコピー処理を中断しました。"
@@ -1439,7 +1987,10 @@ class SaveUsecase:
                 vertex_offset: VertexMorphOffset = offset
                 if vertex_offset.vertex_index in model_vertex_map:
                     copy_morph.offsets.append(
-                        VertexMorphOffset(model_vertex_map[vertex_offset.vertex_index], vertex_offset.position.copy())
+                        VertexMorphOffset(
+                            model_vertex_map[vertex_offset.vertex_index],
+                            vertex_offset.position.copy(),
+                        )
                     )
         elif morph.morph_type == MorphType.UV:
             copy_morph.panel = morph.panel
@@ -1447,35 +1998,60 @@ class SaveUsecase:
             for offset in morph.offsets:
                 uv_offset: UvMorphOffset = offset
                 if uv_offset.vertex_index in model_vertex_map:
-                    copy_morph.offsets.append(UvMorphOffset(model_vertex_map[uv_offset.vertex_index], uv_offset.uv.copy()))
+                    copy_morph.offsets.append(
+                        UvMorphOffset(
+                            model_vertex_map[uv_offset.vertex_index],
+                            uv_offset.uv.copy(),
+                        )
+                    )
         elif morph.morph_type == MorphType.EXTENDED_UV1:
             copy_morph.panel = morph.panel
             copy_morph.morph_type = MorphType.EXTENDED_UV1
             for offset in morph.offsets:
                 extend_uv1_offset: UvMorphOffset = offset
                 if extend_uv1_offset.vertex_index in model_vertex_map:
-                    copy_morph.offsets.append(UvMorphOffset(model_vertex_map[extend_uv1_offset.vertex_index], extend_uv1_offset.uv.copy()))
+                    copy_morph.offsets.append(
+                        UvMorphOffset(
+                            model_vertex_map[extend_uv1_offset.vertex_index],
+                            extend_uv1_offset.uv.copy(),
+                        )
+                    )
         elif morph.morph_type == MorphType.EXTENDED_UV2:
             copy_morph.panel = morph.panel
             copy_morph.morph_type = MorphType.EXTENDED_UV2
             for offset in morph.offsets:
                 extend_uv2_offset: UvMorphOffset = offset
                 if extend_uv2_offset.vertex_index in model_vertex_map:
-                    copy_morph.offsets.append(UvMorphOffset(model_vertex_map[extend_uv2_offset.vertex_index], extend_uv2_offset.uv.copy()))
+                    copy_morph.offsets.append(
+                        UvMorphOffset(
+                            model_vertex_map[extend_uv2_offset.vertex_index],
+                            extend_uv2_offset.uv.copy(),
+                        )
+                    )
         elif morph.morph_type == MorphType.EXTENDED_UV3:
             copy_morph.panel = morph.panel
             copy_morph.morph_type = MorphType.EXTENDED_UV3
             for offset in morph.offsets:
                 extend_uv3_offset: UvMorphOffset = offset
                 if extend_uv3_offset.vertex_index in model_vertex_map:
-                    copy_morph.offsets.append(UvMorphOffset(model_vertex_map[extend_uv3_offset.vertex_index], extend_uv3_offset.uv.copy()))
+                    copy_morph.offsets.append(
+                        UvMorphOffset(
+                            model_vertex_map[extend_uv3_offset.vertex_index],
+                            extend_uv3_offset.uv.copy(),
+                        )
+                    )
         elif morph.morph_type == MorphType.EXTENDED_UV4:
             copy_morph.panel = morph.panel
             copy_morph.morph_type = MorphType.EXTENDED_UV4
             for offset in morph.offsets:
                 extend_uv4_offset: UvMorphOffset = offset
                 if extend_uv4_offset.vertex_index in model_vertex_map:
-                    copy_morph.offsets.append(UvMorphOffset(model_vertex_map[extend_uv4_offset.vertex_index], extend_uv4_offset.uv.copy()))
+                    copy_morph.offsets.append(
+                        UvMorphOffset(
+                            model_vertex_map[extend_uv4_offset.vertex_index],
+                            extend_uv4_offset.uv.copy(),
+                        )
+                    )
         elif morph.morph_type == MorphType.MATERIAL:
             copy_morph.panel = morph.panel
             copy_morph.morph_type = MorphType.MATERIAL
@@ -1530,7 +2106,12 @@ class SaveUsecase:
             for offset in morph.offsets:
                 group_offset: GroupMorphOffset = offset
                 if group_offset.morph_index in model_morph_map:
-                    copy_morph.offsets.append(GroupMorphOffset(model_morph_map[group_offset.morph_index], group_offset.morph_factor))
+                    copy_morph.offsets.append(
+                        GroupMorphOffset(
+                            model_morph_map[group_offset.morph_index],
+                            group_offset.morph_factor,
+                        )
+                    )
 
         return copy_morph
 
@@ -1552,7 +2133,9 @@ class SaveUsecase:
             [
                 vertex_index
                 for bone_name in ankle_under_bone_names
-                for vertex_index in model.vertices_by_bones.get(model.bones[bone_name].index, [])
+                for vertex_index in model.vertices_by_bones.get(
+                    model.bones[bone_name].index, []
+                )
             ]
         )
 
@@ -1560,7 +2143,9 @@ class SaveUsecase:
             # 足首から下の頂点が無い場合、スルー
             return 0.0
 
-        (_, _, model_matrixes, vertex_morph_poses, _, _, _, _) = model_motion.animate(0, model, is_gl=False)
+        (_, _, model_matrixes, vertex_morph_poses, _, _, _, _) = model_motion.animate(
+            0, model, is_gl=False
+        )
 
         ankle_vertex_positions: list[np.ndarray] = []
         for vertex_index in ankle_under_vertex_indexes:
@@ -1570,8 +2155,19 @@ class SaveUsecase:
             for n in range(vertex.deform.count):
                 bone_index = vertex.deform.indexes[n]
                 bone_weight = vertex.deform.weights[n]
-                mat += model_matrixes[0, model.bones[bone_index].name].local_matrix.vector * bone_weight
-            ankle_vertex_positions.append((MMatrix4x4(mat) * (vertex.position + MVector3D(*vertex_morph_poses[vertex_index, :]))).vector)
+                mat += (
+                    model_matrixes[0, model.bones[bone_index].name].local_matrix.vector
+                    * bone_weight
+                )
+            ankle_vertex_positions.append(
+                (
+                    MMatrix4x4(mat)
+                    * (
+                        vertex.position
+                        + MVector3D(*vertex_morph_poses[vertex_index, :])
+                    )
+                ).vector
+            )
 
         # 最も地面に近い頂点を基準に接地位置を求める
         min_position = np.min(ankle_vertex_positions, axis=0)
