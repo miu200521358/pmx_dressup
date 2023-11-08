@@ -136,3 +136,6 @@ archive/rivision.txt
 *.zip
 配布/
 revision.txt
+
+*.vmd
+*.pmx
