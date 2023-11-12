@@ -137,5 +137,7 @@ archive/rivision.txt
 配布/
 revision.txt
 
+.ruff_cache
 *.vmd
 *.pmx
+
