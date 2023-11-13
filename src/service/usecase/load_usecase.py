@@ -191,12 +191,8 @@ class LoadUsecase:
             if bname in (mismatch_bone_names - set(dress.bones.names))
         ]
 
-        logger.info(
-            "人物: 追加候補ボーン: {b}", b=", ".join(short_mismatch_model_bone_names)
-        )
-        logger.info(
-            "衣装: 追加候補ボーン: {b}", b=", ".join(short_mismatch_dress_bone_names)
-        )
+        logger.info("人物: 追加候補ボーン: {b}", b=", ".join(short_mismatch_model_bone_names))
+        logger.info("衣装: 追加候補ボーン: {b}", b=", ".join(short_mismatch_dress_bone_names))
 
         if not (short_model_bone_names or short_dress_bone_names):
             return
@@ -296,14 +292,12 @@ class LoadUsecase:
 
             bust_upper_position = (
                 bust_bone.position
-                + (model.bones["左肩根元"].position - model.bones["上半身"].position)
-                * 0.5
+                + (model.bones["左肩根元"].position - model.bones["上半身"].position) * 0.5
             )
             bust_upper_position.z = 0
             bust_lower_position = (
                 bust_bone.position
-                + (model.bones["左肩根元"].position - model.bones["上半身"].position)
-                * -0.3
+                + (model.bones["左肩根元"].position - model.bones["上半身"].position) * -0.3
             )
             bust_lower_position.z = 0
 
@@ -767,12 +761,8 @@ class LoadUsecase:
 
         from_name = f"{direction}足首"
         replace_name = f"{direction}足先EX"
-        model_to_name = model.bones[
-            model.bones[f"{direction}つま先ＩＫ"].ik.bone_index
-        ].name
-        dress_to_name = dress.bones[
-            dress.bones[f"{direction}つま先ＩＫ"].ik.bone_index
-        ].name
+        model_to_name = model.bones[model.bones[f"{direction}つま先ＩＫ"].ik.bone_index].name
+        dress_to_name = dress.bones[dress.bones[f"{direction}つま先ＩＫ"].ik.bone_index].name
 
         model_from_pos = model.bones[from_name].position.copy()
         model_replace_pos = model.bones[replace_name].position.copy()
@@ -1038,9 +1028,7 @@ class LoadUsecase:
                                 "右足首",
                             )
                         ):
-                            offset_position = position * (
-                                -1 if "右" in bone_name else 1
-                            )
+                            offset_position = position * (-1 if "右" in bone_name else 1)
                             offset_local_qq = (
                                 local_qq.inverse() if "左" in bone_name else local_qq
                             )
@@ -1661,9 +1649,7 @@ class LoadUsecase:
                             )
                         else:
                             dress_fit_length_scale = 1.0
-                    elif (
-                        dress_bone.name in ("首根元", "首") and "上半身2" in dress.bones
-                    ):
+                    elif dress_bone.name in ("首根元", "首") and "上半身2" in dress.bones:
                         # 首根元は上半身2のスケールを流用する
                         dress_fit_length_scale = (
                             dress_local_scales[dress.bones["上半身2"].index].x / 0.98
@@ -2252,10 +2238,7 @@ class LoadUsecase:
                             dress_toe_ik_position,
                         )
 
-                    elif (
-                        "つま先" in bone_name
-                        and f"{bone_name[0]}つま先ＩＫ" in dress.bones
-                    ):
+                    elif "つま先" in bone_name and f"{bone_name[0]}つま先ＩＫ" in dress.bones:
                         toe_ik_bone_name = f"{bone_name[0]}つま先ＩＫ"
 
                         dress_bone_fit_position = dress_matrixes[
@@ -2263,16 +2246,14 @@ class LoadUsecase:
                         ].position
                         dress_bone_position = dress_matrixes[0, bone_name].position
                     elif (
-                        bone_name in ("右肩", "左肩")
-                        and f"{bone_name[0]}肩P" in dress.bones
+                        bone_name in ("右肩", "左肩") and f"{bone_name[0]}肩P" in dress.bones
                     ):
                         dress_bone_fit_position = dress_matrixes[
                             0, f"{bone_name}P"
                         ].position
                         dress_bone_position = dress_matrixes[0, bone_name].position
                     elif (
-                        bone_name in ("右腕", "左腕")
-                        and f"{bone_name[0]}肩C" in dress.bones
+                        bone_name in ("右腕", "左腕") and f"{bone_name[0]}肩C" in dress.bones
                     ):
                         dress_bone_fit_position = dress_matrixes[
                             0, f"{bone_name[0]}肩C"
@@ -2369,10 +2350,14 @@ class LoadUsecase:
                                     and 0 < dress_tail_vector.length()
                                 ):
                                     # 衣装：自分の方向
-                                    dress_slope_qq = dress_tail_vector.to_local_matrix4x4().to_quaternion()
+                                    dress_slope_qq = (
+                                        dress_tail_vector.to_local_matrix4x4().to_quaternion()
+                                    )
 
                                     # 人物：自分の方向
-                                    model_slope_qq = model_tail_vector.to_local_matrix4x4().to_quaternion()
+                                    model_slope_qq = (
+                                        model_tail_vector.to_local_matrix4x4().to_quaternion()
+                                    )
 
                                     dress_offset_qq = (
                                         model_slope_qq * dress_slope_qq.inverse()
@@ -2602,9 +2587,7 @@ class LoadUsecase:
                             )
                         else:
                             dress_fit_length_scale = 1.0
-                    elif (
-                        dress_bone.name in ("首根元", "首") and "上半身2" in dress.bones
-                    ):
+                    elif dress_bone.name in ("首根元", "首") and "上半身2" in dress.bones:
                         # 首根元は上半身2のスケールを流用する
                         dress_fit_length_scale = (
                             dress_local_scales[dress.bones["上半身2"].index].x / 0.98
@@ -2993,8 +2976,12 @@ class LoadUsecase:
                                 and 0.1 < deformed_slope_vector.length()
                             ):
                                 # 子ボーンとの距離がある場合のみ、回転補正
-                                original_slope_qq = original_slope_vector.to_local_matrix4x4().to_quaternion()
-                                deformed_slope_qq = deformed_slope_vector.to_local_matrix4x4().to_quaternion()
+                                original_slope_qq = (
+                                    original_slope_vector.to_local_matrix4x4().to_quaternion()
+                                )
+                                deformed_slope_qq = (
+                                    deformed_slope_vector.to_local_matrix4x4().to_quaternion()
+                                )
                                 dress_offset_qq = (
                                     original_slope_qq * deformed_slope_qq.inverse()
                                 )
