@@ -1845,3 +1845,27 @@ msgstr ""
 msgid "[{v}]\n処理が継続できないため、中断しました\n----------------\n{m}"
 msgstr ""
 
+
+msgid "IK事前計算"
+msgstr ""
+
+
+msgid "ボーンモーフ計算[{d}]"
+msgstr ""
+
+
+msgid "ボーンモーション計算[{d}]"
+msgstr ""
+
+
+msgid "ボーン行列計算[{d}]"
+msgstr ""
+
+
+msgid "ボーン変形行列リストアップ[{d}]"
+msgstr ""
+
+
+msgid "モデル描画初期化処理失敗"
+msgstr ""
+

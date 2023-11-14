@@ -3,7 +3,6 @@ import os
 from typing import Optional
 
 import wx
-
 from mlib.core.logger import MLogger
 from mlib.pmx.pmx_collection import PmxModel
 from mlib.pmx.pmx_writer import PmxWriter
@@ -187,6 +186,18 @@ class LoadWorker(BaseWorker):
             motion = file_panel.motion_ctrl.original_data
         else:
             motion = VmdMotion("empty")
+
+        ik_target_bone_names = [
+            bone.name for bone in model.bones if bone.ik_target_indexes
+        ]
+
+        motion.animate_bone(
+            [fno for fno in range(motion.max_fno, 10)],
+            model,
+            ik_target_bone_names,
+            out_fno_log=True,
+            description=__("IK事前計算"),
+        )
 
         if logger.total_level <= logging.DEBUG:
             # デバッグモードの時だけ変形モーフ付き衣装: データ保存

@@ -241,7 +241,7 @@ class LoadUsecase:
         logger.info("衣装: 初期姿勢計算")
 
         # 衣装の初期姿勢を求める
-        dress_matrixes = VmdMotion().animate_bone([0], dress, append_ik=False)
+        dress_matrixes = VmdMotion().animate_bone([0], dress, is_calc_ik=False)
 
         dress.update_vertices_by_bone()
 
@@ -1520,7 +1520,7 @@ class LoadUsecase:
             )
 
             if dress_bone.is_standard:
-                dress_matrixes = dress_motion.animate_bone([0], dress, append_ik=False)
+                dress_matrixes = dress_motion.animate_bone([0], dress, is_calc_ik=False)
 
                 bone_setting = DRESS_STANDARD_BONE_NAMES[dress_bone.name]
                 if (
@@ -1821,7 +1821,7 @@ class LoadUsecase:
 
                     if bone_setting.local_scalable:
                         dress_matrixes = dress_motion.animate_bone(
-                            [0], dress, append_ik=False
+                            [0], dress, is_calc_ik=False
                         )
 
                         # 衣装の頂点ローカル位置を計算
@@ -1889,7 +1889,7 @@ class LoadUsecase:
 
                             if bone_setting.local_scalable:
                                 dress_matrixes = dress_motion.animate_bone(
-                                    [0], dress, append_ik=False
+                                    [0], dress, is_calc_ik=False
                                 )
 
                                 # 衣装の頂点ローカル位置を計算
@@ -2040,7 +2040,7 @@ class LoadUsecase:
                         continue
 
                     dress_matrixes = dress_motion.animate_bone(
-                        [0], dress, [tail_bone_name], append_ik=False
+                        [0], dress, [tail_bone_name], is_calc_ik=False
                     )
 
                     dress_bone_fit_position = model_matrixes[0, bone_name].position
@@ -2153,7 +2153,7 @@ class LoadUsecase:
                 and bone_name in model.bones
             ):
                 # 現在の衣装ボーン位置を求める
-                dress_matrixes = dress_motion.animate_bone([0], dress, append_ik=False)
+                dress_matrixes = dress_motion.animate_bone([0], dress, is_calc_ik=False)
 
                 # 準標準かつ人物・衣装の両方にボーンがある場合、準標準フィッティング
                 bone_setting = DRESS_STANDARD_BONE_NAMES[bone_name]
@@ -2326,7 +2326,7 @@ class LoadUsecase:
                     else:
                         # キャンセルしない場合、角度差を補正する
                         dress_matrixes = dress_motion.animate_bone(
-                            [0], dress, append_ik=False
+                            [0], dress, is_calc_ik=False
                         )
 
                         model_bone_position = model_matrixes[0, bone_name].position
@@ -2463,7 +2463,7 @@ class LoadUsecase:
                 ) and dress_bone.name in model.bones:
                     # X方向のスケーリングがOKで、人物に同名ボーンがある場合、比率を測る
                     dress_matrixes = dress_motion.animate_bone(
-                        [0], dress, append_ik=False
+                        [0], dress, is_calc_ik=False
                     )
                     model_bone = model.bones[dress_bone.name]
 
@@ -2865,7 +2865,7 @@ class LoadUsecase:
 
                         # 現在の衣装ボーン位置を求める
                         dress_matrixes = dress_motion.animate_bone(
-                            [0], dress, append_ik=False
+                            [0], dress, is_calc_ik=False
                         )
 
                         # 子ボーン

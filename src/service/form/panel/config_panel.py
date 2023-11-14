@@ -2,7 +2,6 @@ import os
 from typing import Optional
 
 import wx
-
 from mlib.core.logger import MLogger
 from mlib.pmx.canvas import CanvasPanel
 from mlib.service.form.notebook_frame import NotebookFrame
@@ -55,9 +54,7 @@ class ConfigPanel(CanvasPanel):
 
         self.play_sizer = wx.BoxSizer(wx.HORIZONTAL)
 
-        frame_tooltip = __(
-            "モーションを指定している場合、任意のキーフレの結果の表示や再生ができます"
-        )
+        frame_tooltip = __("モーションを指定している場合、任意のキーフレの結果の表示や再生ができます")
 
         self.frame_title_ctrl = wx.StaticText(
             self.scrolled_window,
@@ -88,9 +85,7 @@ class ConfigPanel(CanvasPanel):
             wx.DefaultPosition,
             wx.Size(80, -1),
         )
-        self.play_ctrl.SetToolTip(
-            __("モーションを指定している場合、再生することができます")
-        )
+        self.play_ctrl.SetToolTip(__("モーションを指定している場合、再生することができます"))
         self.play_sizer.Add(self.play_ctrl, 0, wx.ALL, 3)
 
         self.window_sizer.Add(self.play_sizer, 0, wx.ALL, 3)
@@ -185,6 +180,10 @@ class ConfigPanel(CanvasPanel):
     @fno.setter
     def fno(self, v: int) -> None:
         self.frame_ctrl.SetValue(v)
+
+    @property
+    def is_calc_ik(self) -> bool:
+        return True
 
     def stop_play(self) -> None:
         self.play_ctrl.SetLabelText(__("再生"))

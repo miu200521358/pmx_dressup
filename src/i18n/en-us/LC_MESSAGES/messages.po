@@ -1388,3 +1388,21 @@ msgstr "[{v}]An unexpected error has occurred"
 
 msgid "[{v}]\n処理が継続できないため、中断しました\n----------------\n{m}"
 msgstr "[{v}]Aborted because processing cannot continue\n----------------\n{m}"
+
+msgid "IK事前計算"
+msgstr "IK pre-calculation"
+
+msgid "ボーンモーフ計算[{d}]"
+msgstr "Bone Morph Calculation [{d}]"
+
+msgid "ボーンモーション計算[{d}]"
+msgstr "Bone Motion Calculation [{d}]"
+
+msgid "ボーン行列計算[{d}]"
+msgstr "Bourne matrix calculation [{d}]"
+
+msgid "ボーン変形行列リストアップ[{d}]"
+msgstr "Bone deformation matrix listing [{d}]"
+
+msgid "モデル描画初期化処理失敗"
+msgstr Model drawing initialization process failed.
