@@ -1406,3 +1406,6 @@ msgstr "Bone deformation matrix listing [{d}]"
 
 msgid "モデル描画初期化処理失敗"
 msgstr Model drawing initialization process failed.
+
+msgid "人物: ボーン調整"
+msgstr "People: Bone Adjustment"

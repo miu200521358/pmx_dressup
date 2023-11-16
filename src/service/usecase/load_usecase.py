@@ -23,8 +23,10 @@ from mlib.pmx.pmx_part import (
     Morph,
     MorphType,
 )
+from mlib.pmx.pmx_reader import PmxReader
 from mlib.vmd.vmd_collection import VmdMotion
 from mlib.vmd.vmd_part import VmdMorphFrame
+from mlib.vmd.vmd_reader import VmdReader
 from mlib.vmd.vmd_tree import VmdBoneFrameTrees
 from service.usecase.dress_bone_setting import (
     DRESS_BONE_FITTING_NAME,
@@ -39,9 +41,137 @@ __ = logger.get_text
 
 
 class LoadUsecase:
-    def valid_model(self, model: PmxModel, type_name: str) -> None:
-        """フィッティングに最低限必要なボーンで不足しているボーンリストを取得する"""
-        pass
+    def load_motion(self, is_load: bool, motion_path: str) -> VmdMotion:
+        if is_load:
+            logger.info("モーション読み込み開始", decoration=MLogger.Decoration.BOX)
+
+            motion = VmdReader().read_by_filepath(motion_path)
+        else:
+            motion = VmdMotion("empty")
+
+        return motion
+
+    def load_model(
+        self, is_load: bool, model_path: str, is_human: bool
+    ) -> tuple[PmxModel, PmxModel]:
+        if is_load:
+            if is_human:
+                logger.info("人物: 読み込み開始", decoration=MLogger.Decoration.BOX)
+            else:
+                logger.info("衣装: 読み込み開始", decoration=MLogger.Decoration.BOX)
+
+            model = PmxReader().read_by_filepath(model_path)
+        else:
+            model = PmxModel("empty")
+
+        return model, model.copy()
+
+    def fit(
+        self, model: PmxModel, dress: PmxModel
+    ) -> tuple[list[str], list[list[int]]]:
+        logger.info("人物: ボーン調整", decoration=MLogger.Decoration.BOX)
+
+        # 首根元にウェイトを振る
+        self.replace_neck_root_weights(model)
+        model.update_vertices_by_bone()
+
+        # 人物に材質透明モーフを入れる
+        logger.info("人物: 追加セットアップ: 材質透過モーフ追加", decoration=MLogger.Decoration.LINE)
+        self.create_material_transparent_morphs(model)
+
+        # --------------------
+        # 衣装
+        dress.update_vertices_by_bone()
+
+        logger.info("衣装: ボーン調整", decoration=MLogger.Decoration.BOX)
+
+        # 不足ボーン追加
+        logger.info("衣装: 不足ボーン調整", decoration=MLogger.Decoration.LINE)
+        self.insert_mismatch_bones(model, dress)
+
+        (
+            model_standard_positions,
+            model_out_standard_positions,
+        ) = self.get_bone_positions(model)
+        (
+            dress_standard_positions,
+            dress_out_standard_positions,
+        ) = self.get_bone_positions(dress)
+
+        replaced_bone_names: list[str] = []
+
+        logger.info("衣装: 位置調整", decoration=MLogger.Decoration.LINE)
+
+        # 上半身の再設定
+        replaced_bone_names += self.replace_upper(model, dress)
+
+        # 上半身2の再設定
+        replaced_bone_names += self.replace_upper2(model, dress)
+
+        # 上半身3の再設定
+        replaced_bone_names += self.replace_upper3(model, dress)
+
+        # # 胸の再設定
+        # replaced_bust_bone_names = self.replace_bust(model, dress)
+
+        # 首の再設定
+        self.replace_neck(model, dress)
+
+        # 肩と腕の再設定
+        self.replace_shoulder_arm(model, dress)
+
+        # 捩りの再設定
+        self.replace_twist(model, dress, replaced_bone_names)
+
+        # 下半身の再設定
+        replaced_bone_names += self.replace_lower(model, dress)
+
+        logger.info("衣装: ウェイト調整", decoration=MLogger.Decoration.LINE)
+
+        # if replaced_bust_bone_names:
+        #     dress.setup()
+        #     self.replace_bust_weights(dress, replaced_bust_bone_names)
+
+        if replaced_bone_names:
+            dress.setup()
+            dress.replace_standard_weights(replaced_bone_names)
+
+        # 首根元にウェイトを振る
+        self.replace_neck_root_weights(dress)
+        dress.update_vertices_by_bone()
+
+        # 衣装に材質透明モーフを入れる
+        logger.info(
+            "衣装: 追加セットアップ: 材質透過モーフ追加",
+            decoration=MLogger.Decoration.BOX,
+        )
+        self.create_material_transparent_morphs(dress)
+
+        # 個別調整用モーフ追加
+        logger.info(
+            "衣装: 追加セットアップ: 個別調整ボーンモーフ追加",
+            decoration=MLogger.Decoration.BOX,
+        )
+        (
+            individual_morph_names,
+            individual_target_bone_indexes,
+        ) = self.create_dress_individual_bone_morphs(dress)
+
+        # 衣装にフィッティングボーンモーフを入れる
+        logger.info(
+            "衣装: 追加セットアップ: フィッティングモーフ追加",
+            decoration=MLogger.Decoration.BOX,
+        )
+        self.create_dress_fit_morphs(
+            model,
+            dress,
+            model_standard_positions,
+            model_out_standard_positions,
+            dress_standard_positions,
+            dress_out_standard_positions,
+        )
+
+        return individual_morph_names, individual_target_bone_indexes
 
     def insert_mismatch_bones(self, model: PmxModel, dress: PmxModel) -> None:
         """準標準ボーンの不足分を追加"""

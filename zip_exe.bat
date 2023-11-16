@@ -14,7 +14,7 @@ call mmd_base\setup.bat
 
 pyinstaller --clean zip_exe.spec
 
-cd src && python create_bat.py && cd ..
+python create_bat.py
 
 copy /y archive\Readme*.txt dist
 

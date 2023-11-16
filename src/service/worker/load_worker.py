@@ -1,6 +1,6 @@
 import logging
 import os
-from typing import Optional
+from concurrent.futures import FIRST_EXCEPTION, ThreadPoolExecutor, as_completed, wait
 
 import wx
 from mlib.core.logger import MLogger
@@ -23,181 +23,27 @@ class LoadWorker(BaseWorker):
 
     def thread_execute(self):
         file_panel: FilePanel = self.frame.file_panel
-        model: Optional[PmxModel] = None
-        dress: Optional[PmxModel] = None
-        motion: Optional[VmdMotion] = None
-        individual_morph_names: list[str] = []
-
-        is_model_change = False
-        is_dress_change = False
-        usecase = LoadUsecase()
 
         logger.info("お着替えモデル読み込み開始", decoration=MLogger.Decoration.BOX)
 
-        if file_panel.model_ctrl.valid() and not file_panel.model_ctrl.data:
-            logger.info("人物: 読み込み開始", decoration=MLogger.Decoration.BOX)
-
-            original_model = file_panel.model_ctrl.reader.read_by_filepath(
-                file_panel.model_ctrl.path
-            )
-
-            usecase.valid_model(original_model, "人物")
-
-            model = original_model.copy()
-
-            # 首根元にウェイトを振る
-            usecase.replace_neck_root_weights(model)
-            model.update_vertices_by_bone()
-
-            # 人物に材質透明モーフを入れる
-            logger.info("人物: 追加セットアップ: 材質透過モーフ追加")
-            usecase.create_material_transparent_morphs(model)
-
-            is_model_change = True
-        elif file_panel.model_ctrl.original_data:
-            original_model = file_panel.model_ctrl.original_data
-            model = file_panel.model_ctrl.data
-        else:
-            original_model = PmxModel()
-            model = PmxModel()
-
-        if (
-            model
-            and isinstance(model, PmxModel)
-            and file_panel.dress_ctrl.valid()
-            and (is_model_change or not file_panel.dress_ctrl.data)
-        ):
-            logger.info("衣装: 読み込み開始", decoration=MLogger.Decoration.BOX)
-
-            original_dress = file_panel.dress_ctrl.reader.read_by_filepath(
-                file_panel.dress_ctrl.path
-            )
-
-            usecase.valid_model(original_dress, "衣装")
-
-            dress = original_dress.copy()
-            dress.update_vertices_by_bone()
-
-            logger.info("衣装: ボーン調整", decoration=MLogger.Decoration.BOX)
-
-            # 不足ボーン追加
-            logger.info("衣装: 不足ボーン調整", decoration=MLogger.Decoration.LINE)
-            usecase.insert_mismatch_bones(model, dress)
-
-            (
-                model_standard_positions,
-                model_out_standard_positions,
-            ) = usecase.get_bone_positions(model)
-            (
-                dress_standard_positions,
-                dress_out_standard_positions,
-            ) = usecase.get_bone_positions(dress)
-
-            replaced_bone_names: list[str] = []
-
-            logger.info("衣装: 位置調整", decoration=MLogger.Decoration.LINE)
-
-            # 上半身の再設定
-            replaced_bone_names += usecase.replace_upper(model, dress)
-
-            # 上半身2の再設定
-            replaced_bone_names += usecase.replace_upper2(model, dress)
-
-            # 上半身3の再設定
-            replaced_bone_names += usecase.replace_upper3(model, dress)
-
-            # # 胸の再設定
-            # replaced_bust_bone_names = usecase.replace_bust(model, dress)
-
-            # 首の再設定
-            usecase.replace_neck(model, dress)
-
-            # 肩と腕の再設定
-            usecase.replace_shoulder_arm(model, dress)
-
-            # 捩りの再設定
-            usecase.replace_twist(model, dress, replaced_bone_names)
-
-            # 下半身の再設定
-            replaced_bone_names += usecase.replace_lower(model, dress)
-
-            logger.info("衣装: ウェイト調整", decoration=MLogger.Decoration.LINE)
-
-            # if replaced_bust_bone_names:
-            #     dress.setup()
-            #     usecase.replace_bust_weights(dress, replaced_bust_bone_names)
-
-            if replaced_bone_names:
-                dress.setup()
-                dress.replace_standard_weights(replaced_bone_names)
-
-            # 首根元にウェイトを振る
-            usecase.replace_neck_root_weights(dress)
-            dress.update_vertices_by_bone()
-
-            # 衣装に材質透明モーフを入れる
-            logger.info(
-                "衣装: 追加セットアップ: 材質透過モーフ追加",
-                decoration=MLogger.Decoration.BOX,
-            )
-            usecase.create_material_transparent_morphs(dress)
-
-            # 個別調整用モーフ追加
-            logger.info(
-                "衣装: 追加セットアップ: 個別調整ボーンモーフ追加",
-                decoration=MLogger.Decoration.BOX,
-            )
-            (
-                individual_morph_names,
-                individual_target_bone_indexes,
-            ) = usecase.create_dress_individual_bone_morphs(dress)
-
-            # 衣装にフィッティングボーンモーフを入れる
-            logger.info(
-                "衣装: 追加セットアップ: フィッティングモーフ追加",
-                decoration=MLogger.Decoration.BOX,
-            )
-            usecase.create_dress_fit_morphs(
-                model,
-                dress,
-                model_standard_positions,
-                model_out_standard_positions,
-                dress_standard_positions,
-                dress_out_standard_positions,
-            )
-
-            is_dress_change = True
-        elif file_panel.dress_ctrl.original_data:
-            original_dress = file_panel.dress_ctrl.original_data
-            dress = file_panel.dress_ctrl.data
-        else:
-            original_dress = PmxModel()
-            dress = PmxModel()
-
-        if file_panel.motion_ctrl.valid() and (
-            not file_panel.motion_ctrl.data or is_model_change or is_dress_change
-        ):
-            logger.info("モーション読み込み開始", decoration=MLogger.Decoration.BOX)
-
-            motion = file_panel.motion_ctrl.reader.read_by_filepath(
-                file_panel.motion_ctrl.path
-            )
-        elif file_panel.motion_ctrl.original_data:
-            motion = file_panel.motion_ctrl.original_data
-        else:
-            motion = VmdMotion("empty")
-
-        ik_target_bone_names = [
-            bone.name for bone in model.bones if bone.ik_target_indexes
-        ]
-
-        motion.animate_bone(
-            [fno for fno in range(motion.max_fno, 10)],
+        # まずは読み込み
+        (
             model,
-            ik_target_bone_names,
-            out_fno_log=True,
-            description=__("IK事前計算"),
+            original_model,
+            dress,
+            original_dress,
+            motion,
+        ) = self.load()
+
+        # フィッティング
+        usecase = LoadUsecase()
+        individual_morph_names, individual_target_bone_indexes = usecase.fit(
+            model, dress
         )
+
+        # individual_morph_names, individual_target_bone_indexes, motion = self.fit(
+        #     model, dress, motion
+        # )
 
         if logger.total_level <= logging.DEBUG:
             # デバッグモードの時だけ変形モーフ付き衣装: データ保存
@@ -238,3 +84,97 @@ class LoadWorker(BaseWorker):
         )
         # 出力されたメッセージを全部出力
         file_panel.console_ctrl.text_ctrl.SaveFile(filename=output_log_path)
+
+    def load(
+        self,
+    ) -> tuple[PmxModel, PmxModel, PmxModel, PmxModel, VmdMotion]:
+        """データ読み込み"""
+        usecase = LoadUsecase()
+        file_panel: FilePanel = self.frame.file_panel
+
+        with ThreadPoolExecutor(
+            thread_name_prefix="load", max_workers=self.max_worker
+        ) as executor:
+            model_future = executor.submit(
+                usecase.load_model,
+                file_panel.model_ctrl.valid() and not file_panel.model_ctrl.data,
+                file_panel.model_ctrl.path,
+                True,
+            )
+
+            dress_future = executor.submit(
+                usecase.load_model,
+                file_panel.dress_ctrl.valid() and not file_panel.dress_ctrl.data,
+                file_panel.dress_ctrl.path,
+                False,
+            )
+
+            motion_future = executor.submit(
+                usecase.load_motion,
+                file_panel.motion_ctrl.valid() and not file_panel.motion_ctrl.data,
+                file_panel.motion_ctrl.path,
+            )
+
+        wait([model_future, dress_future, motion_future], return_when=FIRST_EXCEPTION)
+
+        if as_completed(model_future):
+            if model_future.exception():
+                raise model_future.exception()
+            model, original_model = model_future.result()
+
+        if as_completed(dress_future):
+            if dress_future.exception():
+                raise dress_future.exception()
+            dress, original_dress = dress_future.result()
+
+        if as_completed(motion_future):
+            if motion_future.exception():
+                raise motion_future.exception()
+            motion = motion_future.result()
+
+        return model, original_model, dress, original_dress, motion
+
+    def fit(
+        self, model: PmxModel, dress: PmxModel, motion: VmdMotion
+    ) -> tuple[list[str], list[list[int]], VmdMotion]:
+        usecase = LoadUsecase()
+
+        with ThreadPoolExecutor(
+            thread_name_prefix="load", max_workers=self.max_worker
+        ) as executor:
+            model_future = executor.submit(usecase.fit, model, dress)
+
+            ik_target_bone_names = [
+                bone.name for bone in model.bones if bone.ik_target_indexes
+            ]
+
+            motion_future = executor.submit(
+                motion.animate_bone,
+                [
+                    fno
+                    for fno in range(
+                        0, motion.max_fno, (10 if self.max_worker == 1 else 5)
+                    )
+                ],
+                model,
+                ik_target_bone_names,
+                out_fno_log=True,
+                description=__("IK事前計算"),
+            )
+
+        wait([model_future, motion_future], return_when=FIRST_EXCEPTION)
+
+        if as_completed(model_future):
+            if model_future.exception():
+                raise model_future.exception()
+            (
+                individual_morph_names,
+                individual_target_bone_indexes,
+            ) = model_future.result()
+
+        if as_completed(motion_future):
+            if motion_future.exception():
+                raise motion_future.exception()
+            motion_future.result()
+
+        return individual_morph_names, individual_target_bone_indexes, motion

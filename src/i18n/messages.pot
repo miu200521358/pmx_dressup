@@ -1869,3 +1869,7 @@ msgstr ""
 msgid "モデル描画初期化処理失敗"
 msgstr ""
 
+
+msgid "人物: ボーン調整"
+msgstr ""
+
