@@ -181,10 +181,6 @@ class ConfigPanel(CanvasPanel):
     def fno(self, v: int) -> None:
         self.frame_ctrl.SetValue(v)
 
-    @property
-    def is_calc_ik(self) -> bool:
-        return True
-
     def stop_play(self) -> None:
         self.play_ctrl.SetLabelText(__("再生"))
         self.Enable(True)

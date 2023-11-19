@@ -1,11 +1,10 @@
 import os
 
 import wx
-
 from mlib.core.exception import MApplicationException
 from mlib.core.logger import MLogger
 from mlib.service.base_worker import BaseWorker
-from mlib.service.form.base_frame import BaseFrame
+from mlib.service.form.base_panel import BasePanel
 from mlib.utils.file_utils import get_root_dir
 from service.form.panel.config_panel import ConfigPanel
 from service.form.panel.file_panel import FilePanel
@@ -16,8 +15,8 @@ __ = logger.get_text
 
 
 class SaveWorker(BaseWorker):
-    def __init__(self, frame: BaseFrame, result_event: wx.Event) -> None:
-        super().__init__(frame, result_event)
+    def __init__(self, panel: BasePanel, result_event: wx.Event) -> None:
+        super().__init__(panel, result_event)
 
     def thread_execute(self):
         file_panel: FilePanel = self.frame.file_panel

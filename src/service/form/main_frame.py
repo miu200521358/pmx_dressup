@@ -45,9 +45,11 @@ class MainFrame(NotebookFrame):
         self.config_panel = ConfigPanel(self, 1)
         self.notebook.AddPage(self.config_panel, __("設定"), False)
 
-        self.load_worker = LoadWorker(self, self.on_result)
-        self.motion_load_worker = LoadMotionWorker(self, self.on_motion_result)
-        self.save_worker = SaveWorker(self, self.on_save_result)
+        self.load_worker = LoadWorker(self.file_panel, self.on_result)
+        self.motion_load_worker = LoadMotionWorker(
+            self.file_panel, self.on_motion_result
+        )
+        self.save_worker = SaveWorker(self.file_panel, self.on_save_result)
 
         self.file_panel.exec_btn_ctrl.exec_worker = self.save_worker
 
@@ -57,15 +59,11 @@ class MainFrame(NotebookFrame):
             if not self.load_worker.started:
                 if not self.file_panel.model_ctrl.valid():
                     self.file_panel.exec_btn_ctrl.Enable(False)
-                    logger.warning(
-                        "人物モデル欄に有効なパスが設定されていない為、タブ遷移を中断します。"
-                    )
+                    logger.warning("人物モデル欄に有効なパスが設定されていない為、タブ遷移を中断します。")
                     return
                 if not self.file_panel.dress_ctrl.valid():
                     self.file_panel.exec_btn_ctrl.Enable(False)
-                    logger.warning(
-                        "衣装モデル欄に有効なパスが設定されていない為、タブ遷移を中断します。"
-                    )
+                    logger.warning("衣装モデル欄に有効なパスが設定されていない為、タブ遷移を中断します。")
                     return
                 if (
                     not self.file_panel.model_ctrl.data
@@ -204,9 +202,9 @@ class MainFrame(NotebookFrame):
             # ボーンハイライト
             self.config_panel.canvas.animations[
                 1
-            ].selected_bone_indexes = (
-                self.config_panel.dress_bone_ctrl.individual_target_bone_indexes[0]
-            )
+            ].selected_bone_indexes = self.config_panel.dress_bone_ctrl.individual_target_bone_indexes[
+                0
+            ]
             logger.info("モデル描画")
             self.config_panel.canvas.Refresh()
             self.notebook.ChangeSelection(self.config_panel.tab_idx)
@@ -258,9 +256,9 @@ class MainFrame(NotebookFrame):
             # ボーンハイライト
             self.config_panel.canvas.animations[
                 1
-            ].selected_bone_indexes = (
-                self.config_panel.dress_bone_ctrl.individual_target_bone_indexes[0]
-            )
+            ].selected_bone_indexes = self.config_panel.dress_bone_ctrl.individual_target_bone_indexes[
+                0
+            ]
             logger.info("モデル描画")
             self.config_panel.canvas.Refresh()
             self.notebook.ChangeSelection(self.config_panel.tab_idx)
