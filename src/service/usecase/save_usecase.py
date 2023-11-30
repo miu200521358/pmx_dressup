@@ -1,12 +1,10 @@
-from PIL import Image
-from datetime import datetime
 import os
 import shutil
+from datetime import datetime
 from typing import Optional
 
 import numpy as np
 from executor import APP_NAME, VERSION_NAME
-
 from mlib.core.logger import MLogger
 from mlib.core.math import (
     MMatrix4x4,
@@ -40,6 +38,7 @@ from mlib.pmx.pmx_writer import PmxWriter
 from mlib.utils.file_utils import separate_path
 from mlib.vmd.vmd_collection import VmdMotion
 from mlib.vmd.vmd_part import VmdMorphFrame
+from PIL import Image
 from service.usecase.dress_bone import DressBones
 
 logger = MLogger(os.path.basename(__file__), level=1)
@@ -476,7 +475,7 @@ class SaveUsecase:
                 bone,
                 is_dress=False,
                 is_weight=is_weight,
-                position=model_matrixes[0, bone.name].position.copy(),
+                position=model_matrixes[bone.name, 0].position.copy(),
             )
 
             if not len(dress_model_bones) % 100:
@@ -498,7 +497,7 @@ class SaveUsecase:
                     # 人物側にウェイトが乗っていない場合、変形後の位置にボーンを配置する
                     # もしくは衣装側に合わせる、と指示したボーンは衣装側の変形後の位置に配置
                     dress_model_bones[bone.name].position = dress_matrixes[
-                        0, bone.name
+                        bone.name, 0
                     ].position.copy()
 
                     if (
@@ -512,7 +511,7 @@ class SaveUsecase:
                         dress_model_bones[
                             model.bones[model.bones[bone.name].tail_index].name
                         ].position = (
-                            dress_matrixes[0, bone.name].global_matrix
+                            dress_matrixes[bone.name, 0].global_matrix
                             * bone.tail_position
                         )
 
@@ -526,10 +525,10 @@ class SaveUsecase:
                             break
                         # 親が準標準ではなく、衣装側にない場合、親は子（対象）の変形後の位置からみた相対位置にボーンを配置する
                         dress_model_bones[parent_bone_name].position = dress_matrixes[
-                            0, bone.name
+                            bone.name, 0
                         ].global_matrix * (
-                            model_matrixes[0, parent_bone_name].position
-                            - model_matrixes[0, bone.name].position
+                            model_matrixes[parent_bone_name, 0].position
+                            - model_matrixes[bone.name, 0].position
                         )
 
                 continue
@@ -608,7 +607,7 @@ class SaveUsecase:
                 continue
 
             dress_bone_position = (
-                dress_matrixes[0, bone.name].local_matrix * bone.position
+                dress_matrixes[bone.name, 0].local_matrix * bone.position
             )
             for nearest_bone_name in dress_same_position_bone_names.get(bone.name, []):
                 # 同じ位置にボーンがある場合、それに合わせる
@@ -712,11 +711,11 @@ class SaveUsecase:
                     dress_model_bone.bone.ik.unit_rotation
                 )
                 if 0 <= dress_model_bone.ik.bone_index and dress_matrixes.exists(
-                    0, dress_model_bones[dress_model_bone.ik.bone_index].name
+                    dress_model_bones[dress_model_bone.ik.bone_index].name, 0
                 ):
                     # IKターゲットとその位置を修正
                     ik_target_position = dress_matrixes[
-                        0, dress_model_bones[dress_model_bone.ik.bone_index].name
+                        dress_model_bones[dress_model_bone.ik.bone_index].name, 0
                     ].position
                     dress_model_bone.position = ik_target_position.copy()
                     dress_model_bones[
@@ -738,12 +737,12 @@ class SaveUsecase:
                 dress_model_bone.bone.is_leg_d
                 and 0 <= dress_model_bone.effect_index
                 and dress_matrixes.exists(
-                    0, dress_model_bones[dress_model_bone.effect_index].name
+                    dress_model_bones[dress_model_bone.effect_index].name, 0
                 )
             ):
                 # 足Dを足FKに揃える
                 dress_model_bone.position = dress_matrixes[
-                    0, dress_model_bones[dress_model_bone.effect_index].name
+                    dress_model_bones[dress_model_bone.effect_index].name, 0
                 ].position.copy()
 
             if "全ての親" == dress_model_bone.name:
@@ -897,7 +896,7 @@ class SaveUsecase:
                             bone_weight = model.vertices[vertex_index].deform.weights[n]
                             mat += (
                                 model_matrixes[
-                                    0, model.bones[bone_index].name
+                                    model.bones[bone_index].name, 0
                                 ].local_matrix.vector
                                 * bone_weight
                             )
@@ -1128,7 +1127,7 @@ class SaveUsecase:
                             bone_weight = dress.vertices[vertex_index].deform.weights[n]
                             mat += (
                                 dress_matrixes[
-                                    0, dress.bones[bone_index].name
+                                    dress.bones[bone_index].name, 0
                                 ].local_matrix.vector
                                 * bone_weight
                             )
@@ -1356,17 +1355,17 @@ class SaveUsecase:
                 )
                 model_bone_name = model.bones[nearest_bone_index].name
                 rigidbody_local_position = (
-                    model_original_matrixes[0, model_bone_name].global_matrix.inverse()
+                    model_original_matrixes[model_bone_name, 0].global_matrix.inverse()
                     * rigidbody.shape_position
                 )
                 rigidbody_copy_position = (
-                    model_matrixes[0, model_bone_name].global_matrix
+                    model_matrixes[model_bone_name, 0].global_matrix
                     * rigidbody_local_position
                 )
                 rigidbody_copy_scale = MVector3D(
-                    model_matrixes[0, model_bone_name].global_matrix[0, 0],
-                    model_matrixes[0, model_bone_name].global_matrix[1, 1],
-                    model_matrixes[0, model_bone_name].global_matrix[2, 2],
+                    model_matrixes[model_bone_name, 0].global_matrix[0, 0],
+                    model_matrixes[model_bone_name, 0].global_matrix[1, 1],
+                    model_matrixes[model_bone_name, 0].global_matrix[2, 2],
                 )
 
                 model_copy_rigidbody.shape_position = rigidbody_copy_position
@@ -1393,17 +1392,17 @@ class SaveUsecase:
             # ボーンと剛体の位置関係から剛体位置を求め直す
             model_bone_name = model.bones[rigidbody.bone_index].name
             rigidbody_local_position = (
-                model_original_matrixes[0, model_bone_name].global_matrix.inverse()
+                model_original_matrixes[model_bone_name, 0].global_matrix.inverse()
                 * rigidbody.shape_position
             )
             rigidbody_copy_position = (
-                model_matrixes[0, model_bone_name].global_matrix
+                model_matrixes[model_bone_name, 0].global_matrix
                 * rigidbody_local_position
             )
             rigidbody_copy_scale = MVector3D(
-                model_matrixes[0, model_bone_name].global_matrix[0, 0],
-                model_matrixes[0, model_bone_name].global_matrix[1, 1],
-                model_matrixes[0, model_bone_name].global_matrix[2, 2],
+                model_matrixes[model_bone_name, 0].global_matrix[0, 0],
+                model_matrixes[ model_bone_name, 0].global_matrix[1, 1],
+                model_matrixes[model_bone_name, 0].global_matrix[2, 2],
             )
 
             model_copy_rigidbody.shape_position = rigidbody_copy_position
@@ -1430,17 +1429,17 @@ class SaveUsecase:
                 # ボーンと剛体の位置関係から剛体位置を求め直す
                 dress_bone_name = dress.bones[nearest_bone_index].name
                 rigidbody_local_position = (
-                    dress_original_matrixes[0, dress_bone_name].global_matrix.inverse()
+                    dress_original_matrixes[dress_bone_name, 0].global_matrix.inverse()
                     * rigidbody.shape_position
                 )
                 rigidbody_copy_position = (
-                    dress_matrixes[0, dress_bone_name].global_matrix
+                    dress_matrixes[dress_bone_name, 0].global_matrix
                     * rigidbody_local_position
                 )
                 rigidbody_copy_scale = MVector3D(
-                    dress_matrixes[0, dress_bone_name].global_matrix[0, 0],
-                    dress_matrixes[0, dress_bone_name].global_matrix[1, 1],
-                    dress_matrixes[0, dress_bone_name].global_matrix[2, 2],
+                    dress_matrixes[dress_bone_name, 0].global_matrix[0, 0],
+                    dress_matrixes[dress_bone_name, 0].global_matrix[1, 1],
+                    dress_matrixes[dress_bone_name, 0].global_matrix[2, 2],
                 )
 
                 dress_copy_rigidbody.shape_position = rigidbody_copy_position
@@ -1477,17 +1476,17 @@ class SaveUsecase:
                 # 位置とサイズは衣装に合わせる
                 dress_bone_name = dress.bones[rigidbody.bone_index].name
                 rigidbody_local_position = (
-                    dress_original_matrixes[0, dress_bone_name].global_matrix.inverse()
+                    dress_original_matrixes[dress_bone_name, 0].global_matrix.inverse()
                     * rigidbody.shape_position
                 )
                 rigidbody_copy_position = (
-                    dress_matrixes[0, dress_bone_name].global_matrix
+                    dress_matrixes[dress_bone_name, 0].global_matrix
                     * rigidbody_local_position
                 )
                 rigidbody_copy_scale = MVector3D(
-                    dress_matrixes[0, dress_bone_name].global_matrix[0, 0],
-                    dress_matrixes[0, dress_bone_name].global_matrix[1, 1],
-                    dress_matrixes[0, dress_bone_name].global_matrix[2, 2],
+                    dress_matrixes[dress_bone_name, 0].global_matrix[0, 0],
+                    dress_matrixes[dress_bone_name, 0].global_matrix[1, 1],
+                    dress_matrixes[dress_bone_name, 0].global_matrix[2, 2],
                 )
 
                 dress_model.rigidbodies[
@@ -1507,17 +1506,17 @@ class SaveUsecase:
             # ボーンと剛体の位置関係から剛体位置を求め直す
             dress_bone_name = dress.bones[rigidbody.bone_index].name
             rigidbody_local_position = (
-                dress_original_matrixes[0, dress_bone_name].global_matrix.inverse()
+                dress_original_matrixes[dress_bone_name, 0].global_matrix.inverse()
                 * rigidbody.shape_position
             )
             rigidbody_copy_position = (
-                dress_matrixes[0, dress_bone_name].global_matrix
+                dress_matrixes[dress_bone_name, 0].global_matrix
                 * rigidbody_local_position
             )
             rigidbody_copy_scale = MVector3D(
-                dress_matrixes[0, dress_bone_name].global_matrix[0, 0],
-                dress_matrixes[0, dress_bone_name].global_matrix[1, 1],
-                dress_matrixes[0, dress_bone_name].global_matrix[2, 2],
+                dress_matrixes[dress_bone_name, 0].global_matrix[0, 0],
+                dress_matrixes[dress_bone_name, 0].global_matrix[1, 1],
+                dress_matrixes[dress_bone_name, 0].global_matrix[2, 2],
             )
 
             dress_copy_rigidbody.shape_position = rigidbody_copy_position
@@ -1562,19 +1561,19 @@ class SaveUsecase:
             ]
 
             joint_a_local_position = (
-                model_original_matrixes[0, model_bone_a.name].global_matrix.inverse()
+                model_original_matrixes[model_bone_a.name, 0].global_matrix.inverse()
                 * joint.position
             )
             joint_b_local_position = (
-                model_original_matrixes[0, model_bone_b.name].global_matrix.inverse()
+                model_original_matrixes[model_bone_b.name, 0].global_matrix.inverse()
                 * joint.position
             )
             joint_a_copy_position = (
-                model_matrixes[0, model_bone_a.name].global_matrix
+                model_matrixes[model_bone_a.name, 0].global_matrix
                 * joint_a_local_position
             )
             joint_b_copy_position = (
-                model_matrixes[0, model_bone_b.name].global_matrix
+                model_matrixes[model_bone_b.name, 0].global_matrix
                 * joint_b_local_position
             )
 
@@ -1617,19 +1616,19 @@ class SaveUsecase:
             ]
 
             joint_a_local_position = (
-                dress_original_matrixes[0, dress_bone_a.name].global_matrix.inverse()
+                dress_original_matrixes[dress_bone_a.name, 0].global_matrix.inverse()
                 * joint.position
             )
             joint_b_local_position = (
-                dress_original_matrixes[0, dress_bone_b.name].global_matrix.inverse()
+                dress_original_matrixes[dress_bone_b.name, 0].global_matrix.inverse()
                 * joint.position
             )
             joint_a_copy_position = (
-                dress_matrixes[0, dress_bone_a.name].global_matrix
+                dress_matrixes[dress_bone_a.name, 0].global_matrix
                 * joint_a_local_position
             )
             joint_b_copy_position = (
-                dress_matrixes[0, dress_bone_b.name].global_matrix
+                dress_matrixes[dress_bone_b.name, 0].global_matrix
                 * joint_b_local_position
             )
 
@@ -2156,7 +2155,7 @@ class SaveUsecase:
                 bone_index = vertex.deform.indexes[n]
                 bone_weight = vertex.deform.weights[n]
                 mat += (
-                    model_matrixes[0, model.bones[bone_index].name].local_matrix.vector
+                    model_matrixes[model.bones[bone_index].name, 0].local_matrix.vector
                     * bone_weight
                 )
             ankle_vertex_positions.append(

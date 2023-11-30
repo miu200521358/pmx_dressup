@@ -1873,3 +1873,27 @@ msgstr ""
 msgid "人物: ボーン調整"
 msgstr ""
 
+
+msgid "-- モーフデータ読み取り [{i} ({p:.2f}%)]"
+msgstr ""
+
+
+msgid "-- IKデータ読み取り [{i} ({p:.2f}%)]"
+msgstr ""
+
+
+msgid "-- テクスチャデータ読み取り [{i} ({p:.2f}%)]"
+msgstr ""
+
+
+msgid "-- 表示枠データ読み取り [{i} ({p:.2f}%)]"
+msgstr ""
+
+
+msgid "-- 剛体データ読み取り [{i} ({p:.2f}%)]"
+msgstr ""
+
+
+msgid "-- ジョイントデータ読み取り [{i} ({p:.2f}%)]"
+msgstr ""
+

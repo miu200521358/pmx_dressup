@@ -1409,3 +1409,21 @@ msgstr Model drawing initialization process failed.
 
 msgid "人物: ボーン調整"
 msgstr "People: Bone Adjustment"
+
+msgid "-- モーフデータ読み取り [{i} ({p:.2f}%)]"
+msgstr "-- Morph data read [{i} ({p:.2f}%)]"
+
+msgid "-- IKデータ読み取り [{i} ({p:.2f}%)]"
+msgstr "-- IK data read [{i} ({p:.2f}%)]"
+
+msgid "-- テクスチャデータ読み取り [{i} ({p:.2f}%)]"
+msgstr "-- Texture data read [{i} ({p:.2f}%)]"
+
+msgid "-- 表示枠データ読み取り [{i} ({p:.2f}%)]"
+msgstr "-- Display frame data read [{i} ({p:.2f}%)]"
+
+msgid "-- 剛体データ読み取り [{i} ({p:.2f}%)]"
+msgstr "-- Rigid data reading [{i} ({p:.2f}%)]"
+
+msgid "-- ジョイントデータ読み取り [{i} ({p:.2f}%)]"
+msgstr "-- Joint data read [{i} ({p:.2f}%)]"
