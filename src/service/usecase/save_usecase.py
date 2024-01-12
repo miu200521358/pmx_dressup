@@ -15,6 +15,7 @@ from mlib.core.math import (
     intersect_line_point,
 )
 from mlib.core.part import Switch
+from mlib.pmx.bone_setting import BoneFlg
 from mlib.pmx.pmx_collection import PmxModel
 from mlib.pmx.pmx_part import (
     BoneMorphOffset,
@@ -745,6 +746,18 @@ class SaveUsecase:
                     dress_model_bones[dress_model_bone.effect_index].name, 0
                 ].position.copy()
 
+            if "肩P" in dress_model_bone.bone.name:
+                # 肩Pを肩FKに揃える
+                dress_model_bone.position = dress_matrixes[
+                    dress_model_bone.bone.name[:2], 0
+                ].position.copy()
+
+            if "肩C" in dress_model_bone.name:
+                # 肩Cを腕FKに揃える
+                dress_model_bone.position = dress_matrixes[
+                    f"{dress_model_bone.name[0]}腕", 0
+                ].position.copy()
+
             if "全ての親" == dress_model_bone.name:
                 dress_model_bone.position = MVector3D()
 
@@ -774,6 +787,16 @@ class SaveUsecase:
                     bone.local_x_vector = local_y_vector.cross(
                         bone.local_z_vector
                     ).normalized()
+
+            if bone.is_upper or bone.name == "下半身":
+                # 下半身より上の準標準ボーンはローカル軸を強制再設定する
+                bone.bone_flg |= BoneFlg.HAS_LOCAL_COORDINATE
+                bone.local_x_vector = dress_model.bones.get_tail_relative_position(
+                    bone.index
+                ).normalized()
+                bone.local_z_vector = local_y_vector.cross(
+                    bone.local_x_vector
+                ).normalized()
 
             # if (bone.is_external_rotation or bone.is_external_translation) and bone.effect_index in dress_model.bones:
             #     external_bone = dress_model.bones[bone.effect_index]
@@ -1401,7 +1424,7 @@ class SaveUsecase:
             )
             rigidbody_copy_scale = MVector3D(
                 model_matrixes[model_bone_name, 0].global_matrix[0, 0],
-                model_matrixes[ model_bone_name, 0].global_matrix[1, 1],
+                model_matrixes[model_bone_name, 0].global_matrix[1, 1],
                 model_matrixes[model_bone_name, 0].global_matrix[2, 2],
             )
 
@@ -1858,9 +1881,7 @@ class SaveUsecase:
         # 衣装の指定材質に割り当てられた頂点INDEXが配置されている3次元頂点の位置
         vertex_colors: list[np.ndarray] = []
         for i, vertex_index in enumerate(vertex_indexes):
-            logger.count(
-                "衣装テクスチャ色取得", i, len(vertex_indexes), display_block=500
-            )
+            logger.count("衣装テクスチャ色取得", i, len(vertex_indexes), display_block=500)
 
             vertex = model.vertices[vertex_index]
 

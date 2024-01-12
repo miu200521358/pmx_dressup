@@ -1,7 +1,6 @@
 import os
 
 import wx
-
 from mlib.core.logger import MLogger
 from mlib.core.math import MVector3D
 from mlib.service.form.base_panel import BasePanel
@@ -28,9 +27,7 @@ class BoneCtrlSet:
 
         self.bone_sizer = wx.BoxSizer(wx.HORIZONTAL)
 
-        bone_weight_tooltip = __(
-            "このチェックをONにすると、選択ボーンのウェイト範囲をグラデーションで表示します"
-        )
+        bone_weight_tooltip = __("このチェックをONにすると、選択ボーンのウェイト範囲をグラデーションで表示します")
         self.bone_weight_check_ctrl = wx.CheckBox(
             self.window,
             wx.ID_ANY,
@@ -50,9 +47,7 @@ class BoneCtrlSet:
             wx.DefaultPosition,
             wx.Size(20, -1),
         )
-        self.left_btn_ctrl.SetToolTip(
-            __("ボーンプルダウンの選択肢を上方向に移動できます。")
-        )
+        self.left_btn_ctrl.SetToolTip(__("ボーンプルダウンの選択肢を上方向に移動できます。"))
         self.left_btn_ctrl.Bind(wx.EVT_BUTTON, self.on_change_bone_left)
         self.bone_sizer.Add(self.left_btn_ctrl, 0, wx.ALL, 3)
 
@@ -60,14 +55,10 @@ class BoneCtrlSet:
             self.window,
             wx.ID_ANY,
             wx.DefaultPosition,
-            wx.Size(470, -1),
+            wx.Size(460, -1),
             choices=[],
         )
-        self.bone_choice_ctrl.SetToolTip(
-            __(
-                "スライダーで調整対象となる衣装のボーンです。\n左右は一括で調整できます。"
-            )
-        )
+        self.bone_choice_ctrl.SetToolTip(__("スライダーで調整対象となる衣装のボーンです。\n左右は一括で調整できます。"))
         self.bone_choice_ctrl.Bind(wx.EVT_CHOICE, self.on_change_bone)
         self.bone_sizer.Add(self.bone_choice_ctrl, 1, wx.EXPAND | wx.ALL, 3)
 
@@ -78,11 +69,20 @@ class BoneCtrlSet:
             wx.DefaultPosition,
             wx.Size(20, -1),
         )
-        self.right_btn_ctrl.SetToolTip(
-            __("ボーンプルダウンの選択肢を下方向に移動できます。")
-        )
+        self.right_btn_ctrl.SetToolTip(__("ボーンプルダウンの選択肢を下方向に移動できます。"))
         self.right_btn_ctrl.Bind(wx.EVT_BUTTON, self.on_change_bone_right)
         self.bone_sizer.Add(self.right_btn_ctrl, 0, wx.ALL, 3)
+
+        self.reverse_btn_ctrl = wx.Button(
+            self.window,
+            wx.ID_ANY,
+            __("反"),
+            wx.DefaultPosition,
+            wx.Size(30, -1),
+        )
+        self.reverse_btn_ctrl.SetToolTip(__("選択されているボーンの左右を反転させた対象ボーンに設定値をコピペします"))
+        self.reverse_btn_ctrl.Bind(wx.EVT_BUTTON, self.on_click_reverse)
+        self.bone_sizer.Add(self.reverse_btn_ctrl, 0, wx.ALL, 3)
 
         self.sizer.Add(self.bone_sizer, 0, wx.ALL, 3)
 
@@ -303,9 +303,7 @@ class BoneCtrlSet:
 
         bone_target_dress_tooltip = __(
             "人物と衣装のどちらにもメッシュがある場合には、基本的には人物側のボーン位置で出力します。\n"
-        ) + __(
-            "このチェックをONにすると、指など人物と衣装のボーン位置がずれている場合に衣装側のボーン位置で出力することができます。"
-        )
+        ) + __("このチェックをONにすると、指など人物と衣装のボーン位置がずれている場合に衣装側のボーン位置で出力することができます。")
         self.grid_sizer.Add(wx.StaticText(self.window, wx.ID_ANY, ""), 0, wx.ALL, 3)
 
         self.bone_target_dress_check_ctrl = wx.CheckBox(
@@ -422,6 +420,42 @@ class BoneCtrlSet:
         self.bone_target_dress[
             morph_name
         ] = self.bone_target_dress_check_ctrl.GetValue()
+
+    def on_click_reverse(self, event: wx.Event) -> None:
+        morph_name = self.bone_choice_ctrl.GetStringSelection()
+        if "右" not in morph_name and "左" not in morph_name:
+            return
+
+        # 反転値を記録に設定
+        if "右" in morph_name:
+            reverse_morph_name = morph_name.replace("右", "左")
+        else:
+            reverse_morph_name = morph_name.replace("左", "右")
+
+        self.scales[reverse_morph_name].x = self.scale_x_slider.GetValue()
+        self.scales[reverse_morph_name].y = self.scale_y_slider.GetValue()
+        self.scales[reverse_morph_name].z = self.scale_z_slider.GetValue()
+        self.degrees[reverse_morph_name].x = self.degree_x_slider.GetValue()
+        self.degrees[reverse_morph_name].y = self.degree_y_slider.GetValue()
+        self.degrees[reverse_morph_name].z = self.degree_z_slider.GetValue()
+        self.positions[reverse_morph_name].x = -self.position_x_slider.GetValue()
+        self.positions[reverse_morph_name].y = self.position_y_slider.GetValue()
+        self.positions[reverse_morph_name].z = self.position_z_slider.GetValue()
+        self.bone_target_dress[
+            reverse_morph_name
+        ] = self.bone_target_dress_check_ctrl.GetValue()
+
+        # ボーンを変更
+        self.parent.Enable(False)
+        selection = [
+            i
+            for i, name in enumerate(self.bone_choice_ctrl.GetItems())
+            if name == reverse_morph_name
+        ][0]
+        self.bone_choice_ctrl.SetSelection(selection)
+        self.parent.on_change(reverse_morph_name)
+        self.on_change_bone(event)
+        self.parent.Enable(True)
 
     def on_change_clear(self, event: wx.Event) -> None:
         for morph_name in self.scales.keys():

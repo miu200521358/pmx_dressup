@@ -1263,7 +1263,7 @@ class LoadUsecase:
             ):
                 continue
 
-            individual_morph_names.append(dress_bone.name)
+            individual_morph_names.append(f"{dress_bone.name}{__('(含む子ども)')}")
 
             # 自分とその子どもの準標準外ボーンのINDEXリストを保持
             target_bone_indexes = [
@@ -1299,7 +1299,7 @@ class LoadUsecase:
                 ("MY", MVector3D(0, 1, 0), MQuaternion(), MVector3D()),
                 ("MZ", MVector3D(0, 0, 1), MQuaternion(), MVector3D()),
             ):
-                morph = Morph(name=f"調整:{dress_bone.name}:{axis_name}")
+                morph = Morph(name=f"調整:{dress_bone.name}{__('(含む子ども)')}:{axis_name}")
                 morph.is_system = True
                 morph.morph_type = MorphType.BONE
 
@@ -1324,6 +1324,59 @@ class LoadUsecase:
                 dress.morphs.append(morph)
 
             individual_target_bone_indexes.append(target_bone_indexes)
+
+            # ----------------------------
+            # 個別調整も入れる
+            for target_bone_index in target_bone_indexes:
+                if target_bone_index not in dress.vertices_by_bones:
+                    # ウェイトを持ってないボーンはスルー
+                    continue
+
+                dress_target_bone = dress.bones[target_bone_index]
+
+                for axis_name, position, local_qq, local_scale in (
+                    ("SX", MVector3D(), MQuaternion(), MVector3D(0, 1, 0)),
+                    ("SY", MVector3D(), MQuaternion(), MVector3D(1, 0, 0)),
+                    ("SZ", MVector3D(), MQuaternion(), MVector3D(0, 0, 1)),
+                    (
+                        "RX",
+                        MVector3D(),
+                        MQuaternion.from_euler_degrees(0, 1, 0),
+                        MVector3D(),
+                    ),
+                    (
+                        "RY",
+                        MVector3D(),
+                        MQuaternion.from_euler_degrees(1, 0, 0),
+                        MVector3D(),
+                    ),
+                    (
+                        "RZ",
+                        MVector3D(),
+                        MQuaternion.from_euler_degrees(0, 0, 1),
+                        MVector3D(),
+                    ),
+                    ("MX", MVector3D(1, 0, 0), MQuaternion(), MVector3D()),
+                    ("MY", MVector3D(0, 1, 0), MQuaternion(), MVector3D()),
+                    ("MZ", MVector3D(0, 0, 1), MQuaternion(), MVector3D()),
+                ):
+                    morph = Morph(name=f"調整:{dress_target_bone.name}:{axis_name}")
+                    morph.is_system = True
+                    morph.morph_type = MorphType.BONE
+
+                    morph.offsets.append(
+                        BoneMorphOffset(
+                            dress_target_bone.index,
+                            position=position,
+                            local_qq=local_qq,
+                            local_scale=local_scale,
+                        )
+                    )
+
+                    dress.morphs.append(morph)
+
+                individual_morph_names.append(dress_target_bone.name)
+                individual_target_bone_indexes.append([dress_target_bone.index])
 
         return individual_morph_names, individual_target_bone_indexes
 
@@ -2774,22 +2827,42 @@ class LoadUsecase:
 
                 if out_standard_dress_position is not None:
                     # 同じ位置にある準標準ボーン
-                    nearest_dress_standard_bone_indexes = [
-                        ni
-                        for ni in dress_standard_positions.nearest_all_keys(
-                            out_standard_dress_position
-                        )
-                    ]
-                    if 0 < len(nearest_dress_standard_bone_indexes):
-                        # ウェイトを持っているボーンがあれば、それを優先させる
-                        nearest_dress_bone_index = nearest_dress_standard_bone_indexes[
-                            np.argmax(
-                                [
-                                    len(dress.vertices_by_bones.get(i, []))
-                                    for i in nearest_dress_standard_bone_indexes
-                                ]
+                    nearest_dress_standard_bone_indexes = sorted(
+                        [
+                            ni
+                            for ni in dress_standard_positions.nearest_all_keys(
+                                out_standard_dress_position
                             )
                         ]
+                    )
+                    if 0 < len(nearest_dress_standard_bone_indexes):
+                        nearest_dress_standard_bone_weights = [
+                            len(dress.vertices_by_bones.get(i, []))
+                            for i in nearest_dress_standard_bone_indexes
+                        ]
+                        if 0 < np.sum(nearest_dress_standard_bone_weights):
+                            # ウェイトを持っているボーンがあれば、それを優先させる
+                            nearest_dress_bone_index = (
+                                nearest_dress_standard_bone_indexes[
+                                    np.argmax(nearest_dress_standard_bone_weights)
+                                ]
+                            )
+                        else:
+                            nearest_dress_standard_bone_arm_indexes = [
+                                i
+                                for i in nearest_dress_standard_bone_indexes
+                                if "腕" in dress.bones[i].name[-1]
+                            ]
+                            if nearest_dress_standard_bone_arm_indexes:
+                                # 末尾に「腕」が付くボーンがあれば、それを優先させる(肩Cとの兼ね合い)
+                                nearest_dress_bone_index = max(
+                                    nearest_dress_standard_bone_arm_indexes
+                                )
+                            else:
+                                # どれもウェイトを持っていなければ、最後尾を採用する
+                                nearest_dress_bone_index = max(
+                                    nearest_dress_standard_bone_indexes
+                                )
                         if set(dress.bone_trees[dress_bone.name].indexes) & set(
                             nearest_dress_standard_bone_indexes
                         ):
@@ -2820,6 +2893,7 @@ class LoadUsecase:
                                 model_matrixes[nearest_dress_bone_name, 0].position
                                 - dress_position
                             )
+                            dress_offset_position = MVector3D()
                             bone_setting = DRESS_STANDARD_BONE_NAMES[
                                 nearest_dress_bone_name
                             ]
