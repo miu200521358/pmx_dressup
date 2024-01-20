@@ -199,12 +199,16 @@ class MainFrame(NotebookFrame):
             self.config_panel.canvas.append_model_set(
                 self.file_panel.dress_ctrl.data, self.dress_motion, bone_alpha=0.5
             )
-            # ボーンハイライト
-            self.config_panel.canvas.animations[
-                1
-            ].selected_bone_indexes = self.config_panel.dress_bone_ctrl.individual_target_bone_indexes[
-                0
-            ]
+            if (
+                len(self.config_panel.dress_bone_ctrl.individual_target_bone_indexes)
+                > 0
+            ):
+                # ボーンハイライト
+                self.config_panel.canvas.animations[
+                    1
+                ].selected_bone_indexes = self.config_panel.dress_bone_ctrl.individual_target_bone_indexes[
+                    0
+                ]
             logger.info("モデル描画")
             self.config_panel.canvas.Refresh()
             self.notebook.ChangeSelection(self.config_panel.tab_idx)

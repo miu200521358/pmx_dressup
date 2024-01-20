@@ -1408,6 +1408,12 @@ class SaveUsecase:
             ):
                 continue
 
+            if (
+                rigidbody.bone_index not in model_all_bone_map
+                or rigidbody.bone_index not in model.bones
+            ):
+                continue
+
             model_copy_rigidbody = rigidbody.copy()
             model_copy_rigidbody.index = len(dress_model.rigidbodies)
             model_copy_rigidbody.bone_index = model_all_bone_map[rigidbody.bone_index]
