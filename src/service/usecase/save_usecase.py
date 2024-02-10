@@ -719,9 +719,9 @@ class SaveUsecase:
                         dress_model_bones[dress_model_bone.ik.bone_index].name, 0
                     ].position
                     dress_model_bone.position = ik_target_position.copy()
-                    dress_model_bones[
-                        dress_model_bone.ik.bone_index
-                    ].position = ik_target_position.copy()
+                    dress_model_bones[dress_model_bone.ik.bone_index].position = (
+                        ik_target_position.copy()
+                    )
 
                     if "つま先ＩＫ" in dress_model_bone.name:
                         dress_model_bone.position.y = 0
@@ -1518,9 +1518,9 @@ class SaveUsecase:
                     dress_matrixes[dress_bone_name, 0].global_matrix[2, 2],
                 )
 
-                dress_model.rigidbodies[
-                    rigidbody.name
-                ].shape_position = rigidbody_copy_position
+                dress_model.rigidbodies[rigidbody.name].shape_position = (
+                    rigidbody_copy_position
+                )
                 dress_model.rigidbodies[rigidbody.name].shape_size = (
                     dress.rigidbodies[rigidbody.name].shape_size * rigidbody_copy_scale
                 )
@@ -1887,7 +1887,9 @@ class SaveUsecase:
         # 衣装の指定材質に割り当てられた頂点INDEXが配置されている3次元頂点の位置
         vertex_colors: list[np.ndarray] = []
         for i, vertex_index in enumerate(vertex_indexes):
-            logger.count("衣装テクスチャ色取得", i, len(vertex_indexes), display_block=500)
+            logger.count(
+                "衣装テクスチャ色取得", i, len(vertex_indexes), display_block=500
+            )
 
             vertex = model.vertices[vertex_index]
 

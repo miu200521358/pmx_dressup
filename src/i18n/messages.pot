@@ -1905,3 +1905,35 @@ msgstr ""
 msgid "選択されているボーンの左右を反転させた対象ボーンに設定値をコピペします"
 msgstr ""
 
+
+msgid "キーフレーム確認[{d}]"
+msgstr ""
+
+
+msgid "-- キーフレーム確認[{d}] [{i} ({p:.2f}%)]"
+msgstr ""
+
+
+msgid "ボーン計算[{d}]"
+msgstr ""
+
+
+msgid "-- ボーン計算[{d}] [{i} ({p:.2f}%)]"
+msgstr ""
+
+
+msgid "IK事前計算[{d}]"
+msgstr ""
+
+
+msgid "-- IK事前計算[{d}] [{i} ({p:.2f}%)]"
+msgstr ""
+
+
+msgid "ボーン変形行列積[{d}]"
+msgstr ""
+
+
+msgid "-- ボーン変形行列積[{d}] [{i} ({p:.2f}%)]"
+msgstr ""
+

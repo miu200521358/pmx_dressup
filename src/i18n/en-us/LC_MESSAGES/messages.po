@@ -1433,3 +1433,27 @@ msgstr "(including children)"
 
 msgid "選択されているボーンの左右を反転させた対象ボーンに設定値をコピペします"
 msgstr "Copy and paste the settings to the target bone with the selected bone's left and right sides reversed"
+
+msgid "キーフレーム確認[{d}]"
+msgstr "Keyframe confirmation [{d}]"
+
+msgid "-- キーフレーム確認[{d}] [{i} ({p:.2f}%)]"
+msgstr "-- Keyframe confirmation [{d}] [{i} ({p:.2f}%)]"
+
+msgid "ボーン計算[{d}]"
+msgstr "Bone Calculation [{d}]"
+
+msgid "-- ボーン計算[{d}] [{i} ({p:.2f}%)]"
+msgstr "-- Bourne calculation [{d}] [{i} ({p:.2f}%)]"
+
+msgid "IK事前計算[{d}]"
+msgstr "IK pre-calculation [{d}]"
+
+msgid "-- IK事前計算[{d}] [{i} ({p:.2f}%)]"
+msgstr "-- IK pre-calculation [{d}] [{i} ({p:.2f}%)]"
+
+msgid "ボーン変形行列積[{d}]"
+msgstr "Bourne deformation matrix product [{d}]"
+
+msgid "-- ボーン変形行列積[{d}] [{i} ({p:.2f}%)]"
+msgstr "-- Bourne deformation matrix product [{d}] [{i} ({p:.2f}%)]"
